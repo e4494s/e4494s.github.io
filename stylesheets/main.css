@@ -1,3 +1,6 @@
-* {
-  font-family: Courier, Monaco, monospace;
+body {
+  font-family: monospace;
+}
+.break {
+  font-size: 25px;
 }
