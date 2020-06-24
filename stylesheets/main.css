@@ -1,3 +1,6 @@
 body {
   font-family: monospace;
 }
+canvas {
+  background-image: linear-gradient(to right, #ffff7d, #ffff00);
+}
