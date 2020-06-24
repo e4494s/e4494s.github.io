@@ -7,6 +7,14 @@
   </head>
   <body>
     <h1>e4494s</h1>
-    You have clicked <span id = 'clicks'>0</span> times.
+    <p id = 'clickcount'>You have clicked the button 0 times.</p>
+    <button id = 'clickbutton' onclick = 'click()'>+1 click</button>
   </body>
 </html>
+<script>
+  let clicks = 0;
+  function click() {
+    clicks++;
+    clickcount.innerHTML = `You have clicked the button ${clicks} times.`;
+  }
+</script>
