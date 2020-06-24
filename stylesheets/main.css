@@ -2,5 +2,7 @@ body {
   font-family: monospace;
 }
 canvas {
+  width: 200px;
+  height: 200px;
   background-image: linear-gradient(to right, #ffff7d, #ffff00);
 }
