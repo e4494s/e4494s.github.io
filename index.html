@@ -14,8 +14,12 @@
 <script type = 'text/javascript'>
   let clicks = 0;
   let clickcount = document.getElementById('clickcount');
+  let clickbutton = document.getElementById('clickbutton');
   function clicked() {
     clicks++;
     clickcount.innerHTML = `You have clicked the button ${clicks} times.`;
+  }
+  clickbutton.onkeydown = function(e){
+    if (e.which == 13) e.preventDefault();
   }
 </script>
