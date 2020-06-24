@@ -4,5 +4,6 @@ body {
 canvas {
   width: 200px;
   height: 200px;
-  background-image: linear-gradient(to right, #ffff7d, #ffff00);
+  /*background-image: linear-gradient(to right, #ffff7d, #ffff00);*/
+  background-color: yellow;
 }
