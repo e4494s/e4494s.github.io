@@ -20,6 +20,6 @@
     clickcount.innerHTML = `You have clicked the button ${clicks} times.`;
   }
   clickbutton.onkeydown = function(e){
-    if (e.which == 13) e.preventDefault();
+    if (e.which == 13 || e.which == 32) e.preventDefault();
   }
 </script>
