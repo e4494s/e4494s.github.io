@@ -10,6 +10,7 @@
         bottom: 0;
         left: 0;
         position: absolute;
+        background-color: black;
       }
       
       body {
@@ -337,11 +338,13 @@
   let impulse = 10;
   
   function frame() {
-    if (!trailing) ctx.globalAlpha = 1;
-    else ctx.globalAlpha = 1 / trail_length;
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.globalAlpha = 1;
+    if (trailing) {
+      ctx.globalAlpha = 1 / trail_length;
+      ctx.fillStyle = 'black';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.globalAlpha = 1;
+    }
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (let i = 0; i < balls.length; i++) {
       balls[i].render();
       if (!balls[i].hitbox) balls.splice(i, 1);
