@@ -90,6 +90,9 @@
       <label for = 'sourcetxt'>Accent Image Source</label>
       <br>
       <button onclick = 'changeSource()'>Set Source</button>
+      <br>
+      <input type = 'range' min = '0' max = '1' step = '0.05' value = '0.75' id = 'accentopacityrange'>
+      <label for = 'accentopacityrange'>Accent Opacity</label>
     </td>
   </tr>
   <tr>
@@ -156,8 +159,12 @@
   function switchAccent(new_accent) {
     accent.src = new_accent;
   }
+  accentopacityrange.oninput = function() {
+    accent_opacity = this.value;
+  };
+  
   function changeSource() {
-    accent.src = this.value;
+    accent.src = sourcetxt.value;
   }
   
   let pop_image = new Image();
