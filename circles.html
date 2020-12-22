@@ -372,7 +372,7 @@
   function mouseDownHandler(e) {
     mouse_down = true;
     let size =  randBetween(15 * ratio, 50 * ratio);
-    if ((e.clientY * 1) - (size / 2) > rect.top && (e.clientX * 1) - (size / 2) > rect.left && (e.clientY * 1) + (size / 2) < rect.bottom && (e.clientX * 1) + (size / 2) < rect.right) makeBall((e.clientX * ratio) - (size / 2) - (rect.left * ratio), (e.clientY * ratio) - (size / 2) - (rect.top * ratio), size, Math.random(), default_density, randDarkColor());
+    if ((e.clientY * 1) - (size / 2) > (rect.top * ratio) && (e.clientX * 1) - (size / 2) > (rect.left * ratio) && (e.clientY * 1) + (size / 2) < (rect.bottom * ratio) && (e.clientX * 1) + (size / 2) < (rect.right * ratio)) makeBall((e.clientX * ratio) - (size / 2) - (rect.left * ratio), (e.clientY * ratio) - (size / 2) - (rect.top * ratio), size, Math.random(), default_density, randDarkColor());
   }
   addEventListener('mousedown', mouseDownHandler);
   function mouseUpHandler(e) {
@@ -382,7 +382,7 @@
   function mouseMoveHandler(e) {
     let size =  randBetween(15 * ratio, 50 * ratio);
     //if (e.clientY - (size / 2) > rect.top && e.clientX - (size / 2) > rect.left && e.clientY + (size / 2) < rect.bottom && e.clientX + (size / 2) < rect.right && mouse_down) makeBall(e.clientX - (size / 2) - rect.left, e.clientY - (size / 2) - rect.top, size, Math.random(), default_density, randDarkColor());
-    if ((e.clientY * 1) - (size / 2) > rect.top && (e.clientX * 1) - (size / 2) > rect.left && (e.clientY * 1) + (size / 2) < rect.bottom && (e.clientX * 1) + (size / 2) < rect.right && mouse_down) makeBall((e.clientX * ratio) - (size / 2) - (rect.left * ratio), (e.clientY * ratio) - (size / 2) - (rect.top * ratio), size, Math.random(), default_density, randDarkColor());
+    if ((e.clientY * 1) - (size / 2) > (rect.top * ratio) && (e.clientX * 1) - (size / 2) > (rect.left * ratio) && (e.clientY * 1) + (size / 2) < (rect.bottom * ratio) && (e.clientX * 1) + (size / 2) < (rect.right * ratio) && mouse_down) makeBall((e.clientX * ratio) - (size / 2) - (rect.left * ratio), (e.clientY * ratio) - (size / 2) - (rect.top * ratio), size, Math.random(), default_density, randDarkColor());
   }
   addEventListener('mousemove', mouseMoveHandler);
 </script>
