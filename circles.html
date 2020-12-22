@@ -336,11 +336,11 @@
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.globalAlpha = 1;
-    detectCollisions();
     for (let i = 0; i < balls.length; i++) {
       balls[i].render();
       if (!balls[i].hitbox) balls.splice(i, 1);
     }
+    detectCollisions();
     for (let i = 0; i < pops.length; i++) {
       pops[i].render();
       if (pops[i].finished) pops.splice(i, 1);
@@ -354,9 +354,6 @@
   function randomizeBalls() {
     for (let i = 0; i < balls.length; i++) {
       balls[i].colliding = false;
-      console.log(balls[i].colliding);
-      console.log('h')
-      setTimeout(() => console.log(balls[i].colliding), 50);
       balls[i].x = randBetween(0, canvas.width - balls[i].size);
       balls[i].y = randBetween(0, canvas.height - balls[i].size);
       balls[i].vx = randBetween(0, 20 * ratio) * (coin()?1:-1);
