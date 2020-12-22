@@ -143,14 +143,14 @@
       trailing = true;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = 'black';
-      ctx.globalAlpha = 1 - (1 / trail_length);
+      ctx.globalAlpha = 1 / trail_length;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
   };
   let trail_length = 50;
   if (trailing) {
     ctx.fillStyle = 'black';
-    ctx.globalAlpha = 1 - (1 / trail_length);
+    ctx.globalAlpha = 1 / trail_length;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
   
