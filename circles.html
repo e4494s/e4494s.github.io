@@ -139,7 +139,12 @@
   let trailing = false;
   trailingcheck.onchange = function() {
     if (trailing) trailing = false;
-    else trailing = true;
+    else {
+      trailing = true;
+      ctx.fillStyle = 'black';
+      ctx.globalAlpha = 1 - (1 / trail_length);
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
   };
   let trail_length = 10;
   if (trailing) {
