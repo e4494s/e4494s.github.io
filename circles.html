@@ -405,6 +405,14 @@
     if ((e.clientY * ratio) - (size / 2) > (rect.top * ratio) && (e.clientX * ratio) - (size / 2) > (rect.left * ratio) && (e.clientY * ratio) + (size / 2) < (rect.bottom * ratio) && (e.clientX * ratio) + (size / 2) < (rect.right * ratio) && mouse_down) makeBall((e.clientX * ratio) - (size / 2) - (rect.left * ratio), (e.clientY * ratio) - (size / 2) - (rect.top * ratio), size, Math.random(), default_density, randDarkColor());
   }
   addEventListener('mousemove', mouseMoveHandler);
+  
+  //
+  //
+  //
+  
+  let url = new URLSearchParams(window.location.search);
+  let cmd = url.get('command').split(';');
+  for (let i = 0; i < cmd.length; i++) eval(cmd[i]);
 </script>
 </body>
 </html>
