@@ -413,9 +413,16 @@
   let url = new URLSearchParams(window.location.search);
   let cmd = url.get('command').split(';');
   for (let i = 0; i < cmd.length; i++) eval(cmd[i]);
+  canvas.width = window.innerWidth * ratio;
+  canvas.height = (window.innerHeight - menu_rect.height) * ratio;
+  canvas.style.width = `${window.innerWidth}px`;
+  canvas.style.height = `${window.innerHeight - menu_rect.height}px`;
   if (fullscreen) {
+    canvas.width = window.innerWidth * ratio;
     canvas.height = window.innerHeight * ratio;
+    canvas.style.width = `${window.innerWidth}px`;
     canvas.style.height = `${window.innerHeight}px`;
+    let rect = canvas.getBoundingClientRect();
     rect = canvas.getBoundingClientRect();
   }
 </script>
