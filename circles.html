@@ -87,6 +87,9 @@
       <img class = 'accentimg' src = 'https://e4494s.neocities.org/images/blank.png' onclick = 'switchAccent(this.src)'>
       <br>
       <input type = 'text' id = 'sourcetxt'>
+      <label for = 'sourcetxt'>Accent Image Source</label>
+      <br>
+      <button onclick = 'changeSource()'>Set Source</button>
     </td>
   </tr>
   <tr>
@@ -153,7 +156,7 @@
   function switchAccent(new_accent) {
     accent.src = new_accent;
   }
-  sourcetxt.oninput = function() {
+  function changeSource() {
     accent.src = this.value;
   }
   
