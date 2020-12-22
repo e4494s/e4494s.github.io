@@ -328,7 +328,7 @@
   
   let starting_balls = 150;
   for (let i = 0; i < starting_balls - 1; i++) {
-    let i_size =  randBetween(15 * ratio, 50 * ratio);
+    let i_size =  randBetween(25 * ratio, 50 * ratio);
     //let i_size = 10;
     makeBall(randBetween(0, canvas.width - i_size), randBetween(0, canvas.height - i_size), i_size, Math.random(), default_density, randDarkColor());
   }
@@ -391,7 +391,7 @@
   
   function mouseDownHandler(e) {
     mouse_down = true;
-    let size =  randBetween(15 * ratio, 50 * ratio);
+    let size =  randBetween(25 * ratio, 50 * ratio);
     if ((e.clientY * ratio) - (size / 2) > (rect.top * ratio) && (e.clientX * ratio) - (size / 2) > (rect.left * ratio) && (e.clientY * ratio) + (size / 2) < (rect.bottom * ratio) && (e.clientX * ratio) + (size / 2) < (rect.right * ratio)) makeBall((e.clientX * ratio) - (size / 2) - (rect.left * ratio), (e.clientY * ratio) - (size / 2) - (rect.top * ratio), size, Math.random(), default_density, randDarkColor());
   }
   addEventListener('mousedown', mouseDownHandler);
@@ -400,7 +400,7 @@
   }
   addEventListener('mouseup', mouseUpHandler);
   function mouseMoveHandler(e) {
-    let size =  randBetween(15 * ratio, 50 * ratio);
+    let size =  randBetween(25 * ratio, 50 * ratio);
     //if (e.clientY - (size / 2) > rect.top && e.clientX - (size / 2) > rect.left && e.clientY + (size / 2) < rect.bottom && e.clientX + (size / 2) < rect.right && mouse_down) makeBall(e.clientX - (size / 2) - rect.left, e.clientY - (size / 2) - rect.top, size, Math.random(), default_density, randDarkColor());
     if ((e.clientY * ratio) - (size / 2) > (rect.top * ratio) && (e.clientX * ratio) - (size / 2) > (rect.left * ratio) && (e.clientY * ratio) + (size / 2) < (rect.bottom * ratio) && (e.clientX * ratio) + (size / 2) < (rect.right * ratio) && mouse_down) makeBall((e.clientX * ratio) - (size / 2) - (rect.left * ratio), (e.clientY * ratio) - (size / 2) - (rect.top * ratio), size, Math.random(), default_density, randDarkColor());
   }
