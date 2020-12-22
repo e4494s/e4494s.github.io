@@ -84,6 +84,7 @@
     <td>
       <img class = 'accentimg' src = 'https://e4494s.neocities.org/images/ballshine.png' onclick = 'switchAccent(this.src)'>
       <img class = 'accentimg' src = 'https://e4494s.neocities.org/images/bounce/circle.png' onclick = 'switchAccent(this.src)'>
+      <img class = 'accentimg' src = 'https://e4494s.neocities.org/images/blank.png' onclick = 'switchAccent(this.src)'>
       <br>
       <input type = 'text' id = 'sourcetxt'>
     </td>
@@ -151,6 +152,9 @@
   
   function switchAccent(new_accent) {
     accent.src = new_accent;
+  }
+  sourcetxt.oninput = function() {
+    accent.src = this.value;
   }
   
   let pop_image = new Image();
