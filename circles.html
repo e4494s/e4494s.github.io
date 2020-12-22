@@ -354,11 +354,11 @@
   function randomizeBalls() {
     for (let i = 0; i < balls.length; i++) {
       balls[i].colliding = false;
+      setTimeout(() => console.log(balls[i].colliding), 500);
       balls[i].x = randBetween(0, canvas.width - balls[i].size);
       balls[i].y = randBetween(0, canvas.height - balls[i].size);
       balls[i].vx = randBetween(0, 20 * ratio) * (coin()?1:-1);
       balls[i].vy = randBetween(0, 20 * ratio) * (coin()?1:-1);
-      console.log(balls[i].vx);
     }
   }
   function centerBalls() {
