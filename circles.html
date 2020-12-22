@@ -411,8 +411,9 @@
   //
   let fullscreen = false;
   let url = new URLSearchParams(window.location.search);
-  let cmd = url.get('command').split(';');
-  for (let i = 0; i < cmd.length; i++) eval(cmd[i]);
+  let cmd = url.get('command');//.split(';');
+  //for (let i = 0; i < cmd.length; i++) eval(cmd[i]);
+  eval(cmd);
   canvas.width = window.innerWidth * ratio;
   canvas.height = (window.innerHeight - menu_rect.height) * ratio;
   canvas.style.width = `${window.innerWidth}px`;
