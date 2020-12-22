@@ -358,6 +358,7 @@
       balls[i].y = randBetween(0, canvas.height - balls[i].size);
       balls[i].vx = randBetween(0, 20 * ratio) * (coin()?1:-1);
       balls[i].vy = randBetween(0, 20 * ratio) * (coin()?1:-1);
+      console.log(balls[i].vx);
     }
   }
   function centerBalls() {
