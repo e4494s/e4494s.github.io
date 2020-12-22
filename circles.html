@@ -416,6 +416,7 @@
   if (fullscreen) {
     canvas.height = window.innerHeight * ratio;
     canvas.style.height = `${window.innerHeight}px`;
+    rect = canvas.getBoundingClientRect();
   }
 </script>
 </body>
