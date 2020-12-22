@@ -409,10 +409,14 @@
   //
   //
   //
-  
+  let fullscreen = false;
   let url = new URLSearchParams(window.location.search);
   let cmd = url.get('command').split(';');
   for (let i = 0; i < cmd.length; i++) eval(cmd[i]);
+  if (fullscreen) {
+    canvas.height = window.innerHeight * ratio;
+    canvas.style.height = `${window.innerHeight}px`;
+  }
 </script>
 </body>
 </html>
