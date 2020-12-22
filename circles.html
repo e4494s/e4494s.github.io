@@ -141,6 +141,7 @@
     if (trailing) trailing = false;
     else {
       trailing = true;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = 'black';
       ctx.globalAlpha = 1 - (1 / trail_length);
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -263,7 +264,7 @@
             let ball2 = balls[j];
             ball1.colliding = true;
             ball2.colliding = true;
-            if (mode == 0) {
+            if (mode == 0 || mode == 3) {
               let vCollision = {x: ball2.center.x - ball1.center.x, y: ball2.center.y - ball1.center.y};
               let distance = Math.sqrt((ball2.center.x - ball1.center.x) * (ball2.center.x - ball1.center.x) + (ball2.center.y - ball1.center.y) * (ball2.center.y - ball1.center.y));
               let vCollisionNorm = {x: vCollision.x / distance, y: vCollision.y / distance};
