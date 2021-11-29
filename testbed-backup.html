@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -6568,7 +6569,7 @@
   Car.angle = 0;
   Car.velocity = 0;
   Car.sprite = new Image();
-  Car.sprite.src = "images/car.png"; // ~1x2
+  Car.sprite.src = "https://e4494s.neocities.org/images/car.png"; // ~1x2
   Car.width = 200;
   Car.height = 100;
   Car.acceleration = 0.2;
@@ -7070,7 +7071,7 @@
   
   let Rocket = {};
   Rocket.sprite = new Image();
-  Rocket.sprite.src = "images/rocket.png"; // 9 x 5
+  Rocket.sprite.src = "https://e4494s.neocities.org/images/rocket.png"; // 9 x 5
   Rocket.width = 90;
   Rocket.height = 50;
   Rocket.x = canvas48.width / 2;
@@ -7146,7 +7147,7 @@
   
   let EvilRocket = {};
   EvilRocket.sprite = new Image();
-  EvilRocket.sprite.src = "images/evil-rocket.png"; // 9 x 5
+  EvilRocket.sprite.src = "https://e4494s.neocities.org/images/evil-rocket.png"; // 9 x 5
   EvilRocket.width = 72//90;
   EvilRocket.height = 40//50;
   EvilRocket.x = 0;
@@ -7273,7 +7274,7 @@
   
   let Portal = {};
   Portal.sprite = new Image();
-  Portal.sprite.src = "images/pixel-portal.png"; // 35 x 35
+  Portal.sprite.src = "https://e4494s.neocities.org/images/pixel-portal.png"; // 35 x 35
   Portal.x = Math.random() * canvas48.width;
   Portal.y = Math.random() * canvas48.height;
   Portal.width = 150;
@@ -11222,7 +11223,7 @@
 <button onclick = "randomizeSeed2()">Randomize Name</button>
 <div class = "desc">Random person generator. Their characteristics - like hair, skin color, height, body type, etc. - are determined by a seeded random number generator using their name as the seed. <b><i>Last Updated: 7/16/2021</i></b></div>
 <hr><hr>
-<script src = "scripts/seedrandom.js"></script>
+<script src = "https://e4494s.neocities.org/scripts/seedrandom.js"></script>
 <script>
   const ctx10 = canvas10.getContext("2d");
   canvas10.width = canvas10.height = 300;
@@ -11587,7 +11588,7 @@
     this.angle = angle
     this.velocity = velocity;
     this.sprite = new Image();
-    this.sprite.src = "images/levelportal.png";
+    this.sprite.src = "https://e4494s.neocities.org/images/levelportal.png";
   }
   Bullet.prototype.render = function() {
     this.x += Math.cos(toRad(this.angle)) * this.velocity;
@@ -11613,7 +11614,7 @@
     speed: 1.5
   };
   Hero.sprite = new Image();
-  Hero.sprite.src = "images/watermelon.png";
+  Hero.sprite.src = "https://e4494s.neocities.org/images/watermelon.png";
   Hero.render = function() {
     if (upDown) Hero.y -= Hero.speed;
     if (rightDown) Hero.x += Hero.speed;
@@ -12123,7 +12124,6 @@
 </script>
 </body>
 </html>
-
 
 
 
