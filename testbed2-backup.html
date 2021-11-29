@@ -1,0 +1,4975 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel = "icon"  href = "https://e4494s.neocities.org/images/favicon.png" type = "image/png">
+  <link rel = "stylesheet" href = "https://e4494s.neocities.org/stylesheets/main.css">
+  <title>Test Bed 2 ~ e4494s</title>
+  <style>
+    canvas {
+      width: 300px;
+      height: 300px;
+      border: 2px solid black;
+    }
+    
+    hr {
+      border: 1px solid black;
+    }
+    
+    .desc {
+      background-color: silver;
+      margin: 5px;
+      padding: 5px;
+      border-radius: 5px;
+    }
+    .desc mark {
+      background-color: #ffff4d;
+    }
+  </style>
+</head>
+<body>
+<script src = "https://e4494s.neocities.org/scripts/main.js"></script>
+<h1>The Second Island of Misfit Code</h1>
+<div style = "font-size: 16px; background-color: rgb(255, 150, 150); padding: 8px; margin-top: 25px; margin-bottom: 25px; border-radius: 10px"><b><i>Moved to from <a href = "https://e4494s.neocities.org/testbed.html" target = "_blank">testbed.html</a> on 10/17/2021.</i></b></div>
+<!--
+<canvas id = "canvas0"></canvas>
+<button onclick = "startCanvas0()">Start/Stop</button>
+<div class = "desc"></div>
+<hr><hr>
+<script>
+  const ctx0 = canvas0.getContext("2d");
+  canvas0.width = canvas0.height = 300;
+  let canvas0Running = false;
+  
+  function frame0() {
+    ctx0.clearRect(0, 0, canvas0.width, canvas0.height);
+    
+    if (canvas0Running) requestAnimationFrame(frame0);
+  }
+  frame0();
+  
+  function startCanvas0() {
+    if (canvas0Running) canvas0Running = false;
+    else {
+      canvas0Running = true;
+      frame0();
+    }
+  }
+</script>
+-->
+<canvas id = "canvas32" style = "width: 400px; height: 400px"></canvas>
+<button onclick = "startCanvas32()">Start/Stop</button>
+<button onclick = "reset32()">Reset</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps32Txt"></span></b></i></div>
+<table>
+  <tr>
+    <td style = "padding: 10px; width: 180px">
+      <div><b><u>Grid Size:</u></b> <span id = "gridSize32Txt">100&times;100</span></div>
+      <input type = "range" min = "50" max = "200" step = "25" value = "100" id = "gridSize32Range" oninput = "updateSettings32(true)">
+    </td>
+    <td style = "padding: 10px; width: 180px">
+      <input type = "checkbox" id = "blackBackground32Checkbox" oninput = "updateSettings32(true)" CHECKED>
+      <label for = "blackBackground32Checkbox">Black background</label>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div><b><u>Line Length:</u></b> <span id = "lineLength32Txt">400</span>%</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "lineLength32Range" oninput = "updateSettings32(false)">
+    </td>
+    <td>
+      <div><b><u>Line Thickness:</u></b> <span id = "lineThickness32Txt">100</span>%</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "lineThickness32Range" oninput = "updateSettings32(false)">
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Line Brightness:</u></b> <span id = "lineBrightness32Txt">70</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "10" value = "70" id = "lineBrightness32Range" oninput = "updateSettings32(false)">
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Line Opacity:</u></b> <span id = "lineOpacity32Txt">5</span>%</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "lineOpacity32Range" oninput = "updateSettings32(false)">
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Line Hue Variation:</u></b> <span id = "hueVariation32Txt">0.5</span>%</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "hueVariation32Range" oninput = "updateSettings32(false)">
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px" colspan = "3">
+      <div><b><u>Settings Presets:</u></b></div>
+      <div id = "presetsDiv32"></div>
+    </td>
+  </tr>
+</table>
+<div class = "desc"><b><i>(11/28/2021)</i></b> Generative art made by a random walker, each step it moves either left/right/up/down, and draws a rectangle in the direction it moved, with a set thickness and length and opacity. The hue changes some per step as well, and it creates interesting intricate patterns.<br><b><i>Update: (Later that day)</i></b> Added more settings and sliders, and added settings presets.</div>
+<hr><hr>
+<script>
+  const ctx32 = canvas32.getContext("2d");
+  canvas32.width = canvas32.height = 2000;
+  let canvas32Running = false;
+  
+  let gridSize32 = 100;
+  let tileSize32 = canvas32.width / gridSize32;
+  let stepsPerFrame32 = 100;
+  let lineOpacity32 = 0.05;
+  let lineLength32 = 4;
+  let lineThickness32 = 1;
+  let lineBrightness32 = 70;
+  let blackBackground32 = true;
+  let hueVariation32 = 0.005;
+  
+  let presets32 = [
+    { // Default
+      gridSize32: 100,
+      lineOpacity32: 5,
+      lineLength32: 400,
+      lineThickness32: 100,
+      lineBrightness32: 70,
+      blackBackground32: true,
+      hueVariation32: 0.5
+    },
+    {
+      gridSize32: 50,
+      lineOpacity32: 100,
+      lineLength32: 80,
+      lineThickness32: 15,
+      lineBrightness32: 70,
+      blackBackground32: true,
+      hueVariation32: 2
+    },
+    {
+      gridSize32: 100,
+      lineOpacity32: 3,
+      lineLength32: 800,
+      lineThickness32: 30,
+      lineBrightness32: 70,
+      blackBackground32: true,
+      hueVariation32: 1
+    },
+    {
+      gridSize32: 100,
+      lineOpacity32: 10,
+      lineLength32: 100,
+      lineThickness32: 100,
+      lineBrightness32: 50,
+      blackBackground32: true,
+      hueVariation32: 0.5
+    },
+    {
+      gridSize32: 100,
+      lineOpacity32: 10,
+      lineLength32: 70,
+      lineThickness32: 70,
+      lineBrightness32: 50,
+      blackBackground32: true,
+      hueVariation32: 1
+    },
+    {
+      gridSize32: 100,
+      lineOpacity32: 2,
+      lineLength32: 400,
+      lineThickness32: 400,
+      lineBrightness32: 0,
+      blackBackground32: false,
+      hueVariation32: 0.5
+    },
+    {
+      gridSize32: 100,
+      lineOpacity32: 100,
+      lineLength32: 400,
+      lineThickness32: 400,
+      lineBrightness32: 40,
+      blackBackground32: true,
+      hueVariation32: 3
+    }
+  ];
+  function loadPreset32(n) {
+    let p = presets32[n];
+    gridSize32Range.value = p.gridSize32;
+    lineOpacity32Range.value = lineOpacity32RangeArray.indexOf(p.lineOpacity32);
+    lineLength32Range.value = line32RangeArray.indexOf(p.lineLength32);
+    lineThickness32Range.value = line32RangeArray.indexOf(p.lineThickness32);
+    lineBrightness32Range.value = p.lineBrightness32;
+    blackBackground32Checkbox.checked = p.blackBackground32;
+    hueVariation32Range.value = hueVariation32RangeArray.indexOf(p.hueVariation32);
+    
+    updateSettings32(true);
+  }
+  for (let i = 0; i < presets32.length; i++) {
+    let btn = document.createElement("button");
+    btn.id = "presetBtn32" + i;
+    btn.innerHTML = i + 1;
+    btn.onclick = () => {
+      loadPreset32(i);
+      btn.style.backgroundColor = "gray";
+    }
+    btn.style.margin = "5px";
+    btn.style.borderRadius = "50%";
+    btn.style.display = "inline-block";
+    
+    presetsDiv32.appendChild(btn);
+  }
+  document.getElementById("presetBtn320").style.backgroundColor = "gray";
+  
+  let Walker32 = {
+    x: 0,
+    y: 0,
+    hue: 0
+  };
+  Walker32.walk = function() {
+    let dir = Math.floor(Math.random() * 4);
+    if (dir === 0) this.y--; // Top
+    else if (dir === 1) this.x++; // Right
+    else if (dir === 2) this.y++; // Bottom
+    else this.x--; // Left
+    this.x = (this.x + gridSize32) % gridSize32;
+    this.y = (this.y + gridSize32) % gridSize32;
+    
+    this.hue += Math.random() * randSign() * hueVariation32 * 360;
+    ctx32.fillStyle = `hsla(${this.hue}deg, 100%, ${lineBrightness32}%, ${lineOpacity32})`;
+    if (dir === 0 || dir === 2) {
+      ctx32.fillRectFromCenter(this.x * tileSize32, this.y * tileSize32, tileSize32 * lineThickness32, tileSize32 * lineLength32);
+    }
+    else {
+      ctx32.fillRectFromCenter(this.x * tileSize32, this.y * tileSize32, tileSize32 * lineLength32, tileSize32 * lineThickness32);
+    }
+  };
+  
+  function reset32() {
+    ctx32.fillStyle = blackBackground32 ? "black" : "white";
+    ctx32.fillRect(0, 0, canvas32.width, canvas32.height);
+    tileSize32 = canvas32.width / gridSize32;
+    Walker32.x = Math.floor(Math.random() * gridSize32);
+    Walker32.y = Math.floor(Math.random() * gridSize32);
+    Walker32.hue = Math.random() * 360;
+  }
+  reset32();
+  
+  let lastFrame32Time = 0;
+  let lastFps32DisplayTime = 1000;
+  
+  function frame32() {
+    if (Date.now() - lastFps32DisplayTime >= 500) {
+      fps32Txt.innerHTML = (1000 / (Date.now() - lastFrame32Time)).toFixed(1);
+      lastFps32DisplayTime = Date.now();
+    }
+    lastFrame32Time = Date.now();
+    
+    for (let i = 0; i < stepsPerFrame32; i++) Walker32.walk();
+    
+    if (canvas32Running) requestAnimationFrame(frame32);
+  }
+  frame32();
+  
+  function startCanvas32() {
+    if (canvas32Running) canvas32Running = false;
+    else {
+      canvas32Running = true;
+      frame32();
+    }
+  }
+  
+  let line32RangeArray = [10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 125, 150, 175, 200, 300, 400, 500, 600, 800, 1000, 1500, 2000];
+  lineLength32Range.max = line32RangeArray.length - 1;
+  lineLength32Range.value = line32RangeArray.indexOf(800);
+  lineThickness32Range.max = line32RangeArray.length - 1;
+  lineThickness32Range.value = line32RangeArray.indexOf(100);
+  
+  let lineOpacity32RangeArray = [1, 2, 3, 4, 5, 10, 15, 20, 25, 50, 75, 100];
+  lineOpacity32Range.max = lineOpacity32RangeArray.length - 1;
+  lineOpacity32Range.value = lineOpacity32RangeArray.indexOf(5);
+  
+  let hueVariation32RangeArray = [0, 0.25, 0.5, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100];
+  hueVariation32Range.max = hueVariation32RangeArray.length - 1;
+  hueVariation32Range.value = hueVariation32RangeArray.indexOf(0.5);
+  
+  function updateSettings32(reset) {
+    gridSize32 = Number(gridSize32Range.value);
+    gridSize32Txt.innerHTML = gridSize32 + "&times;" + gridSize32;
+    
+    lineLength32 = line32RangeArray[Number(lineLength32Range.value)] / 100;
+    lineLength32Txt.innerHTML = line32RangeArray[Number(lineLength32Range.value)];
+    
+    lineThickness32 = line32RangeArray[Number(lineThickness32Range.value)] / 100;
+    lineThickness32Txt.innerHTML = line32RangeArray[Number(lineThickness32Range.value)];
+    
+    blackBackground32 = blackBackground32Checkbox.checked;
+    
+    lineBrightness32 = lineBrightness32Txt.innerHTML = Number(lineBrightness32Range.value);
+    
+    lineOpacity32 = lineOpacity32RangeArray[Number(lineOpacity32Range.value)] / 100;
+    lineOpacity32Txt.innerHTML = lineOpacity32RangeArray[Number(lineOpacity32Range.value)];
+    
+    hueVariation32 = hueVariation32RangeArray[Number(hueVariation32Range.value)] / 100;
+    hueVariation32Txt.innerHTML = hueVariation32RangeArray[Number(hueVariation32Range.value)];
+    
+    for (let i = 0; i < presets32.length; i++) {
+      document.getElementById("presetBtn32" + i).style.backgroundColor = "white";
+    }
+    
+    if (reset) reset32();
+  }
+</script>
+<canvas id = "canvas31"></canvas>
+<button onclick = "startCanvas31()">Start/Stop</button>
+<button onclick = "reset31()">Reset</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps31Txt"></span></b></i></div>
+<div class = "desc"><b><i>(11/28/2021)</i></b> Simple color averaging art based on <a href = "https://www.youtube.com/watch?v=xHq4UlJiUaE" target = "_blank">this</a> video.</div>
+<hr><hr>
+<script>
+  const ctx31 = canvas31.getContext("2d");
+  canvas31.width = canvas31.height = 1000;
+  let canvas31Running = false;
+  
+  let gridSize31 = 100;
+  let tileSize31 = canvas31.width / gridSize31;
+  let grid31 = [];
+  let hueStep31 = 1;
+  let numFixed31 = 0;
+  let stepsPerFrame31 = 2;
+  
+  function reset31() {
+    tileSize31 = canvas31.width / gridSize31;
+    grid31 = [];
+    for (let x = 0; x < gridSize31; x++) {
+      let row = [];
+      for (let y = 0; y < gridSize31; y++) {
+        row.push({hue: Math.random() * 360, fixed: false, brightness: 50});
+      }
+      grid31.push(row);
+    }
+    for (let i = 0; i < numFixed31; i++) {
+      grid31[Math.floor(Math.random() * gridSize31)][Math.floor(Math.random() * gridSize31)].fixed = true;
+    }
+    
+    drawGrid31();
+  }
+  reset31();
+  
+  function getNeighbors31(x, y) {
+    let M = grid31[x][y].hue;
+    let T = grid31[x][(y - 1 + gridSize31) % gridSize31].hue;
+    let TR = grid31[(x + 1) % gridSize31][(y - 1 + gridSize31) % gridSize31].hue;
+    let R = grid31[(x + 1) % gridSize31][y].hue;
+    let BR = grid31[(x + 1) % gridSize31][(y + 1) % gridSize31].hue;
+    let B = grid31[x][(y + 1) % gridSize31].hue;
+    let BL = grid31[(x - 1 + gridSize31) % gridSize31][(y + 1) % gridSize31].hue;
+    let L = grid31[(x - 1 + gridSize31) % gridSize31][y].hue;
+    let TL = grid31[(x - 1 + gridSize31) % gridSize31][(y - 1 + gridSize31) % gridSize31].hue;
+    return [M, T, TR, R, BR, B, BL, L, TL];
+  }
+  
+  function averageGrid31() {
+    let nextGrid = [];
+    for (let x = 0; x < gridSize31; x++) {
+      let row = [];
+      for (let y = 0; y < gridSize31; y++) {
+        row.push({hue: 0, fixed: false, brightness: 50});
+      }
+      nextGrid.push(row);
+    }
+    
+    for (let x = 0; x < gridSize31; x++) {
+      for (let y = 0; y < gridSize31; y++) {
+        if (!grid31[x][y].fixed) {
+          let neighbors = getNeighbors31(x, y);
+          let _x = 0;
+          let _y = 0;
+          for (let i = 0; i < neighbors.length; i++) {
+            let d = 1//Math.random() * 5;
+            _x += d * Math.cos(toRad(neighbors[i]));
+            _y += d * Math.sin(toRad(neighbors[i]));
+          }
+          let a = Math.atan2(_y, _x);
+          nextGrid[x][y].hue = toDeg(a);
+          //let dist = Math.sqrt((_x * _x) + (_y * _y));
+          //nextGrid[x][y].brightness = 1000 / (dist * dist);
+        }
+        else {
+          nextGrid[x][y].hue = (grid31[x][y].hue + hueStep31) % 360;
+        }
+        nextGrid[x][y].fixed = grid31[x][y].fixed;
+      }
+    }
+    
+    grid31 = nextGrid;
+  }
+  function drawGrid31() {
+    for (let x = 0; x < gridSize31; x++) {
+      for (let y = 0; y < gridSize31; y++) {
+         ctx31.fillStyle = `hsl(${grid31[x][y].hue}deg, 100%, ${grid31[x][y].brightness}%)`;
+         ctx31.fillRect(x * tileSize31, y * tileSize31, tileSize31, tileSize31);
+         if (grid31[x][y].fixed) {
+           ctx31.fillStyle = "black";
+           ctx31.fillCircle((x + 0.5) * tileSize31, (y + 0.5) * tileSize31, tileSize31 / 4);
+         }
+      }
+    }
+  }
+  
+  let lastFrame31Time = 0;
+  let lastFps31DisplayTime = 1000;
+  function frame31() {
+    if (Date.now() - lastFps31DisplayTime >= 500) {
+      fps31Txt.innerHTML = (1000 / (Date.now() - lastFrame31Time)).toFixed(1);
+      lastFps31DisplayTime = Date.now();
+    }
+    lastFrame31Time = Date.now();
+    
+    ctx31.clearRect(0, 0, canvas31.width, canvas31.height);
+    
+    for (let j = 0; j < stepsPerFrame31; j++) averageGrid31();
+    drawGrid31();
+    
+    if (canvas31Running) requestAnimationFrame(frame31);
+  }
+  frame31();
+  
+  function startCanvas31() {
+    if (canvas31Running) canvas31Running = false;
+    else {
+      canvas31Running = true;
+      frame31();
+    }
+  }
+</script>
+<canvas id = "canvas30" style = "width: 400px; height: 400px"></canvas>
+<button onclick = "drawSquares30()">Reset</button>
+<div><b><u>Squares:</u></b> <span id = "numSquares30Txt"></span></div>
+<table>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Min Square Size:</u></b> <span id = "minSquare30SizeTxt">5</span>px</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "minSquare30SizeRange" oninput = "updateSettings30(false)">
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Max Square Size:</u></b> <span id = "maxSquare30SizeTxt">200</span>px</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "maxSquare30SizeRange" oninput = "updateSettings30(false)">
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Square Visual Size Ratio:</u></b> <span id = "square30SizeRatioTxt">100</span>%</div>
+      <input type = "range" min = "50" max = "150" value = "100" step = "10" id = "square30SizeRatioRange" oninput = "updateSettings30(true)">
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Square Fill Mode:</u></b></div>
+      <input type = "radio" name = "fillMode30Radio" id = "fillMode30Radio0" oninput = "updateSettings30(true)" CHECKED>
+      <label for = "fillMode30Radio0">Size-based color</label>
+      <br>
+      <input type = "radio" name = "fillMode30Radio" id = "fillMode30Radio1" oninput = "updateSettings30(true)">
+      <label for = "fillMode30Radio1">Random color</label>
+      <br>
+      <input type = "radio" name = "fillMode30Radio" id = "fillMode30Radio2" oninput = "updateSettings30(true)">
+      <label for = "fillMode30Radio2">White</label>
+      <br>
+      <input type = "radio" name = "fillMode30Radio" id = "fillMode30Radio3" oninput = "updateSettings30(true)">
+      <label for = "fillMode30Radio3">Black</label>
+      <br>
+      <input type = "radio" name = "fillMode30Radio" id = "fillMode30Radio4" oninput = "updateSettings30(true)">
+      <label for = "fillMode30Radio4">No fill</label>
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Square Outline Mode:</u></b></div>
+      <input type = "radio" name = "outlineMode30Radio" id = "outlineMode30Radio0" oninput = "updateSettings30(true)">
+      <label for = "outlineMode30Radio0">Size-based color</label>
+      <br>
+      <input type = "radio" name = "outlineMode30Radio" id = "outlineMode30Radio1" oninput = "updateSettings30(true)">
+      <label for = "outlineMode30Radio1">Random color</label>
+      <br>
+      <input type = "radio" name = "outlineMode30Radio" id = "outlineMode30Radio2" oninput = "updateSettings30(true)">
+      <label for = "outlineMode30Radio2">White</label>
+      <br>
+      <input type = "radio" name = "outlineMode30Radio" id = "outlineMode30Radio3" oninput = "updateSettings30(true)" CHECKED>
+      <label for = "outlineMode30Radio3">Black</label>
+      <br>
+      <input type = "radio" name = "outlineMode30Radio" id = "outlineMode30Radio4" oninput = "updateSettings30(true)">
+      <label for = "outlineMode30Radio4">No outline</label>
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Settings Presets:</u></b></div>
+      <div id = "presetsDiv30"></div>
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "blackBackground30Checkbox" oninput = "updateSettings30(true)" CHECKED>
+      <label for = "blackBackground30Checkbox">Black background</label>
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Outline width:</u></b> <span id = "lineWidth30Txt">5</span>px</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "lineWidth30Range" oninput = "updateSettings30(true)">
+    </td>
+  </tr>
+</table>
+<div class = "desc"><b><i>(11/27/2021)</i></b> I finally redid my old square packing algorithm, and it's significantly faster now. I also added settings, sliders, and presets.</div>
+<hr><hr>
+<script>
+  const ctx30 = canvas30.getContext("2d");
+  canvas30.width = canvas30.height = 2000;
+  
+  let canvas30Filled = false;
+  let minSquare30Size = 5;
+  let maxSquare30Size = 200;
+  let maxSquares30 = 5000;
+  let square30SizeRatio = 1;
+  let fillMode30 = 0; // 0: Gradient, 1: Random, 2: White, 3: Black, 4: No fill
+  let outlineMode30 = 3; // 0: Gradient, 1: Random, 2: White, 3: Black, 4: No outline
+  let hue30 = Math.random() * 360;
+  let blackBackground30 = true;
+  let lineWidth30 = 5;
+  let maxTries30 = 1000;
+  
+  let presets30 = [
+    { // Default
+      minSquare30Size: 5,
+      maxSquare30Size: 200,
+      square30SizeRatio: 100,
+      fillMode30: 0,
+      outlineMode30: 3,
+      blackBackground30: true,
+      lineWidth30: 5
+    },
+    {
+      minSquare30Size: 1,
+      maxSquare30Size: 200,
+      square30SizeRatio: 50,
+      fillMode30: 4,
+      outlineMode30: 0,
+      blackBackground30: true,
+      lineWidth30: 5
+    },
+    {
+      minSquare30Size: 20,
+      maxSquare30Size: 200,
+      square30SizeRatio: 70,
+      fillMode30: 1,
+      outlineMode30: 4,
+      blackBackground30: false,
+      lineWidth30: 5
+    },
+    {
+      minSquare30Size: 5,
+      maxSquare30Size: 150,
+      square30SizeRatio: 120,
+      fillMode30: 3,
+      outlineMode30: 1,
+      blackBackground30: true,
+      lineWidth30: 5
+    },
+    {
+      minSquare30Size: 5,
+      maxSquare30Size: 200,
+      square30SizeRatio: 90,
+      fillMode30: 3,
+      outlineMode30: 0,
+      blackBackground30: false,
+      lineWidth30: 5
+    },
+    {
+      minSquare30Size: 1,
+      maxSquare30Size: 50,
+      square30SizeRatio: 100,
+      fillMode30: 0,
+      outlineMode30: 4,
+      blackBackground30: true,
+      lineWidth30: 5
+    }
+  ];
+  for (let i = 0; i < presets30.length; i++) {
+    let btn = document.createElement("button");
+    btn.innerHTML = i + 1;
+    btn.onclick = () => loadPreset30(i);
+    btn.style.margin = "5px";
+    btn.style.borderRadius = "50%";
+    btn.style.display = "inline-block";
+    
+    presetsDiv30.appendChild(btn);
+  }
+  function loadPreset30(n) {
+    let p = presets30[n];
+    minSquare30SizeRange.value = square30SizeRangeArray.indexOf(p.minSquare30Size);
+    maxSquare30SizeRange.value = square30SizeRangeArray.indexOf(p.maxSquare30Size);
+    square30SizeRatioRange.value = p.square30SizeRatio;
+    document.getElementById("fillMode30Radio" + p.fillMode30).checked = true;
+    document.getElementById("outlineMode30Radio" + p.outlineMode30).checked = true;
+    blackBackground30Checkbox.checked = p.blackBackground30;
+    lineWidth30Range.value = lineWidth30RangeArray.indexOf(p.lineWidth30);
+    
+    updateSettings30(false);
+    drawSquares30();
+  }
+  
+  function Square30() {
+    let x = Math.random() * canvas30.width;
+    let y = Math.random() * canvas30.height;
+    let tries = 0;
+    
+    while (!validatePoint30(x, y)) {
+      if (tries > maxTries30) {
+        canvas30Filled = true;
+        return;
+      }
+      x = Math.random() * canvas30.width;
+      y = Math.random() * canvas30.height;
+      tries++;
+    }
+    
+    this.x = x;
+    this.y = y;
+    this.radius = 0;
+    this.grow();
+  }
+  Square30.prototype.grow = function() {
+    let leastDist = Infinity;
+    let thisInd = square30Array.indexOf(this);
+    let len = square30Array.length;
+    for (let i = 0; i < len; i++) {
+      if (i !== thisInd) {
+        let s = square30Array[i];
+        let dx = Math.abs(this.x - s.x) - s.radius;
+        let dy = Math.abs(this.y - s.y) - s.radius;
+        let dist = Math.max(dx, dy); // Which direction is furthest away
+        if (dist < leastDist) leastDist = dist; // Find shortest distance
+      }
+    }
+    
+    let distToTop = this.y; // Check distance to edges
+    if (distToTop <= leastDist) leastDist = distToTop;
+    let distToRight = canvas30.width - this.x;
+    if (distToRight <= leastDist) leastDist = distToRight;
+    let distToBottom = canvas30.height - this.y;
+    if (distToBottom <= leastDist) leastDist = distToBottom;
+    let distToLeft = this.x;
+    if (distToLeft <= leastDist) leastDist = distToLeft;
+    
+    if (leastDist > maxSquare30Size) leastDist = maxSquare30Size; // Update size
+    this.radius = leastDist;
+    
+    this.draw();
+  };
+  Square30.prototype.draw = function() {
+    let r = this.radius * square30SizeRatio;
+    let hue = ((this.radius - minSquare30Size) / (maxSquare30Size - minSquare30Size)) * 360;
+    let colors = [
+      ctx30.fillStyle = `hsl(${hue30 + hue}deg, 100%, 40%)`, // Gradient
+      ctx30.fillStyle = `hsl(${Math.random() * 360}deg, 100%, 40%)`, // Random
+      "white", // White
+      "black", // Black
+      null // No outline
+    ];
+    
+    ctx30.fillStyle = colors[fillMode30];
+    ctx30.strokeStyle = colors[outlineMode30];
+    ctx30.lineWidth = lineWidth30;
+    ctx30.beginPath();
+    ctx30.rect(this.x - r, this.y - r, r * 2, r * 2);
+    if (fillMode30 !== 4) ctx30.fill();
+    if (outlineMode30 !== 4) ctx30.stroke();
+  };
+  let square30Array = [];
+  
+  function validatePoint30(x, y) {
+    for (let i = 0; i < square30Array.length; i++) {
+      let r = square30Array[i].radius + minSquare30Size;
+      let x1 = square30Array[i].x - r;
+      let x2 = square30Array[i].x + r;
+      let y1 = square30Array[i].y - r;
+      let y2 = square30Array[i].y + r;
+      if ((x > x1 && x < x2) && (y > y1 && y < y2)) return false; // Too close to a square
+    }
+    if (x < minSquare30Size || x > canvas30.width - minSquare30Size) return false; // Too close to left/right
+    if (y < minSquare30Size || y > canvas30.height - minSquare30Size) return false; // Too close to top/bottom
+    return true;
+  }
+  
+  function drawSquares30() {
+    ctx30.fillStyle = blackBackground30 ? "black" : "white";
+    ctx30.fillRect(0, 0, canvas30.width, canvas30.height);
+    canvas30Filled = false;
+    hue30 = Math.random() * 360;
+    square30Array = [];
+    square30Array.push(new Square30());
+    while (!canvas30Filled && square30Array.length < maxSquares30) square30Array.push(new Square30());
+    
+    numSquares30Txt.innerHTML = square30Array.length.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+  drawSquares30();
+  function recolorSquares30() {
+    ctx30.fillStyle = blackBackground30 ? "black" : "white";
+    ctx30.fillRect(0, 0, canvas30.width, canvas30.height);
+    
+    for (let i = 0; i < square30Array.length; i++) square30Array[i].draw();
+  }
+  
+  
+  let lineWidth30RangeArray = [1, 2, 3, 4, 5, 10, 15, 20];//, 25, 30, 40, 50];
+  lineWidth30Range.max = lineWidth30RangeArray.length - 1;
+  lineWidth30Range.value = lineWidth30RangeArray.indexOf(5);
+  
+  let square30SizeRangeArray = [1, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 150, 200, 300, 400, 500];
+  minSquare30SizeRange.max = maxSquare30SizeRange.max = square30SizeRangeArray.length - 1;
+  minSquare30SizeRange.value = square30SizeRangeArray.indexOf(5);
+  maxSquare30SizeRange.value = square30SizeRangeArray.indexOf(200);
+  
+  function updateSettings30(recolor) {
+    maxSquare30Size = maxSquare30SizeTxt.innerHTML = square30SizeRangeArray[Number(maxSquare30SizeRange.value)];
+    minSquare30SizeRange.max = square30SizeRangeArray.indexOf(maxSquare30Size);
+    minSquare30Size = minSquare30SizeTxt.innerHTML = square30SizeRangeArray[Number(minSquare30SizeRange.value)];
+    
+    if (fillMode30Radio0.checked) fillMode30 = 0;
+    else if (fillMode30Radio1.checked) fillMode30 = 1;
+    else if (fillMode30Radio2.checked) fillMode30 = 2;
+    else if (fillMode30Radio3.checked) fillMode30 = 3;
+    else if (fillMode30Radio4.checked) fillMode30 = 4;
+    
+    if (outlineMode30Radio0.checked) outlineMode30 = 0;
+    else if (outlineMode30Radio1.checked) outlineMode30 = 1;
+    else if (outlineMode30Radio2.checked) outlineMode30 = 2;
+    else if (outlineMode30Radio3.checked) outlineMode30 = 3;
+    else if (outlineMode30Radio4.checked) outlineMode30 = 4;
+    
+    blackBackground30 = blackBackground30Checkbox.checked;
+    
+    lineWidth30 = lineWidth30Txt.innerHTML = lineWidth30RangeArray[Number(lineWidth30Range.value)];
+    
+    square30SizeRatio = Number(square30SizeRatioRange.value) / 100;
+    square30SizeRatioTxt.innerHTML = square30SizeRatioRange.value;
+    
+    if (recolor) recolorSquares30();
+  }
+</script>
+<canvas id = "canvas29" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "startCanvas29()">Start/Stop</button>
+<button onclick = "stackCards29()">Stack Cards</button>
+<button onclick = "randomizeCards29()">Randomize Cards</button>
+<button onclick = "fanCards29()">Fan Cards</button>
+<button onclick = "spreadCards29()">Spread Cards</button>
+<button onclick = "trailing29 = !trailing29; this.innerHTML = 'Trailing: ' + trailing29">Trailing: false</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps29Txt"></span></b></i></div>
+<div class = "desc"><b><i>(11/26/2021)</i></b> I'm wanting this to be a simple card table, where you can drag the cards around and slide them, right now I have the cards working but not the dragging or sliding yet.<br><b><i>Update: (Later that day)</i></b> I got the dragging hitboxes working properly after a lot of Googling and messing with dot products, so the dragging mechanic works. I took out sliding the cards across the table, and I'm not sure what else I want to do with it right now.<br><b><i>(11/27/2021)</i></b> Added animation buttons for the cards, and a trailing option.</div>
+<hr><hr>
+<script>
+  const ctx29 = canvas29.getContext("2d");
+  canvas29.width = canvas29.height = 1000;
+  let canvas29Running = false;
+  let canvas29Ratio = canvas29.width / 500;
+  let canvas29Rect = canvas29.getBoundingClientRect();
+  
+  let Mouse29 = {
+    down: false,
+    x: 0,
+    y: 0,
+    draggingCard: false,
+    dragIndex: null,
+    offsetX: 0,
+    offsetY: 0
+  };
+  
+  let card29Img = new Image();
+  card29Img.src = "https://e4494s.neocities.org/images/card-sheet.png";
+  let background29Img = new Image();
+  background29Img.src = "https://e4494s.neocities.org/images/card-table-background.jpg";
+  let card29ImgWidth = 71;
+  let card29ImgHeight = 96;
+  let card29Width = card29ImgWidth * 2;
+  let card29Height = card29ImgHeight * 2;
+  let numCards29 = 52;
+  let card29SlideSpeed = 15;
+  let card29TurnSpeed = 0.2;
+  let trailing29 = false;
+  
+  function Card29(index) {
+    this.x = Math.random() * canvas29.width;
+    this.y = Math.random() * canvas29.height;
+    this.a = Math.random() * Math.PI * 2;
+    this.vx = 0;
+    this.vy = 0;
+    this.va = 0;
+    this.sx = (index % 4) * card29ImgWidth;
+    this.sy = (index % 13) * card29ImgHeight;
+    this.dragging = false;
+    this.sliding = false;
+    this.destination = {x: this.x, y: this.y, a: this.a};
+    this.turnDir = 1;
+  }
+  Card29.prototype.render = function() {
+    let lastX = this.x;
+    let lastY = this.y;
+    this.x += this.vx;
+    this.y += this.vy;
+    this.a += this.va;
+    if (this.dragging) {
+      this.vx = 0;
+      this.vy = 0;
+      this.x = Mouse29.x - Mouse29.offsetX;
+      this.y = Mouse29.y - Mouse29.offsetY;
+    }
+    else if (this.sliding) {
+      this.destination.a = (this.destination.a + (Math.PI * 2)) % (Math.PI * 2);
+      let dx = this.destination.x - this.x;
+      let dy = this.destination.y - this.y;
+      let distSq = (dx * dx) + (dy * dy);
+      let posClose = false;
+      if (distSq <= card29SlideSpeed * card29SlideSpeed) {
+        posClose = true;
+        this.x = this.destination.x;
+        this.y = this.destination.y;
+      }
+      else {
+        let a = Math.atan2(dy, dx);
+        this.x += card29SlideSpeed * Math.cos(a);
+        this.y += card29SlideSpeed * Math.sin(a);
+      }
+      let da = this.destination.a - this.a;
+      this.a += this.turnDir * card29TurnSpeed;
+      let angClose = Math.abs(da) <= card29TurnSpeed;
+      if (angClose) this.a = this.destination.a;
+      if (angClose && posClose) {
+        this.destination = {x: this.x, y: this.y, a: this.a};
+        this.sliding = false;
+      }
+    }
+    this.x = (this.x + canvas29.width) % canvas29.width;
+    this.y = (this.y + canvas29.height) % canvas29.height;
+    this.a = (this.a + (Math.PI * 2)) % (Math.PI * 2);
+    ctx29.shadowBlur = this.dragging ? 25 : 0;
+    ctx29.shadowColor = "black";
+    ctx29.save();
+    ctx29.translate(this.x, this.y);
+    ctx29.rotate(this.a);
+    ctx29.drawImage(card29Img, this.sx, this.sy, card29ImgWidth, card29ImgHeight, -card29Width / 2, -card29Height / 2, card29Width, card29Height);
+    if (this.dragging) ctx29.drawImage(card29Img, this.sx, this.sy, card29ImgWidth, card29ImgHeight, -card29Width / 2, -card29Height / 2, card29Width, card29Height);
+    ctx29.restore();
+    ctx29.shadowBlur = 0;
+  };
+  Card29.prototype.getCorners = function() {
+    let normCorners = [];
+    let w2 = card29Width / 2;
+    let h2 = card29Height / 2;
+    normCorners.push({x: this.x - w2, y: this.y - h2}); // Top left
+    normCorners.push({x: this.x + w2, y: this.y - h2}); // Top right
+    normCorners.push({x: this.x + w2, y: this.y + h2}); // Bottom right
+    normCorners.push({x: this.x - w2, y: this.y + h2}); // Bottom left
+    let rotatedCorners = [];
+    for (let i = 0; i < normCorners.length; i++) {
+      let n = normCorners[i];
+      let tx = n.x - this.x;
+      let ty = n.y - this.y;
+      let rotX = (tx * Math.cos(this.a)) - (ty * Math.sin(this.a));
+      let rotY = (tx * Math.sin(this.a)) + (ty * Math.cos(this.a));
+      rotatedCorners.push({x: rotX + this.x, y: rotY + this.y});
+    }
+    return rotatedCorners;
+  };
+  Card29.prototype.stack = function() {
+    this.setDestination(canvas29.width / 2, canvas29.height / 2, 0);
+  };
+  Card29.prototype.randomize = function() {
+    this.setDestination(Math.random() * canvas29.width, Math.random() * canvas29.width, Math.random() * Math.PI * 2);
+  };
+  Card29.prototype.setDestination = function(_x, _y, _a) {
+    this.destination = {x: _x, y: _y, a: _a};
+    this.sliding = true;
+    this.turnDir = Math.sign(this.destination.a - this.a);//Math.random() >= 0.5 ? 1 : -1;
+    if (this.turnDir === 0) this.turnDir = 1;
+  };
+  let card29Array = [];
+  function reset29() {
+    ctx29.drawImage(background29Img, 0, 0, canvas29.width, canvas29.height);
+    card29Array = [];
+    let cards = [];
+    for (let i = 0; i < Math.ceil(numCards29 / 52) * 52; i++) cards.push(i);
+    for (let i = 0; i < numCards29; i++) card29Array.push(new Card29(cards.splice(Math.floor(Math.random() * cards.length), 1)));
+  }
+  reset29();
+  function stackCards29() {
+    for (let i = 0; i < card29Array.length; i++) card29Array[i].stack();
+  }
+  function randomizeCards29() {
+    shuffleCard29Array();
+    for (let i = 0; i < card29Array.length; i++) card29Array[i].randomize();
+  }
+  function shuffleCard29Array() {
+    let result = [];
+    while (card29Array.length > 0) result.push(card29Array.splice(Math.floor(Math.random() * card29Array.length), 1));
+    card29Array = result.flat(1);
+  }
+  function fanCards29() {
+    //shuffleCard29Array();
+    let r = canvas29.width * 0.4;
+    let offset = card29Array[card29Array.length - 1].a + toRad(90);//Math.random() * Math.PI * 2;
+    for (let i = 0; i < card29Array.length; i++) {
+      let a = ((i / card29Array.length) * Math.PI * 2) + offset;
+      let c = card29Array[i];
+      let dx = (canvas29.width / 2) + (r * Math.cos(a));
+      let dy = (canvas29.height / 2) + (r * Math.sin(a));
+      let da = a + (Math.PI / 2);
+      c.setDestination(dx, dy, da);
+    }
+  }
+  function spreadCards29() {
+    for (let i = 0; i < card29Array.length; i++) {
+      card29Array[i].setDestination(((i / card29Array.length) * canvas29.width * 0.8) + (canvas29.width * 0.1), canvas29.height / 2, 0);
+    }
+  }
+  
+  function dotProduct29(a, b) {
+    return (a.x * b.x) + (a.y * b.y);
+  }
+  
+  let lastFrame29Time = 0;
+  let lastFps29DisplayTime = 1000;
+  function frame29() {
+    if (Date.now() - lastFps29DisplayTime >= 500) {
+      fps29Txt.innerHTML = (1000 / (Date.now() - lastFrame29Time)).toFixed(1);
+      lastFps29DisplayTime = Date.now();
+    }
+    lastFrame29Time = Date.now();
+    
+    ctx29.globalAlpha = trailing29 ? 0.1 : 1;
+    ctx29.drawImage(background29Img, 0, 0, canvas29.width, canvas29.height);
+    ctx29.globalAlpha = 1;
+    
+    for (let i = 0; i < card29Array.length; i++) card29Array[i].render();
+    
+    if (canvas29Running) requestAnimationFrame(frame29);
+  }
+  frame29();
+  
+  function startCanvas29() {
+    if (canvas29Running) canvas29Running = false;
+    else {
+      canvas29Running = true;
+      frame29();
+    }
+  }
+  
+  canvas29.addEventListener("mousedown", e => {
+    if (!canvas29Running) return;
+    e.preventDefault();
+    canvas29Rect = canvas29.getBoundingClientRect();
+    Mouse29.x = (e.clientX - canvas29Rect.left) * canvas29Ratio;
+    Mouse29.y = (e.clientY - canvas29Rect.top) * canvas29Ratio;
+    for (let i = card29Array.length - 1; i >= 0; i--) {
+      let c = card29Array[i];
+      let corners = c.getCorners();
+      let AM = {x: Mouse29.x - corners[0].x, y: Mouse29.y - corners[0].y};
+      let AB = {x: corners[1].x - corners[0].x, y: corners[1].y - corners[0].y};
+      let BM = {x: Mouse29.x - corners[1].x, y: Mouse29.y - corners[1].y};
+      let BC = {x: corners[2].x - corners[1].x, y: corners[2].y - corners[1].y};
+      let AMAB = dotProduct29(AM, AB);
+      let ABAB = dotProduct29(AB, AB);
+      let BMBC = dotProduct29(BM, BC);
+      let BCBC = dotProduct29(BC, BC);
+      let touching = ((0 < AMAB) && (AMAB < ABAB)) && ((0 < BMBC) && (BMBC < BCBC));
+      if (touching) {
+        let dx = Mouse29.x - c.x;
+        let dy = Mouse29.y - c.y;
+        Mouse29.offsetX = dx;
+        Mouse29.offsetY = dy;
+        Mouse29.draggingCard = true;
+        c.dragging = true;
+        Mouse29.dragIndex = i;
+        card29Array.splice(i, 1);
+        card29Array.push(c);
+        return;
+      }
+    }
+  });
+  canvas29.addEventListener("mousemove", e => {
+    if (!canvas29Running) return;
+    e.preventDefault();
+    canvas29Rect = canvas29.getBoundingClientRect();
+    Mouse29.x = (e.clientX - canvas29Rect.left) * canvas29Ratio;
+    Mouse29.y = (e.clientY - canvas29Rect.top) * canvas29Ratio;
+  });
+  window.addEventListener("mouseup", e => {
+    Mouse29.down = false;
+    Mouse29.draggingCard = false;
+    Mouse29.dragIndex = null;
+    for (let i = 0; i < card29Array.length; i++) card29Array[i].dragging = false;
+  });
+</script>
+<canvas id = "canvas28"></canvas>
+<button onclick = "startCanvas28()">Start/Stop</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps28Txt"></span></b></i></div>
+<div class = "desc"><b><i>(11/24/2021)</i></b> I'm trying to make a (probably pretty lame) version of Cow Evolution, using blobs. Right now I have the wandering down, and the dragging works, but I haven't added points or merging. I have a class set up with different layers for different stages of evolution but currently it only has one item, the first layer. I'm probably never going to finish this so it'll probably stay as just random blobs walking around.</div>
+<hr><hr>
+<script>
+  const ctx28 = canvas28.getContext("2d");
+  canvas28.width = canvas28.height = 1000;
+  let canvas28Running = false;
+  let canvas28Ratio = canvas28.width / 300;
+  let canvas28Rect = canvas28.getBoundingClientRect();
+  
+  let blob28StepDist = 80;
+  let blob28StepSpeed = 2;
+  let blob28StepInterval = 100;
+  
+  let Mouse28 = {
+    x: 0,
+    y: 0,
+    down: false,
+    draggingBlob: false,
+    dragOffsetX: 0,
+    dragOffsetY: 0
+  };
+  
+  let layers28 = [
+    { // Layer 0
+      width: 80,
+      height: 80,
+      PPS: 1,
+      draw: function(x, y, ratio, dragging) {
+        ctx28.fillStyle = `hsl(240deg, 100%, ${dragging ? 70 : 50}%)`;
+        ctx28.strokeStyle = "black";
+        ctx28.lineWidth = 3;
+        ctx28.shadowColor = "black";
+        ctx28.shadowBlur = dragging ? 15 : 0;
+        ctx28.beginPath();
+        ctx28.arc(x, y, this.width * 0.5 * ratio * (dragging ? 1.2 : 1), 0, Math.PI * 2);
+        ctx28.fill();
+        ctx28.stroke();
+        ctx28.shadowBlur = 0;
+      }
+    }
+  ];
+  
+  function Blob28(x, y, layer) {
+    this.x = x;
+    this.y = y;
+    this.layer = layers28[layer];
+    this.willStep = Math.round(blob28StepInterval * randBetween(0.2, 1));
+    this.stepAge = Math.floor(Math.random() * this.willStep);
+    this.destination = {x: this.x, y: this.y};
+    this.stepping = false;
+    this.sizeRatio = randBetween(0.8, 1);
+    this.stepSpeed = blob28StepSpeed * randBetween(0.75, 1);
+    this.dragging = false;
+  }
+  Blob28.prototype.render = function() {
+    if (this.dragging) {
+      this.x = Mouse28.x + Mouse28.dragOffsetX;
+      this.y = Mouse28.y + Mouse28.dragOffsetY;
+      this.destination.x = this.x;
+      this.destination.y = this.y;
+      this.stepping = false;
+      this.stepAge = 0;
+    }
+    
+    if (!this.stepping) this.stepAge++;
+    if (this.stepAge >= this.willStep) {
+      this.stepAge = 0;
+      this.willStep = Math.round(blob28StepInterval * randBetween(0.2, 1));
+      this.stepSpeed = blob28StepSpeed * randBetween(0.75, 1);
+      let a = Math.random() * Math.PI * 2;
+      let v = blob28StepDist * randBetween(0.75, 1);
+      this.destination.x = this.x + (v * Math.cos(a));
+      this.destination.y = this.y + (v * Math.sin(a));
+    }
+    
+    let dx = this.destination.x - this.x;
+    let dy = this.destination.y - this.y;
+    let distSq = (dx * dx) + (dy * dy);
+    if (distSq <= 100) {
+      this.destination.x = this.x;
+      this.destination.y = this.y;
+      this.stepping = false;
+    }
+    else {
+      let a = Math.atan2(dy, dx);
+      this.x += this.stepSpeed * Math.cos(a);
+      this.y += this.stepSpeed * Math.sin(a);
+      this.stepping = true;
+    }
+    
+    this.destination.x = this.destination.x.clamp(0, canvas28.width);
+    this.destination.y = this.destination.y.clamp(0, canvas28.height);
+    
+    this.layer.draw(this.x, this.y, this.sizeRatio, this.dragging);
+  };
+  let blob28Array = [];
+  
+  function reset28() {
+    blob28Array = [];
+    for (let i = 0; i < 25; i++) blob28Array.push(new Blob28(Math.random() * canvas28.width, Math.random() * canvas28.height, 0));
+  }
+  reset28();
+  
+  let lastFrame28Time = 0;
+  let lastFps28DisplayTime = 1000;
+  
+  function frame28() {
+    if (Date.now() - lastFps28DisplayTime >= 500) {
+      fps28Txt.innerHTML = (1000 / (Date.now() - lastFrame28Time)).toFixed(1);
+      lastFps28DisplayTime = Date.now();
+    }
+    lastFrame28Time = Date.now();
+    
+    ctx28.clearRect(0, 0, canvas28.width, canvas28.height);
+    
+    for (let i = 0; i < blob28Array.length; i++) blob28Array[i].render();
+    
+    if (canvas28Running) requestAnimationFrame(frame28);
+  }
+  frame28();
+  
+  function startCanvas28() {
+    if (canvas28Running) canvas28Running = false;
+    else {
+      canvas28Running = true;
+      frame28();
+    }
+  }
+  
+  canvas28.addEventListener("mousedown", e => {
+    if (!canvas28Running) return;
+    Mouse28.down = true;
+    canvas28Rect = canvas28.getBoundingClientRect();
+    Mouse28.x = (e.clientX - canvas28Rect.left) * canvas28Ratio;
+    Mouse28.y = (e.clientY - canvas28Rect.top) * canvas28Ratio;
+    for (let i = 0; i < blob28Array.length; i++) {
+      let b = blob28Array[i];
+      let w = b.layer.width * b.sizeRatio;
+      let h = b.layer.height * b.sizeRatio;
+      let _x = b.x - (w / 2);
+      let _y = b.y - (h / 2);
+      let topBottom = Mouse28.x > _x && Mouse28.x < _x + w;
+      let leftRight = Mouse28.y > _y && Mouse28.y < _y + h;
+      if (topBottom && leftRight) {
+        Mouse28.draggingBlob = true;
+        Mouse28.dragOffsetX = b.x - Mouse28.x;
+        Mouse28.dragOffsetY = b.y - Mouse28.y;
+        b.dragging = true;
+        blob28Array.splice(i, 1);
+        blob28Array.push(b);
+        return;
+      }
+    }
+  });
+  canvas28.addEventListener("mousemove", e => {
+    if (!canvas28Running) return;
+    canvas28Rect = canvas28.getBoundingClientRect();
+    Mouse28.x = (e.clientX - canvas28Rect.left) * canvas28Ratio;
+    Mouse28.y = (e.clientY - canvas28Rect.top) * canvas28Ratio;
+  });
+  window.addEventListener("mouseup", e => {
+    Mouse28.down = false;
+    Mouse28.draggingBlob = false;
+    for (let i = 0; i < blob28Array.length; i++) blob28Array[i].dragging = false;
+  });
+</script>
+<canvas id = "canvas27" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "startCanvas27()">Start/Stop</button>
+<button onclick = "reset27()">Reset</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps27Txt"></span></b></i></div>
+<div><b><u>Number of Pixels:</u></b> <span id = "numPixels27Txt">0</span></div>
+<div><b><u>Grid Size:</u></b> <span id = "gridSize27Txt">500&times;500</span></div>
+<input type = "range" min = "0" max = "10" step = "1" value = "0" id = "gridSize27Range" oninput = "updateSettings27(true)">
+<div><b><u>Stickiness:</u></b> <span id = "stickiness27Txt">100</span>%</div>
+<input type = "range" min = "0" max = "10" step = "1" value = "0" id = "stickiness27Range" oninput = "updateSettings27(false)">
+<div><b><u>Turn Chance:</u></b> <span id = "turnChance27Txt">5</span>%</div>
+<input type = "range" min = "0" max = "10" step = "1" value = "0" id = "turnChance27Range" oninput = "updateSettings27(false)">
+<div><b><u>Hue Step:</u></b> <span id = "hueStep27Txt">0.01</span>&deg;</div>
+<input type = "range" min = "0" max = "10" step = "1" value = "0" id = "hueStep27Range" oninput = "updateSettings27(false)">
+<div><b><u>Initial Shape:</u></b></div>
+<input type = "radio" name = "spawnMode27Radio" id = "spawnMode27Radio1" oninput = "updateSettings27(true)" CHECKED>
+<label for = "spawnMode27Radio1">Dot in middle</label>
+<br>
+<input type = "radio" name = "spawnMode27Radio" id = "spawnMode27Radio2" oninput = "updateSettings27(true)">
+<label for = "spawnMode27Radio2">Line at bottom</label>
+<div class = "desc"><b><i>(11/18/2021)</i></b> I redid my old DLA aligned to a grid project, this time using a cached array keeping track of the states of all the pixels, instead of manually checking every pixel every step, making it ridiculously faster. Like, a 100x100 grid would take 10,000 steps EVERY time the Walker moved, whereas this one only checks its current position. I also added colors, and a turn chance setting (currently set to 5%), so that the walker only has a X% chance to turn each step, instead of definitely turning every step, which makes it reach the pixels faster (since it spends less time wandering aimlessly), and still makes a really interesting coral-like pattern. Interestingly, the resulting pattern with a low turn chance is basically just a denser version of the classic one, which I think looks better actually.<br><b><i>Update: (Later that day)</i></b> Added a stickiness setting, for the chance of a pixel sticking versus continuing to wander when it touches something (currently set to 100%).<br><b><i>(11/22/2021)</i></b> Added a tracker for the current number of pixels, different spawning modes, and more sliders.</div>
+<hr><hr>
+<script>
+  const ctx27 = canvas27.getContext("2d");
+  canvas27.width = canvas27.height = 1000;
+  let canvas27Running = false;
+  
+  let grid27 = [];
+  let gridSize27 = 500;
+  let tileSize27 = canvas27.width / gridSize27;
+  let stepsPerFrame27 = 250000;
+  let turnChance27 = 0.05;
+  let hueStep27 = 0.01;
+  let stickiness27 = 1;
+  let drawMode27 = 1;
+  let numPixels27 = 0;
+  let spawnMode27 = 1;
+  
+  let Walker27 = {};
+  Walker27.newPos = function() {
+    if (spawnMode27 === 1) {
+      let side = Math.floor(Math.random() * 4);
+      if (side === 0) { // Left
+        this.x = 0;
+        this.y = Math.floor(Math.random() * gridSize27);
+        this.dir = 1;
+      }
+      else if (side === 1) { // Top
+        this.x = Math.floor(Math.random() * gridSize27);
+        this.y = 0;
+        this.dir = 2;
+      }
+      else if (side === 2) { // Right
+        this.x = gridSize27 - 1;
+        this.y = Math.floor(Math.random() * gridSize27);
+        this.dir = 3;
+      }
+      else { // Bottom
+        this.x = Math.floor(Math.random() * gridSize27);
+        this.y = gridSize27 - 1;
+        this.dir = 0;
+      }
+    }
+    else if (spawnMode27 === 2) {
+      this.x = Math.floor(Math.random() * gridSize27);
+      this.y = 0;
+      this.dir = 2;
+    }
+    if (grid27[this.x][this.y]) this.running = false;
+  };
+  Walker27.walk = function() {
+    if (!this.running) return;
+    if (Math.random() < turnChance27) this.dir = Math.floor(Math.random() * 4);
+    if (this.dir === 0) this.y--; // Up
+    else if (this.dir === 1) this.x++; // Right
+    else if (this.dir === 2) this.y++; // Down
+    else this.x--; // Left
+    this.x = (this.x + gridSize27) % gridSize27;
+    if (spawnMode27 === 2) {
+      if (this.y < 0) this.y = 0;
+    }
+    this.y = (this.y + gridSize27) % gridSize27;
+    
+    let middle = grid27[this.x][this.y];
+    let top = grid27[this.x][(this.y - 1 + gridSize27) % gridSize27];
+    if (spawnMode27 === 2) {
+      if (this.y === 0) top = false;
+    }
+    let right = grid27[(this.x + 1) % gridSize27][this.y];
+    let bottom = grid27[this.x][(this.y + 1) % gridSize27];
+    let left = grid27[(this.x - 1 + gridSize27) % gridSize27][this.y];
+    
+    if ((middle || top || right || bottom || left) && Math.random() < stickiness27) {
+      if (!middle) {
+        grid27[this.x][this.y] = true;
+        ctx27.fillStyle = `hsl(${this.hue}deg, 100%, 50%)`;
+        if (drawMode27 === 1) ctx27.fillRect(this.x * tileSize27, this.y * tileSize27, tileSize27, tileSize27);
+        else if (drawMode27 === 2) {
+          ctx27.globalAlpha = 0.1;
+          ctx27.fillCircle(this.x * tileSize27, this.y * tileSize27, tileSize27 * 3);
+          ctx27.globalAlpha = 1;
+        }
+        this.hue += hueStep27;
+        numPixels27++;
+      }
+      this.newPos();
+    }
+  };
+  function reset27() {
+    ctx27.fillStyle = "black";
+    ctx27.fillRect(0, 0, canvas27.width, canvas27.height);
+    
+    tileSize27 = canvas27.width / gridSize27;
+    grid27 = [];
+    for (let x = 0; x < gridSize27; x++) {
+      let row = [];
+      for (let y = 0; y < gridSize27; y++) {
+        row.push(false);
+      }
+      grid27.push(row);
+    }
+    
+    numPixels27 = 0;
+    Walker27.hue = Math.random() * 360;
+    ctx27.fillStyle = `hsl(${Walker27.hue}deg, 100%, 50%)`;
+    
+    let _x = 0;
+    let _y = 0;
+    if (spawnMode27 === 1) {
+      _x = Math.floor(gridSize27 / 2);
+      _y = Math.floor(gridSize27 / 2);
+      grid27[_x][_y] = true;
+      ctx27.fillRect(_x * tileSize27, _y * tileSize27, tileSize27, tileSize27);
+      numPixels27++;
+    }
+    else if (spawnMode27 === 2) {
+      for (let x = 0; x < gridSize27; x++) {
+        grid27[x][gridSize27 - 1] = true;
+        Walker27.hue += hueStep27;
+        ctx27.fillStyle = `hsl(${Walker27.hue}deg, 100%, 50%)`;
+        ctx27.fillRect(x * tileSize27, (gridSize27 - 1) * tileSize27, tileSize27, tileSize27);
+        numPixels27++;
+      }
+    }
+    
+    numPixels27Txt.innerHTML = numPixels27.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    
+    Walker27.running = true;
+    Walker27.newPos();
+  }
+  reset27();
+  
+  let lastFrame27Time = 0;
+  let lastFps27DisplayTime = 1000;
+  
+  function frame27() {
+    if (Date.now() - lastFps27DisplayTime >= 500) {
+      fps27Txt.innerHTML = (1000 / (Date.now() - lastFrame27Time)).toFixed(1);
+      lastFps27DisplayTime = Date.now();
+    }
+    lastFrame27Time = Date.now();
+    
+    for (let i = 0; i < stepsPerFrame27; i++) Walker27.walk();
+    
+    numPixels27Txt.innerHTML = numPixels27.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    
+    if (canvas27Running) requestAnimationFrame(frame27);
+  }
+  frame27();
+  
+  function startCanvas27() {
+    if (canvas27Running) canvas27Running = false;
+    else {
+      canvas27Running = true;
+      frame27();
+    }
+  }
+  
+  let turnChance27RangeArray = [1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100];
+  turnChance27Range.max = turnChance27RangeArray.length - 1;
+  turnChance27Range.value = turnChance27RangeArray.indexOf(5);
+  
+  let hueStep27RangeArray = [0.005, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.75, 1];
+  hueStep27Range.max = hueStep27RangeArray.length - 1;
+  hueStep27Range.value = hueStep27RangeArray.indexOf(0.01);
+  
+  let gridSize27RangeArray = [25, 50, 75, 100, 150, 200, 250, 300, 400, 500];
+  gridSize27Range.max = gridSize27RangeArray.length - 1;
+  gridSize27Range.value = gridSize27RangeArray.indexOf(500);
+  
+  let stickiness27RangeArray = [1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100];
+  stickiness27Range.max = stickiness27RangeArray.length - 1;
+  stickiness27Range.value = stickiness27RangeArray.indexOf(100);
+  
+  function updateSettings27(reset) {
+    stickiness27Txt.innerHTML = stickiness27RangeArray[Number(stickiness27Range.value)];
+    stickiness27 = stickiness27RangeArray[Number(stickiness27Range.value)] / 100;
+    
+    turnChance27Txt.innerHTML = turnChance27RangeArray[Number(turnChance27Range.value)];
+    turnChance27 = turnChance27RangeArray[Number(turnChance27Range.value)] / 100;
+    
+    hueStep27 = hueStep27Txt.innerHTML = hueStep27RangeArray[Number(hueStep27Range.value)];
+    
+    if (spawnMode27Radio1.checked) spawnMode27 = 1;
+    else if (spawnMode27Radio2.checked) spawnMode27 = 2;
+    
+    gridSize27 = gridSize27RangeArray[Number(gridSize27Range.value)];
+    gridSize27Txt.innerHTML = gridSize27 + "&times;" + gridSize27;
+    
+    if (reset) reset27();
+  }
+</script>
+<canvas id = "canvas26"></canvas>
+<button onclick = "drawTree26()">Redraw</button>
+<table>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Recursion layers:</u></b> <span id = "maxLayers26Txt">15</span></div>
+      <input type = "range" min = "1" max = "15" step = "1" value = "15" id = "maxLayers26Range" oninput = "updateSettings26()">
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Initial triangle size:</u></b> <span id = "startSize26Txt">400</span>px</div>
+      <input type = "range" min = "50" max = "600" step = "50" value = "400" id = "startSize26Range" oninput = "updateSettings26()">
+    </td>
+    <td style = "padding: 10px; width: 150px" rowspan = "5">
+      <div><b><u>Presets:</u></b></div>
+      <div id = "presetsDiv26"></div>
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Triangle left angle:</u></b> <span id = "sideAngle26Txt">60</span>&deg;</div>
+      <input type = "range" min = "5" max = "85" step = "1" value = "60" id = "sideAngle26Range" oninput = "updateSettings26()">
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Triangle top angle:</u></b> <span id = "topAngle26Txt">90</span>&deg;</div>
+      <input type = "range" min = "60" max = "120" step = "1" value = "90" id = "topAngle26Range" oninput = "updateSettings26()">
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "fill26Checkbox" oninput = "updateSettings26()">
+      <label for = "fill26Checkbox">Fill triangles</label>
+    </td>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "stroke26Checkbox" oninput = "updateSettings26()" CHECKED>
+      <label for = "stroke26Checkbox">Outline triangles</label>
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Triangle hue:</u></b> <span id = "hue26Txt">180</span>&deg;</div>
+      <input type = "range" min = "0" max = "360" step = "15" value = "180" id = "hue26Range" oninput = "updateSettings26()">
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Hue variation:</u></b> <span id = "hueVariation26Txt">0</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "5" value = "0" id = "hueVariation26Range" oninput = "updateSettings26()">
+    </td>
+  </tr>
+</table>
+<div class = "desc"><b><i>(11/16/2021)</i></b> Nested triangle tree generator, based on <a href = "https://turtletoy.net/turtle/77a93d1394" target = "_blank">this</a> Turtletoy project.<br><b><i>(11/17/2021)</i></b> Added more settings and sliders, as well as a few presets.</div>
+<hr><hr>
+<script>
+  const ctx26 = canvas26.getContext("2d");
+  canvas26.width = canvas26.height = 1000;
+  
+  let sideAngle26 = 60; // Left angle
+  let topAngle26 = 90;
+  let maxLayers26 = 15;
+  let startX26 = canvas26.width / 2;
+  let startY26 = 700;
+  let startSize26 = 400;
+  let fill26 = false;
+  let stroke26 = true;
+  let hue26 = 180;
+  let hueVariation26 = 0;
+  
+  let presetsArray26 = [
+    {
+      sideAngle26: 60,
+      topAngle26: 90,
+      maxLayers26: 15,
+      fill26: false,
+      stroke26: true,
+      hue26: 180,
+      hueVariation26: 0,
+      startSize26: 400
+    },
+    {
+      sideAngle26: 45,
+      topAngle26: 90,
+      maxLayers26: 11,
+      fill26: true,
+      stroke26: true,
+      hue26: 0,
+      hueVariation26: 20,
+      startSize26: 450
+    },
+    {
+      sideAngle26: 50,
+      topAngle26: 80,
+      maxLayers26: 12,
+      fill26: true,
+      stroke26: false,
+      hue26: 60,
+      hueVariation26: 0,
+      startSize26: 300
+    },
+    {
+      sideAngle26: 40,
+      topAngle26: 100,
+      maxLayers26: 15,
+      fill26: true,
+      stroke26: false,
+      hue26: 315,
+      hueVariation26: 0,
+      startSize26: 600
+    },
+    {
+      sideAngle26: 60,
+      topAngle26: 60,
+      maxLayers26: 15,
+      fill26: true,
+      stroke26: false,
+      hue26: 210,
+      hueVariation26: 30,
+      startSize26: 150
+    }
+  ];
+  function loadPreset26(n) {
+    let p = presetsArray26[n];
+    sideAngle26Range.value = p.sideAngle26;
+    topAngle26Range.value = p.topAngle26;
+    maxLayers26Range.value = p.maxLayers26;
+    fill26Checkbox.checked = p.fill26;
+    stroke26Checkbox.checked = p.stroke26;
+    hue26Range.value = p.hue26;
+    hueVariation26Range.value = p.hueVariation26;
+    startSize26Range.value = p.startSize26;
+    
+    updateSettings26();
+  }
+  for (let i = 0; i < presetsArray26.length; i++) {
+    let btn = document.createElement("button");
+    btn.innerHTML = i + 1;
+    btn.onclick = () => loadPreset26(i);
+    btn.style.borderRadius = "50%";
+    btn.style.margin = "5px";
+    
+    presetsDiv26.appendChild(btn);
+  }
+  
+  function drawTriangle26(x, y, angle, lenBase, layer) {
+    if (layer > maxLayers26) return;
+    //sideAngle26 = randBetween(Number(sideAngle26Range.min) + 10, Number(sideAngle26Range.max) - 10);
+    let angleLeft = 180 - (sideAngle26 + topAngle26);
+    let lenLeft = (lenBase / Math.sin(toRad(topAngle26))) * Math.sin(toRad(angleLeft));
+    let lenRight = (lenBase / Math.sin(toRad(topAngle26))) * Math.sin(toRad(sideAngle26));
+    let currX = x;
+    let currY = y;
+    let currAngle = angle;
+    ctx26.beginPath();
+    ctx26.moveTo(currX, currY);
+    currAngle -= sideAngle26;
+    currX += lenLeft * Math.cos(toRad(currAngle));
+    currY += lenLeft * Math.sin(toRad(currAngle));
+    let top = {x: currX, y: currY};
+    ctx26.lineTo(currX, currY);
+    currAngle += 180 - topAngle26;
+    currX += lenRight * Math.cos(toRad(currAngle));
+    currY += lenRight * Math.sin(toRad(currAngle));
+    ctx26.lineTo(currX, currY);
+    ctx26.lineTo(x, y);
+    let hue = hue26 + randBetween(-180 * hueVariation26, 180 * hueVariation26);
+    ctx26.fillStyle = `hsla(${hue}deg, 100%, 50%, 0.5)`;
+    ctx26.strokeStyle = `hsl(${hue}deg, 100%, 50%)`;
+    if (fill26) ctx26.fill();
+    if (stroke26) ctx26.stroke();
+    
+    drawTriangle26(x, y, angle - sideAngle26, lenLeft, layer + 1);
+    drawTriangle26(top.x, top.y, angle + (180 - (topAngle26 + sideAngle26)), lenRight, layer + 1);
+  }
+  
+  function drawTree26() {
+    ctx26.fillStyle = "black";
+    ctx26.fillRect(0, 0, canvas26.width, canvas26.height);
+    
+    drawTriangle26(startX26 - (startSize26 / 2), startY26, 0, startSize26, 1);
+  }
+  drawTree26();
+  
+  function updateSettings26() {
+    topAngle26 = topAngle26Txt.innerHTML = Number(topAngle26Range.value);
+    sideAngle26Range.max = 175 - topAngle26;
+    sideAngle26 = sideAngle26Txt.innerHTML = Number(sideAngle26Range.value);
+    maxLayers26 = maxLayers26Txt.innerHTML = Number(maxLayers26Range.value);
+    fill26 = fill26Checkbox.checked;
+    stroke26 = stroke26Checkbox.checked;
+    hue26 = hue26Txt.innerHTML = Number(hue26Range.value);
+    hueVariation26Txt.innerHTML = hueVariation26Range.value;
+    hueVariation26 = Number(hueVariation26Range.value) / 100;
+    startSize26 = startSize26Txt.innerHTML = Number(startSize26Range.value);
+    
+    drawTree26();
+  }
+</script>
+<canvas id = "canvas25"></canvas>
+<button onclick = "startCanvas25()">Start/Stop</button>
+<button onclick = "resetWalkers25()">Reset</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps25Txt"></span></b></i></div>
+<div class = "desc"><b><i>(11/10/2021)</i></b> I tried to replicate the pattern in <a href = "https://www.onirom.fr/get/compart/chaos/050.png" target = "_blank">this</a> image, using Curlicue fractals, but I couldn't get it to quite look right.</div>
+<hr><hr>
+<script>
+  const ctx25 = canvas25.getContext("2d");
+  canvas25.width = canvas25.height = 2000;
+  let canvas25Running = false;
+  
+  let stepsPerFrame25 = 100;
+  let numWalkers25 = 25//50;
+  let walker25Speed = 2;
+  
+  function Walker25() {
+    this.x = Math.random() * canvas25.width;
+    this.y = Math.random() * canvas25.height;
+    this.theta = Math.random() * Math.PI * 2;
+    this.phi = Math.random() * Math.PI * 2;
+    this.step = Math.random();//Math.PI * randBetween(0.5, 1.5);
+    this.color = `hsl(${randBetween(100, 140)}deg, ${randBetween(80, 100)}%, ${randBetween(30, 60)}%)`;
+  }
+  Walker25.prototype.walk = function() {
+    let lastX = this.x;
+    let lastY = this.y;
+    this.theta = (this.theta + (this.step * Math.PI * 2)) % (Math.PI * 2);
+    this.phi = (this.phi + this.theta) % (Math.PI * 2);
+    
+    this.x += walker25Speed * Math.cos(this.phi);
+    this.y += walker25Speed * Math.sin(this.phi);
+    
+    if (this.x > canvas25.width) this.x = lastX = 0;
+    if (this.x < 0) this.x = lastX = canvas25.width;
+    if (this.y > canvas25.height) this.y = lastY = 0;
+    if (this.y < 0) this.y = lastY = canvas25.height;
+    
+    ctx25.strokeStyle = this.color;
+    ctx25.beginPath();
+    ctx25.moveTo(lastX, lastY);
+    ctx25.lineTo(this.x, this.y);
+    ctx25.stroke();
+  };
+  let walker25Array = [];
+  function resetWalkers25() {
+    ctx25.fillStyle = "black";
+    ctx25.fillRect(0, 0, canvas25.width, canvas25.height);
+    walker25Array = [];
+    for (let i = 0; i < numWalkers25; i++) walker25Array.push(new Walker25());
+  }
+  resetWalkers25();
+  
+  let lastFrame25Time = 0;
+  let lastFps25DisplayTime = 1000;
+  
+  function frame25() {
+    if (Date.now() - lastFps25DisplayTime >= 500) {
+      fps25Txt.innerHTML = (1000 / (Date.now() - lastFrame25Time)).toFixed(1);
+      lastFps25DisplayTime = Date.now();
+    }
+    lastFrame25Time = Date.now();
+    
+    for (let j = 0; j < stepsPerFrame25; j++) {
+      for (let i = 0; i < walker25Array.length; i++) walker25Array[i].walk();
+    }
+    
+    if (canvas25Running) requestAnimationFrame(frame25);
+  }
+  frame25();
+  
+  function startCanvas25() {
+    if (canvas25Running) canvas25Running = false;
+    else {
+      canvas25Running = true;
+      frame25();
+    }
+  }
+</script>
+<canvas id = "canvas24"></canvas>
+<button onclick = "startCanvas24()">Start/Stop</button>
+<button onclick = "resetWalkers24()">Reset</button>
+<button onclick = "rainbow24 = !rainbow24">Rainbow On/Off</button>
+<button onclick = "mode24 = mode24 === 1 ? 2 : 1; resetWalkers24()">Switch Circle/Spiral</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps24Txt"></span></b></i></div>
+<div class = "desc"><b><i>(11/5/2021)</i></b> An experiment with giving random walkers a direction bias, which actually worked the first try. Now they all crawl out in more of a circle formation, instead of randomly walking clumped in the middle, or in a spiral shape. This can be used for lots of different designs and shapes.</div>
+<hr><hr>
+<script>
+  const ctx24 = canvas24.getContext("2d");
+  canvas24.width = canvas24.height = 1000;
+  let canvas24Running = false;
+  
+  let numWalkers24 = 200;
+  let walker24Speed = 1;
+  let stepsPerFrame24 = 15;
+  let walker24Alignment = 2;
+  let rainbow24 = false;
+  let mode24 = 1;
+  
+  function Walker24(x, y, directionBias) {
+    this.x = x;
+    this.y = y;
+    this.directionBias = directionBias;
+    this.color = `hsl(${toDeg(this.directionBias)}deg, 100%, 40%)`;
+  }
+  Walker24.prototype.walk = function() {
+    let lastX = this.x;
+    let lastY = this.y;
+    let r = 1;
+    //r = Math.pow(Math.random(), walker24Alignment);
+    for (let i = 0; i < walker24Alignment; i++) r *= Math.random();
+    //r = Math.random() % Math.random();
+    let a = this.directionBias + (r * Math.PI * 2 * randSign());
+    //this.directionBias += Math.random() * 0.05 * randSign();
+    let m = Math.random() * walker24Speed;
+    this.x += m * Math.cos(a);
+    this.y += m * Math.sin(a);
+    ctx24.strokeStyle = rainbow24 ? this.color : "black";
+    ctx24.beginPath();
+    ctx24.moveTo(lastX, lastY);
+    ctx24.lineTo(this.x, this.y);
+    ctx24.stroke();
+  };
+  let walker24Array = [];
+  function resetWalkers24() {
+    ctx24.clearRect(0, 0, canvas24.width, canvas24.height);
+    walker24Array = [];
+    if (mode24 === 1) { // Circle
+      for (let i = 0; i < numWalkers24; i++) {
+        let a = (i / numWalkers24) * Math.PI * 2;
+        let x = (canvas24.width / 2) + (100 * Math.cos(a));
+        let y = (canvas24.height / 2) + (100 * Math.sin(a));
+        walker24Array.push(new Walker24(x, y, a));
+      }
+    }
+    else if (mode24 === 2) { // Spiral
+      for (let i = 0; i < numWalkers24; i++) {
+        let a = (i / numWalkers24) * Math.PI * 4;
+        let r = (i / numWalkers24) * 200;
+        let x = (canvas24.width / 2) + (r * Math.cos(a));
+        let y = (canvas24.height / 2) + (r * Math.sin(a));
+        walker24Array.push(new Walker24(x, y, a + (Math.PI / 2)));
+      }
+    }
+  }
+  resetWalkers24();
+  
+  let lastFrame24Time = 0;
+  let lastFps24DisplayTime = 1000;
+  
+  function frame24() {
+    if (Date.now() - lastFps24DisplayTime >= 500) {
+      fps24Txt.innerHTML = (1000 / (Date.now() - lastFrame24Time)).toFixed(1) + (canvas24Running ? "" : " (PAUSED)");;
+      lastFps24DisplayTime = Date.now();
+    }
+    lastFrame24Time = Date.now();
+    
+    for (let j = 0; j < stepsPerFrame24; j++) {
+      for (let i = 0; i < walker24Array.length; i++) walker24Array[i].walk();
+    }
+    
+    if (canvas24Running) requestAnimationFrame(frame24);
+  }
+  frame24();
+  
+  function startCanvas24() {
+    if (canvas24Running) canvas24Running = false;
+    else {
+      canvas24Running = true;
+      frame24();
+    }
+  }
+</script>
+<canvas id = "canvas23"></canvas>
+<button onclick = "startCanvas23()">Start/Stop</button>
+<button onclick = "Walker23.reset()">Reset</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps23Txt"></span></b></i></div>
+<div style = "font-weight: bold; font-style: italic; margin: 5px" id = "running23Txt"></div>
+<input type = "checkbox" id = "reverseContrast23Checkbox" oninput = "updateSettings23(true)">
+<label for = "reverseContrast23Checkbox">Reverse Contrast</label>
+<div><b><u>Grid Size:</u></b> <span id = "gridSize23Txt">50&times;50</span></div>
+<input type = "range" min = "0" max = "10" step = "1" value = "0" id = "gridSize23Range" oninput = "updateSettings23(true)">
+<div><b><u>Density:</u></b> <span id = "density23Txt">30</span>%</div>
+<input type = "range" min = "5" max = "100" step = "5" value = "30" id = "density23Range" oninput = "updateSettings23(false)">
+<div><b><u>Turn Chance:</u></b> <span id = "turnChance23Txt">20</span>%</div>
+<input type = "range" min = "0" max = "100" step = "5" value = "20" id = "turnChance23Range" oninput = "updateSettings23(false)">
+<div class = "desc"><b><i>(11/4/2021)</i></b> An attempt to replicate the self-playing snake game from <a href = "https://www.reddit.com/r/PlotterArt/comments/mk18km/plotter_playing_snake_against_itself" target = "_blank">this</a> Reddit post, but I spent ages trying to get it to turn and could not figure it out to save my life. Right now it just randomly turns, but it doesn't steer away from it's own body like I was trying to get it to do.<br><b><i>(11/5/2021)</i></b> Modified the code some so that there's adjustable density and each new path is a different color, and I like how it turned out. Now it reminds me of subway maps and it actually looks interesting.<br><b><i>Update: (Later that day)</i></b> Added settings and sliders for everything.</div>
+<hr><hr>
+<script>
+  const ctx23 = canvas23.getContext("2d");
+  canvas23.width = canvas23.height = 2000;
+  let canvas23Running = false;
+  
+  let gridSize23 = 50;
+  let tileSize23 = canvas23.width / gridSize23;
+  let stepsPerFrame23 = 50;
+  let minHeadLength23 = 2;
+  let density23 = 0.3;
+  let reverseContrast23 = false;
+  let turnChance23 = 0.2;
+  
+  let Walker23 = {};
+  Walker23.reset = function() {
+    this.stopped = false;
+    ctx23.fillStyle = reverseContrast23 ? "black" : "white";
+    ctx23.fillRect(0, 0, canvas23.width, canvas23.height);
+    tileSize23 = canvas23.width / gridSize23;
+    this.pointsLeft = [];
+    for (let x = 0; x < gridSize23; x++) {
+      for (let y = 0; y < gridSize23; y++) {
+        this.pointsLeft.push({x: x, y: y});
+      }
+    }
+    this.globalAge = 0;
+    this.newPos();
+    if (!canvas23Running) frame23();
+  };
+  Walker23.splicePoint = function(x, y) {
+    if (this.stopped) return;
+    for (let i = 0; i < this.pointsLeft.length; i++) {
+      if (this.pointsLeft[i].x === x && this.pointsLeft[i].y === y) {
+        this.pointsLeft.splice(i, 1);
+        return;
+      }
+    }
+    if (this.pointsLeft.length <= (gridSize23 * gridSize23) * (1 - density23)) this.stopped = true;
+  };
+  Walker23.validatePoint = function(x, y) {
+    if (this.stopped) return;
+    for (let i = 0; i < this.pointsLeft.length; i++) {
+      if (this.pointsLeft[i].x === x && this.pointsLeft[i].y === y) {
+        return true;
+      }
+    }
+    return false;
+  }
+  Walker23.newPos = function() {
+    if (this.stopped || this.pointsLeft.length <= (gridSize23 * gridSize23) * (1 - density23)) {
+      this.stopped = true;
+      return;
+    }
+    let i = Math.floor(Math.random() * this.pointsLeft.length);
+    let pos = this.pointsLeft[i];
+    this.x = pos.x;
+    this.y = pos.y;
+    this.splicePoint(this.x, this.y);
+    this.dir = Math.floor(Math.random() * 4);
+    this.turns = 0;
+    this.age = 0;
+    this.color = `hsl(${Math.random() * 360}deg, 100%, ${reverseContrast23 ? 60 : 40}%)`;
+  };
+  Walker23.checkDir = function(dir) {
+    if (dir === 0) return this.validatePoint(this.x - 1, this.y);
+    else if (dir === 1) return this.validatePoint(this.x + 1, this.y);
+    else if (dir === 2) return this.validatePoint(this.x, this.y - 1);
+    else return this.validatePoint(this.x, this.y + 1);
+  };
+  Walker23.walk = function() {
+    if (this.stopped || this.pointsLeft.length <= (gridSize23 * gridSize23) * (1 - density23)) {
+      this.stopped = true;
+      return;
+    }
+    this.globalAge++;
+    this.age++;
+    let lastX = this.x;
+    let lastY = this.y;
+    if (this.dir === 0) this.x--;
+    else if (this.dir === 1) this.x++;
+    else if (this.dir === 2) this.y--;
+    else this.y++;
+    if (Math.random() < turnChance23) this.dir = Math.floor(Math.random() * 4);
+    //if (this.age % 4 === 0) this.dir = Math.floor(Math.random() * 4);
+    if (this.validatePoint(this.x, this.y)) {
+      ctx23.lineWidth = tileSize23 * 0.3;
+      ctx23.lineCap = ctx23.lineJoin = "round";
+      ctx23.strokeStyle = this.color//`hsl(${this.globalAge / 4}deg, 100%, 40%)`;
+      ctx23.beginPath();
+      ctx23.moveTo((lastX + 0.5) * tileSize23, (lastY + 0.5) * tileSize23);
+      ctx23.lineTo((this.x + 0.5) * tileSize23, (this.y + 0.5) * tileSize23);
+      ctx23.stroke();
+      this.splicePoint(this.x, this.y);
+    }
+    else {
+      ctx23.fillStyle = this.color//`hsl(${this.globalAge / 4}deg, 100%, 40%)`;
+      if (this.age > minHeadLength23) ctx23.fillCircle((lastX + 0.5) * tileSize23, (lastY + 0.5) * tileSize23, tileSize23 * 0.45);
+      this.newPos();
+    }
+  };
+  
+  let lastFrame23Time = 0;
+  let lastFps23DisplayTime = 1000;
+  
+  function frame23() {
+    if (Date.now() - lastFps23DisplayTime >= 500) {
+      fps23Txt.innerHTML = (1000 / (Date.now() - lastFrame23Time)).toFixed(1) + (canvas23Running ? "" : " (PAUSED)");
+      lastFps23DisplayTime = Date.now();
+    }
+    lastFrame23Time = Date.now();
+    
+    for (let i = 0; i < stepsPerFrame23; i++) Walker23.walk();
+    
+    if (Walker23.stopped) {
+      running23Txt.style.color = "hsl(120deg, 50%, 40%)";
+      running23Txt.innerHTML = "Done!";
+    }
+    else {
+      running23Txt.style.color = "hsl(0deg, 50%, 40%)";
+      running23Txt.innerHTML = "Running...";
+    }
+    
+    if (canvas23Running) requestAnimationFrame(frame23);
+  }
+  Walker23.reset();
+  frame23();
+  
+  function startCanvas23() {
+    if (canvas23Running) canvas23Running = false;
+    else {
+      canvas23Running = true;
+      frame23();
+    }
+  }
+  
+  let gridSize23RangeArray = [3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 125, 150, 175, 200];
+  gridSize23Range.max = gridSize23RangeArray.length - 1;
+  gridSize23Range.value = gridSize23RangeArray.indexOf(50);
+  
+  function updateSettings23(reset) {
+    gridSize23 = gridSize23RangeArray[Number(gridSize23Range.value)];
+    gridSize23Txt.innerHTML = gridSize23 + "&times;" + gridSize23;
+    
+    density23 = Number(density23Range.value) / 100;
+    density23Txt.innerHTML = density23Range.value;
+    
+    turnChance23 = Number(turnChance23Range.value) / 100;
+    turnChance23Txt.innerHTML = turnChance23Range.value;
+    
+    reverseContrast23 = reverseContrast23Checkbox.checked;
+    
+    Walker23.stopped = false;
+    if (reset) Walker23.reset();
+  }
+</script>
+<canvas id = "canvas22" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "drawCircles22()">Regenerate</button>
+<table>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Min Circle Radius:</u></b> <span id = "minCircle22SizeTxt">10</span>px</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "minCircle22SizeRange" oninput = "updateSettings22()">
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Max Circle Radius:</u></b> <span id = "maxCircle22SizeTxt">200</span>px</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "maxCircle22SizeRange" oninput = "updateSettings22()">
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Circle Visual Size Ratio:</u></b> <span id = "circle22SizeRatioTxt">120</span>%</div>
+      <input type = "range" min = "50" max = "150" step = "5" value = "120" id = "circle22SizeRatioRange" oninput = "updateSettings22()">
+    </td>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "reverseContrast22Checkbox" oninput = "updateSettings22()">
+      <label for = "reverseContrast22Checkbox">Reverse contrast</label>
+    </td>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "yellowMode22Checkbox" oninput = "updateSettings22()" CHECKED>
+      <label for = "yellowMode22Checkbox">Rainbow</label>
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "outline22Checkbox" oninput = "updateSettings22()" CHECKED>
+      <label for = "outline22Checkbox">Outline circles</label>
+    </td>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "fill22Checkbox" oninput = "updateSettings22()" CHECKED>
+      <label for = "fill22Checkbox">Fill circles</label>
+    </td>
+  </tr>
+</table>
+<div class = "desc"><b><i>(11/3/2021)</i></b> Variation on the circle packing project I did awhile ago, where it generates all at once (which speeds things up a lot) and also draws little smiley faces on each circle.</div>
+<hr><hr>
+<script>
+  const ctx22 = canvas22.getContext("2d");
+  canvas22.width = canvas22.height = 2000;
+  
+  let maxCircles22 = 2000;
+  let canvas22Filled = false;
+  let minCircle22Size = 10;
+  let maxCircle22Size = 200;
+  let outline22 = true;
+  let fill22 = true;
+  let circle22SizeRatio = 1.2;
+  let reverseContrast22 = false;
+  let yellowMode22 = false;
+  let opacity22 = 1;
+  
+  function Circle22() {
+    let x = Math.random() * canvas22.width;
+    let y = Math.random() * canvas22.height;
+    let tries = 0;
+    while (!validatePoint22(x, y)) {
+      if (tries > 1000) {
+        canvas22Filled = true;
+        return;
+      }
+      x = Math.random() * canvas22.width;
+      y = Math.random() * canvas22.height;
+      tries++;
+    }
+    this.x = x;
+    this.y = y;
+    this.radius = 0;
+    this.grow();
+  }
+  Circle22.prototype.grow = function() {
+    let smallestDist = Infinity;
+    for (let i = 0; i < circle22Array.length; i++) {
+      if (i != circle22Array.indexOf(this)) {
+        let dx = this.x - circle22Array[i].x;
+        let dy = this.y - circle22Array[i].y;
+        let distSq = (dx * dx) + (dy * dy);
+        let dist = Math.sqrt(distSq) - circle22Array[i].radius;
+        if (dist <= smallestDist) smallestDist = dist;
+      }
+    }
+    let distToTop = this.y;
+    if (distToTop <= smallestDist) smallestDist = distToTop;
+    let distToRight = canvas22.width - this.x;
+    if (distToRight <= smallestDist) smallestDist = distToRight;
+    let distToBottom = canvas22.height - this.y;
+    if (distToBottom <= smallestDist) smallestDist = distToBottom;
+    let distToLeft = this.x;
+    if (distToLeft <= smallestDist) smallestDist = distToLeft;
+    this.radius = Math.min(smallestDist, maxCircle22Size);
+    drawFace22(this.x, this.y, this.radius * circle22SizeRatio);
+  };
+  
+  function drawFace22(x, y, radius) {
+    ctx22.fillStyle = `hsl(${Math.random() * 360}deg, ${randBetween(80, 100)}%, ${randBetween(40, 60)}%)`;
+    if (yellowMode22) ctx22.fillStyle = reverseContrast22 ? "blue" : "yellow";
+    ctx22.strokeStyle = reverseContrast22 ? "white" : "black";
+    ctx22.lineWidth = Math.min(radius / 5, 5);//5;
+    ctx22.beginPath();
+    ctx22.arc(x, y, radius, 0, Math.PI * 2);
+    if (fill22) ctx22.fill();
+    if (outline22) ctx22.stroke();
+    
+    ctx22.fillStyle = reverseContrast22 ? "white" : "black";
+    ctx22.fillCircle(x - (radius * randBetween(0.3, 0.5)), y - (radius * randBetween(0.1, 0.3)), radius * 0.1);
+    ctx22.fillCircle(x + (radius * randBetween(0.3, 0.5)), y - (radius * randBetween(0.1, 0.3)), radius * 0.1);
+    
+    ctx22.lineWidth = radius / 12;
+    ctx22.lineCap = ctx22.lineJoin = "round";
+    ctx22.beginPath();
+    ctx22.ellipse(
+      x + (radius * randBetween(-0.1, 0.1)), // x
+      y + (radius * randBetween(0.1, 0.3)), // y
+      radius * randBetween(0.5, 0.7), // radiusX
+      radius * randBetween(0.3, 0.5), // radiusY
+      toRad(randBetween(-5, 5)), // rotation
+      randBetween(0.3, 0.7), // startAngle
+      Math.PI - randBetween(0.3, 0.7) // endAngle
+    );
+    ctx22.stroke();
+  }
+  let circle22Array = [];
+  
+  function validatePoint22(x, y) {
+    for (let i = 0; i < circle22Array.length; i++) {
+      let dx = circle22Array[i].x - x;
+      let dy = circle22Array[i].y - y;
+      let distSq = (dx * dx) + (dy * dy);
+      let r = circle22Array[i].radius + minCircle22Size;
+      if (distSq <= r * r) return false; // Too close to a circle
+    }
+    if (x < minCircle22Size || x > canvas22.width - minCircle22Size) return false; // Too close to left/right
+    if (y < minCircle22Size || y > canvas22.height - minCircle22Size) return false; // Too close to top/bottom
+    return true;
+  }
+  
+  function drawCircles22() {
+    ctx22.globalAlpha = 1;
+    ctx22.fillStyle = reverseContrast22 ? "black" : "white";
+    ctx22.fillRect(0, 0, canvas22.width, canvas22.height);
+    ctx22.globalAlpha = opacity22;
+    canvas22Filled = false;
+    circle22Array = [];
+    while (circle22Array.length < maxCircles22 && !canvas22Filled) circle22Array.push(new Circle22());
+  }
+  drawCircles22();
+  
+  let minCircle22SizeRangeArray = [1, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 150, 200, 300, 400];
+  minCircle22SizeRange.max = minCircle22SizeRangeArray.length - 1;
+  minCircle22SizeRange.value = minCircle22SizeRangeArray.indexOf(10);
+  minCircle22SizeRange.max = minCircle22SizeRangeArray.indexOf(maxCircle22Size);
+  
+  let maxCircle22SizeRangeArray = [1, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 150, 200, 300, 400];
+  maxCircle22SizeRange.max = maxCircle22SizeRangeArray.length - 1;
+  maxCircle22SizeRange.value = maxCircle22SizeRangeArray.indexOf(200);
+  
+  function updateSettings22() {
+    maxCircle22Size = maxCircle22SizeTxt.innerHTML = maxCircle22SizeRangeArray[Number(maxCircle22SizeRange.value)];
+    minCircle22SizeRange.max = minCircle22SizeRangeArray.indexOf(maxCircle22Size);
+    minCircle22Size = minCircle22SizeTxt.innerHTML = minCircle22SizeRangeArray[Number(minCircle22SizeRange.value)];
+    circle22SizeRatio = Number(circle22SizeRatioRange.value) / 100;
+    circle22SizeRatioTxt.innerHTML = circle22SizeRatioRange.value;
+    outline22 = outline22Checkbox.checked;
+    fill22 = fill22Checkbox.checked;
+    reverseContrast22 = reverseContrast22Checkbox.checked;
+    yellowMode22 = !yellowMode22Checkbox.checked;
+  }
+</script>
+<canvas id = "canvas21"></canvas>
+<button onclick = "drawRocks21()">Regenerate</button>
+<div class = "desc"><b><i>(11/2/2021)</i></b> Messing around with generating random rock-like shapes, it's not the best but I like how it turned out.</div>
+<hr><hr>
+<script>
+  const ctx21 = canvas21.getContext("2d");
+  canvas21.width = canvas21.height = 1000;
+  
+  let gridSize21 = 10;
+  let tileSize21 = canvas21.width / gridSize21;
+  
+  function drawOneRock21(x, y, size) {
+    let points = Math.round(randBetween(3, 10));
+    let offsetAngle = Math.random() * Math.PI * 2;
+    ctx21.lineWidth = 3;
+    ctx21.lineCap = ctx21.lineJoin = "round";
+    ctx21.fillStyle = `hsl(0deg, 0%, ${randBetween(30, 70)}%)`;
+    ctx21.beginPath();
+    for (let i = 0; i < points; i++) {
+      let a1 = toRad(((i / points) * 360) + randBetween(-10, 10) + offsetAngle);
+      let r1 = size * randBetween(0.8, 1);
+      let a2 = toRad((((i + randBetween(0.4, 0.6)) / points) * 360) + randBetween(-10, 10) + offsetAngle);
+      let r2 = size * randBetween(0.8, 1);
+      ctx21.quadraticCurveTo(x + (r1 * Math.cos(a1)), y + (r1 * Math.sin(a1)), x + (r2 * Math.cos(a2)), y + (r2 * Math.sin(a2)));
+      /*let a = toRad(((i / points) * 360) + randBetween(-10, 10) + offsetAngle);
+      let r = size * randBetween(0.8, 1);
+      ctx21.lineTo(x + (r * Math.cos(a)), y + (r * Math.sin(a)));*/
+    }
+    ctx21.closePath();
+    ctx21.fill();
+    ctx21.stroke();
+  }
+  
+  function drawRocks21() {
+    ctx21.fillStyle = "#4b371c";
+    ctx21.fillRect(0, 0, canvas21.width, canvas21.height);
+    
+    tileSize21 = canvas21.width / gridSize21;
+    
+    for (let x = 0; x < gridSize21; x++) {
+      for (let y = 0; y < gridSize21; y++) {
+        drawOneRock21((x + randBetween(0.4, 0.6)) * tileSize21, (y + randBetween(0.4, 0.6)) * tileSize21, tileSize21 * randBetween(0.3, 0.45));
+      }
+    }
+  }
+  drawRocks21();
+</script>
+<canvas id = "canvas20"></canvas>
+<button onclick = "startCanvas20()">Start/Stop</button>
+<button onclick = "resetSquares20()">Reset</button>
+<button onclick = "reverseContrast20 = !reverseContrast20; if (!canvas20Running) frame20()">Switch Contrast</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps20Txt"></span></b></i></div>
+<div class = "desc"><b><i>(11/1/2021)</i></b> Square animation I was messing around with: each square grows at the same speed and if there's 9 touching squares that are all at their max size, they all get their sizes reset (to a random value below 0, so that they don't stay aligned).</div>
+<hr><hr>
+<script>
+  const ctx20 = canvas20.getContext("2d");
+  canvas20.width = canvas20.height = 1000;
+  let canvas20Running = false;
+  
+  let growSpeed20 = 0.4;
+  let reverseContrast20 = false;
+  let resetChance20 = 1//0.8;
+  let gridSize20 = 25;
+  let tileSize20 = canvas20.width / gridSize20;
+  
+  function Square20(x, y, growSpeed, maxSize, hue) {
+    this.x = x;
+    this.y = y;
+    this.growSpeed = growSpeed;//randBetween(0.2, 0.8);
+    this.maxSize = maxSize;
+    this.size = randBetween(-this.maxSize / 2, 0);//0
+    this.stopped = false;
+    this.hue = hue;
+    this.willStart = false;
+  }
+  Square20.prototype.render = function() {
+    if (!this.stopped) this.size += this.growSpeed;
+    if (this.size >= this.maxSize) {
+      this.size = this.maxSize;
+      this.stopped = true;
+    }
+    let size = this.stopped ? this.size : Math.max(this.size, 0);
+    let brightness = reverseContrast20 ? (size / this.maxSize) * 100 : (1 - (size / this.maxSize)) * 100;
+    let stoppedColor = reverseContrast20 ? "white" : "black";
+    ctx20.fillStyle = this.stopped ? stoppedColor : `hsl(${this.hue}deg, 40%, ${brightness}%)`;
+    ctx20.fillRectFromCenter(this.x, this.y, size, size);
+    //ctx20.fillCircle(this.x, this.y, Math.max(this.size / 2, 0));
+  };
+  let square20Array = [];
+  function resetSquares20() {
+    tileSize20 = canvas20.width / gridSize20;
+    square20Array = [];
+    ctx20.clearRect(0, 0, canvas20.width, canvas20.height);
+    for (let x = 0; x < gridSize20; x++) {
+      let row = [];
+      for (let y = 0; y < gridSize20; y++) {
+        row.push(new Square20((x + 0.5) * tileSize20, (y + 0.5) * tileSize20, growSpeed20, tileSize20, Math.random() * 360));
+      }
+      square20Array.push(row);
+    }
+  }
+  resetSquares20();
+  
+  let lastFrame20Time = 0;
+  let lastFps20DisplayTime = 1000;
+  
+  function frame20() {
+    if (Date.now() - lastFps20DisplayTime >= 500) {
+      fps20Txt.innerHTML = (1000 / (Date.now() - lastFrame20Time)).toFixed(1);
+      lastFps20DisplayTime = Date.now();
+    }
+    lastFrame20Time = Date.now();
+    
+    ctx20.fillStyle = reverseContrast20 ? "black" : "white";
+    ctx20.fillRect(0, 0, canvas20.width, canvas20.height);
+    
+    for (let x = 0; x < gridSize20; x++) {
+      for (let y = 0; y < gridSize20; y++) {
+        square20Array[x][y].render();
+        let M = square20Array[x][y];
+        let T = square20Array[x][(y - 1 + gridSize20) % gridSize20];
+        let TR = square20Array[(x + 1) % gridSize20][(y - 1 + gridSize20) % gridSize20];
+        let R = square20Array[(x + 1) % gridSize20][y];
+        let BR = square20Array[(x + 1) % gridSize20][(y + 1) % gridSize20];
+        let B = square20Array[x][(y + 1) % gridSize20];
+        let BL = square20Array[(x - 1 + gridSize20) % gridSize20][(y + 1) % gridSize20];
+        let L = square20Array[(x - 1 + gridSize20) % gridSize20][y];
+        let TL = square20Array[(x - 1 + gridSize20) % gridSize20][(y - 1 + gridSize20) % gridSize20];
+        if (M.stopped && T.stopped && R.stopped && B.stopped && L.stopped && TR.stopped && BR.stopped && BL.stopped && TL.stopped) {
+          M.willStart = T.willStart = R.willStart = B.willStart = L.willStart = TR.willStart = BR.willStart = BL.willStart = TL.willStart = true;
+        }
+      }
+    }
+    for (let x = 0; x < gridSize20; x++) {
+      for (let y = 0; y < gridSize20; y++) {
+        if (square20Array[x][y].willStart) {
+          square20Array[x][y].willStart = false;
+          if (Math.random() < resetChance20) {
+            square20Array[x][y].stopped = false;
+            //square20Array[x][y].growSpeed *= -1;
+            square20Array[x][y].size = randBetween(-square20Array[x][y].maxSize / 2, 0);//0
+          }
+        }
+      }
+    }
+    
+    if (canvas20Running) requestAnimationFrame(frame20);
+  }
+  frame20();
+  
+  function startCanvas20() {
+    if (canvas20Running) canvas20Running = false;
+    else {
+      canvas20Running = true;
+      frame20();
+    }
+  }
+</script>
+<canvas id = "canvas19"></canvas>
+<button onclick = "drawSkyline19()">Regenerate</button>
+<div class = "desc"><b><i>(11/1/2021)</i></b> Another unsuccessful generative art attempt, this time I was trying to make a generative city skyline to mimic the skyline in <a href = "https://www.reddit.com/r/generative/comments/qkfojk/skylines_generator" target = "_blank">this</a> Reddit post, but mine looks pretty boring.</div>
+<hr><hr>
+<script>
+  const ctx19 = canvas19.getContext("2d");
+  canvas19.width = canvas19.height = 1000;
+  
+  let hue19 = 0;
+  
+  function drawBuilding19(x, height, size) {
+    let ratio = randBetween(0.2, 0.8);
+    ctx19.lineWidth = 2;
+    ctx19.fillStyle = `hsl(${hue19 + randBetween(-30, 30)}deg, ${randBetween(80, 90)}%, ${randBetween(30, 50)}%)`;
+    ctx19.beginPath();
+    ctx19.rect(x, canvas19.height - height, size * ratio, height);
+    ctx19.fill();
+    ctx19.stroke();
+    
+    ctx19.fillStyle = `hsl(${hue19 + randBetween(-30, 30)}deg, ${randBetween(80, 90)}%, ${randBetween(70, 90)}%)`;
+    ctx19.beginPath();
+    ctx19.rect(x + (size * ratio), canvas19.height - height, size * (1 - ratio), height);
+    ctx19.fill();
+    ctx19.stroke();
+  }
+  
+  function drawSkyline19() {
+    ctx19.clearRect(0, 0, canvas19.width, canvas19.height);
+    
+    hue19 = Math.random() * 360;
+    let maxHeight = randBetween(300, 600);
+    let num = Math.round(randBetween(10, 20));
+    for (let i = 0; i < num; i++) {
+      drawBuilding19(randBetween(canvas19.width * 0.2, canvas19.width * 0.8), randBetween(50, maxHeight), randBetween(25, 50));
+    }
+  }
+  drawSkyline19();
+</script>
+<canvas id = "canvas18" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "drawCubes18()">Regenerate</button>
+<div class = "desc"><b><i>(10/31/2021)</i></b> Generative art of 3D rectangular prisms, but it's honestly pretty dull.<br><b><i>(11/1/2021)</i></b> Messed with the generation some more, but I still don't feel like it's particularly interesting.</div>
+<hr><hr>
+<script>
+  const ctx18 = canvas18.getContext("2d");
+  canvas18.width = canvas18.height = 1000;
+  
+  let hue18 = 240;
+  
+  function drawOneCube18(x, y, size, sizeZ, angle, angleZ) {
+    let backLeft = {x: x + ((sizeZ * Math.cos(angle)) * Math.cos(angleZ)), y: y + ((sizeZ * Math.sin(angle)) * Math.sin(angleZ))};
+    let backRight = {x: backLeft.x + size, y: backLeft.y};
+    let backBottom = {x: backRight.x, y: backRight.y + size};
+    
+    ctx18.lineWidth = 1;
+    ctx18.lineCap = ctx18.lineJoin = "round";
+    ctx18.fillStyle = `hsl(${hue18 + randBetween(-40, 40)}deg, ${randBetween(80, 100)}%, ${randBetween(60, 80)}%)`;
+    ctx18.beginPath();
+    ctx18.moveTo(x, y);
+    ctx18.lineTo(backLeft.x, backLeft.y);
+    ctx18.lineTo(backRight.x, backRight.y);
+    ctx18.lineTo(backBottom.x, backBottom.y);
+    ctx18.lineTo(x + size, y + size);
+    ctx18.lineTo(x, y + size);
+    ctx18.lineTo(x, y);
+    ctx18.fill();
+    
+    ctx18.beginPath();
+    ctx18.rect(x, y, size, size);
+    ctx18.moveTo(x, y);
+    ctx18.lineTo(backLeft.x, backLeft.y);
+    ctx18.lineTo(backRight.x, backRight.y);
+    ctx18.lineTo(x + size, y);
+    ctx18.moveTo(backRight.x, backRight.y);
+    ctx18.lineTo(backBottom.x, backBottom.y);
+    ctx18.lineTo(x + size, y + size);
+    ctx18.stroke();
+  }
+  
+  function drawCubes18() {
+    ctx18.globalAlpha = 1;
+    ctx18.fillStyle = "white";//`hsl(${Math.random() * 360}deg, 30%, 90%)`;
+    ctx18.fillRect(0, 0, canvas18.width, canvas18.height);
+    ctx18.globalAlpha = 1//0.5;
+    
+    
+    hue18 = Math.random() * 360;
+    
+    let gridSize = Math.round(randBetween(10, 15));
+    let tileSize = canvas18.width / gridSize;
+    let maxLen = randBetween(1, 3);
+    let density = randBetween(0.5, 0.8);
+    
+    for (let x = 0; x <= gridSize; x++) {
+      for (let y = 0; y <= gridSize; y++) {
+        let size = tileSize * randBetween(0.25, 0.75);
+        let _x = (randBetween(x - 0.2, x + 0.2) * tileSize);
+        let _y = (randBetween(y - 0.2, y + 0.2) * tileSize);
+        //if (Math.random() < density) drawOneCube18(_x - (size / 2), _y - (size / 2), size, size * randBetween(maxLen / 3, maxLen), toRad(315 + (25 * Math.random() * randSign())), toRad(45 + (Math.random() * 25 * randSign())));
+        if (Math.random() < density) drawOneCube18(_x - (size / 2), _y - (size / 2), size, size * randBetween(maxLen / 3, maxLen), toRad(315), toRad(45));
+      }
+    }
+    
+    /*ctx18.fillStyle = "white";
+    for (let i = 0; i < 1000; i++) {
+      ctx18.fillCircle(Math.random() * canvas18.width, Math.random() * canvas18.height, randBetween(3, 6));
+    }*/
+  }
+  drawCubes18();
+</script>
+<canvas id = "canvas17"></canvas>
+<button onclick = "startCanvas17()">Start/Stop</button>
+<button onclick = "reset17()">Reset</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps17Txt"></span></b></i></div>
+<div class = "desc"><b><i>(10/30/2021)</i></b> Clifford Attractor visualizer based on the tutorial from <a href = "https://medium.com/@bit101/flow-fields-part-i-3ebebc688fd8" target = "_blank">this</a> article.</div>
+<hr><hr>
+<script>
+  const ctx17 = canvas17.getContext("2d");
+  canvas17.width = canvas17.height = 1000;
+  let canvas17Running = false;
+  
+  let Attractor17 = {
+    a: randBetween(-2, 2),
+    b: randBetween(-2, 2),
+    c: randBetween(-2, 2),
+    d: randBetween(-2, 2)
+  };
+  Attractor17.getValue = function(x, y) {
+    let x1 = (x - (canvas17.width / 2)) * 0.01;
+    let y1 = (y - (canvas17.height / 2)) * 0.01;
+    
+    let x2 = Math.sin(this.a * y1) + (this.c * Math.cos(this.a * x1));
+    let y2 = Math.sin(this.b * x1) + (this.d * Math.cos(this.b * y1));
+    
+    return Math.atan2(y2 - y1, x2 - x1);
+  };
+  
+  function Point17(x, y) {
+    this.x = x;
+    this.y = y;
+    this.vx = 0;
+    this.vy = 0;
+  }
+  Point17.prototype.render = function() {
+    let lastX = this.x;
+    let lastY = this.y;
+    
+    let angle = Attractor17.getValue(this.x, this.y);
+    this.vx += Math.cos(angle) / 3;
+    this.vy += Math.sin(angle) / 3;
+    
+    this.x += this.vx;
+    this.y += this.vy;
+    
+    this.vx *= 0.99;
+    this.vy *= 0.99;
+    
+    ctx17.lineWidth = 0.05;
+    ctx17.lineCap = ctx17.lineJoin = "round";
+    ctx17.beginPath();
+    ctx17.moveTo(lastX, lastY);
+    ctx17.lineTo(this.x, this.y);
+    ctx17.stroke();
+  };
+  let point17Array = [];
+  
+  let lastFrame17Time = 0;
+  let lastFps17DisplayTime = 1000;
+  
+  function frame17() {
+    if (Date.now() - lastFps17DisplayTime >= 500) {
+      fps17Txt.innerHTML = (1000 / (Date.now() - lastFrame17Time)).toFixed(1);
+      lastFps17DisplayTime = Date.now();
+    }
+    lastFrame17Time = Date.now();
+    
+    for (let i = 0; i < point17Array.length; i++) point17Array[i].render();
+    
+    if (canvas17Running) requestAnimationFrame(frame17);
+  }
+  frame17();
+  
+  function reset17() {
+    ctx17.clearRect(0, 0, canvas17.width, canvas17.height);
+    Attractor17.a = randBetween(-2, 2);
+    Attractor17.b = randBetween(-2, 2);
+    Attractor17.c = randBetween(-2, 2);
+    Attractor17.d = randBetween(-2, 2);
+    point17Array = [];
+    for (let i = 0; i < 2000; i++) {
+      point17Array.push(new Point17(0, i / 2));
+    }
+  }
+  reset17();
+  
+  function startCanvas17() {
+    if (canvas17Running) canvas17Running = false;
+    else {
+      canvas17Running = true;
+      frame17();
+    }
+  }
+</script>
+<canvas id = "canvas16" style = "width: 400px; height: 400px"></canvas>
+<button onclick = "startCanvas16()">Start/Stop</button>
+<button onclick = "reset16()">Reset</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps16Txt"></span></b></i></div>
+<div><b>Total Points Drawn:</b> <span id = "totalPoints16Txt">0</span></div>
+<div><b><u>Settings Presets:</u></b></div>
+<div id = "presets16Div" style = "width: 600px"></div>
+<table>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Flow Field Size:</u></b> <span id = "gridSize16Txt">25&times;25</span></div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "gridSize16Range" oninput = "updateSettings16(true)">
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Flow Field Smoothness:</u></b> <span id = "smoothIterations16Txt">3</span> iterations</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "3" id = "smoothIterations16Range" oninput = "updateSettings16(true)">
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Flow Field Strength:</u></b> &times;<span id = "fieldStrength16Txt">1.0</span></div>
+      <input type = "range" min = "50" max = "500" step = "50" value = "100" id = "fieldStrength16Range" oninput = "updateSettings16(false)">
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Max Point Age:</u></b> <span id = "maxAge16Txt">50</span> steps</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "maxAge16Range" oninput = "updateSettings16(false)">
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Friction:</u></b> <span id = "friction16Txt">10</span>%</div>
+      <input type = "range" min = "0" max = "50" step = "5" value = "10" id = "friction16Range" oninput = "updateSettings16(false)">
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Path Hue:</u></b> <span id = "hue16Txt">120</span>&deg;</div>
+      <input type = "range" min = "0" max = "360" step = "5" value = "120" id = "hue16Range" oninput = "updateSettings16(false)">
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Path Opacity:</u></b> <span id = "opacity16Txt">5</span>%</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "opacity16Range" oninput = "updateSettings16(false)">
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Path Hue Variation:</u></b> <span id = "hueVariation16Txt">50</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "5" value = "50" id = "hueVariation16Range" oninput = "updateSettings16(false)">
+    </td>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "edgeSpawning16Checkbox" oninput = "updateSettings16(false)">
+      <label for = "edgeSpawning16Checkbox">Points start at edges</label>
+    </td>
+  </tr>
+</table>
+<div class = "desc"><b><i>(10/30/2021)</i></b> An unsuccessful attempt to simulate a flow field, by having a grid of random vectors that are averaged together. For some reason, there is a strong bias towards angles around 120&deg; and 240&deg;, with little to no other angles, meaning there's something wrong with my averaging function, but I don't know what. The field is visualized with magnitude being brightness and angle being hue.<br><b><i>Update: (A few minutes later)</i></b> I realized I was going about the averaging completely wrong, I had been just averaging up the magnitudes and averaging up the angles and calling it good, but that's not how vector addition works. What I should have been doing is adding the vectors x and y components and dividing that resulting magnitude by 9 (the number of neighbors). I added that, and also added a Point16 class that moves around the flow field, tracing its path. Each point only lasts a set number of frames, and then it is replaced with a new point at a random position. Now everything works perfectly and it looks really cool. I also added more settings and sliders for everything, as well as presets.<br><b><i>(10/31/2021)</i></b> Slightly modified the code so that instead of 500 points moving 5 times per frame, there's one point moving 5000 times per frame, which is less laggy and almost twice as fast.</div>
+<hr><hr>
+<script>
+  const ctx16 = canvas16.getContext("2d");
+  canvas16.width = canvas16.height = 1000;
+  let canvas16Running = false;
+  
+  let gridSize16 = 25;
+  let tileSize16 = canvas16.width / gridSize16;
+  let maxPoints16 = 1//500;
+  let maxAge16 = 50;
+  let stepsPerFrame16 = 5000//5;
+  let friction16 = 0.1;
+  let opacity16 = 0.05;
+  let smoothIterations16 = 3;
+  let hue16 = 120;
+  let totalPoints16 = 0;
+  let edgeSpawning16 = false;
+  let hueVariation16 = 0.5;
+  let fieldStrength16 = 1;
+  
+  // Maybe later add: points spawn near mouse position?
+  
+  let presets16 = [
+    {
+      name: "Default",
+      gridSize16: 25,
+      smoothIterations16: 3,
+      fieldStrength16: 1,
+      maxAge16: 50,
+      friction16: 0.1,
+      hue16: 120,
+      opacity16: 0.05,
+      hueVariation16: 0.5,
+      edgeSpawning16: false
+    },
+    {
+      name: "Checkerboard",
+      gridSize16: 8,
+      smoothIterations16: 0,
+      fieldStrength16: 1,
+      maxAge16: 5,
+      friction16: 0,
+      hue16: 240,
+      opacity16: 0.1,
+      hueVariation16: 0,
+      edgeSpawning16: false
+    },
+    {
+      name: "Circuits",
+      gridSize16: 25,
+      smoothIterations16: 0,
+      fieldStrength16: 2,
+      maxAge16: 50,
+      friction16: 0.5,
+      hue16: 120,
+      opacity16: 0.1,
+      hueVariation16: 0,
+      edgeSpawning16: false
+    },
+    {
+      name: "Crimson Growth",
+      gridSize16: 50,
+      smoothIterations16: 0,
+      fieldStrength16: 1.5,
+      maxAge16: 200,
+      friction16: 0.1,
+      hue16: 0,
+      opacity16: 0.1,
+      hueVariation16: 0,
+      edgeSpawning16: true
+    },
+    {
+      name: "Coiling Tendrils",
+      gridSize16: 100,
+      smoothIterations16: 2,
+      fieldStrength16: 1,
+      maxAge16: 50,
+      friction16: 0.25,
+      hue16: 120,
+      opacity16: 0.05,
+      hueVariation16: 1,
+      edgeSpawning16: false
+    },
+    {
+      name: "Tropical Branches",
+      gridSize16: 25,
+      smoothIterations16: 3,
+      fieldStrength16: 5,
+      maxAge16: 10,
+      friction16: 0,
+      hue16: 120,
+      opacity16: 0.05,
+      hueVariation16: 0.5,
+      edgeSpawning16: true
+    }
+  ];
+  for (let i = 0; i < presets16.length; i++) {
+    let btn = document.createElement("button");
+    btn.innerHTML = presets16[i].name;
+    btn.onclick = () => loadPreset16(i);
+    btn.style.borderRadius = "8px";
+    btn.style.margin = "5px";
+    btn.style.fontWeight = "bold";
+    
+    presets16Div.appendChild(btn);
+  }
+  
+  let field16 = [];
+  
+  function initField16() {
+    field16 = [];
+    for (let x = 0; x < gridSize16; x++) {
+      let row = [];
+      for (let y = 0; y < gridSize16; y++) {
+        row.push({magnitude: 1, angle: Math.random() * Math.PI * 2});
+      }
+      field16.push(row);
+    }
+  }
+  function smoothField16(steps) {
+    for (let j = 0; j < steps; j++) {
+      let nextField = [];
+      for (let x = 0; x < gridSize16; x++) {
+        let row = [];
+        for (let y = 0; y < gridSize16; y++) {
+          row.push({magnitude: 0, angle: 0});
+        }
+        nextField.push(row);
+      }
+      for (let x = 0; x < gridSize16; x++) {
+        for (let y = 0; y < gridSize16; y++) {
+          let vecs = [];
+          vecs.push(field16[x][(y - 1 + gridSize16) % gridSize16]);
+          vecs.push(field16[(x + 1) % gridSize16][(y - 1 + gridSize16) % gridSize16]);
+          vecs.push(field16[(x + 1) % gridSize16][y]);
+          vecs.push(field16[(x + 1) % gridSize16][(y + 1) % gridSize16]);
+          vecs.push(field16[x][(y + 1) % gridSize16]);
+          vecs.push(field16[(x - 1 + gridSize16) % gridSize16][(y + 1) % gridSize16]);
+          vecs.push(field16[(x - 1 + gridSize16) % gridSize16][y]);
+          vecs.push(field16[(x - 1 + gridSize16) % gridSize16][(y - 1 + gridSize16) % gridSize16]);
+          vecs.push(field16[x][y]);
+          
+          let currX = 0;
+          let currY = 0;
+          for (let i = 0; i < vecs.length; i++) {
+            currX += Math.cos(vecs[i].angle);
+            currY += Math.sin(vecs[i].angle);
+          }
+          let avgAngle = Math.atan2(currY, currX);
+          nextField[x][y].magnitude = 1;
+          nextField[x][y].angle = avgAngle;
+        }
+      }
+      for (let x = 0; x < gridSize16; x++) {
+        for (let y = 0; y < gridSize16; y++) {
+          field16[x][y] = nextField[x][y];
+        }
+      }
+    }
+  }
+  function drawField16() {
+    ctx16.clearRect(0, 0, canvas16.width, canvas16.height);
+    tileSize16 = canvas16.width / gridSize16;
+    for (let x = 0; x < gridSize16; x++) {
+      for (let y = 0; y < gridSize16; y++) {
+        let hue = toDeg(field16[x][y].angle);
+        let brightness = 40;
+        ctx16.fillStyle = `hsl(${hue}deg, 100%, ${brightness}%)`;
+        ctx16.fillRect(x * tileSize16, y * tileSize16, tileSize16, tileSize16);
+      }
+    }
+  }
+  
+  function randCanvas16EdgePos() {
+    let r = Math.floor(Math.random() * 4);
+    if (r === 0) return {x: Math.random() * canvas16.width, y: 0};
+    else if (r === 1) return {x: canvas16.width, y: Math.random() * canvas16.height};
+    else if (r === 2) return {x: Math.random() * canvas16.width, y: canvas16.height};
+    else return {x: 0, y: Math.random() * canvas16.height};
+  }
+  
+  function Point16() {
+    let P = randCanvas16EdgePos();
+    this.x = edgeSpawning16 ? P.x : Math.random() * canvas16.width;
+    this.y = edgeSpawning16 ? P.y : Math.random() * canvas16.height;
+    this.vx = 0;
+    this.vy = 0;
+    this.age = 0;
+    let hue = hue16 + randBetween(-180 * hueVariation16, 180 * hueVariation16);
+    this.color = `hsl(${hue}deg, 100%, 50%)`;
+  }
+  Point16.prototype.render = function() {
+    this.age++;
+    let fieldX = Math.floor(this.x / tileSize16);
+    let fieldY = Math.floor(this.y / tileSize16);
+    fieldX = fieldX.clamp(0, gridSize16 - 1);
+    fieldY = fieldY.clamp(0, gridSize16 - 1);
+    let lastX = this.x;
+    let lastY = this.y;
+    this.x += this.vx;
+    this.y += this.vy;
+    if (this.x > canvas16.width + 2) this.x = lastX = -2;
+    if (this.x < -2) this.x = lastX = canvas16.width + 2;
+    if (this.y > canvas16.height + 2) this.y = lastY = -2;
+    if (this.y < -2) this.y = lastY = canvas16.height + 2;
+    this.vx += fieldStrength16 * Math.cos(field16[fieldX][fieldY].angle);
+    this.vy += fieldStrength16 * Math.sin(field16[fieldX][fieldY].angle);
+    this.vx *= 1 - friction16;
+    this.vy *= 1 - friction16;
+    ctx16.globalAlpha = opacity16;
+    ctx16.strokeStyle = this.color;
+    ctx16.beginPath();
+    ctx16.moveTo(lastX, lastY);
+    ctx16.lineTo(this.x, this.y);
+    ctx16.stroke();
+  };
+  Point16.prototype.resetPos = function() {
+    let P = randCanvas16EdgePos();
+    this.x = edgeSpawning16 ? P.x : Math.random() * canvas16.width;
+    this.y = edgeSpawning16 ? P.y : Math.random() * canvas16.height;
+    this.vx = 0;
+    this.vy = 0;
+    this.age = 0;
+    let hue = hue16 + randBetween(-180 * hueVariation16, 180 * hueVariation16);
+    this.color = `hsl(${hue}deg, 100%, 50%)`;
+    totalPoints16++;
+  };
+  let point16Array = [];
+  function initPoints16() {
+    point16Array = [];
+    for (let i = 0; i < maxPoints16; i++) {
+      totalPoints16++;
+      point16Array.push(new Point16());
+    }
+  }
+  
+  let lastFrame16Time = 0;
+  let lastFps16DisplayTime = 1000;
+  
+  function frame16() {
+    if (Date.now() - lastFps16DisplayTime >= 500) {
+      fps16Txt.innerHTML = (1000 / (Date.now() - lastFrame16Time)).toFixed(1);
+      lastFps16DisplayTime = Date.now();
+    }
+    lastFrame16Time = Date.now();
+    
+    for (let j = 0; j < stepsPerFrame16; j++) {
+      let newPoints = 0;
+      for (let i = 0; i < point16Array.length; i++) {
+        point16Array[i].render();
+        if (point16Array[i].age > maxAge16) {
+          point16Array[i].resetPos();
+          /*point16Array.splice(i, 1);
+          i--;
+          newPoints++;*/
+        }
+      }
+      /*for (let i = 0; i < newPoints; i++) {
+        totalPoints16++;
+        point16Array.push(new Point16());
+      }*/
+    }
+    
+    totalPoints16Txt.innerHTML = totalPoints16.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    
+    if (canvas16Running) requestAnimationFrame(frame16);
+  }
+  
+  function reset16() {
+    ctx16.globalAlpha = 1;
+    ctx16.fillStyle = "black";
+    ctx16.fillRect(0, 0, canvas16.width, canvas16.height);
+    tileSize16 = canvas16.width / gridSize16;
+    totalPoints16 = 0;
+    initField16();
+    smoothField16(smoothIterations16);
+    initPoints16();
+    if (!canvas16Running) frame16();
+  }
+  
+  ctx16.lineCap = ctx16.lineJoin = "round";
+  reset16();
+  
+  function startCanvas16() {
+    if (canvas16Running) canvas16Running = false;
+    else {
+      canvas16Running = true;
+      frame16();
+    }
+  }
+  
+  let gridSize16RangeArray = [5, 8, 10, 15, 20, 25, 50, 100];
+  gridSize16Range.max = gridSize16RangeArray.length - 1;
+  gridSize16Range.value = gridSize16RangeArray.indexOf(25);
+  let maxAge16RangeArray = [5, 10, 15, 20, 25, 50, 75, 100, 200];
+  maxAge16Range.max = maxAge16RangeArray.length - 1;
+  maxAge16Range.value = maxAge16RangeArray.indexOf(50);
+  let opacity16RangeArray = [1, 2, 3, 4, 5, 10, 15, 20, 25, 50, 75, 100];
+  opacity16Range.max = opacity16RangeArray.length - 1;
+  opacity16Range.value = opacity16RangeArray.indexOf(5);
+  
+  function updateSettings16(reset) {
+    gridSize16 = gridSize16RangeArray[Number(gridSize16Range.value)];
+    gridSize16Txt.innerHTML = gridSize16 + "&times;" + gridSize16;
+    
+    smoothIterations16 = smoothIterations16Txt.innerHTML = Number(smoothIterations16Range.value);
+    
+    fieldStrength16 = Number(fieldStrength16Range.value) / 100;
+    fieldStrength16Txt.innerHTML = fieldStrength16.toFixed(1);
+    
+    maxAge16 = maxAge16Txt.innerHTML = maxAge16RangeArray[Number(maxAge16Range.value)];
+    
+    friction16 = Number(friction16Range.value) / 100;
+    friction16Txt.innerHTML = friction16Range.value;
+    
+    hue16 = hue16Txt.innerHTML = Number(hue16Range.value);
+    
+    opacity16 = opacity16RangeArray[Number(opacity16Range.value)] / 100;
+    opacity16Txt.innerHTML = opacity16RangeArray[Number(opacity16Range.value)];
+    
+    hueVariation16 = Number(hueVariation16Range.value) / 100;
+    hueVariation16Txt.innerHTML = hueVariation16Range.value;
+    
+    edgeSpawning16 = edgeSpawning16Checkbox.checked;
+    
+    if (reset) reset16();
+  }
+  
+  function loadPreset16(n) {
+    gridSize16Range.value = gridSize16RangeArray.indexOf(presets16[n].gridSize16);
+    smoothIterations16Range.value = presets16[n].smoothIterations16;
+    fieldStrength16Range.value = presets16[n].fieldStrength16 * 100;
+    maxAge16Range.value = maxAge16RangeArray.indexOf(presets16[n].maxAge16);
+    friction16Range.value = presets16[n].friction16 * 100;
+    opacity16Range.value = opacity16RangeArray.indexOf(presets16[n].opacity16 * 100);
+    hue16Range.value = presets16[n].hue16;
+    hueVariation16Range.value = presets16[n].hueVariation16 * 100;
+    edgeSpawning16Checkbox.checked = presets16[n].edgeSpawning16;
+    
+    updateSettings16(true);
+  }
+</script>
+<canvas id = "canvas15"></canvas>
+<div><b><i>How random are you? Start typing random numbers below...</i></b></div>
+<input type = "text" id = "rand15Txt" oninput = "addRandNumbers15()">
+<div><b>Random Numbers Submitted:</b> <span id = "randNumbers15LengthTxt">0</span></div>
+<div class = "desc"><b><i>(10/29/2021)</i></b> An idea I had for showing how not random humans are, where you type "random" numbers that get fed into a program as psuedorandom numbers, and it shows you some vizualization of how not random those numbers actually are. It works well enough, but it's kinda dull and takes ages to type out a reasonable amount of numbers to get a feel for it.</div>
+<hr><hr>
+<script>
+  const ctx15 = canvas15.getContext("2d");
+  canvas15.width = canvas15.height = 1000;
+  
+  let randNumbers15 = [];
+  let currIndex15 = 0;
+  
+  let gridSize15 = 25;
+  let tileSize15 = canvas15.width / gridSize15;
+  
+  function rand15() {
+    let num = "0.";
+    let j = currIndex15;
+    for (let i = j; i < j + 5; i++) {
+      currIndex15++;
+      if (randNumbers15.length > i) num += String(randNumbers15[i]);
+    }
+    if (currIndex15 >= randNumbers15.length) currIndex15 = 0;
+    return Number(num);
+  }
+  function addRandNumbers15() {
+    let num = rand15Txt.value.replace(/\D/g,"");
+    for (let i = 0; i < num.length; i++) {
+      randNumbers15.push(Number(num[i]));
+    }
+    rand15Txt.value = "";
+    randNumbers15LengthTxt.innerHTML = randNumbers15.length;
+    //drawRandomWalk15();
+    drawRandomPixels15();
+  }
+  
+  function drawRandomPixels15() {
+    ctx15.clearRect(0, 0, canvas15.width, canvas15.height);
+    
+    currIndex15 = 0;
+    tileSize15 = canvas15.width / gridSize15;
+    for (let x = 0; x < gridSize15; x++) {
+      for (let y = 0; y < gridSize15; y++) {
+        ctx15.fillStyle = `rgb(${rand15() * 255}, ${rand15() * 255}, ${rand15() * 255})`;
+        ctx15.fillRect(x * tileSize15, y * tileSize15, tileSize15, tileSize15);
+      }
+    }
+  }
+  drawRandomPixels15();
+  
+  function drawRandomWalk15() {
+    ctx15.clearRect(0, 0, canvas15.width, canvas15.height);
+    
+    currIndex15 = 0;
+    let x = canvas15.width / 2;
+    let y = canvas15.height / 2;
+    for (let i = 0; i < 100; i++) {
+      let lastX = x;
+      let lastY = y;
+      let a = rand15() * Math.PI * 2;
+      let v = (rand15() * 15) + 15;
+      x += v * Math.cos(a);
+      y += v * Math.sin(a);
+      if (x > canvas15.width) x = lastX = 0;
+      if (x < 0) x = lastX = canvas15.width;
+      if (y > canvas15.height) y = lastY = 0;
+      if (y < 0) y = lastY = canvas15.height;
+      ctx15.lineWidth = 3;
+      ctx15.beginPath();
+      ctx15.moveTo(lastX, lastY);
+      ctx15.lineTo(x, y);
+      ctx15.stroke();
+    }
+  }
+</script>
+<canvas id = "canvas14" style = "width: 400px; height: 400px"></canvas>
+<button onclick = "drawTiles14()">Redraw</button>
+<div><b><u>Grid Size:</u></b> <span id = "gridSize14Txt">10x10</span></div>
+<input type = "range" min = "1" max = "20" step = "1" value = "10" id = "gridSize14Range" oninput = "updateSettings14()">
+<div><b><u>Outline Thickness:</u></b> <span id = "lineWidth14Txt">3</span>px</div>
+<input type = "range" min = "0" max = "10" step = "1" value = "3" id = "lineWidth14Range" oninput = "updateSettings14()">
+<div><b><u>Selected Tiles:</u></b></div>
+<table>
+  <tr>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "selectedTiles14Checkbox1" oninput = "toggleTile14(this.checked, 1)" CHECKED>
+      <label for  = "selectedTiles14Checkbox1">Full Square</label>
+    </td>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "selectedTiles14Checkbox12" oninput = "toggleTile14(this.checked, 12)" CHECKED>
+      <label for  = "selectedTiles14Checkbox12">Small Square</label>
+    </td>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "selectedTiles14Checkbox2" oninput = "toggleTile14(this.checked, 2)" CHECKED>
+      <label for  = "selectedTiles14Checkbox2">Half Rectangle</label>
+    </td>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "selectedTiles14Checkbox11" oninput = "toggleTile14(this.checked, 11)" CHECKED>
+      <label for  = "selectedTiles14Checkbox11">Stripe</label>
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "selectedTiles14Checkbox3" oninput = "toggleTile14(this.checked, 3)" CHECKED>
+      <label for  = "selectedTiles14Checkbox3">Diagonal</label>
+    </td>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "selectedTiles14Checkbox5" oninput = "toggleTile14(this.checked, 5)" CHECKED>
+      <label for  = "selectedTiles14Checkbox5">Full Circle</label>
+    </td>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "selectedTiles14Checkbox4" oninput = "toggleTile14(this.checked, 4)" CHECKED>
+      <label for  = "selectedTiles14Checkbox4">Small Circle</label>
+    </td>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "selectedTiles14Checkbox6" oninput = "toggleTile14(this.checked, 6)" CHECKED>
+      <label for  = "selectedTiles14Checkbox6">Half Circle</label>
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "selectedTiles14Checkbox10" oninput = "toggleTile14(this.checked, 10)" CHECKED>
+      <label for  = "selectedTiles14Checkbox10">Double Half Circle</label>
+    </td>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "selectedTiles14Checkbox7" oninput = "toggleTile14(this.checked, 7)" CHECKED>
+      <label for  = "selectedTiles14Checkbox7">Quarter Circle</label>
+    </td>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "selectedTiles14Checkbox8" oninput = "toggleTile14(this.checked, 8)" CHECKED>
+      <label for  = "selectedTiles14Checkbox8">Double Quarter Circle</label>
+    </td>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "selectedTiles14Checkbox9" oninput = "toggleTile14(this.checked, 9)" CHECKED>
+      <label for  = "selectedTiles14Checkbox9">Ring</label>
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "selectedTiles14Checkbox13" oninput = "toggleTile14(this.checked, 13)" CHECKED>
+      <label for  = "selectedTiles14Checkbox13">Diamond</label>
+    </td>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "selectedTiles14Checkbox14" oninput = "toggleTile14(this.checked, 14)" CHECKED>
+      <label for  = "selectedTiles14Checkbox14">Cross</label>
+    </td>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "selectedTiles14Checkbox15" oninput = "toggleTile14(this.checked, 15)" CHECKED>
+      <label for  = "selectedTiles14Checkbox15">Side Triangle</label>
+    </td>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "selectedTiles14Checkbox16" oninput = "toggleTile14(this.checked, 16)" CHECKED>
+      <label for  = "selectedTiles14Checkbox16">Double Side Triangle</label>
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <button onclick = "selectAllTiles14()">Select All</button>
+      <br><br>
+      <button onclick = "deselectAllTiles14()">Deselect All</button>
+      <br><br>
+      <button onclick = "selectRandomTiles14()">Select Random</button>
+    </td>
+    <td colspan = "3">
+      <div><b><u>Tile Presets:</u></b></div>
+      <div id = "presetsDiv14"></div>
+    </td>
+  </tr>
+</table>
+<div class = "desc"><b><i>(10/29/2021)</i></b> Generative tile art generator, based on the idea from <a href = "https://generated.space/sketch/tilework" target = "_blank">https://generated.space/sketch/tilework</a>. I also added some more tiles of my own.<br><b><i>Update: (Later that day)</i></b> Added more tiles and line width around each tile, as well as more settings, sliders, and buttons.<br><b><i>(10/30/2021)</i></b> Added presets and added more tiles.</div>
+<hr><hr>
+<script>
+  const ctx14 = canvas14.getContext("2d");
+  canvas14.width = canvas14.height = 1000;
+  
+  let palette14 = ["yellow", "pink", "rgb(120, 120, 255)", "rgb(255, 50, 50)", "white"];
+  function shufflePalette14() {
+    let result = [];
+    while (palette14.length > 0) result.push(palette14.splice(Math.floor(Math.random() * palette14.length), 1));
+    palette14 = result.flat(1);
+  }
+  
+  let gridSize14 = 10;
+  let tileSize14 = canvas14.width / gridSize14;
+  let lineWidth14 = 3;
+  let numTiles14 = 16;
+  
+  let selectedTiles14 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+  // 1: Filled | 2: Half | 3: Diagonal | 4: Small circle | 5: Full circle | 6: Half circle | 7: Quarter circle | 8: Double quarter circle | 9: Ring
+  // 10: Double half circle | 11: Stripe | 12: Small square | 13: Diamond | 14: Cross | 15: Side triangle | 16: Double side triangle
+  
+  function selectTile14(n) {
+    if (!selectedTiles14.includes(n)) selectedTiles14.push(n);
+    drawTiles14();
+  }
+  function deselectTile14(n) {
+    if (selectedTiles14.includes(n)) selectedTiles14.splice(selectedTiles14.indexOf(n), 1);
+    drawTiles14();
+  }
+  function toggleTile14(select, n) {
+    if (select) selectTile14(n);
+    else deselectTile14(n);
+  }
+  function deselectAllTiles14() {
+    selectedTiles14 = [];
+    updateSettings14();
+  }
+  function selectAllTiles14() {
+    selectedTiles14 = [];
+    for (let i = 1; i <= numTiles14; i++) selectedTiles14.push(i);
+    updateSettings14();
+  }
+  function selectRandomTiles14() {
+    selectedTiles14 = [];
+    for (let i = 1; i <= numTiles14; i++) {
+      if (Math.random() >= 0.5) selectedTiles14.push(i);
+    }
+    updateSettings14();
+  }
+  let presets14 = [
+    {
+      name: "Triangular",
+      tiles: [3, 15, 16]
+    },
+    {
+      name: "Rectangular",
+      tiles: [1, 2, 11, 12]
+    },
+    {
+      name: "Circular",
+      tiles: [6, 7, 8, 10]
+    },
+    {
+      name: "Simplistic",
+      tiles: [1, 4, 12]
+    }
+  ];
+  for (let i = 0; i < presets14.length; i++) {
+    let btn = document.createElement("button");
+    btn.innerHTML = "<i>" + presets14[i].name + "</i>";
+    btn.style.borderRadius = "8px";
+    btn.style.border = "2px solid black";
+    btn.style.margin = "5px";
+    btn.onclick = () => loadPreset14(i);
+    
+    presetsDiv14.appendChild(btn);
+  }
+  function loadPreset14(n) {
+    selectedTiles14 = presets14[n].tiles;
+    updateSettings14();
+  }
+  
+  function drawOneTile14(x, y, size) {
+    let n = selectedTiles14[Math.floor(Math.random() * selectedTiles14.length)]; // Get tile type
+    
+    shufflePalette14(); // Get colors
+    let color1 = palette14[0];
+    let color2 = palette14[1];
+    
+    ctx14.fillStyle = color1;
+    ctx14.fillRect(x, y, size, size);
+    
+    ctx14.fillStyle = color2;
+    ctx14.lineWidth = lineWidth14;
+    ctx14.lineCap = ctx14.lineJoin = "round";
+    let stroke = lineWidth14 !== 0;
+    
+    
+    if (n === 2) { // Half
+      if (Math.random() >= 0.5) { // Horizontal
+        ctx14.fillRect(x, y, size, size / 2);
+        if (stroke) ctx14.strokeRect(x, y, size, size / 2);
+      }
+      else { // Vertical
+        ctx14.fillRect(x, y, size / 2, size);
+        if (stroke) ctx14.strokeRect(x, y, size / 2, size);
+      }
+    }
+    
+    else if (n === 3) { // Diagonal
+      if (Math.random() >= 0.5) { // Top left
+        ctx14.beginPath();
+        ctx14.moveTo(x, y);
+        ctx14.lineTo(x + size, y);
+        ctx14.lineTo(x, y + size);
+        ctx14.lineTo(x, y);
+        ctx14.fill();
+        if (stroke) ctx14.stroke();
+      }
+      else { // Bottom left
+        ctx14.beginPath();
+        ctx14.moveTo(x, y + size);
+        ctx14.lineTo(x + size, y + size);
+        ctx14.lineTo(x, y);
+        ctx14.lineTo(x, y + size);
+        ctx14.fill();
+        if (stroke) ctx14.stroke();
+      }
+    }
+    
+    else if (n === 4) { // Small circle
+      ctx14.fillCircle(x + (size / 2), y + (size / 2), size / 4);
+      if (stroke) ctx14.strokeCircle(x + (size / 2), y + (size / 2), size / 4);
+    }
+    
+    else if (n === 5) { // Full circle
+      ctx14.fillCircle(x + (size / 2), y + (size / 2), size / 2);
+      if (stroke) ctx14.strokeCircle(x + (size / 2), y + (size / 2), size / 2);
+    }
+    
+    else if (n === 6) { // Half circle
+      let side = Math.floor(Math.random() * 4);
+      if (side === 0) { // Top
+        ctx14.beginPath();
+        ctx14.arc(x + (size / 2), y, size / 2, 0, Math.PI);
+        ctx14.fill();
+        if (stroke) ctx14.stroke();
+      }
+      else if (side === 1) { // Right
+        ctx14.beginPath();
+        ctx14.arc(x + size, y + (size / 2), size / 2, Math.PI / 2, (3 * Math.PI) / 2);
+        ctx14.fill();
+        if (stroke) ctx14.stroke();
+      }
+      else if (side === 2) { // Bottom
+        ctx14.beginPath();
+        ctx14.arc(x + (size / 2), y + size, size / 2, 0, Math.PI, true);
+        ctx14.fill();
+        if (stroke) ctx14.stroke();
+      }
+      else if (side === 3) { // Left
+        ctx14.beginPath();
+        ctx14.arc(x, y + (size / 2), size / 2, Math.PI / 2, (3 * Math.PI) / 2, true);
+        ctx14.fill();
+        if (stroke) ctx14.stroke();
+      }
+    }
+    
+    else if (n === 7) { // Quarter circle
+      let side = Math.floor(Math.random() * 4);
+      if (side === 0) { // Top right
+        ctx14.beginPath();
+        ctx14.moveTo(x, y);
+        ctx14.lineTo(x + size, y);
+        ctx14.lineTo(x + size, y + size);
+        ctx14.arc(x + size, y, size, Math.PI / 2, Math.PI);
+        ctx14.fill();
+        if (stroke) {
+          ctx14.beginPath();
+          ctx14.arc(x + size, y, size, Math.PI / 2, Math.PI);
+          ctx14.stroke();
+        }
+      }
+      else if (side === 1) { // Bottom right
+        ctx14.beginPath();
+        ctx14.moveTo(x, y + size);
+        ctx14.lineTo(x + size, y + size);
+        ctx14.lineTo(x + size, y);
+        ctx14.arc(x + size, y + size, size, (3 * Math.PI) / 2, Math.PI, true);
+        ctx14.fill();
+        if (stroke) {
+          ctx14.beginPath();
+          ctx14.arc(x + size, y + size, size, (3 * Math.PI) / 2, Math.PI, true);
+          ctx14.stroke();
+        }
+      }
+      else if (side === 2) { // Bottom left
+        ctx14.beginPath();
+        ctx14.moveTo(x + size, y + size);
+        ctx14.lineTo(x, y + size);
+        ctx14.lineTo(x, y);
+        ctx14.arc(x, y + size, size, 0, (3 * Math.PI) / 2, true);
+        ctx14.fill();
+        if (stroke) {
+          ctx14.beginPath();
+          ctx14.arc(x, y + size, size, 0, (3 * Math.PI) / 2, true);
+          ctx14.stroke();
+        }
+      }
+      else if (side === 3) { // Top left
+        ctx14.beginPath();
+        ctx14.moveTo(x + size, y);
+        ctx14.lineTo(x, y);
+        ctx14.lineTo(x, y + size);
+        ctx14.arc(x, y, size, 0, Math.PI / 2);
+        ctx14.fill();
+        if (stroke) {
+          ctx14.beginPath();
+          ctx14.arc(x, y, size, 0, Math.PI / 2);
+          ctx14.stroke();
+        }
+      }
+    }
+    
+    else if (n === 8) { // Double quarter circle
+      if (Math.random() >= 0.5) { // Top left and bottom right
+        ctx14.beginPath(); // Top left
+        ctx14.moveTo(x + (size / 2), y);
+        ctx14.lineTo(x, y);
+        ctx14.lineTo(x, y + (size / 2));
+        ctx14.arc(x, y, size / 2, 0, Math.PI / 2);
+        ctx14.fill();
+        if (stroke) {
+          ctx14.beginPath();
+          ctx14.arc(x, y, size / 2, 0, Math.PI / 2);
+          ctx14.stroke();
+        }
+        
+        ctx14.beginPath(); // Bottom right
+        ctx14.moveTo(x + (size / 2), y + size);
+        ctx14.lineTo(x + size, y + size);
+        ctx14.lineTo(x + size, y + (size / 2));
+        ctx14.arc(x + size, y + size, size / 2, (3 * Math.PI) / 2, Math.PI, true);
+        ctx14.fill();
+        if (stroke) {
+          ctx14.beginPath();
+          ctx14.arc(x + size, y + size, size / 2, (3 * Math.PI) / 2, Math.PI, true);
+          ctx14.stroke();
+        }
+      }
+      else { // Top right and bottom left
+        ctx14.beginPath(); // Top right
+        ctx14.moveTo(x + (size / 2), y);
+        ctx14.lineTo(x + size, y);
+        ctx14.lineTo(x + size, y + (size / 2));
+        ctx14.arc(x + size, y, size / 2, Math.PI / 2, Math.PI);
+        ctx14.fill();
+        if (stroke) {
+          ctx14.beginPath();
+          ctx14.arc(x + size, y, size / 2, Math.PI / 2, Math.PI);
+          ctx14.stroke();
+        }
+        
+        ctx14.beginPath(); // Bottom left
+        ctx14.moveTo(x + (size / 2), y + size);
+        ctx14.lineTo(x, y + size);
+        ctx14.lineTo(x, y + (size / 2));
+        ctx14.arc(x, y + size, size / 2, 0, (3 * Math.PI) / 2, true);
+        ctx14.fill();
+        if (stroke) {
+          ctx14.beginPath();
+          ctx14.arc(x, y + size, size / 2, 0, (3 * Math.PI) / 2, true);
+          ctx14.stroke();
+        }
+      }
+    }
+    
+    else if (n === 9) { // Ring
+      ctx14.fillStyle = color2;
+      ctx14.fillCircle(x + (size / 2), y + (size / 2), size / 2);
+      if (stroke) ctx14.strokeCircle(x + (size / 2), y + (size / 2), size / 2);
+      ctx14.fillStyle = color1;
+      ctx14.fillCircle(x + (size / 2), y + (size / 2), size / 4);
+      if (stroke) ctx14.strokeCircle(x + (size / 2), y + (size / 2), size / 4);
+      ctx14.fillStyle = color2;
+    }
+    
+    else if (n === 10) { // Double half circle
+      if (Math.random() >= 0.5) { // Left and right
+        ctx14.beginPath(); // Left
+        ctx14.arc(x, y + (size / 2), size / 2, Math.PI / 2, (3 * Math.PI) / 2, true);
+        ctx14.fill();
+        if (stroke) ctx14.stroke();
+        
+        ctx14.beginPath(); // Right
+        ctx14.arc(x + size, y + (size / 2), size / 2, Math.PI / 2, (3 * Math.PI) / 2);
+        ctx14.fill();
+        if (stroke) ctx14.stroke();
+      }
+      else { // Top and bottom
+        ctx14.beginPath(); // Top
+        ctx14.arc(x + (size / 2), y, size / 2, 0, Math.PI);
+        ctx14.fill();
+        if (stroke) ctx14.stroke();
+        
+        ctx14.beginPath(); // Bottom
+        ctx14.arc(x + (size / 2), y + size, size / 2, 0, Math.PI, true);
+        ctx14.fill();
+        if (stroke) ctx14.stroke();
+      }
+    }
+    
+    else if (n === 11) { // Stripe
+      if (Math.random() >= 0.5) { // Horizontal
+        ctx14.fillRect(x, y + (size / 4), size, size / 2);
+        if (stroke) ctx14.strokeRect(x, y + (size / 4), size, size / 2);
+      }
+      else { // Vertical
+        ctx14.fillRect(x + (size / 4), y, size / 2, size);
+        if (stroke) ctx14.strokeRect(x + (size / 4), y, size / 2, size);
+      }
+    }
+    
+    else if (n === 12) { // Small square
+      ctx14.fillRect(x + (size / 4), y + (size / 4), size / 2, size / 2);
+      if (stroke) ctx14.strokeRect(x + (size / 4), y + (size / 4), size / 2, size / 2);
+    }
+    
+    else if (n === 13) { // Diamond
+      ctx14.beginPath();
+      ctx14.moveTo(x + (size / 2), y);
+      ctx14.lineTo(x + size, y + (size / 2));
+      ctx14.lineTo(x + (size / 2), y + size);
+      ctx14.lineTo(x, y + (size / 2));
+      ctx14.lineTo(x + (size / 2), y);
+      ctx14.fill();
+      if (stroke) ctx14.stroke();
+    }
+    
+    else if (n === 14) { // Cross
+      ctx14.beginPath();
+      ctx14.moveTo(x + (size / 4), y);
+      ctx14.lineTo(x + (size * 0.75), y);
+      ctx14.lineTo(x + (size * 0.75), y + (size / 4));
+      ctx14.lineTo(x + size, y + (size / 4));
+      ctx14.lineTo(x + size, y + (size * 0.75));
+      ctx14.lineTo(x + (size * 0.75), y + (size * 0.75));
+      ctx14.lineTo(x + (size * 0.75), y + size);
+      ctx14.lineTo(x + (size / 4), y + size);
+      ctx14.lineTo(x + (size / 4), y + (size * 0.75));
+      ctx14.lineTo(x, y + (size * 0.75));
+      ctx14.lineTo(x, y + (size / 4));
+      ctx14.lineTo(x + (size / 4), y + (size / 4));
+      ctx14.lineTo(x + (size / 4), y);
+      ctx14.fill();
+      if (stroke) ctx14.stroke();
+    }
+    
+    else if (n === 15) { // Side triangle
+      let side = Math.floor(Math.random() * 4);
+      if (side === 0) { // Top
+        ctx14.beginPath();
+        ctx14.moveTo(x, y);
+        ctx14.lineTo(x + (size / 2), y + (size / 2));
+        ctx14.lineTo(x + size, y);
+        ctx14.lineTo(x, y);
+        ctx14.fill();
+        if (stroke) ctx14.stroke();
+      }
+      else if (side === 1) { // Right
+        ctx14.beginPath();
+        ctx14.moveTo(x + size, y);
+        ctx14.lineTo(x + (size / 2), y + (size / 2));
+        ctx14.lineTo(x + size, y + size);
+        ctx14.lineTo(x + size, y);
+        ctx14.fill();
+        if (stroke) ctx14.stroke();
+      }
+      else if (side === 2) { // Bottom
+        ctx14.beginPath();
+        ctx14.moveTo(x, y + size);
+        ctx14.lineTo(x + (size / 2), y + (size / 2));
+        ctx14.lineTo(x + size, y + size);
+        ctx14.lineTo(x, y + size);
+        ctx14.fill();
+        if (stroke) ctx14.stroke();
+      }
+      else if (side === 3) { // Left
+        ctx14.beginPath();
+        ctx14.moveTo(x, y);
+        ctx14.lineTo(x + (size / 2), y + (size / 2));
+        ctx14.lineTo(x, y + size);
+        ctx14.lineTo(x, y);
+        ctx14.fill();
+        if (stroke) ctx14.stroke();
+      }
+    }
+    
+    else if (n === 16) {
+      ctx14.beginPath(); // Top
+      ctx14.moveTo(x, y);
+      ctx14.lineTo(x + (size / 2), y + (size / 2));
+      ctx14.lineTo(x + size, y);
+      ctx14.lineTo(x, y);
+      ctx14.fill();
+      if (stroke) ctx14.stroke();
+      
+      ctx14.beginPath(); // Bottom
+      ctx14.moveTo(x, y + size);
+      ctx14.lineTo(x + (size / 2), y + (size / 2));
+      ctx14.lineTo(x + size, y + size);
+      ctx14.lineTo(x, y + size);
+      ctx14.fill();
+      if (stroke) ctx14.stroke();
+    }
+    
+    if (stroke) ctx14.strokeRect(x, y, size, size);
+  }
+  
+  function drawTiles14() {
+    ctx14.clearRect(0, 0, canvas14.width, canvas14.height);
+    
+    tileSize14 = canvas14.width / gridSize14;
+    
+    for (let x = 0; x < gridSize14; x++) {
+      for (let y = 0; y < gridSize14; y++) {
+        drawOneTile14(x * tileSize14, y * tileSize14, tileSize14);
+      }
+    }
+  }
+  drawTiles14();
+  
+  function updateSettings14() {
+    gridSize14 = Number(gridSize14Range.value);
+    gridSize14Txt.innerHTML = gridSize14Range.value + "x" + gridSize14Range.value;
+    lineWidth14 = lineWidth14Txt.innerHTML = Number(lineWidth14Range.value);
+    
+    for (let i = 1; i <= numTiles14; i++) {
+      document.getElementById("selectedTiles14Checkbox" + i).checked = selectedTiles14.includes(i);
+    }
+    
+    drawTiles14();
+  }
+</script>
+<canvas id = "canvas13" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "drawSquares13()">Redraw</button>
+<div class = "desc"><b><i>(10/28/2021)</i></b> Random square subdivision faces, based on the image from <a href = "https://www.reddit.com/r/creativecoding/comments/dvjubb/random_faces" target = "_blank">this</a> Reddit post. I also added random eyebrows for more expressions.</div>
+<hr><hr>
+<script>
+  const ctx13 = canvas13.getContext("2d");
+  canvas13.width = canvas13.height = 2000;
+  
+  let maxLayers13 = 7;
+  let splitsPerDraw13 = 200;
+  
+  function Square13(x, y, size, layer) {
+    this.x = x;
+    this.y = y;
+    this.size = size;
+    this.layer = layer;
+  }
+  Square13.prototype.draw = function() {
+    ctx13.lineWidth = 3;
+    drawFace13(this.x + 2, this.y + 2, this.size - 4);
+    //ctx13.strokeRect(this.x, this.y, this.size, this.size);
+  };
+  Square13.prototype.split = function() {
+    if (this.layer > maxLayers13) return; // Don't go too deep
+    let halfSize = this.size / 2;
+    square13Array.push(new Square13(this.x, this.y, halfSize, this.layer + 1)); // Replace self with 4 new squares
+    square13Array.push(new Square13(this.x + halfSize, this.y, halfSize, this.layer + 1));
+    square13Array.push(new Square13(this.x, this.y + halfSize, halfSize, this.layer + 1));
+    square13Array.push(new Square13(this.x + halfSize, this.y + halfSize, halfSize, this.layer + 1));
+    square13Array.splice(square13Array.indexOf(this), 1);
+  };
+  let square13Array = [];
+  
+  function drawFace13(x, y, size) {
+    // Head
+    ctx13.lineWidth = 1;
+    ctx13.fillStyle = ctx13.strokeStyle = `hsl(${Math.random() * 360}deg, ${randBetween(80, 100)}%, ${randBetween(40, 60)}%)`;
+    ctx13.fillRect(x, y, size, size);
+    ctx13.strokeRect(x, y, size, size);
+    
+    // Eyes
+    let eyeSize = size * 0.1;
+    let pupilSize = eyeSize * randBetween(0.3, 0.8);
+    let lEyeX = x + (size * 0.25);
+    let rEyeX = x + (size * 0.75);
+    let eyeY = y + (size / 2);
+    ctx13.fillStyle = "white";
+    ctx13.fillCircle(lEyeX, eyeY, eyeSize);
+    ctx13.fillCircle(rEyeX, eyeY, eyeSize);
+    ctx13.fillStyle = "black";
+    ctx13.fillCircle(lEyeX, eyeY, pupilSize);
+    ctx13.fillCircle(rEyeX, eyeY, pupilSize);
+    
+    if (Math.random() >= 0.5) {
+      // Eyebrows
+      let eyebrowY = y + (size * randBetween(0.3, 0.4));
+      let eyebrowXOffset = size * randBetween(0.02, 0.05);
+      let eyebrowAngle = randBetween(-0.25, 0.25);
+      ctx13.strokeStyle = "black";
+      ctx13.lineCap = ctx13.lineJoin = "round";
+      ctx13.lineWidth = size * 0.02;
+      ctx13.beginPath();
+      ctx13.ellipse(lEyeX - eyebrowXOffset, eyebrowY, eyeSize * randBetween(0.9, 1.1), eyeSize * randBetween(0.5, 0.9), eyebrowAngle, -randBetween(0.25, 0.5), Math.PI + randBetween(0.25, 0.5), true);
+      ctx13.stroke();
+      if (Math.random() >= 0.5) eyebrowAngle = randBetween(-0.25, 0.25); // 50% change eyebrows are asymmetric
+      else eyebrowAngle *= -1;
+      ctx13.beginPath();
+      ctx13.ellipse(rEyeX + eyebrowXOffset, eyebrowY, eyeSize * randBetween(0.9, 1.1), eyeSize * randBetween(0.5, 0.9), eyebrowAngle, -randBetween(0.25, 0.5), Math.PI + randBetween(0.25, 0.5), true);
+      ctx13.stroke();
+    }
+    
+    // Mouth
+    let mouthRadX = size * randBetween(0.05, 0.1);
+    let mouthRadY = size * randBetween(0.05, 0.1);
+    let mouthY = y + (size * randBetween(0.6, 0.7));
+    ctx13.fillStyle = "black";
+    ctx13.beginPath();
+    ctx13.ellipse(x + (size / 2), mouthY, mouthRadX, mouthRadY, 0, 0, Math.PI, Math.random() >= 0.5);
+    ctx13.fill();
+  }
+  
+  function drawSquares13() {
+    ctx13.clearRect(0, 0, canvas13.width, canvas13.height);
+    square13Array = [];
+    square13Array.push(new Square13(0, 0, canvas13.width, 1));
+    for (let i = 0; i < splitsPerDraw13; i++) {
+      square13Array[Math.floor(Math.random() * square13Array.length)].split();
+    }
+    for (let i = 0; i < square13Array.length; i++) square13Array[i].draw();
+  }
+  drawSquares13();
+</script>
+<canvas id = "canvas12" style = "background-color: black"></canvas>
+<button onclick = "startCanvas12()">Start/Stop</button>
+<button onclick = "reset12()">Reset</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps12Txt"></span></b></i></div>
+<div class = "desc"><b><i>(10/28/2021)</i></b> Simple colorful interlocking rings animation, I might add settings later but for now this is all there is to it.</div>
+<hr><hr>
+<script>
+  const ctx12 = canvas12.getContext("2d");
+  canvas12.width = canvas12.height = 1000;
+  let canvas12Running = false;
+  
+  function Ring12(startAngle, radius, arcLength, sign, color) {
+    this.x = canvas12.width / 2;
+    this.y = canvas12.height / 2;
+    this.radius = radius;
+    this.arcLength = toRad(arcLength);
+    this.sign = sign;
+    this.speed = this.sign === 1 ? 0.03 : 0.015;
+    this.angle = toRad(startAngle) - (this.speed * this.sign);
+    this.color = color;
+  }
+  Ring12.prototype.render = function() {
+    this.angle += this.speed * this.sign;
+    ctx12.strokeStyle = this.color;
+    ctx12.globalAlpha = 1//0.25;
+    ctx12.lineWidth = 15// * 4;
+    ctx12.lineCap = ctx12.lineJoin = "round";
+    ctx12.beginPath();
+    ctx12.arc(this.x, this.y, this.radius, this.angle, this.angle + this.arcLength);
+    ctx12.stroke();
+  };
+  let ring12Array = [];
+  for (let i = 0; i < 25; i++) ring12Array.push(new Ring12(-i * 10, i * 20, 90 + (i * 5), i % 2 === 0 ? 1 : -1, `hsl(${(i / 25) * 360}deg, 100%, 50%)`));
+  function reset12() {
+    ring12Array = [];
+    for (let i = 0; i < 25; i++) ring12Array.push(new Ring12(-i * 10, i * 20, 90 + (i * 5), i % 2 === 0 ? 1 : -1, `hsl(${(i / 25) * 360}deg, 100%, 50%)`));
+    
+    if (!canvas12Running) frame12();
+  }
+  
+  let lastFrame12Time = 0;
+  let lastFps12DisplayTime = 1000;
+  
+  function frame12() {
+    if (Date.now() - lastFps12DisplayTime >= 500) {
+      fps12Txt.innerHTML = (1000 / (Date.now() - lastFrame12Time)).toFixed(1);
+      lastFps12DisplayTime = Date.now();
+    }
+    lastFrame12Time = Date.now();
+    
+    ctx12.clearRect(0, 0, canvas12.width, canvas12.height);
+    
+    for (let i = 0; i < ring12Array.length; i++) ring12Array[i].render();
+    
+    if (canvas12Running) requestAnimationFrame(frame12);
+  }
+  frame12();
+  
+  function startCanvas12() {
+    if (canvas12Running) canvas12Running = false;
+    else {
+      canvas12Running = true;
+      frame12();
+    }
+  }
+</script>
+<canvas id = "canvas11" style = "width: 600px; height: 300px"></canvas>
+<button onclick = "drawMountains11()">Regenerate</button>
+<div class = "desc"><b><i>(10/28/2021)</i></b> Generative mountain range with fog, based on <a href = "https://www.reddit.com/r/creativecoding/comments/ndsrfl/randomly_generated_mountains_with_fog_based_on_a" target = "_blank">this</a> Reddit post. Basically, each mountain starts at a certain level and a random walker traces the peaks of the mountain by moving along and varying the y-coordinate. Each time it's redrawn, there's a random fog level (brightness contrast between closest mountain and furthest mountain), random height ratio (how high up the tallest mountains can start), and random number of mountains. Each mountain is given a random steepness (how much the random walker tracing the mountain moves vertically per step) and a random ratio offset for starting height and coloring, to give more variation.</div>
+<hr><hr>
+<script>
+  const ctx11 = canvas11.getContext("2d");
+  canvas11.width = 1000;
+  canvas11.height = 500;
+  
+  function drawMountains11() {
+    ctx11.clearRect(0, 0, canvas11.width, canvas11.height);
+    
+    let heightRatio = randBetween(0.1, 0.3); // How high the tallest mountains can start
+    let numLayers = Math.round(randBetween(5, 15)); // Number of mountains
+    let fog = randBetween(0.6, 1); // Brightness contrast between closest and furthest mountains
+    let invFog = 1 - fog;
+    
+    for (let i = 0; i < numLayers; i++) {
+      let steepness = randBetween(3, 8); // How much the random walker tracing the mountain moves each time
+      let ratio = (i + randBetween(-0.5, 0.5)) / numLayers;
+      let invRatio = 1 - ratio;
+      ctx11.fillStyle = `hsl(0deg, 0%, ${(invRatio * 100 * fog) + (50 * invFog)}%)`; // Color it based on what mountain we're on
+      let currY = (canvas11.height * heightRatio) + ratio * canvas11.height * (1 - heightRatio);
+      ctx11.beginPath();
+      ctx11.moveTo(0, currY);
+      for (let j = 0; j <= canvas11.width; j += 2) { // Move the random walker along the x-axis
+        currY += steepness * Math.random() * randSign(); // Move the random walker up or down the y-axis randomly
+        ctx11.lineTo(j, currY);
+      }
+      ctx11.lineTo(canvas11.width, canvas11.height); // Close up the path
+      ctx11.lineTo(0, canvas11.height);
+      ctx11.lineTo(0, ratio * canvas11.height);
+      ctx11.fill();
+    }
+  }
+  drawMountains11();
+</script>
+<canvas id = "canvas10"></canvas>
+<button onclick = "startCanvas10()">Start/Stop</button>
+<button onclick = "reset10()">Reset</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps10Txt"></span></b></i></div>
+<div class = "desc"><b><i>(10/28/2021)</i></b> Simple random walker art with 200 random walkers of different colors drawing along the canvas, with their brightness being determined by their starting y-position, and their hue determined by their starting x-position.</div>
+<hr><hr>
+<script>
+  const ctx10 = canvas10.getContext("2d");
+  canvas10.width = canvas10.height = 1000;
+  let canvas10Running = false;
+  
+  let gridSize10 = 20;
+  let tileSize10 = canvas10.width / gridSize10;
+  let stepsPerFrame10 = 25;
+  let walkerSpeed10 = 2;
+  
+  function Walker10() {
+    this.x = Math.random() * canvas10.width;
+    this.y = Math.random() * canvas10.height;
+    this.color = `hsl(${(this.x / canvas10.width) * 360}deg, 50%, ${(this.y / canvas10.height) * 100}%)`;//`rgb(${(this.x / canvas10.width) * 255}, ${(this.y / canvas10.height) * 255}, ${((this.x * this.y) / (canvas10.width * canvas10.height)) * 255})`;
+  }
+  Walker10.prototype.walk = function() {
+    for (let i = 0; i < stepsPerFrame10; i++) {
+      let lastX = this.x;
+      let lastY = this.y;
+      let a = Math.random() * Math.PI * 2;
+      this.x += walkerSpeed10 * Math.cos(a);
+      this.y += walkerSpeed10 * Math.sin(a);
+      
+      // Wrap around sides, and update lastX and lastY so it doesn't draw a line across the whole canvas
+      if (this.x > canvas10.width) {
+        this.x = lastX = 0;
+      }
+      if (this.x < 0) {
+        this.x = lastX = canvas10.width;
+      }
+      if (this.y > canvas10.height) {
+        this.y = lastY = 0;
+      }
+      if (this.y < 0) {
+        this.y = lastY = canvas10.height;
+      }
+      ctx10.strokeStyle = this.color;
+      ctx10.beginPath();
+      ctx10.moveTo(lastX, lastY);
+      ctx10.lineTo(this.x, this.y);
+      ctx10.stroke();
+    }
+  };
+  let walker10Array = [];
+  for (let i = 0; i < 200; i++) walker10Array.push(new Walker10());
+  function reset10() {
+    ctx10.clearRect(0, 0, canvas10.width, canvas10.height);
+    walker10Array = [];
+    for (let i = 0; i < 200; i++) walker10Array.push(new Walker10());
+    if (!canvas10Running) frame10();
+  }
+  
+  let lastFrame10Time = 0;
+  let lastFps10DisplayTime = 1000;
+  
+  function frame10() {
+    if (Date.now() - lastFps10DisplayTime >= 500) {
+      fps10Txt.innerHTML = (1000 / (Date.now() - lastFrame10Time)).toFixed(1);
+      lastFps10DisplayTime = Date.now();
+    }
+    lastFrame10Time = Date.now();
+    
+    for (let i = 0; i < walker10Array.length; i++) walker10Array[i].walk();
+    
+    if (canvas10Running) requestAnimationFrame(frame10);
+  }
+  frame10();
+  
+  function startCanvas10() {
+    if (canvas10Running) canvas10Running = false;
+    else {
+      canvas10Running = true;
+      frame10();
+    }
+  }
+</script>
+<canvas id = "canvas9" style = "background-color: black; width: 500px; height: 500px"></canvas>
+<button onclick = "startCanvas9()">Start/Stop</button>
+<button onclick = "resetClocks9()">Reset</button>
+<button onclick = "randomizeClock9Times()">Randomize Times</button>
+<button onclick = "resetClock9Times()">Reset Times to 12:00</button>
+<div><b><u>Pixel Mode:</u></b></div>
+<input type = "checkbox" id = "pixelMode9Checkbox" oninput = "updateSettings9(false)">
+<div><b><u>Alternative Pixel Coloring:</u></b></div>
+<input type = "checkbox" id = "pixelColoringMode9Checkbox" oninput = "updateSettings9(false)">
+<div><b><u>Number of Real-Time Clocks:</u></b> <span id = "numRealTimeClocks9Txt">4</span></div>
+<input type = "range" min = "0" max = "10" step = "1" value = "4" id = "numRealTimeClocks9Range" oninput = "updateSettings9(true)">
+<div><b><u>Real-Time Clock Speed:</u></b> <span id = "clockSpeed9Txt">100</span>%</div>
+<input type = "range" min = "0" max = "300" step = "10" value = "100" id = "clockSpeed9Range" oninput = "updateSettings9(false)">
+<div><b><u>Clock Averaging Weight:</u></b> <span id = "weight9Txt">80</span>%</div>
+<input type = "range" min = "0" max = "100" step = "10" value = "80" id = "weight9Range" oninput = "updateSettings9(false)">
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps9Txt"></span></b></i></div>
+<div class = "desc"><b><i>(10/27/2021)</i></b> Cool clock animation, where each clock takes the average of its neighbors time, but some of them show their actual time, based on <a href = "https://www.reddit.com/r/generative/comments/kbvau2/oc_each_clock_shows_average_time_of_its_neighbors" target = "_blank">this</a> Reddit post (I actually didn't copy the code, I just used the idea and made it myself). I wanted to constantly modulus each clock's time so that it never goes past 720, but for some reason that throws the whole system off and you get these weird pulsations each time one of the real time clocks sets back to zero. Sadly this means the times are constantly counting up, but that's not really a huge deal. I also added pixel mode, based off an idea from a comment on that post, where each clock is rendered as a pixel with its hue being based on the hour hand's angle, and its brightness being based on the minute hand's angle.<br><b><i>(10/28/2021)</i></b> Added a setting and checkbox for aternative pixel coloring, so that the hue is based on the minute hand, and the brightness based on the hour hand, instead of vice versa.</div>
+<hr><hr>
+<script>
+  const ctx9 = canvas9.getContext("2d");
+  canvas9.width = canvas9.height = 1000;
+  let canvas9Running = false;
+  
+  let gridSize9 = 30;
+  let tileSize9 = canvas9.width / gridSize9;
+  let weight9 = 0.2;
+  let pixelMode9 = false;
+  let numRealTimeClocks9 = 4;
+  let clockSpeed9 = 1;
+  let pixelColoringMode9 = 1;
+  
+  function Clock9(x, y, radius, indexX, indexY) {
+    this.x = x;
+    this.y = y;
+    this.indexX = indexX;
+    this.indexY = indexY;
+    this.radius = radius;
+    this.time = Math.random() * 720;
+    this.hours = ((this.time / 60) + 12) % 12;
+    this.minutes = (this.time + 60) % 60;
+    this.realTime = false;
+  }
+  Clock9.prototype.updateTime = function() {
+    //this.time = (this.time + 720) % 720;
+    this.hours = ((this.time / 60) + 12) % 12;
+    this.minutes = (this.time + 60) % 60;
+  };
+  Clock9.prototype.tick = function() {
+    this.time += clockSpeed9;
+    this.updateTime();
+  };
+  Clock9.prototype.draw = function() {
+    if (pixelMode9) {
+      let hourRatio = this.hours / 12;
+      let minuteRatio = this.minutes / 60;
+      if (pixelColoringMode9 === 1) ctx9.fillStyle = ctx9.strokeStyle = `hsl(${hourRatio * 360}deg, 100%, ${minuteRatio * 100}%)`;
+      else ctx9.fillStyle = ctx9.strokeStyle = `hsl(${minuteRatio * 360}deg, 100%, ${hourRatio * 100}%)`;
+      if (this.realTime) {
+        ctx9.fillStyle = ctx9.strokeStyle = "white";
+      }
+      ctx9.lineWidth = 2;
+      ctx9.fillRectFromCenter(this.x, this.y, tileSize9, tileSize9);
+      ctx9.strokeRectFromCenter(this.x, this.y, tileSize9, tileSize9);
+    }
+    else {
+      ctx9.lineCap = ctx9.lineJoin = "round";
+      ctx9.lineWidth = 3;
+      ctx9.strokeStyle = this.realTime ? "blue" : "white";
+      
+      let aH = ((this.hours / 12) * Math.PI * 2) - (Math.PI / 2);
+      let rH = this.radius * 0.8;
+      ctx9.beginPath();
+      ctx9.moveTo(this.x, this.y);
+      ctx9.lineTo(this.x + (rH * Math.cos(aH)), this.y + (rH * Math.sin(aH)));
+      ctx9.stroke();
+      
+      let aM = ((this.minutes / 60) * Math.PI * 2) - (Math.PI / 2);
+      let rM = this.radius;
+      ctx9.beginPath();
+      ctx9.moveTo(this.x, this.y);
+      ctx9.lineTo(this.x + (rM * Math.cos(aM)), this.y + (rM * Math.sin(aM)));
+      ctx9.stroke();
+    }
+  };
+  Clock9.prototype.averageNeighbors = function() {
+    let w = (1 - weight9) / 4;
+    let T = clock9Array[this.indexX][(this.indexY - 1 + gridSize9) % gridSize9].time * w;
+    let R = clock9Array[(this.indexX + 1) % gridSize9][this.indexY].time * w;
+    let B = clock9Array[this.indexX][(this.indexY + 1) % gridSize9].time * w;
+    let L = clock9Array[(this.indexX - 1 + gridSize9) % gridSize9][this.indexY].time * w;
+    let M = this.time * weight9;
+    this.time = M + T + R + B + L;
+    this.updateTime();
+  };
+  let clock9Array = [];
+  function resetClocks9() {
+    clock9Array = [];
+    tileSize9 = canvas9.width / gridSize9;
+    for (let x = 0; x < gridSize9; x++) {
+      let row = [];
+      for (let y = 0; y < gridSize9; y++) {
+        row.push(new Clock9((x + 0.5) * tileSize9, (y + 0.5) * tileSize9, tileSize9 * 0.4, x, y));
+      }
+      clock9Array.push(row);
+    }
+    
+    for (let i = 0; i < numRealTimeClocks9; i++) {
+      let x = Math.floor(Math.random() * gridSize9);
+      let y = Math.floor(Math.random() * gridSize9);
+      clock9Array[x][y].realTime = true;
+    }
+  }
+  function randomizeClock9Times() {
+    for (let x = 0; x < gridSize9; x++) {
+      for (let y = 0; y < gridSize9; y++) {
+        clock9Array[x][y].time = Math.random() * 720;
+        clock9Array[x][y].updateTime();
+      }
+    }
+  }
+  function resetClock9Times() {
+    for (let x = 0; x < gridSize9; x++) {
+      for (let y = 0; y < gridSize9; y++) {
+        clock9Array[x][y].time = 0;
+        clock9Array[x][y].updateTime();
+      }
+    }
+  }
+  
+  let lastFrame9Time = 0;
+  let lastFps9DisplayTime = 1000;
+  
+  function frame9() {
+    if (Date.now() - lastFps9DisplayTime >= 500) {
+      fps9Txt.innerHTML = (1000 / (Date.now() - lastFrame9Time)).toFixed(1);
+      lastFps9DisplayTime = Date.now();
+    }
+    lastFrame9Time = Date.now();
+    
+    ctx9.clearRect(0, 0, canvas9.width, canvas9.height);
+    
+    for (let x = 0; x < gridSize9; x++) {
+      for (let y = 0; y < gridSize9; y++) {
+        clock9Array[x][y].updateTime();
+        if (clock9Array[x][y].realTime) clock9Array[x][y].tick();
+        else clock9Array[x][y].averageNeighbors();
+        clock9Array[x][y].draw();
+      }
+    }
+    
+    if (canvas9Running) requestAnimationFrame(frame9);
+  }
+  resetClocks9();
+  frame9();
+  
+  function startCanvas9() {
+    if (canvas9Running) canvas9Running = false;
+    else {
+      canvas9Running = true;
+      frame9();
+    }
+  }
+  
+  function updateSettings9(reset) {
+    numRealTimeClocks9 = numRealTimeClocks9Txt.innerHTML = Number(numRealTimeClocks9Range.value);
+    pixelMode9 = pixelMode9Checkbox.checked;
+    weight9 = 1 - (Number(weight9Range.value) / 100);
+    weight9Txt.innerHTML = weight9Range.value;
+    clockSpeed9 = Number(clockSpeed9Range.value) / 100;
+    clockSpeed9Txt.innerHTML = clockSpeed9Range.value;
+    
+    pixelColoringMode9 = pixelColoringMode9Checkbox.checked ? 2 : 1;
+    
+    if (reset) resetClocks9();
+    
+    if (!canvas9Running) frame9();
+  }
+</script>
+<canvas id = "canvas8" style = "width: 400px; height: 400px"></canvas>
+<button onclick = "resetLines8()">Reset</button>
+<table>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Mesh Size:</u></b> <span id = "gridSize8Txt">10x10</span></div>
+      <input type = "range" min = "1" max = "25" step = "1" value = "10" id = "gridSize8Range" oninput = "updateSettings8()">
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Mesh Crumple:</u></b> <span id = "jitter8Txt">25</span>%</div>
+      <input type = "range" min = "0" max = "50" step = "5" value = "25" id = "jitter8Range" oninput = "updateSettings8()">
+    </td>
+    <td>
+      <div><b><u>Extra Crumple:</u></b></div>
+      <input type = "checkbox" id = "superJitter8Checkbox" oninput = "updateSettings8()">
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Drawing Mode:</u></b></div>
+      <input type = "radio" name = "drawMode8Radio" id = "drawMode8Radio1" oninput = "updateSettings8()">
+      <label for = "drawMode8Radio1">Outline</label>
+      <br>
+      <input type = "radio" name = "drawMode8Radio" id = "drawMode8Radio2" oninput = "updateSettings8()">
+      <label for = "drawMode8Radio2">Fill</label>
+      <br>
+      <input type = "radio" name = "drawMode8Radio" id = "drawMode8Radio3" oninput = "updateSettings8()" CHECKED>
+      <label for = "drawMode8Radio3">Outline + Fill</label>
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Grayscale Fill:</u></b></div>
+      <input type = "checkbox" id = "grayscale8Checkbox" oninput = "updateSettings8()">
+      <br><br>
+      <div><b><u>White Outline:</u></b></div>
+      <input type = "checkbox" id = "whiteOutline8Checkbox" oninput = "updateSettings8()">
+      <!--<div><b><u>Color Mode:</u></b></div>
+      <input type = "radio" name = "colorMode8Radio" id = "colorMode8Radio1" oninput = "updateSettings8()">
+      <label for = "colorMode8Radio1">Grayscale</label>
+      <br>
+      <input type = "radio" name = "colorMode8Radio" id = "colorMode8Radio2" oninput = "updateSettings8()">
+      <label for = "colorMode8Radio2">Single Color</label>
+      <br>
+      <input type = "radio" name = "colorMode8Radio" id = "colorMode8Radio3" oninput = "updateSettings8()">
+      <label for = "colorMode8Radio3">Rainbow</label>-->
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Outline Width:</u></b> <span id = "lineWidth8Txt">3</span>px</div>
+      <input type = "range" min = "1" max = "15" step = "1" value = "3" id = "lineWidth8Range" oninput = "updateSettings8()">
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Fill Hue:</u></b> <span id = "hue8Txt">240</span>&deg;</div>
+      <input type = "range" min = "0" max = "360" step = "5" value = "240" id = "hue8Range" oninput = "updateSettings8()">
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Brightness Contrast:</u></b> <span id = "contrast8Txt">80</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "5" value = "80" id = "contrast8Range" oninput = "updateSettings8()">
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Hue Variation:</u></b> <span id = "hueVariation8Txt">30</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "5" value = "30" id = "hueVariation8Range" oninput = "updateSettings8()">
+    </td>
+  </tr>
+</table>
+<div class = "desc"><b><i>(10/27/2021)</i></b> Generative triangular mesh art, from <a href = "https://generativeartistry.com/tutorials/triangular-mesh" target = "_blank">https://generativeartistry.com/tutorials/triangular-mesh</a>.<br><b><i>Update: (Later that day)</i></b> Added more settings for shaping and coloring the mesh that weren't in the tutorial, and sliders for everything.</div>
+<hr><hr>
+<script>
+  const ctx8 = canvas8.getContext("2d");
+  canvas8.width = canvas8.height = 1000;
+  
+  let gridSize8 = 10;
+  let triangleSize8 = canvas8.width / gridSize8;
+  let jitter8 = 0.25;
+  let drawMode8 = 3; // 1: Outline, 2: Fill, 3: Outline + Fill
+  let lineWidth8 = 3;
+  let grayscale8 = false;
+  let hue8 = 240;
+  let contrast8 = 0.8;
+  let hueVariation8 = 0.3;
+  let superJitter8 = false;
+  let whiteOutline8 = false;
+  
+  function drawOneTriangle8(a, b, c) {
+    ctx8.lineWidth = lineWidth8;
+    ctx8.lineCap = ctx8.lineJoin = "round";
+    let color = "";
+    let brightness = (0.5 + randBetween(-contrast8 / 2, contrast8 / 2)) * 100;
+    let hue = hue8 + randBetween(-180 * hueVariation8, 180 * hueVariation8);
+    color = grayscale8 ? `hsl(0deg, 0%, ${brightness}%)` : `hsl(${hue}deg, 100%, ${brightness}%)`;
+    ctx8.strokeStyle = drawMode8 === 2 ? color : whiteOutline8 ? "white" : "black";
+    ctx8.fillStyle = color;
+    ctx8.beginPath();
+    ctx8.moveTo(a.x, a.y);
+    ctx8.lineTo(b.x, b.y);
+    ctx8.lineTo(c.x, c.y);
+    ctx8.lineTo(a.x, a.y);
+    if (drawMode8 !== 1) ctx8.fill();
+    ctx8.stroke();
+  }
+  
+  let lines8 = [];
+  function resetLines8() {
+    triangleSize8 = canvas8.width / gridSize8;
+    lines8 = [];
+    let odd = false;
+    for (let y = -triangleSize8; y <= canvas8.height + triangleSize8; y += triangleSize8) {
+      odd = !odd;
+      let line = [];
+      for (let x = -triangleSize8; x <= canvas8.width + triangleSize8; x += triangleSize8) {
+        line.push({
+          x: x + (triangleSize8 * randBetween(-jitter8, jitter8)) + (odd ? triangleSize8 / 2 : 0),
+          y: y + (triangleSize8 * randBetween(-jitter8, jitter8))
+        });
+      }
+      lines8.push(line);
+    }
+    drawTriangles8();
+  }
+  
+  function drawTriangles8() {
+    ctx8.fillStyle = whiteOutline8 ? "black" : "white";
+    ctx8.fillRect(0, 0, canvas8.width, canvas8.height);
+    
+    let line = [];
+    let odd = true;
+    for (let y = 0; y < lines8.length - 1; y++) {
+      odd = !odd;
+      line = [];
+      for (let i = 0; i < lines8[y].length; i++) {
+        line.push(odd ? lines8[y][i] : lines8[y + 1][i]);
+        line.push(odd ? lines8[y + 1][i] : lines8[y][i]);
+      }
+      for (let i = 0; i < line.length - 2; i++) {
+        drawOneTriangle8(line[i], line[i + 1], line[i + 2]);
+      }
+    }
+  }
+  resetLines8();
+  
+  function updateSettings8() {
+    gridSize8 = Number(gridSize8Range.value);
+    gridSize8Txt.innerHTML = gridSize8Range.value + "x" + gridSize8Range.value;
+    
+    superJitter8 = superJitter8Checkbox.checked;
+    
+    jitter8 = (Number(jitter8Range.value) / 100) * (superJitter8 ? 10 : 1);
+    jitter8Txt.innerHTML = Number(jitter8Range.value) * (superJitter8 ? 10 : 1);
+    
+    if (drawMode8Radio1.checked) drawMode8 = 1;
+    else if (drawMode8Radio2.checked) drawMode8 = 2;
+    else if (drawMode8Radio3.checked) drawMode8 = 3;
+    
+    grayscale8 = grayscale8Checkbox.checked;
+    
+    whiteOutline8 = whiteOutline8Checkbox.checked;
+    
+    lineWidth8 = lineWidth8Txt.innerHTML = Number(lineWidth8Range.value);
+    
+    hue8 = hue8Txt.innerHTML = Number(hue8Range.value);
+    
+    contrast8 = Number(contrast8Range.value) / 100;
+    contrast8Txt.innerHTML = contrast8Range.value;
+    
+    hueVariation8 = Number(hueVariation8Range.value) / 100;
+    hueVariation8Txt.innerHTML = hueVariation8Range.value;
+    
+    resetLines8();
+  }
+</script>
+<canvas id = "canvas7" style = "background-color: black; width: 400px; height: 400px"></canvas>
+<button onclick = "startCanvas7()">Start/Stop</button>
+<button onclick = "reset7()">Reset Waves</button>
+<button onclick = "globalSign7 *= -1">Change Direction</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps7Txt"></span></b></i></div>
+<div><b><u>Wave Amplitude:</u></b> <span id = "amplitude7Txt">100</span>%</div>
+<input type = "range" min = "20" max = "200" step = "10" value = "100" id = "amplitude7Range" oninput = "updateSettings7()">
+<div><b><u>Wave Frequency:</u></b> <span id = "frequency7Txt">100</span>%</div>
+<input type = "range" min = "10" max = "300" step = "10" value = "100" id = "frequency7Range" oninput = "updateSettings7()">
+<div><b><u>Wave Period:</u></b> <span id = "period7Txt">50</span> frames</div>
+<input type = "range" min = "5" max = "200" step = "1" value = "50" id = "period7Range" oninput = "updateSettings7()">
+<div><b><u>Number of Waves:</u></b> <span id = "numWaves7Txt">10</span> copies</div>
+<input type = "range" min = "1" max = "20" step = "1" value = "10" id = "numWaves7Range" oninput = "updateSettings7()">
+<div><b><u>Wave Spacing:</u></b> <span id = "waveSpacing7Txt">10</span>px</div>
+<input type = "range" min = "5" max = "50" step = "1" value = "10" id = "waveSpacing7Range" oninput = "updateSettings7()">
+<div class = "desc"><b><i>(10/26/2021)</i></b> Additive sine waves visualization, I wanted it to look like some interesting generative art but it ended up being pretty dull.<br><b><i>Update: (Later that day)</i></b> Added more settings and sliders for everything, as well as an FPS counter.</div>
+<hr><hr>
+<script>
+  const ctx7 = canvas7.getContext("2d");
+  canvas7.width = canvas7.height = 1000;
+  let canvas7Running = false;
+  
+  let currX7 = 0;
+  let frequency7 = 1;
+  let amplitude7 = 100;
+  let period7 = 50;
+  let numWaves7 = 10;
+  let waveSpacing7 = 10;
+  let globalSign7 = 1;
+  
+  let waves7 = [];
+  for (let i = 0; i < 4; i++) waves7.push({a: randBetween(0.5, 1.5), f: randBetween(0.5, 4)});//waves7.push({a: 1, f: randBetween(0.5, 4)});
+  
+  function sineWave7(x) {
+    let sum = 0;
+    for (let i = 0; i < waves7.length; i++) sum += waves7[i].a * Math.sin(waves7[i].f * x);
+    return sum;
+  }
+  
+  let lastFrame7Time = 0;
+  let lastFps7DisplayTime = 1000;
+  
+  function frame7() {
+    if (Date.now() - lastFps7DisplayTime >= 500) {
+      fps7Txt.innerHTML = (1000 / (Date.now() - lastFrame7Time)).toFixed(1);//Math.floor(1000 / (Date.now() - lastFrame7Time));
+      lastFps7DisplayTime = Date.now();
+    }
+    lastFrame7Time = Date.now();
+    
+    ctx7.clearRect(0, 0, canvas7.width, canvas7.height);
+    
+    currX7 += (1 / period7) * globalSign7;
+    /*for (let i = 0; i < waves7.length; i++) {
+      waves7[i].f = i + Math.sin(currX7) + 1.5;
+    }*/
+    
+    ctx7.lineWidth = 3;
+    ctx7.lineCap = ctx7.lineJoin = "round";
+    for (let j = 0; j < numWaves7; j++) {
+      ctx7.strokeStyle = `hsl(${(j / numWaves7) * 360}deg, 100%, 50%)`;
+      ctx7.beginPath();
+      for (let i = -j * waveSpacing7; i < canvas7.width; i += 3) {
+        let x = (i / canvas7.width) * Math.PI * 2 * frequency7;
+        ctx7.lineTo(i + (j * waveSpacing7), (canvas7.height / 2) + (amplitude7 * sineWave7(x - currX7)));
+      }
+      ctx7.stroke();
+    }
+    
+    if (canvas7Running) requestAnimationFrame(frame7);
+  }
+  frame7();
+  
+  function reset7() {
+    waves7 = [];
+    for (let i = 0; i < 4; i++) waves7.push({a: 1, f: randBetween(0.5, 4)});
+    if (!canvas7Running) frame7();
+  }
+  
+  function startCanvas7() {
+    if (canvas7Running) canvas7Running = false;
+    else {
+      canvas7Running = true;
+      frame7();
+    }
+  }
+  
+  function updateSettings7() {
+    amplitude7 = amplitude7Txt.innerHTML = Number(amplitude7Range.value);
+    frequency7 = Number(frequency7Range.value) / 100;
+    frequency7Txt.innerHTML = Number(frequency7Range.value);
+    period7 = period7Txt.innerHTML = Number(period7Range.value);
+    numWaves7 = numWaves7Txt.innerHTML = Number(numWaves7Range.value);
+    waveSpacing7 = waveSpacing7Txt.innerHTML = Number(waveSpacing7Range.value);
+  }
+</script>
+<canvas id = "canvas6" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "startCanvas6()">Start/Stop</button>
+<button onclick = "square6Array = []; square6Array.push(new Square6(0, 0, canvas6.width, 1)); drawSquares6()">Reset</button>
+<div class = "desc"><b><i>(10/24/2021)</i></b> Just simple square splitting where the mouse moves. It's not perfect, like I want it to not immediately split down to the lowest layer, and it gets laggy around ~2,000 squares.</div>
+<hr><hr>
+<script>
+  const ctx6 = canvas6.getContext("2d");
+  canvas6.width = canvas6.height = 1000;
+  let canvas6Rect = canvas6.getBoundingClientRect();
+  let canvas6Ratio = canvas6.width / 500;
+  let canvas6Running = false;
+  
+  let Mouse6 = {
+    x: 0,
+    y: 0,
+    touchingIndex: null
+  };
+  
+  let maxLayers6 = 7;
+  let maxSquares6 = 2000;
+  
+  function Square6(x, y, size, layer, index) {
+    this.x = x;
+    this.y = y;
+    this.size = size;
+    this.layer = layer;
+    square6Array.push(this);
+    //let lr = Mouse6.x >= this.x && Mouse6.x <= this.x + this.size;
+    //let tb = Mouse6.y >= this.y && Mouse6.y <= this.y + this.size;
+    //if (lr && tb) Mouse6.touchingIndex = square6Array.indexOf(this);
+  }
+  Square6.prototype.draw = function() {
+    ctx6.lineWidth = 5;
+    ctx6.strokeRect(this.x, this.y, this.size, this.size);
+  };
+  Square6.prototype.split = function() {
+    if (this.layer > maxLayers6) return;
+    
+    square6Array.splice(square6Array.indexOf(this), 1);
+    
+    let halfSize = this.size / 2;
+    new Square6(this.x, this.y, halfSize, this.layer + 1);
+    new Square6(this.x + halfSize, this.y, halfSize, this.layer + 1);
+    new Square6(this.x, this.y + halfSize, halfSize, this.layer + 1);
+    new Square6(this.x + halfSize, this.y + halfSize, halfSize, this.layer + 1);
+  };
+  let square6Array = [];
+  square6Array.push(new Square6(0, 0, canvas6.width, 1));
+  
+  function drawSquares6() {
+    ctx6.clearRect(0, 0, canvas6.width, canvas6.height);
+    for (let i = 0; i < square6Array.length; i++) square6Array[i].draw();
+  }
+  drawSquares6();
+  
+  function startCanvas6() {
+    canvas6Running = !canvas6Running;
+  }
+  
+  canvas6.addEventListener("mousemove", e => {
+    if (!canvas6Running) return;
+    canvas6Rect = canvas6.getBoundingClientRect();
+    let eX = (e.clientX - canvas6Rect.left) * canvas6Ratio;
+    let eY = (e.clientY - canvas6Rect.top) * canvas6Ratio;
+    Mouse6.x = eX;
+    Mouse6.y = eY;
+    for (let i = 0; i < square6Array.length; i++) {
+      let lr = Mouse6.x >= square6Array[i].x && Mouse6.x <= square6Array[i].x + square6Array[i].size;
+      let tb = Mouse6.y >= square6Array[i].y && Mouse6.y <= square6Array[i].y + square6Array[i].size;
+      //console.log(Mouse6.touchingIndex, i);
+      if (lr && tb) {
+        square6Array[i].split();
+        drawSquares6();
+        return;
+      }
+    }
+  });
+</script>
+<canvas id = "canvas5" style = "background-color: black; width: 500px; height: 500px"></canvas>
+<button onclick = "startCanvas5()">Start/Stop</button>
+<button onclick = "reset5()">Reset</button>
+<button onclick = "addPoints5()">Add Points</button>
+<table>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Number of Gravity Wells:</u></b> <span id = "numBlackHoles5Txt">25</span></div>
+      <input type = "range" min = "0" max = "15" value = "12" id = "numBlackHoles5Range" oninput = "updateSettings5()">
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Gravity Well Strength:</u></b> <span id = "blackHole5PowerTxt">150</span>%</div>
+      <input type = "range" min = "50" max = "500" step = "50" value = "150" id = "blackHole5PowerRange" oninput = "updateSettings5()">
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Friction:</u></b> <span id = "friction5Txt">10</span>%</div>
+      <input type = "range" min = "5" max = "50" step = "5" value = "10" id = "friction5Range" oninput = "updateSettings5()">
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Point Spawning:</u></b></div>
+      <input type = "radio" name = "point5SpawningRadio" id = "point5SpawningRadio1" oninput = "updateSettings5()" CHECKED>
+      <label for = "point5SpawningRadio1">Points spawn at edges</label>
+      <br>
+      <input type = "radio" name = "point5SpawningRadio" id = "point5SpawningRadio2" oninput = "updateSettings5()">
+      <label for = "point5SpawningRadio2">Points spawn randomly on canvas</label>
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Point Spawn Velocity:</u></b> <span id = "spawningVelocity5Txt">0</span></div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "spawningVelocity5Range" oninput = "updateSettings5()">
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Line Width:</u></b> <span id = "lineWidth5Txt">0.5</span>px</div>
+      <input type = "range" min = "0" max = "12" step = "1" value = "4" id = "lineWidth5Range" oninput = "updateSettings5()">
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Line Opacity:</u></b> <span id = "opacity5Txt">100</span>%</div>
+      <input type = "range" min = "0" max = "15" step = "1" value = "15" id = "opacity5Range" oninput = "updateSettings5()">
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Line Hue:</u></b> <span id = "hue5Txt">0</span>&deg;</div>
+      <input type = "range" min = "0" max = "360" step = "15" value = "0" id = "hue5Range" oninput = "updateSettings5()">
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Line Brightness:</u></b> <span id = "brightness5Txt">60</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "10" value = "60" id = "brightness5Range" oninput = "updateSettings5()">
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Color Variation:</u></b> <span id = "colorVariation5Txt">40</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "10" value = "40" id = "colorVariation5Range" oninput = "updateSettings5()">
+    </td>
+  </tr>
+</table>
+<div class = "desc"><b><i>(10/23/2021)</i></b> Art generator where points are spawned in that are attracted to various gravity wells around the canvas, leaving a trial behind them.<br><b><i>(10/24/2021)</i></b> Added more settings and sliders for everything.</div>
+<hr><hr>
+<script>
+  const ctx5 = canvas5.getContext("2d");
+  canvas5.width = canvas5.height = 1000;
+  let canvas5Running = false;
+  
+  let friction5 = 0.1;
+  let numBlackHoles5 = 25;
+  let numPoints5 = 1000;
+  let minDist5 = 5;
+  let minAcceleration5 = 0.01;
+  let blackHole5Power = 15;
+  let brightness5 = 60;
+  let lineWidth5 = 0.5;
+  let opacity5 = 1;
+  let edgeSpawning5 = true;
+  let hue5 = 0;
+  let stepsPerFrame5 = 1;
+  let spawningVelocity5 = 0;
+  let colorVariation5 = 0.4;
+  
+  function randCanvas5EdgePos() {
+    let r = Math.floor(Math.random() * 4);
+    if (r === 0) return {x: Math.random() * canvas5.width, y: 0};
+    else if (r === 1) return {x: canvas5.width, y: Math.random() * canvas5.height};
+    else if (r === 2) return {x: Math.random() * canvas5.width, y: canvas5.height};
+    else return {x: 0, y: Math.random() * canvas5.height};
+  }
+  
+  function Point5() {
+    let p = randCanvas5EdgePos();
+    this.x = edgeSpawning5 ? p.x : Math.random() * canvas5.width;
+    this.y = edgeSpawning5 ? p.y : Math.random() * canvas5.height;
+    let a = Math.random() * Math.PI * 2;
+    this.vx = spawningVelocity5 * Math.cos(a);
+    this.vy = spawningVelocity5 * Math.sin(a);
+    this.stopped = false;
+    let hue = hue5 + (Math.random() * colorVariation5 * 0.5 * 360 * randSign());
+    this.color = `hsl(${hue}deg, 100%, ${brightness5}%)`;
+  }
+  Point5.prototype.render = function() {
+    let lastX = this.x;
+    let lastY = this.y;
+    this.x += this.vx;
+    this.y += this.vy;
+    this.vx *= 1 - friction5;
+    this.vy *= 1 - friction5;
+    for (let i = 0; i < blackHole5Array.length; i++) {
+      let dx = blackHole5Array[i].x - this.x;
+      let dy = blackHole5Array[i].y - this.y;
+      let distSq = (dx * dx) + (dy * dy);
+      let dist = Math.sqrt(distSq);
+      if (dist <= minDist5) {
+        this.stopped = true;
+        this.x = blackHole5Array[i].x;
+        this.y = blackHole5Array[i].y;
+      }
+      let invDist = 1 / dist;
+      let angle = Math.atan2(dy, dx);
+      let velocity = blackHole5Array[i].powerRatio * blackHole5Power * invDist;
+      velocity = Math.max(velocity, minAcceleration5);
+      this.vx += velocity * Math.cos(angle);
+      this.vy += velocity * Math.sin(angle);
+    }
+    ctx5.strokeStyle = this.color;
+    ctx5.lineWidth = lineWidth5;
+    ctx5.globalAlpha = opacity5;
+    ctx5.lineCap = ctx5.lineJoin = "round";
+    ctx5.beginPath();
+    ctx5.moveTo(lastX, lastY);
+    ctx5.lineTo(this.x, this.y);
+    ctx5.stroke();
+  };
+  let point5Array = [];
+  for (let i = 0; i < numPoints5; i++) point5Array.push(new Point5());
+  
+  function BlackHole5() {
+    this.x = Math.random() * canvas5.width;
+    this.y = Math.random() * canvas5.height;
+    this.powerRatio = randBetween(0.5, 1);
+  }
+  let blackHole5Array = [];
+  for (let i = 0; i < numBlackHoles5; i++) blackHole5Array.push(new BlackHole5());
+  
+  function frame5() {
+    for (let j = 0; j < stepsPerFrame5; j++) {
+      for (let i = 0; i < point5Array.length; i++) {
+        point5Array[i].render();
+        if (point5Array[i].stopped) {
+          point5Array.splice(i, 1);
+          i--;
+        }
+      }
+    }
+    
+    if (canvas5Running) requestAnimationFrame(frame5);
+  }
+  frame5();
+  
+  function addPoints5() {
+    while (point5Array.length < numPoints5) point5Array.push(new Point5());
+    if (!canvas5Running) frame5();
+  }
+  
+  function reset5() {
+    ctx5.clearRect(0, 0, canvas5.width, canvas5.height);
+    blackHole5Array = [];
+    while (blackHole5Array.length < numBlackHoles5) blackHole5Array.push(new BlackHole5());
+    point5Array = [];
+    while (point5Array.length < numPoints5) point5Array.push(new Point5());
+    if (!canvas5Running) frame5();
+  }
+  
+  let numBlackHoles5RangeArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40, 50];
+  let lineWidth5RangeArray = [0.1, 0.2, 0.3, 0.4, 0.5, 1, 2, 3, 4, 5, 10, 15, 20];
+  let opacity5RangeArray = [1, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 100];
+  
+  function updateSettings5() {
+    numBlackHoles5 = numBlackHoles5Txt.innerHTML = numBlackHoles5RangeArray[Number(numBlackHoles5Range.value)];
+    blackHole5PowerTxt.innerHTML = Number(blackHole5PowerRange.value);
+    blackHole5Power = Number(blackHole5PowerRange.value) / 10;
+    friction5Txt.innerHTML = Number(friction5Range.value);
+    friction5 = Number(friction5Range.value) / 100;
+    edgeSpawning5 = point5SpawningRadio1.checked;
+    spawningVelocity5 = spawningVelocity5Txt.innerHTML = Number(spawningVelocity5Range.value);
+    lineWidth5 = lineWidth5Txt.innerHTML = lineWidth5RangeArray[Number(lineWidth5Range.value)];
+    opacity5Txt.innerHTML = opacity5RangeArray[Number(opacity5Range.value)];
+    opacity5 = opacity5RangeArray[Number(opacity5Range.value)] / 100;
+    hue5 = hue5Txt.innerHTML = Number(hue5Range.value);
+    brightness5 = brightness5Txt.innerHTML = Number(brightness5Range.value);
+    colorVariation5Txt.innerHTML = Number(colorVariation5Range.value)
+    colorVariation5 = Number(colorVariation5Range.value) / 100;
+    
+    while (blackHole5Array.length < numBlackHoles5) blackHole5Array.push(new BlackHole5());
+    
+    if (!canvas5Running) frame5();
+  }
+  
+  function startCanvas5() {
+    if (canvas5Running) canvas5Running = false;
+    else {
+      canvas5Running = true;
+      frame5();
+    }
+  }
+</script>
+<canvas id = "canvas4"></canvas>
+<button onclick = "startCanvas4()">Start/Stop</button>
+<button onclick = "reset4()">Reset</button>
+<div class = "desc"><b><i>(10/22/2021)</i></b> An attempt to make interesting spiral tiling with different settings for grow speed and turn speed, but I couldn't get it working right for when each spiral should stop drawing, so it doesn't look very interesting right now.</div>
+<hr><hr>
+<script>
+  const ctx4 = canvas4.getContext("2d");
+  canvas4.width = canvas4.height = 1000;
+  let canvas4Running = false;
+  
+  let gridSize4 = 10;
+  let tileSize4 = canvas4.width / gridSize4;
+  let turnSpeed4 = 0.1;
+  let growSpeed4 = 1;
+  let stopped4 = false;
+  
+  function Spiral4(x, y, turnSign) {
+    this.x = x;
+    this.y = y;
+    this.turnSign = turnSign;
+    this.angle = 0;
+    this.radius = 0;
+  }
+  Spiral4.prototype.render = function() {
+    let lastX = this.x + (this.radius * Math.cos(this.angle));
+    let lastY = this.y + (this.radius * Math.sin(this.angle));
+    
+    this.radius += growSpeed4;
+    if (this.radius >= tileSize4 / 2) {
+      stopped4 = true;
+      return;
+    }
+    this.angle += turnSpeed4 * this.turnSign;
+    ctx4.lineWidth = 3;
+    ctx4.lineCap = ctx4.lineJoin = "round";
+    ctx4.beginPath();
+    ctx4.moveTo(lastX, lastY);
+    ctx4.lineTo(this.x + (this.radius * Math.cos(this.angle)), this.y + (this.radius * Math.sin(this.angle)));
+    ctx4.stroke();
+  };
+  let spiral4Array = [];
+  for (let x = 0; x < gridSize4; x++) {
+    for (let y = 0; y < gridSize4; y++) {
+      spiral4Array.push(new Spiral4((x + 0.5) * tileSize4, (y + 0.5) * tileSize4, 1));
+      spiral4Array.push(new Spiral4((x + 0.5) * tileSize4, (y + 0.5) * tileSize4, -1));
+    }
+  }
+  
+  function frame4() {
+    if (!stopped4) {
+      for (let i = 0; i < spiral4Array.length; i++) spiral4Array[i].render();
+    }
+    
+    if (canvas4Running) requestAnimationFrame(frame4);
+  }
+  frame4();
+  
+  function reset4() {
+    ctx4.clearRect(0, 0, canvas4.width, canvas4.height);
+    spiral4Array = [];
+    for (let x = 0; x < gridSize4; x++) {
+      for (let y = 0; y < gridSize4; y++) {
+        spiral4Array.push(new Spiral4((x + 0.5) * tileSize4, (y + 0.5) * tileSize4, 1));
+        spiral4Array.push(new Spiral4((x + 0.5) * tileSize4, (y + 0.5) * tileSize4, -1));
+      }
+    }
+    stopped4 = false;
+    if (!canvas4Running) frame4();
+  }
+  
+  function startCanvas4() {
+    if (canvas4Running) canvas4Running = false;
+    else {
+      canvas4Running = true;
+      frame4();
+    }
+  }
+</script>
+<canvas id = "canvas3"></canvas>
+<button onclick = "startCanvas3()">Start/Stop</button>
+<button onclick = "randomizeDots3()">Randomize &theta;</button>
+<button onclick = "cosDots3()">&theta; = cos(&theta;)</button>
+<div><b><u>Average Angle:</u></b> <span id = "dot3AngleTxt">0.000000</span> radians</div>
+<div><b><u>Percent Error:</u></b> <span id = "error3Txt">100.000000</span>%</div>
+<div class = "desc"><b><i>(10/18/2021)</i></b> Extremely simple (and probably not very helpful) visualization showing how the <a href = "https://en.wikipedia.org/wiki/Dottie_number" target = "_blank">Dottie number</a> (&#8776;0.739085 radians) shows up from repeatedly taking the cosine of any angle.</div>
+<hr><hr>
+<script>
+  const ctx3 = canvas3.getContext("2d");
+  canvas3.width = canvas3.height = 1000;
+  let canvas3Running = false;
+  
+  let clearOpacity3 = 0.05;
+  const DOTTIE_NUMBER = 0.739085;
+  
+  function Dot3() {
+    this.x = Math.random() * canvas3.width;
+    this.y = Math.random() * canvas3.height;
+    this.lastX = this.x;
+    this.lastY = this.y;
+    this.velocity = 5;
+    this.angle = 0;
+    this.size = 2;
+  };
+  Dot3.prototype.render = function() {
+    this.lastX = this.x;
+    this.lastY = this.y;
+    this.x += this.velocity * Math.cos(this.angle);
+    this.y += this.velocity * Math.sin(this.angle);
+    
+    if (this.x > canvas3.width || this.x < 0) this.x = this.lastX = (this.x + canvas3.width) % canvas3.width;
+    if (this.y > canvas3.height || this.y < 0) this.y = this.lastY = (this.y + canvas3.height) % canvas3.height;
+    
+    ctx3.lineWidth = this.size;
+    ctx3.lineCap = ctx3.lineJoin = "round";
+    ctx3.beginPath();
+    ctx3.moveTo(this.lastX, this.lastY);
+    ctx3.lineTo(this.x, this.y);
+    ctx3.stroke();
+  };
+  let dot3Array = [];
+  for (let i = 0; i < 50; i++) dot3Array.push(new Dot3());
+  function randomizeDots3() {
+    let sum = 0;
+    for (let i = 0; i < dot3Array.length; i++) {
+      dot3Array[i].angle = Math.random() * Math.PI * 2;
+      sum += dot3Array[i].angle;
+    }
+    sum /= dot3Array.length;
+    sum = (sum + (Math.PI * 2)) % (Math.PI * 2);
+    sum = Number(sum.toFixed(6));
+    dot3AngleTxt.innerHTML = sum;
+    error3Txt.innerHTML = Math.abs((((sum - DOTTIE_NUMBER) / DOTTIE_NUMBER) * 100)).toFixed(6);
+  }
+  function cosDots3() {
+    let sum = 0;
+    for (let i = 0; i < dot3Array.length; i++) {
+      dot3Array[i].angle = Math.cos(dot3Array[i].angle);
+      sum += dot3Array[i].angle;
+    }
+    sum /= dot3Array.length;
+    sum = (sum + (Math.PI * 2)) % (Math.PI * 2);
+    sum = Number(sum.toFixed(6));
+    dot3AngleTxt.innerHTML = sum;
+    error3Txt.innerHTML = Math.abs((((sum - DOTTIE_NUMBER) / DOTTIE_NUMBER) * 100)).toFixed(6);
+  }
+  
+  function frame3() {
+    ctx3.fillStyle = `rgba(255, 255, 255, ${clearOpacity3})`;
+    ctx3.fillRect(0, 0, canvas3.width, canvas3.height);
+    
+    for (let i = 0; i < dot3Array.length; i++) dot3Array[i].render();
+    
+    if (canvas3Running) requestAnimationFrame(frame3);
+  }
+  frame3();
+  
+  function startCanvas3() {
+    if (canvas3Running) canvas3Running = false;
+    else {
+      canvas3Running = true;
+      frame3();
+    }
+  }
+</script>
+<canvas id = "canvas2" style = "background-color: black"></canvas>
+<button onclick = "startCanvas2()">Start/Stop</button>
+<button onclick = "particle2Array = []">Clear</button>
+<button onclick = "flowing2 = !flowing2">Toggle Flow</button>
+<div><b><u>Flow Rate:</u></b> <span id = "flow2Txt">500</span>%</div>
+<input type = "range" min = "0" max = "15" value = "12" step = "1" id = "flow2Range" oninput = "updateSettings2()">
+<div class = "desc"><b><i>(10/18/2021)</i></b> Simple Plinko board simulation, showing random data distribution.</div>
+<hr><hr>
+<script>
+  const ctx2 = canvas2.getContext("2d");
+  canvas2.width = canvas2.height = 1000;
+  let canvas2Running = false;
+  
+  let particle2Radius = 3;
+  let peg2Radius = 10;
+  let gravity2 = 0.1;
+  let bounciness2 = 0.5;
+  let stepsPerFrame2 = 1;
+  let flow2 = 5;
+  let hue2 = 240;
+  let clearOpacity2 = 0.3;
+  let flowing2 = true;
+  const MAX_PARTICLES2 = 1200;
+  
+  function Particle2() {
+    this.x = (canvas2.width / 2) + randBetween(-10, 10);
+    this.y = -particle2Radius - (Math.random() * 5);
+    this.vx = 0;
+    this.vy = 0;
+    this.dead = false;
+    this.bounciness = bounciness2 * randBetween(0.75, 1);
+    //hue2 = Math.random() * 360;
+    this.color = `hsl(${hue2}deg, 100%, ${randBetween(20, 80)}%)`;
+  }
+  Particle2.prototype.render = function() {
+    let lastX = this.x;
+    let lastY = this.y;
+    for (let i = 0; i < stepsPerFrame2; i++) {
+      this.x += this.vx;
+      this.y += this.vy;
+      this.vy += gravity2;
+      
+      for (let i = 0; i < peg2Array.length; i++) {
+        let dx = this.x - peg2Array[i].x;
+        let dy = this.y - peg2Array[i].y;
+        let distSq = (dx * dx) + (dy * dy);
+        let rad = particle2Radius + peg2Radius;
+        let radSq = rad * rad;
+        if (distSq <= radSq) {
+          let angle = Math.atan2(dy, dx);
+          let collX = Math.cos(angle);
+          let collY = Math.sin(angle);
+          let speed = ((this.vx * collX) + (this.vy * collY)) * 2;
+          this.vx -= this.bounciness * speed * collX;
+          this.vy -= this.bounciness * speed * collY;
+          this.x = peg2Array[i].x + (rad * collX);
+          this.y = peg2Array[i].y + (rad * collY);
+        }
+      }
+      
+      if (this.y - particle2Radius >= canvas2.height) {
+        this.dead = true;
+        let _x = this.x.toMultipleOf(Rows2.tileSize) / Rows2.tileSize;
+        if (_x < 0) return;
+        if (_x >= Rows2.array.length) return;
+        //Rows2.array[_x]++;
+      }
+    }
+    
+    ctx2.strokeStyle = this.color;
+    ctx2.lineWidth = particle2Radius * 2;
+    ctx2.lineJoin = ctx2.lineCap = "round";
+    ctx2.beginPath();
+    ctx2.moveTo(lastX, lastY);
+    ctx2.lineTo(this.x, this.y);
+    ctx2.stroke();
+  };
+  let particle2Array = [];
+  
+  function Peg2(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+  Peg2.prototype.render = function() {
+    ctx2.fillStyle = "white";
+    ctx2.fillCircle(this.x, this.y, peg2Radius);
+  };
+  let peg2Array = [];
+  for (let y = 0; y <= 8; y++) {
+    for (let x = 0; x <= 10; x++) {
+      let _x = y % 2 === 0 ? x : x + 0.5;
+      peg2Array.push(new Peg2(_x * (canvas2.width / 10), 100 + (y * (canvas2.height / 10))));
+    }
+  }
+  
+  let Rows2 = {
+    array: [],
+    tileSize: 5,
+    opacity: 0.5
+  };
+  Rows2.render = function() {
+    ctx2.globalAlpha = this.opacity;
+    ctx2.fillStyle = "white";
+    for (let i = 0; i < this.array.length; i++) {
+      let h = this.array[i] * this.tileSize;
+      ctx2.fillRect(i * this.tileSize, canvas2.height - h, this.tileSize, h);
+    }
+    ctx2.globalAlpha = 1;
+  };
+  
+  for (let i = 0; i < canvas2.width / Rows2.tileSize; i++) Rows2.array.push(0);
+  
+  function frame2() {
+    ctx2.fillStyle = `rgba(0, 0, 0, ${clearOpacity2})`;
+    ctx2.fillRect(0, 0, canvas2.width, canvas2.height);
+    
+    if (flowing2 && (particle2Array.length < MAX_PARTICLES2)) {
+      if (flow2 >= 1) {
+        for (let i = 0; i < flow2; i++) particle2Array.push(new Particle2());
+      }
+      else {
+        if (Math.random() <= flow2) particle2Array.push(new Particle2());
+      }
+    }
+    
+    while (particle2Array.length > MAX_PARTICLES2) particle2Array.pop();
+    
+    //Rows2.render();
+    
+    for (let i = 0; i < particle2Array.length; i++) {
+      particle2Array[i].render();
+      if (particle2Array[i].dead) {
+        particle2Array.splice(i, 1);
+        i--;
+      }
+    }
+    for (let i = 0; i < peg2Array.length; i++) peg2Array[i].render();
+    
+    if (canvas2Running) requestAnimationFrame(frame2);
+  }
+  frame2();
+  
+  function startCanvas2() {
+    if (canvas2Running) canvas2Running = false;
+    else {
+      canvas2Running = true;
+      frame2();
+    }
+  }
+  
+  let flow2RangeArray = [1, 5, 10, 20, 30, 40, 50, 75, 100, 200, 300, 400, 500, 600, 700, 800];
+  
+  function updateSettings2() {
+    flow2 = flow2Txt.innerHTML = flow2RangeArray[Number(flow2Range.value)];
+    flow2 = flow2RangeArray[Number(flow2Range.value)] / 100;
+  }
+</script>
+<canvas id = "canvas1" style = "background-color: black"></canvas>
+<button onclick = "startCanvas1()">Start/Stop</button>
+<div class = "desc"><b><i>(10/17/2021)</i></b> Holomorphic Dynamics visualization of escape paths. The yellow point is the starting value, and the blue point is the <b><i>c</i></b> value for the equation <b><i>z_n+1 = (z_n)^2 + c</i></b>. The red lines show the paths of the point through several iterations in the complex plane, scaled from -1 to 1. The mouse cursor drags either point.</div>
+<hr><hr>
+<script>
+  const ctx1 = canvas1.getContext("2d");
+  canvas1.width = canvas1.height = 1000;
+  let canvas1Running = false;
+  let canvas1Rect = canvas1.getBoundingClientRect();
+  let canvas1Ratio = canvas1.width / 300;
+  
+  let Mouse1 = {
+    down: false
+  };
+  
+  let scale1 = canvas1.width / 2;
+  
+  function gridToActual1(x, y) {
+    return {x: (x * scale1) + (canvas1.width / 2), y: (canvas1.height / 2) - (y * scale1)};
+  }
+  function actualToGrid1(x, y) {
+    return {x: (x - (canvas1.width / 2)) / scale1, y: ((canvas1.height / 2) - y) / scale1};
+  }
+  
+  let HolomorphicDynamic = {
+    constant: {
+      a: -0.52,
+      b: 0.58
+    },
+    start: {
+      a: 0,
+      b: 0
+    },
+    iterations: 25
+  };
+  HolomorphicDynamic.square = function(z) {
+    return {a: (z.a * z.a) - (z.b * z.b), b: 2 * z.a * z.b};
+  };
+  HolomorphicDynamic.draw = function() {
+    let curr = this.start;
+    ctx1.lineWidth = 3;
+    ctx1.strokeStyle = "red";
+    ctx1.beginPath();
+    let p = gridToActual1(this.start.a, this.start.b);
+    ctx1.moveTo(p.x, p.y);
+    for (let i = 0; i < this.iterations; i++) {
+      let sq = this.square(curr);
+      curr = {a: sq.a + this.constant.a, b: sq.b + this.constant.b};
+      
+      if (!(Math.abs(curr.a) >= 1000 || Math.abs(curr.b) >= 1000)) {
+        let p = gridToActual1(curr.a, curr.b);
+        ctx1.lineTo(p.x, p.y);
+      }
+    }
+    ctx1.stroke();
+    
+    ctx1.font = "bold 30px arial";
+    p = gridToActual1(this.constant.a, this.constant.b);
+    ctx1.fillStyle = "blue";
+    ctx1.fillCircle(p.x, p.y, 10);
+    ctx1.fillStyle = "rgba(255, 255, 255, 0.75)";
+    ctx1.fillText(`(${this.constant.a.toFixed(2)} ${this.constant.b >= 0 ? "+" : "-"} ${Math.abs(this.constant.b).toFixed(2)}i)`, p.x + 15, p.y + 10);
+    
+    p = gridToActual1(this.start.a, this.start.b);
+    ctx1.fillStyle = "yellow";
+    ctx1.fillCircle(p.x, p.y, 10);
+    ctx1.fillStyle = "rgba(255, 255, 255, 0.75)";
+    ctx1.fillText(`(${this.start.a.toFixed(2)} ${this.start.b >= 0 ? "+" : "-"} ${Math.abs(this.start.b).toFixed(2)}i)`, p.x + 15, p.y + 10);
+  };
+  
+  function frame1() {
+    ctx1.clearRect(0, 0, canvas1.width, canvas1.height);
+    
+    ctx1.lineWidth = 3;
+    ctx1.strokeStyle = "white";
+    ctx1.lineCap = ctx1.lineJoin = "round";
+    ctx1.beginPath();
+    ctx1.moveTo(0, canvas1.height / 2);
+    ctx1.lineTo(canvas1.width, canvas1.height / 2);
+    ctx1.stroke();
+    ctx1.beginPath();
+    ctx1.moveTo(canvas1.width / 2, 0);
+    ctx1.lineTo(canvas1.width / 2, canvas1.height);
+    ctx1.stroke();
+    
+    HolomorphicDynamic.draw();
+    
+    if (canvas1Running) requestAnimationFrame(frame1);
+  }
+  frame1();
+  
+  function startCanvas1() {
+    if (canvas1Running) canvas1Running = false;
+    else {
+      canvas1Running = true;
+      frame1();
+    }
+  }
+  
+  canvas1.addEventListener("mousedown", e => {
+    if (!canvas1Running) return;
+    e.preventDefault();
+    Mouse1.down = true;
+    canvas1Rect = canvas1.getBoundingClientRect();
+    let eX = (e.clientX - canvas1Rect.left) * canvas1Ratio;
+    let eY = (e.clientY - canvas1Rect.top) * canvas1Ratio;
+    let c = gridToActual1(HolomorphicDynamic.constant.a, HolomorphicDynamic.constant.b);
+    let s = gridToActual1(HolomorphicDynamic.start.a, HolomorphicDynamic.start.b);
+    let dx1 = eX - c.x;
+    let dx2 = eX - s.x;
+    let dy1 = eY - c.y;
+    let dy2 = eY - s.y;
+    let distSqC = (dx1 * dx1) + (dy1 * dy1);
+    let distSqS = (dx2 * dx2) + (dy2 * dy2);
+    let p = actualToGrid1(eX, eY);
+    if (distSqC < distSqS) {
+      HolomorphicDynamic.constant.a = p.x;
+      HolomorphicDynamic.constant.b = p.y;
+    }
+    else {
+      HolomorphicDynamic.start.a = p.x;
+      HolomorphicDynamic.start.b = p.y;
+    }
+  });
+  window.addEventListener("mouseup", e => {
+    if (!canvas1Running) return;
+    Mouse1.down = false;
+  });
+  canvas1.addEventListener("mousemove", e => {
+    if (!canvas1Running || !Mouse1.down) return;
+    e.preventDefault();
+    canvas1Rect = canvas1.getBoundingClientRect();
+    let eX = (e.clientX - canvas1Rect.left) * canvas1Ratio;
+    let eY = (e.clientY - canvas1Rect.top) * canvas1Ratio;
+    let c = gridToActual1(HolomorphicDynamic.constant.a, HolomorphicDynamic.constant.b);
+    let s = gridToActual1(HolomorphicDynamic.start.a, HolomorphicDynamic.start.b);
+    let dx1 = eX - c.x;
+    let dx2 = eX - s.x;
+    let dy1 = eY - c.y;
+    let dy2 = eY - s.y;
+    let distSqC = (dx1 * dx1) + (dy1 * dy1);
+    let distSqS = (dx2 * dx2) + (dy2 * dy2);
+    let p = actualToGrid1(eX, eY);
+    if (distSqC < distSqS) {
+      HolomorphicDynamic.constant.a = p.x;
+      HolomorphicDynamic.constant.b = p.y;
+    }
+    else {
+      HolomorphicDynamic.start.a = p.x;
+      HolomorphicDynamic.start.b = p.y;
+    }
+  });
+</script>
+
+
+
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
