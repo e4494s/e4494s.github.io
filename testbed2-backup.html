@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel = "icon"  href = "https://e4494s.neocities.org/images/favicon.png" type = "image/png">
-  <link rel = "stylesheet" href = "https://e4494s.neocities.org/stylesheets/main.css">
+  <link rel = "icon"  href = "images/favicon.png" type = "image/png">
+  <link rel = "stylesheet" href = "stylesheets/main.css">
   <title>Test Bed 2 ~ e4494s</title>
   <style>
     canvas {
@@ -28,9 +27,9 @@
   </style>
 </head>
 <body>
-<script src = "https://e4494s.neocities.org/scripts/main.js"></script>
+<script src = "scripts/main.js"></script>
 <h1>The Second Island of Misfit Code</h1>
-<div style = "font-size: 16px; background-color: rgb(255, 150, 150); padding: 8px; margin-top: 25px; margin-bottom: 25px; border-radius: 10px"><b><i>Moved to from <a href = "https://e4494s.neocities.org/testbed.html" target = "_blank">testbed.html</a> on 10/17/2021.</i></b></div>
+<div style = "font-size: 16px; background-color: rgb(255, 150, 150); padding: 8px; margin-top: 25px; margin-bottom: 25px; border-radius: 10px"><b><i>Moved to from <a href = "testbed.html" target = "_blank">testbed.html</a> on 10/17/2021.</i></b></div>
 <!--
 <canvas id = "canvas0"></canvas>
 <button onclick = "startCanvas0()">Start/Stop</button>
@@ -57,6 +56,2321 @@
   }
 </script>
 -->
+<canvas id = "canvas47"></canvas>
+<button onclick = "startCanvas47()">Start/Stop</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps47Txt"></span></b></i></div>
+<table>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Number of Arms:</u></b> <span id = "arm47SymmetryTxt">6</span></div>
+      <input type = "range" min = "1" max = "24" step = "1" value = "6" id = "arm47SymmetryRange" oninput = "updateSettings47(false)">
+    </td>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "arm47ShowArmsCheckbox" oninput = "updateSettings47(false)" CHECKED>
+      <label for = "arm47ShowArmsCheckbox">Show Arms</label>
+    </td>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "arm47RainbowArmsCheckbox" oninput = "updateSettings47(false)">
+      <label for = "arm47RainbowArmsCheckbox">Rainbow Arms</label>
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Arm Thickness:</u></b> <span id = "arm47ArmThicknessTxt">3</span>px</div>
+      <input type = "range" min = "1" max = "15" step = "1" value = "3" id = "arm47ArmThicknessRange" oninput = "updateSettings47(false)">
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Joints Per Arm:</u></b> <span id = "arm47SegmentsTxt">5</span></div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "arm47SegmentsRange" oninput = "updateSettings47(true)">
+    </td>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "arm47ShowJointsCheckbox" oninput = "updateSettings47(false)" CHECKED>
+      <label for = "arm47ShowJointsCheckbox">Show Joints</label>
+    </td>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "arm47RainbowJointsCheckbox" oninput = "updateSettings47(false)">
+      <label for = "arm47RainbowJointsCheckbox">Rainbow Joints</label>
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Joint Size:</u></b> <span id = "arm47JointSizeTxt">5</span>px</div>
+      <input type = "range" min = "1" max = "15" step = "1" value = "5" id = "arm47JointSizeRange" oninput = "updateSettings47(false)">
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Arm Length:</u></b> <span id = "arm47TotalLengthTxt">400</span>px</div>
+      <input type = "range" min = "100" max = "500" step = "50" value = "400" id = "arm47TotalLengthRange" oninput = "updateSettings47(true)">
+    </td>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "arm47ShowShadowsCheckbox" oninput = "updateSettings47(false)">
+      <label for = "arm47ShowShadowsCheckbox">Show Shadows</label>
+    </td>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "arm47RainbowShadowsCheckbox" oninput = "updateSettings47(false)">
+      <label for = "arm47RainbowShadowsCheckbox">Rainbow Shadows</label>
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Shadow Opacity:</u></b> <span id = "arm47ShadowOpacityTxt">25</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "5" value = "25" id = "arm47ShadowOpacityRange" oninput = "updateSettings47(false)">
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "arm47AnchorOnCheckbox" oninput = "updateSettings47(false)" CHECKED>
+      <label for = "arm47AnchorOnCheckbox">Anchor to center</label>
+    </td>
+  </tr>
+</table>
+<div class = "desc"><b><i>(1/24/2022)</i></b> Continuing the FABRIK experiment trend, this is a simple FABRIK chain with symmetry (dragged by the cursor), making cool intricate patterns that are similar to <a href = "servo.html" target = "_blank">servo.html</a> but manually controlled.<br><b><i>Update: (Later that day)</i></b> I added all the settings from servo.html and sliders for everything.</div>
+<hr><hr>
+<script>
+  const ctx47 = canvas47.getContext("2d");
+  canvas47.width = canvas47.height = 1000;
+  let canvas47Running = false;
+  let canvas47Ratio = canvas47.width / 300;
+  let canvas47Rect = canvas47.getBoundingClientRect();
+  
+  let Mouse47 = {
+    x: 0,
+    y: 0,
+    down: false
+  };
+  
+  let Arm47 = {
+    points: [],
+    anchor: {
+      x: canvas47.width / 2,
+      y: canvas47.height / 2,
+      on: true
+    },
+    segments: 6,
+    totalLength: 400,
+    symmetry: 6,
+    
+    showShadows: false,
+    showJoints: true,
+    showArms: true,
+    
+    armThickness: 3,
+    jointSize: 5,
+    shadowOpacity: 0.25,
+    
+    rainbowArms: false,
+    rainbowJoints: false,
+    rainbowShadows: false,
+    
+    easeToCursor: false,
+    easeSpeed: 0.05
+  };
+  Arm47.reset = function() {
+    let orientation = 270;
+    
+    this.segmentLength = this.totalLength / this.segments;
+    this.points = [];
+    let cx = this.anchor.x;
+    let cy = this.anchor.y;
+    for (let i = 0; i < this.segments + 1; i++) {
+      this.points.push({x: cx, y: cy});
+      cx += this.segmentLength * Math.cos(toRad(orientation));
+      cy += this.segmentLength * Math.sin(toRad(orientation));
+    }
+    
+    if (!canvas47Running) frame47();
+  };
+  Arm47.snapToPoint = function(x, y) {
+    let oX = this.points[0].x;
+    let oY = this.points[0].y;
+    let endX = x;
+    let endY = y;
+    for (let i = this.points.length - 1; i >= 0; i--) {
+      this.points[i].x = endX;
+      this.points[i].y = endY;
+      if (i !== 0) {
+        let dx = this.points[i - 1].x - endX;
+        let dy = this.points[i - 1].y - endY;
+        let angle = Math.atan2(dy, dx);
+        endX += this.segmentLength * Math.cos(angle);
+        endY += this.segmentLength * Math.sin(angle);
+      }
+    }
+    
+    if (!this.anchor.on) return;
+    
+    endX = oX;
+    endY = oY;
+    
+    for (let i = 0; i < this.points.length; i++) {
+      this.points[i].x = endX;
+      this.points[i].y = endY;
+      if (i !== this.points.length - 1) {
+        let dx = this.points[i + 1].x - endX;
+        let dy = this.points[i + 1].y - endY;
+        let angle = Math.atan2(dy, dx);
+        endX += this.segmentLength * Math.cos(angle);
+        endY += this.segmentLength * Math.sin(angle);
+      }
+    }
+  };
+  Arm47.easeToPoint = function(x, y, t) {
+    let endX = this.points[this.points.length - 1].x;
+    let endY = this.points[this.points.length - 1].y;
+    
+    this.snapToPoint(((1 - t) * endX) + (t * x), ((1 - t) * endY) + (t * y));
+  };
+  Arm47.rotatePoint = function(x, y, angle) {
+    let P = {x: x, y: y};
+    P.x -= canvas47.width / 2;
+    P.y -= canvas47.height / 2;
+    
+    let R = {x: (P.x * Math.cos(angle)) - (P.y * Math.sin(angle)), y: (P.x * Math.sin(angle)) + (P.y * Math.cos(angle))};
+    R.x += canvas47.width / 2;
+    R.y += canvas47.height / 2;
+    
+    return R;
+  };
+  Arm47.draw = function(angle) {
+    ctx47.lineWidth = this.armThickness;
+    ctx47.lineCap = ctx47.lineJoin = "round";
+    
+    ctx47.beginPath();
+    for (let i = 0; i < this.points.length; i++) {
+      let P = this.rotatePoint(this.points[i].x, this.points[i].y, angle);
+      ctx47.lineTo(P.x, P.y);
+    }
+    
+    if (this.showShadows) {
+      ctx47.fillStyle = this.rainbowShadows ? `hsla(${toDeg(angle)}deg, 100%, 50%, ${this.shadowOpacity})` : `rgba(0, 0, 0, ${this.shadowOpacity})`;
+      ctx47.fill();
+    }
+    
+    if (this.showArms) {
+      ctx47.strokeStyle = this.rainbowArms ? `hsl(${toDeg(angle)}deg, 100%, 50%)` : "black";
+      ctx47.stroke();
+    }
+    
+    if (this.showJoints) {
+      ctx47.fillStyle = this.rainbowJoints ? `hsl(${toDeg(angle)}deg, 100%, 50%)` : "black";
+      for (let i = 1; i < this.points.length - 1; i++) {
+        let P = this.rotatePoint(this.points[i].x, this.points[i].y, angle);
+        ctx47.fillCircle(P.x, P.y, this.jointSize);
+      }
+    }
+  };
+  Arm47.update = function() {
+    if (Mouse47.down) {
+      if (this.easeToCursor) this.easeToPoint(Mouse47.x, Mouse47.y, this.easeSpeed);
+      else this.snapToPoint(Mouse47.x, Mouse47.y);
+    }
+  };
+  
+  let lastFrame47Time = 0;
+  let lastFps47DisplayTime = 1000;
+  
+  function frame47() {
+    if (Date.now() - lastFps47DisplayTime >= 500) {
+      fps47Txt.innerHTML = (1000 / (Date.now() - lastFrame47Time)).toFixed(1);
+      lastFps47DisplayTime = Date.now();
+    }
+    lastFrame47Time = Date.now();
+    
+    ctx47.clearRect(0, 0, canvas47.width, canvas47.height);
+    
+    Arm47.update();
+    for (let i = 0; i < Arm47.symmetry; i++) Arm47.draw((i / Arm47.symmetry) * Math.PI * 2);
+    
+    if (canvas47Running) requestAnimationFrame(frame47);
+  }
+  Arm47.reset();
+  
+  function startCanvas47() {
+    if (canvas47Running) canvas47Running = false;
+    else {
+      canvas47Running = true;
+      frame47();
+    }
+  }
+  
+  let arm47SegmentsRangeArray = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40, 50, 100, 200];
+  arm47SegmentsRange.max = arm47SegmentsRangeArray.length - 1;
+  arm47SegmentsRange.value = arm47SegmentsRangeArray.indexOf(5);
+  
+  function updateSettings47(reset) {
+    Arm47.symmetry = arm47SymmetryTxt.innerHTML = Number(arm47SymmetryRange.value);
+    
+    Arm47.segments = arm47SegmentsRangeArray[Number(arm47SegmentsRange.value)] + 1;
+    arm47SegmentsTxt.innerHTML = Arm47.segments - 1;
+    
+    Arm47.totalLength = arm47TotalLengthTxt.innerHTML = Number(arm47TotalLengthRange.value);
+    
+    let lastAnchor = Arm47.anchor.on;
+    Arm47.anchor.on = arm47AnchorOnCheckbox.checked;
+    if (!lastAnchor && Arm47.anchor.on) reset = true;
+    
+    Arm47.showArms = arm47ShowArmsCheckbox.checked;
+    Arm47.showJoints = arm47ShowJointsCheckbox.checked;
+    Arm47.showShadows = arm47ShowShadowsCheckbox.checked;
+    
+    Arm47.rainbowArms = arm47RainbowArmsCheckbox.checked;
+    Arm47.rainbowJoints = arm47RainbowJointsCheckbox.checked;
+    Arm47.rainbowShadows = arm47RainbowShadowsCheckbox.checked;
+    
+    Arm47.armThickness = arm47ArmThicknessTxt.innerHTML = Number(arm47ArmThicknessRange.value);
+    Arm47.jointSize = arm47JointSizeTxt.innerHTML = Number(arm47JointSizeRange.value);
+    Arm47.shadowOpacity = Number(arm47ShadowOpacityRange.value) / 100;
+    arm47ShadowOpacityTxt.innerHTML = arm47ShadowOpacityRange.value;
+    
+    if (reset) Arm47.reset();
+    else if (!canvas47Running) frame47();
+  }
+  
+  canvas47.addEventListener("mousedown", e => {
+    if (!canvas47Running) return;
+    e.preventDefault();
+    Mouse47.down = true;
+    canvas47Rect = canvas47.getBoundingClientRect();
+    Mouse47.x = (e.clientX - canvas47Rect.left) * canvas47Ratio;
+    Mouse47.y = (e.clientY - canvas47Rect.top) * canvas47Ratio;
+  });
+  canvas47.addEventListener("mousemove", e => {
+    if (!canvas47Running || !Mouse47.down) return;
+    e.preventDefault();
+    canvas47Rect = canvas47.getBoundingClientRect();
+    Mouse47.x = (e.clientX - canvas47Rect.left) * canvas47Ratio;
+    Mouse47.y = (e.clientY - canvas47Rect.top) * canvas47Ratio;
+  });
+  window.addEventListener("mouseup", e => {
+    Mouse47.down = false;
+  });
+</script>
+<canvas id = "canvas46" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "startCanvas46()">Start/Stop</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps46Txt"></span></b></i></div>
+<div class = "desc"><b><i>(1/23/2022)</i></b> I want to make another FABRIK-based animation, with colored claws reaching for colored boxes and placing them offscreen, and repeating. I have the arms working but the grabbing and placing down doesn't work yet.<br><b><i>(1/24/2022)</i></b> I finally got everything working properly, each arm bends to grab its box and places it offscreen, and repeats. It might not be super impressive but I like this project and I'm pretty proud of it, and it's really satisfying to watch. I also got the claw part of the arms to look right, and added text to show each arm's total number of collected boxes.</div>
+<hr><hr>
+<script>
+  const ctx46 = canvas46.getContext("2d");
+  canvas46.width = canvas46.height = 1000;
+  let canvas46Running = false;
+  
+  let arm46Length = 600;
+  let arm46Segments = 6;
+  let arm46Speed = 0.05;
+  let arm46SegmentLength = arm46Length / arm46Segments;
+  let arm46Thickness = 20;
+  let box46Size = 50;
+  let arm46MagnetDist = 200;
+  let arm46GrabDist = (box46Size + arm46Thickness) / 2;
+  let arm46ClawLength = box46Size + arm46Thickness;
+  let arm46ClawDepth = box46Size + (arm46Thickness / 2);
+  let arm46PlaceDist = box46Size * 1.5;
+  let arm46MagnetSpeed = 3;
+  let shadows46 = true;
+  
+  function Arm46(anchorX, anchorY, orientation, color) {
+    this.anchor = {
+      x: anchorX,
+      y: anchorY
+    };
+    
+    this.points = [];
+    let cx = this.anchor.x;
+    let cy = this.anchor.y;
+    for (let i = 0; i < arm46Segments + 1; i++) {
+      this.points.push({x: cx, y: cy});
+      cx += arm46SegmentLength * Math.cos(toRad(orientation));
+      cy += arm46SegmentLength * Math.sin(toRad(orientation));
+    }
+    
+    this.end = {
+      x: this.points[this.points.length - 1].x,
+      y: this.points[this.points.length - 1].y
+    };
+    
+    this.color = color;
+    
+    this.box = new Box46(this.color);
+    this.pullingBox = false;
+    this.holdingBox = false;
+    this.destination = {x: this.anchor.x, y: this.anchor.y};
+    
+    this.collected = 0;
+    
+    this.speed = arm46Speed// * randBetween(0.75, 1);
+  }
+  Arm46.prototype.draw = function() {
+    ctx46.lineCap = ctx46.lineJoin = "round";
+    
+    ctx46.beginPath();
+    ctx46.moveTo(this.anchor.x, this.anchor.y);
+    for (let i = 0; i < this.points.length; i++) ctx46.lineTo(this.points[i].x, this.points[i].y);
+    
+    let dx = this.points[this.points.length - 2].x - this.end.x;
+    let dy = this.points[this.points.length - 2].y - this.end.y;
+    let norm = Math.atan2(dy, dx) + (Math.PI / 2);
+    let angle = norm + (Math.PI / 2);
+    let left = {x: this.end.x - (arm46ClawLength * 0.5 * Math.cos(norm)), y: this.end.y - (arm46ClawLength * 0.5 * Math.sin(norm))};
+    let topLeft = {x: left.x + (arm46ClawDepth * Math.cos(angle)), y: left.y + (arm46ClawDepth * Math.sin(angle))};
+    let right = {x: this.end.x + (arm46ClawLength * 0.5 * Math.cos(norm)), y: this.end.y + (arm46ClawLength * 0.5 * Math.sin(norm))};
+    let topRight = {x: right.x + (arm46ClawDepth * Math.cos(angle)), y: right.y + (arm46ClawDepth * Math.sin(angle))};
+    ctx46.moveTo(topLeft.x, topLeft.y);
+    ctx46.lineTo(left.x, left.y);
+    ctx46.lineTo(right.x, right.y);
+    ctx46.lineTo(topRight.x, topRight.y);
+    
+    if (!shadows46) {
+      ctx46.lineWidth = arm46Thickness * 1.33;
+      ctx46.strokeStyle = "black";
+      ctx46.stroke();
+    }
+    
+    if (shadows46) {
+      ctx46.shadowBlur = 10;
+      ctx46.shadowColor = "black";
+    }
+    ctx46.strokeStyle = this.color;
+    ctx46.lineWidth = arm46Thickness;
+    ctx46.stroke();
+    
+    ctx46.shadowBlur = 0;
+    
+    ctx46.fillStyle = "white";
+    for (let i = 1; i < this.points.length; i++) ctx46.fillCircle(this.points[i].x, this.points[i].y, arm46Thickness / 4);
+    
+    this.box.draw(toDeg(angle));
+    
+    ctx46.fillStyle = this.color;
+    ctx46.font = "bold 50px verdana";
+    ctx46.shadowBlur = 25;
+    ctx46.shadowColor = "black";
+    for (let i = 0; i < 5; i++) this.drawScore();
+    ctx46.shadowBlur = 0;
+  };
+  Arm46.prototype.snapToPoint = function(x, y) {
+    let oX = this.points[0].x;
+    let oY = this.points[0].y;
+    let cx = x;
+    let cy = y;
+    for (let i = this.points.length - 1; i >= 0; i--) {
+      this.points[i].x = cx;
+      this.points[i].y = cy;
+      if (i !== 0) {
+        let dx = this.points[i - 1].x - cx;
+        let dy = this.points[i - 1].y - cy;
+        let angle = Math.atan2(dy, dx);
+        cx += arm46SegmentLength * Math.cos(angle);
+        cy += arm46SegmentLength * Math.sin(angle);
+      }
+    }
+    
+    cx = oX;
+    cy = oY;
+    
+    for (let i = 0; i < this.points.length; i++) {
+      this.points[i].x = cx;
+      this.points[i].y = cy;
+      if (i !== this.points.length - 1) {
+        let dx = this.points[i + 1].x - cx;
+        let dy = this.points[i + 1].y - cy;
+        let angle = Math.atan2(dy, dx);
+        cx += arm46SegmentLength * Math.cos(angle);
+        cy += arm46SegmentLength * Math.sin(angle);
+      }
+    }
+    
+    this.end.x = this.points[this.points.length - 1].x;
+    this.end.y = this.points[this.points.length - 1].y;
+  };
+  Arm46.prototype.easeToPoint = function(x, y, t) {
+    this.end.x = this.points[this.points.length - 1].x;
+    this.end.y = this.points[this.points.length - 1].y;
+    
+    this.snapToPoint(((1 - t) * this.end.x) + (t * x), ((1 - t) * this.end.y) + (t * y));
+  };
+  Arm46.prototype.update = function() {
+    if (!this.holdingBox) { // If not holding box, move towards box
+      this.easeToPoint(this.box.x, this.box.y, this.speed);
+      let dx = this.box.x - this.end.x;
+      let dy = this.box.y - this.end.y;
+      let distSq = (dx * dx) + (dy * dy);
+      
+      if (distSq <= arm46MagnetDist * arm46MagnetDist) this.pullingBox = true; // If close enough, activate magnet
+      
+      if (this.pullingBox) { // Pull box closer
+        let dx = this.box.x - this.end.x;
+        let dy = this.box.y - this.end.y;
+        let angle = Math.atan2(dy, dx) + Math.PI;
+        this.box.x += arm46MagnetSpeed * Math.cos(angle);
+        this.box.y += arm46MagnetSpeed * Math.sin(angle);
+      }
+      
+      if (distSq <= arm46GrabDist * arm46GrabDist) { // If the box is close enough to the claw, set it to holding
+        this.holdingBox = true;
+        this.pullingBox = false;
+        this.putBoxOnClaw();
+        this.setDestination();
+      }
+    }
+    else { // If holding box, ease towards destination
+      this.easeToPoint(this.destination.x, this.destination.y, this.speed / 2);
+      this.putBoxOnClaw();
+      
+      let dx = this.destination.x - this.end.x;
+      let dy = this.destination.y - this.end.y;
+      let distSq = (dx * dx) + (dy * dy);
+      
+      if (distSq <= arm46PlaceDist * arm46PlaceDist) { // If close enough to destination, place down box
+        this.box.resetPos();
+        this.holdingBox = false;
+        this.collected++;
+        this.speed = arm46Speed// * randBetween(0.75, 1);
+      }
+    }
+  };
+  Arm46.prototype.putBoxOnClaw = function() {
+    let dx = this.points[this.points.length - 2].x - this.end.x;
+    let dy = this.points[this.points.length - 2].y - this.end.y;
+    let norm = Math.atan2(dy, dx) + (Math.PI / 2);
+    let angle = norm + (Math.PI / 2);
+    this.box.x = this.end.x + (arm46GrabDist * Math.cos(angle));
+    this.box.y = this.end.y + (arm46GrabDist * Math.sin(angle));
+  };
+  Arm46.prototype.setDestination = function() {
+    this.destination = {x: this.anchor.x, y: this.anchor.y};
+  };
+  let arm46Array = [];
+  
+  function Box46(color) {
+    this.resetPos();
+    this.color = color;
+  }
+  Box46.prototype.draw = function(angle) {
+    let a = angle;//(angle + 360) % 90;
+    
+    if (shadows46) {
+      ctx46.shadowBlur = 10;
+      ctx46.shadowColor = "black";
+    }
+    
+    ctx46.fillStyle = this.color;
+    ctx46.fillRotatedRectFromCenter(this.x, this.y, box46Size, box46Size, a);
+    
+    ctx46.shadowBlur = 0;
+    
+    if (!shadows46) {
+      ctx46.lineWidth = 3;
+      ctx46.strokeStyle = "black";
+      ctx46.strokeRotatedRectFromCenter(this.x, this.y, box46Size, box46Size, a);
+    }
+  };
+  Box46.prototype.resetPos = function() {
+    this.x = (canvas46.width / 2) + randBetween(-50, 50);
+    this.y = (canvas46.height / 2) + randBetween(-50, 50);
+  };
+  
+  let lastFrame46Time = 0;
+  let lastFps46DisplayTime = 1000;
+  
+  function frame46() {
+    if (Date.now() - lastFps46DisplayTime >= 500) {
+      fps46Txt.innerHTML = (1000 / (Date.now() - lastFrame46Time)).toFixed(1);
+      lastFps46DisplayTime = Date.now();
+    }
+    lastFrame46Time = Date.now();
+    
+    ctx46.clearRect(0, 0, canvas46.width, canvas46.height);
+    
+    for (let i = 0; i < arm46Array.length; i++) {
+      arm46Array[i].update();
+      arm46Array[i].draw();
+    }
+    
+    if (canvas46Running) requestAnimationFrame(frame46);
+  }
+  
+  function reset46() {
+    arm46SegmentLength = arm46Length / arm46Segments;
+    arm46GrabDist = (box46Size + arm46Thickness) / 2;
+    arm46ClawLength = box46Size + arm46Thickness;
+    arm46ClawDepth = box46Size + (arm46Thickness / 2);
+    arm46PlaceDist = box46Size * 1.5;
+    
+    arm46Array = [];
+    
+    let red = new Arm46(0, 0, 45, "red");
+    let yellow = new Arm46(canvas46.width, 0, 135, "yellow");
+    let green = new Arm46(canvas46.width, canvas46.height, 225, "green");
+    let blue = new Arm46(0, canvas46.height, 315, "blue");
+    
+    red.setDestination = function() {
+      if (Math.random() < 0.5) this.destination = {x: randBetween(100, 200), y: -100};
+      else this.destination = {x: -100, y: randBetween(100, 200)};
+    };
+    yellow.setDestination = function() {
+      if (Math.random() < 0.5) this.destination = {x: canvas46.width - randBetween(100, 200), y: -100};
+      else this.destination = {x: canvas46.width + 100, y: randBetween(100, 200)};
+    };
+    green.setDestination = function() {
+      if (Math.random() < 0.5) this.destination = {x: canvas46.width - randBetween(100, 200), y: canvas46.height + 100};
+      else this.destination = {x: canvas46.width + 100, y: canvas46.height - randBetween(100, 200)};
+    };
+    blue.setDestination = function() {
+      if (Math.random() < 0.5) this.destination = {x: randBetween(100, 200), y: canvas46.height + 100};
+      else this.destination = {x: -100, y: canvas46.height - randBetween(100, 200)};
+    };
+    
+    red.drawScore = function() {
+      ctx46.direction = "ltr";
+      ctx46.fillText(this.collected, 25, 65);
+    }
+    yellow.drawScore = function() {
+      ctx46.direction = "rtl";
+      ctx46.fillText(this.collected, canvas46.width - 25, 65);
+    };
+    green.drawScore = function() {
+      ctx46.direction = "rtl";
+      ctx46.fillText(this.collected, canvas46.width - 25, canvas46.height - 25);
+    };
+    blue.drawScore = function() {
+      ctx46.direction = "ltr";
+      ctx46.fillText(this.collected, 25, canvas46.height - 25)
+    };
+    
+    red.snapToPoint(canvas46.width / 2, 0);
+    yellow.snapToPoint(canvas46.width, canvas46.height / 2);
+    green.snapToPoint(canvas46.width / 2, canvas46.height);
+    blue.snapToPoint(0, canvas46.height / 2);
+    
+    arm46Array.push(red);
+    arm46Array.push(yellow);
+    arm46Array.push(green);
+    arm46Array.push(blue);
+    
+    if (!canvas46Running) frame46();
+  }
+  reset46();
+  
+  function startCanvas46() {
+    if (canvas46Running) canvas46Running = false;
+    else {
+      canvas46Running = true;
+      frame46();
+    }
+  }
+</script>
+<canvas id = "canvas45" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "draw45()">Redraw</button>
+<div class = "desc"><b><i>(1/23/2022)</i></b> More random generative art -- I'm not super pleased with how this turned out and at some point in the future I might mess with the parameters until I like it more. But it's still interesting.</div>
+<hr><hr>
+<script>
+  const ctx45 = canvas45.getContext("2d");
+  canvas45.width = canvas45.height = 1000;
+  
+  let bands45 = 100;
+  let radius45 = 200;
+  let numCircles45 = 25;
+  let fillChance45 = 0.25;
+  let outlineChance45 = 0.1;
+  let colorVariation45 = 0.2;
+  
+  function Circle45() {
+    this.x = Math.random() * canvas45.width;
+    this.y = Math.random() * canvas45.height;
+    this.hue = Math.random() * 360;
+    this.radiusRatio = randBetween(0.5, 1);
+  }
+  Circle45.prototype.draw = function(radius, brightness) {
+    ctx45.fillStyle = `hsla(${this.hue + randBetween(-180 * colorVariation45, 180 * colorVariation45)}deg, ${randBetween(50, 100)}%, ${brightness}%, ${randBetween(0.3, 0.6)})`;
+    if (Math.random() < fillChance45) ctx45.fillCircle(this.x, this.y, radius * this.radiusRatio);
+    
+    ctx45.lineWidth = 2;
+    if (Math.random() < outlineChance45) ctx45.strokeCircle(this.x, this.y, radius * this.radiusRatio);
+  };
+  let circle45Array = [];
+  
+  function draw45() {
+    bands45 = Math.random() < 0.25 ? randBetween(5, 15) : randBetween(40, 100); // 25% chance to draw few bands, 75% chance to draw many bands
+    radius45 = randBetween(100, 300);
+    numCircles45 = Math.round(randBetween(10, 30));
+    fillChance45 = randBetween(0.2, 1);
+    outlineChance45 = Math.random() < 0.5 ? Math.random() * fillChance45 * 0.25 : 0; // 50% chance to have outline or no outline
+    colorVariation45 = Math.random() * 0.25;
+    
+    ctx45.fillStyle = `hsl(${Math.random() * 360}deg, ${randBetween(50, 100)}%, ${randBetween(80, 100)}%)`;
+    ctx45.fillRect(0, 0, canvas45.width, canvas45.height);
+    
+    circle45Array = [];
+    for (let i = 0; i < numCircles45; i++) circle45Array.push(new Circle45());
+    
+    for (let i = 1; i <= bands45; i++) {
+      let ratio = 1 - (i / bands45);
+      let radius = radius45 * ratio;
+      let brightness = ratio * 100;
+      for (let j = 0; j < circle45Array.length; j++) circle45Array[j].draw(radius, brightness);
+    }
+  }
+  draw45();
+</script>
+<canvas id = "canvas44" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "startCanvas44()">Start/Stop</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps44Txt"></span></b></i></div>
+<div class = "desc"><b><i>(1/22/2022)</i></b> "Spelunking" Move your cursor slowly around the screen to explore the cave. Another experiment with the <a href = "http://andreasaristidou.com/FABRIK.html" target = "_blank">FABRIK algorithm</a> to make creatures follow the cursor around slowly. They also lose brightness and eye glow the further the cursor is to give an effect like shining a flashlight.</div>
+<hr><hr>
+<script>
+  const ctx44 = canvas44.getContext("2d");
+  canvas44.width = canvas44.height = 1000;
+  let canvas44Running = false;
+  let canvas44Ratio = canvas44.width / 500;
+  let canvas44Rect = canvas44.getBoundingClientRect();
+  
+  let chain44SenseRadius = 200;
+  
+  let Mouse44 = {
+    down: false,
+    x: -100,
+    y: -100,
+    onCanvas: false
+  };
+  
+  function Chain44(anchorX, anchorY, totalLength, numSegments, orientation, thickness, easeSpeed) {
+    this.anchor = {
+      x: anchorX,
+      y: anchorY
+    };
+    
+    this.totalLength = totalLength;
+    this.segmentLength = this.totalLength / numSegments;
+    
+    this.points = [];
+    let cx = this.anchor.x;
+    let cy = this.anchor.y;
+    for (let i = 0; i < numSegments + 1; i++) {
+      this.points.push({x: cx, y: cy});
+      cx += this.segmentLength * Math.cos(toRad(orientation));
+      cy += this.segmentLength * Math.sin(toRad(orientation));
+    }
+    
+    this.end = {
+      x: this.points[this.points.length - 1].x,
+      y: this.points[this.points.length - 1].y
+    };
+    
+    this.thickness = thickness;
+    this.easeSpeed = easeSpeed;
+  }
+  Chain44.prototype.draw = function() {
+    let dx = Mouse44.x - this.end.x;
+    let dy = Mouse44.y - this.end.y;
+    let distSq = (dx * dx) + (dy * dy);
+    let ratio = 1 - (distSq / (canvas44.width * canvas44.width * 0.25));
+    this.ratio = ratio;
+    
+    ctx44.lineWidth = this.thickness;
+    ctx44.lineJoin = ctx44.lineCap = "round";
+    ctx44.strokeStyle = `hsl(0deg, 0%, ${ratio * 4}%)`;
+    ctx44.beginPath();
+    for (let i = 0; i < this.points.length; i++) ctx44.lineTo(this.points[i].x, this.points[i].y);
+    ctx44.stroke();
+    
+    ctx44.shadowColor = "white";
+    ctx44.shadowBlur = ratio * 20;
+    ctx44.fillStyle = `rgba(255, 255, 255, ${ratio})`;
+    ctx44.fillCircle(this.end.x, this.end.y, this.thickness / 4);
+    ctx44.shadowBlur = 0;
+  };
+  Chain44.prototype.update = function() {
+    this.easeToPoint(Mouse44.x, Mouse44.y, this.easeSpeed);
+  };
+  Chain44.prototype.snapToPoint = function(x, y) {
+    let oX = this.points[0].x;
+    let oY = this.points[0].y;
+    let cx = x;
+    let cy = y;
+    for (let i = this.points.length - 1; i >= 0; i--) {
+      this.points[i].x = cx;
+      this.points[i].y = cy;
+      if (i !== 0) {
+        let dx = this.points[i - 1].x - cx;
+        let dy = this.points[i - 1].y - cy;
+        let angle = Math.atan2(dy, dx);
+        cx += this.segmentLength * Math.cos(angle);
+        cy += this.segmentLength * Math.sin(angle);
+      }
+    }
+    
+    cx = oX;
+    cy = oY;
+    
+    for (let i = 0; i < this.points.length; i++) {
+      this.points[i].x = cx;
+      this.points[i].y = cy;
+      if (i !== this.points.length - 1) {
+        let dx = this.points[i + 1].x - cx;
+        let dy = this.points[i + 1].y - cy;
+        let angle = Math.atan2(dy, dx);
+        cx += this.segmentLength * Math.cos(angle);
+        cy += this.segmentLength * Math.sin(angle);
+      }
+    }
+    
+    this.end.x = this.points[this.points.length - 1].x;
+    this.end.y = this.points[this.points.length - 1].y;
+  };
+  Chain44.prototype.easeToPoint = function(x, y, t) {
+    this.end.x = this.points[this.points.length - 1].x;
+    this.end.y = this.points[this.points.length - 1].y;
+    
+    this.snapToPoint(((1 - t) * this.end.x) + (t * x), ((1 - t) * this.end.y) + (t * y));
+  };
+  let chain44Array = [];
+  
+  function randCanvas44EdgePos() {
+    let s = Math.floor(Math.random() * 4);
+    if (s === 0) return {x: Math.random() * canvas44.width, y: 0, a: 90}; // top
+    if (s === 1) return {x: canvas44.width, y: Math.random() * canvas44.height, a: 180}; // right
+    if (s === 2) return {x: Math.random() * canvas44.width, y: canvas44.height, a: 270}; // bottom
+    return {x: 0, y: Math.random() * canvas44.height, a: 0}; // left
+  }
+  
+  let lastFrame44Time = 0;
+  let lastFps44DisplayTime = 1000;
+  
+  function frame44() {
+    if (Date.now() - lastFps44DisplayTime >= 500) {
+      fps44Txt.innerHTML = (1000 / (Date.now() - lastFrame44Time)).toFixed(1);
+      lastFps44DisplayTime = Date.now();
+    }
+    lastFrame44Time = Date.now();
+    
+    ctx44.fillStyle = "black";
+    ctx44.fillRect(0, 0, canvas44.width, canvas44.height);
+    
+    for (let i = 0; i < chain44Array.length; i++) {
+      chain44Array[i].update();
+      chain44Array[i].draw();
+    }
+    
+    if (canvas44Running) requestAnimationFrame(frame44);
+  }
+  
+  function reset44() {
+    chain44Array = [];
+    for (let i = 0; i < 100; i++) {
+      let pos = randCanvas44EdgePos();
+      chain44Array.push(new Chain44(
+        pos.x, // anchorX
+        pos.y, // anchorY
+        randBetween(100, randBetween(200, 400)), // totalLength
+        50,//Math.round(randBetween(3, 7)), // numSegments
+        pos.a + 180, // orientation
+        randBetween(15, 35), // thickness
+        randBetween(0.03, 0.06) // easeSpeed
+      ));
+    }
+    
+    /*for (let i = 0; i < chain44Array.length; i++) {
+      let a = Math.random() * 360;
+      let d = 100;
+      let lookX = chain44Array[i].anchor.x + (d * Math.cos(a));
+      let lookY = chain44Array[i].anchor.y + (d * Math.sin(a));
+      chain44Array[i].easeToPoint(lookX, lookY, 0.5);
+    }*/
+    
+    if (!canvas44Running) frame44();
+  }
+  reset44();
+  
+  function startCanvas44() {
+    if (canvas44Running) canvas44Running = false;
+    else {
+      canvas44Running = true;
+      frame44();
+    }
+  }
+  
+  canvas44.addEventListener("mousemove", e => {
+    if (!canvas44Running) return;
+    canvas44Rect = canvas44.getBoundingClientRect();
+    let eX = (e.clientX - canvas44Rect.left) * canvas44Ratio;
+    let eY = (e.clientY - canvas44Rect.top) * canvas44Ratio;
+    
+    let onX = eX >= 0 && eX <= canvas44.width;
+    let onY = eY >= 0 && eY <= canvas44.height
+    Mouse44.onCanvas = onX && onY;
+    
+    if (Mouse44.onCanvas) {
+      Mouse44.x = eX;
+      Mouse44.y = eY;
+    }
+  });
+</script>
+<canvas id = "canvas43"></canvas>
+<button onclick = "startCanvas43()">Start/Stop</button>
+<button onclick = "reset43()">Reset</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps43Txt"></span></b></i></div>
+<div class = "desc"><b><i>(1/22/2022)</i></b> Simple black hole art/animation.</div>
+<hr><hr>
+<script>
+  const ctx43 = canvas43.getContext("2d");
+  canvas43.width = canvas43.height = 1000;
+  let canvas43Running = false;
+  
+  let numPoints43 = 1000;
+  let gravity43 = 5;
+  let stepsPerFrame43 = 5;
+  
+  function Point43() {
+    this.x = randBetween(-canvas43.width / 2, canvas43.width * 1.5);
+    this.y = randBetween(-canvas43.height / 2, canvas43.height * 1.5);
+    
+    this.color = `hsla(${Math.random() * 360}deg, 100%, ${randBetween(50, 90)}%, 0.5)`;
+  }
+  Point43.prototype.render = function() {
+    let dx = (canvas43.width / 2) - this.x;
+    let dy = (canvas43.height / 2) - this.y;
+    let angle = Math.atan2(dy, dx) + (Math.PI * 0.4) + randBetween(-0.3, 0.3);
+    
+    let lastX = this.x;
+    let lastY = this.y;
+    
+    this.x += gravity43 * Math.cos(angle);
+    this.y += gravity43 * Math.sin(angle);
+    
+    if ((dx * dx) + (dy * dy) < 100) {
+      this.x = canvas43.width / 2;
+      this.y = canvas43.height / 2;
+      this.vx = 0;
+      this.vy = 0;
+    }
+    
+    ctx43.strokeStyle = this.color;
+    ctx43.lineCap = ctx43.lineJoin = "round";
+    ctx43.beginPath();
+    ctx43.moveTo(lastX, lastY);
+    ctx43.lineTo(this.x, this.y);
+    ctx43.stroke();
+  };
+  let point43Array = [];
+  
+  let lastFrame43Time = 0;
+  let lastFps43DisplayTime = 1000;
+  
+  function frame43() {
+    if (Date.now() - lastFps43DisplayTime >= 500) {
+      fps43Txt.innerHTML = (1000 / (Date.now() - lastFrame43Time)).toFixed(1);
+      lastFps43DisplayTime = Date.now();
+    }
+    lastFrame43Time = Date.now();
+    
+    for (let j = 0; j < stepsPerFrame43; j++) {
+      for (let i = 0; i < point43Array.length; i++) point43Array[i].render();
+    }
+    
+    if (canvas43Running) requestAnimationFrame(frame43);
+  }
+  
+  function reset43() {
+    ctx43.fillStyle = "black";
+    ctx43.fillRect(0, 0, canvas43.width, canvas43.height);
+    
+    point43Array = [];
+    for (let i = 0; i < numPoints43; i++) point43Array.push(new Point43);
+    
+    if (!canvas43Running) frame43();
+  }
+  reset43();
+  
+  function startCanvas43() {
+    if (canvas43Running) canvas43Running = false;
+    else {
+      canvas43Running = true;
+      frame43();
+    }
+  }
+</script>
+<canvas id = "canvas42" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "startCanvas42()">Start/Stop</button>
+<button onclick = "reset42()">Regenerate</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps42Txt"></span></b></i></div>
+<div><b><u>Circles:</u></b> <span id = "circles42Txt">1</span></div>
+<br>
+<div><b><u>Max Circles:</u></b> <span id = "maxCircles42Txt">1,000</span></div>
+<input type = "range" min = "0" max = "10" step = "1" value = "0" id = "maxCircles42Range" oninput = "updateSettings42()">
+<br>
+<input type = "checkbox" id = "drawToFinish42Checkbox" oninput = "updateSettings42()">
+<label for = "drawToFinish42Checkbox">Draw Immediately</label>
+<div class = "desc"><b><i>(1/21/2022)</i></b> Circle generative art, using <a href = "https://www.dwitter.net/d/24732" target = "_blank">this</a> algorithm, the settings are randomized every generation.</div>
+<hr><hr>
+<script>
+  const ctx42 = canvas42.getContext("2d");
+  canvas42.width = canvas42.height = 1000;
+  let canvas42Running = false;
+  
+  let maxCircle42Radius = 2000;
+  let stepsPerFrame42 = 25;
+  let hue42 = 0;
+  let maxCircles42 = 1000;
+  let hueVariation42 = 0.1;
+  let brightness42 = 50;
+  let brightnessVariation42 = 0.2;
+  let opacity42 = 0.4;
+  let circle42SizeRatio = 1;
+  let outline42 = true;
+  let fill42 = true;
+  let drawToFinish42 = false;
+  
+  function Circle42() {
+    if (circle42Array.length >= maxCircles42) return;
+    
+    this.x = Math.random() * canvas42.width;
+    this.y = Math.random() * canvas42.height;
+    
+    let minDist = Infinity;
+    for (let i = 0; i < circle42Array.length; i++) {
+      let dx = circle42Array[i].x - this.x;
+      let dy = circle42Array[i].y - this.y;
+      let dist = Math.abs(Math.sqrt((dx * dx) + (dy * dy)) - circle42Array[i].radius);
+      if (dist < minDist) minDist = dist;
+    }
+    if (minDist > maxCircle42Radius) minDist = maxCircle42Radius;
+    if (circle42Array.length === 0) minDist = 2000;
+    
+    this.radius = minDist;
+    
+    circle42Array.push(this);
+    
+    this.draw();
+  }
+  Circle42.prototype.draw = function() {
+    let h = hue42 + randBetween(-180 * hueVariation42, 180 * hueVariation42);
+    let s = randBetween(50, 100);
+    let l = 0;
+    if (Math.random() >= 0.5) l = brightness42 * (1 - (Math.random() * brightnessVariation42));
+    else l = ((100 - brightness42) * Math.random() * brightnessVariation42) + brightness42;
+    
+    ctx42.fillStyle = `hsla(${h}deg, ${s}%, ${l}%, ${opacity42})`;
+    ctx42.strokeStyle = "black";
+    ctx42.lineWidth = 1;
+    
+    ctx42.beginPath();
+    ctx42.arc(this.x, this.y, this.radius * circle42SizeRatio, 0, Math.PI * 2);
+    if (fill42) ctx42.fill();
+    if (outline42) ctx42.stroke();
+  };
+  let circle42Array = [];
+  
+  let lastFrame42Time = 0;
+  let lastFps42DisplayTime = 1000;
+  
+  function frame42() {
+    if (Date.now() - lastFps42DisplayTime >= 500) {
+      fps42Txt.innerHTML = (1000 / (Date.now() - lastFrame42Time)).toFixed(1);
+      lastFps42DisplayTime = Date.now();
+    }
+    lastFrame42Time = Date.now();
+    
+    if (drawToFinish42) return;
+    
+    for (let i = 0; i < stepsPerFrame42; i++) new Circle42();
+    
+    circles42Txt.innerHTML = circle42Array.length.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    
+    if (canvas42Running) requestAnimationFrame(frame42);
+  }
+  
+  function reset42() {
+    ctx42.fillStyle = "white";
+    ctx42.fillRect(0, 0, canvas42.width, canvas42.height);
+    
+    hue42 = Math.random() * 360;
+    hueVariation42 = Math.random() < 0.7 ? randBetween(0.2, 0.5) : Math.random(); // 70% chance to have less extreme values
+    brightness42 = Math.random() < 0.7 ? randBetween(30, 60) : (Math.random() * 100); // 70% chance to have less extreme values
+    brightnessVariation42 = Math.random();
+    opacity42 = Math.random() < 0.5 ? randBetween(0.3, 0.6) : randBetween(0.6, 1); // 50% chance to be lighter or darker
+    outline42 = Math.random() < 0.7; // 70% chance to have outline on
+    if (outline42 && Math.random() < 0.1) fill42 = false; // If outline is on, 10% chance to have no fill
+    else fill42 = true;
+    maxCircle42Radius = Math.random() < 0.5 ? randBetween(50, 250) : randBetween(500, 1000); // 50% chance to generate smaller circles or bigger circles
+    
+    circle42Array = [];
+    
+    if (drawToFinish42) {
+      while (circle42Array.length < maxCircles42) new Circle42();
+    }
+    else {
+      for (let i = 0; i < stepsPerFrame42; i++) new Circle42();
+    }
+    
+    circles42Txt.innerHTML = circle42Array.length.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+  reset42();
+  
+  function startCanvas42() {
+    if (canvas42Running) canvas42Running = false;
+    else {
+      canvas42Running = true;
+      frame42();
+    }
+  }
+  
+  let maxCircles42RangeArray = [5, 10, 20, 30, 50, 100, 200, 300, 500, 750, 1000, 2000, 3000, 5000, 7000, 10000];
+  maxCircles42Range.max = maxCircles42RangeArray.length - 1;
+  maxCircles42Range.value = maxCircles42RangeArray.indexOf(1000);
+  
+  function updateSettings42() {
+    maxCircles42 = maxCircles42RangeArray[Number(maxCircles42Range.value)];
+    maxCircles42Txt.innerHTML = maxCircles42.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    
+    let last = drawToFinish42;
+    
+    drawToFinish42 = drawToFinish42Checkbox.checked;
+    
+    if (!last && drawToFinish42) {
+      while (circle42Array.length < maxCircles42) new Circle42();
+    }
+    else frame42();
+  }
+</script>
+<canvas id = "canvas41"></canvas>
+<button onclick = "startCanvas41()">Start/Stop</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps41Txt"></span></b></i></div>
+<table>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Friction:</u></b> <span id = "friction41Txt">25</span>%</div>
+      <input type = "range" min = "0" max = "100" value = "25" step = "5" id = "friction41Range" oninput = "updateSettings41(false)">
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Bug Random Wander Factor:</u></b> <span id = "randTurn41Txt">10</span>%</div>
+      <input type = "range" min = "0" max = "100" value = "10" step = "5" id = "randTurn41Range" oninput = "updateSettings41(false)">
+    </td>
+    <td style = "padding: 10px" rowspan = "5">
+      <button style = "border-radius: 10px" onclick = "resetSettings41()"><b><i>Reset Settings</i></b></button>
+      <br><br>
+      <button onclick = "reset41(false)">Reset Bugs Randomly</button>
+      <br><br>
+      <button onclick = "reset41(true)">Reset Bugs to Circle</button>
+      <br><br>
+      <button onclick = "randomizeBug41Following()">Randomize Bug Following</button>
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <div><b><u>Number of Bugs:</u></b> <span id = "numBugs41Txt">1000</span></div>
+      <input type = "range" min = "0" max = "10" value = "0" step = "1" id = "numBugs41Range" oninput = "updateSettings41(true)">
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Bug Size:</u></b> <span id = "bug41SizeTxt">3</span>px</div>
+      <input type = "range" min = "1" max = "20" value = "3" step = "1" id = "bug41SizeRange" oninput = "updateSettings41(false)">
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "colorBugs41Checkbox" oninput = "updateSettings41(false)">
+      <label for = "colorBugs41Checkbox">Colored Bugs</label>
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Bug Hue:</u></b> <span id = "bug41HueTxt">0</span>&deg;</div>
+      <input type = "range" min = "0" max = "360" value = "0" step = "10" id = "bug41HueRange" oninput = "updateSettings41(false)">
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
+      <input type = "checkbox" id = "reverseContrast41Checkbox" oninput = "updateSettings41(false)">
+      <label for = "reverseContrast41Checkbox">Reverse Contrast</label>
+    </td>
+  </tr>
+</table>
+<div class = "desc"><b><i>(1/20/2022)</i></b> An attempt to replicate the design in <a href = "https://www.dwitter.net/d/24687" target = "_blank">this</a>, with random bugs following each other, but it just devolves into a blob in the middle quickly.<br><b><i>(1/21/2022)</i></b> I added a trailing effect which greatly improves how cool it looks and made each bug be assigned another random bug to follow -- without worrying about "each bug follows one bug, each bug is only followed by one bug." I also added reset buttons and made the bugs turn a little bit from directly facing their target for more random behavior. Later I made the bugs accelerate towards their targets instead of just moving towards it, with some friction, and I also added settings for everything and sliders.<br><b><i>Update: (Later that day)</i></b> I finalized everything and added more settings and color.</div>
+<hr><hr>
+<script>
+  const ctx41 = canvas41.getContext("2d");
+  canvas41.width = canvas41.height = 1000;
+  let canvas41Running = false;
+  
+  let friction41 = 0.25;
+  let randTurn41 = 0.1;
+  let bug41Size = 3;
+  let clearRate41 = 0.1;
+  let numBugs41 = 1000;
+  let stepsPerFrame41 = 5;
+  let edgeSize41 = 5;
+  let reverseContrast41 = false;
+  let colorBugs41 = false;
+  let bug41Hue = 0;
+  
+  function Bug41(x, y) {
+    this.x = x;
+    this.y = y;
+    
+    this.lastX = this.x;
+    this.lastY = this.y;
+    
+    this.vx = 0;
+    this.vy = 0;
+    
+    this.brightness = Math.random();
+    this.hue = bug41Hue;
+  }
+  Bug41.prototype.update = function() {
+    for (let i = 0; i < stepsPerFrame41; i++) {
+      let dx = this.following.x - this.x;
+      let dy = this.following.y - this.y;
+      let angle = Math.atan2(dy, dx) + (Math.random() * Math.PI * randTurn41 * randSign()); // Get angle to bug it's following
+      
+      this.vx += Math.cos(angle); // Accelerate
+      this.vy += Math.sin(angle);
+    }
+  };
+  Bug41.prototype.move = function() {
+    this.lastX = this.x;
+    this.lastY = this.y;
+    
+    this.vx *= 1 - friction41; // Dampen velocity
+    this.vy *= 1 - friction41;
+    
+    this.x += this.vx;
+    this.y += this.vy;
+    
+    if (this.x > canvas41.width - edgeSize41) { // Stop at right edge
+      this.x = canvas41.width - edgeSize41;
+      this.vx = 0;
+    }
+    else if (this.x < edgeSize41) { // Stop at left edge
+      this.x = edgeSize41;
+      this.vx = 0;
+    }
+    if (this.y > canvas41.height - edgeSize41) { // Stop at bottom edge
+      this.y = canvas41.height - edgeSize41;
+      this.vy = 0;
+    }
+    else if (this.y < edgeSize41) { // Stop at top edge
+      this.y = edgeSize41;
+      this.vy = 0;
+    }
+  };
+  Bug41.prototype.draw = function() {
+    if (colorBugs41) ctx41.strokeStyle = reverseContrast41 ? `hsl(${bug41Hue}deg, 100%, ${(this.brightness * 40) + 60}%)` : `hsl(${bug41Hue}deg, 100%, ${this.brightness * 40}%)`;
+    else ctx41.strokeStyle = reverseContrast41 ? "white" : "black";
+    ctx41.lineCap = ctx41.lineJoin = "round";
+    ctx41.lineWidth = bug41Size;
+    ctx41.beginPath();
+    ctx41.moveTo(this.lastX, this.lastY);
+    ctx41.lineTo(this.x, this.y);
+    ctx41.stroke();
+  };
+  let bug41Array = [];
+  
+  function randomizeBug41Following() {
+    for (let i = 0; i < bug41Array.length; i++) {
+      let j = Math.floor(Math.random() * bug41Array.length);
+      while (j === i) j = Math.floor(Math.random() * bug41Array.length);
+      bug41Array[i].following = bug41Array[j]; // Get random index, different from itself, and follow it
+    }
+  }
+  
+  let lastFrame41Time = 0;
+  let lastFps41DisplayTime = 1000;
+  
+  function frame41() {
+    if (Date.now() - lastFps41DisplayTime >= 500) {
+      fps41Txt.innerHTML = (1000 / (Date.now() - lastFrame41Time)).toFixed(1);
+      lastFps41DisplayTime = Date.now();
+    }
+    lastFrame41Time = Date.now();
+    
+    ctx41.fillStyle = reverseContrast41 ? `rgba(0, 0, 0, ${clearRate41})`: `rgba(255, 255, 255, ${clearRate41})`;
+    ctx41.fillRect(0, 0, canvas41.width, canvas41.height);
+    
+    for (let i = 0; i < bug41Array.length; i++) {
+      bug41Array[i].update();
+      bug41Array[i].move();
+      bug41Array[i].draw();
+    }
+    
+    if (canvas41Running) requestAnimationFrame(frame41);
+  }
+  frame41();
+  
+  function reset41(circle) {
+    ctx41.fillStyle = reverseContrast41 ? "black" : "white";
+    ctx41.fillRect(0, 0, canvas41.width, canvas41.height);
+    
+    bug41Array = [];
+    for (let i = 0; i < numBugs41; i++) {
+      let a = (i / numBugs41) * Math.PI * 2;
+      let bug;
+      if (circle) {
+        bug = new Bug41(
+          (canvas41.width / 2) + ((canvas41.width / 2) * Math.cos(a)), // x
+          (canvas41.height / 2) + ((canvas41.height / 2) * Math.sin(a)) // y
+        );
+      }
+      else {
+        bug = new Bug41(
+          Math.random() * canvas41.width, // x
+          Math.random() * canvas41.height // y
+        );
+      }
+      bug41Array.push(bug);
+    }
+    
+    randomizeBug41Following();
+    
+    if (!canvas41Running) frame41();
+  }
+  
+  reset41(false);
+  
+  function startCanvas41() {
+    if (canvas41Running) canvas41Running = false;
+    else {
+      canvas41Running = true;
+      frame41();
+    }
+  }
+  
+  let numBugs41RangeArray = [2, 3, 4, 5, 10, 25, 50, 100, 200, 300, 400, 500, 750, 1000, 1500, 2000];
+  numBugs41Range.max = numBugs41RangeArray.length - 1;
+  numBugs41Range.value = numBugs41RangeArray.indexOf(1000);
+  
+  function updateSettings41(reset) {
+    friction41 = Number(friction41Range.value) / 100;
+    friction41Txt.innerHTML = friction41Range.value;
+    
+    randTurn41 = Number(randTurn41Range.value) / 100;
+    randTurn41Txt.innerHTML = randTurn41Range.value;
+    
+    bug41Size = bug41SizeTxt.innerHTML = Number(bug41SizeRange.value);
+    
+    numBugs41 = numBugs41Txt.innerHTML = numBugs41RangeArray[Number(numBugs41Range.value)];
+    
+    colorBugs41 = colorBugs41Checkbox.checked;
+    
+    bug41Hue = bug41HueTxt.innerHTML = Number(bug41HueRange.value);
+    
+    reverseContrast41 = reverseContrast41Checkbox.checked;
+    
+    if (reset) reset41(false);
+  }
+  
+  function resetSettings41() {
+    friction41Range.value = 25;
+    randTurn41Range.value = 10;
+    bug41SizeRange.value = 3;
+    numBugs41Range.value = numBugs41RangeArray.indexOf(1000);
+    colorBugs41Checkbox.checked = false;
+    bug41HueRange.value = 0;
+    reverseContrast41Checkbox.checked = false;
+    
+    updateSettings41(true);
+  }
+</script>
+<canvas id = "canvas40"></canvas>
+<button onclick = "startCanvas40()">Start/Stop</button>
+<button onclick = "randomizeColors40()">Change Colors</button>
+<button onclick = "randomizeRuleString40()">Change Rule</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps40Txt"></span></b></i></div>
+<div class = "desc"><b><i>(1/19/2022)</i></b> (Somewhat underwhelming) 1D Cellular Automata scrolling viewer, with randomly changing rule and random colors.</div>
+<hr><hr>
+<script>
+  const ctx40 = canvas40.getContext("2d");
+  canvas40.width = canvas40.height = 1000;
+  let canvas40Running = false;
+  
+  /*let colors40 = [ // "High contrast colors" list
+    "#ffb300",
+    "#803e75",
+    "#ff6800",
+    "#a6bdd7",
+    "#c10020",
+    "#cea262",
+    "#817066",
+    "#007d34",
+    "#f6768e",
+    "#232c16"
+  ];*/
+  
+  let grid40 = [];
+  let gridSize40 = 100;
+  let colorOn40 = "";
+  let colorOff40 = "";
+  let ruleString40 = "01101110"; // 1D Cellular Automata rule system from Wolfram's "A New Kind of Science"
+  let timer40 = 0;
+  
+  function reset40() {
+    grid40 = [];
+    for (let x = 0; x < gridSize40; x++) {
+      let row = [];
+      for (let y = 0; y < gridSize40; y++) {
+        row.push(Math.random() >= 0.5); // Fill grid with random on/off
+      }
+      grid40.push(row);
+    }
+    
+    randomizeRuleString40();
+    
+    /*let colorCopy = [];
+    for (let i = 0; i < colors40.length; i++) colorCopy.push(colors40[i]);
+    colorOn40 = colorCopy.splice(Math.floor(Math.random() * colorCopy.length), 1);
+    colorOff40 = colorCopy.splice(Math.floor(Math.random() * colorCopy.length), 1);*/
+    randomizeColors40();
+
+    
+    if (!canvas40Running) frame40();
+  }
+  
+  function randomizeColors40() {
+    colorOn40 = `hsl(${Math.random() * 360}deg, 100%, ${randBetween(35, 50)}%)`;
+    colorOff40 = `hsl(${Math.random() * 360}deg, 100%, ${randBetween(50, 65)}%)`;
+  }
+  
+  function updateGrid40() {
+    ctx40.clearRect(0, 0, canvas40.width, canvas40.height);
+    
+    let tileSize = canvas40.width / gridSize40;
+    
+    for (let y = 1; y < gridSize40; y++) {
+      for (let x = 0; x < gridSize40; x++) {
+        grid40[x][y - 1] = grid40[x][y]; // Move each row up
+        ctx40.fillStyle = grid40[x][y - 1] ? colorOn40 : colorOff40;
+        ctx40.fillRect(x * tileSize, (y - 1) * tileSize, tileSize, tileSize); // Draw current cell in new position
+      }
+      
+      if (y === gridSize40 - 1) { // Update last row
+        let nextRow = [];
+        for (let x = 0; x < gridSize40; x++) {
+          let neighbors = "";
+          neighbors += grid40[(x - 1 + gridSize40) % gridSize40][y] ? "1" : "0"; // Left neighbor
+          neighbors += grid40[x][y] ? "1" : "0"; // Itself
+          neighbors += grid40[(x + 1) % gridSize40][y] ? "1" : "0"; // Right neighbor
+          nextRow.push(ruleString40[parseInt(neighbors, 2)] === "1");
+        }
+        for (let x = 0; x < gridSize40; x++) {
+          grid40[x][y] = nextRow[x];
+          ctx40.fillStyle = grid40[x][y] ? colorOn40 : colorOff40;
+          ctx40.fillRect(x * tileSize, y * tileSize, tileSize, tileSize); // Draw current cell
+        }
+      }
+    }
+  }
+  
+  function randomizeRuleString40() {
+    ruleString40 = "";
+    for (let i = 0; i < 8; i++) ruleString40 += Math.random() >= 0.5 ? "1" : "0";
+    for (let x = 0; x < gridSize40; x++) grid40[x][gridSize40 - 1] = Math.random() >= 0.5;
+  }
+  
+  let lastFrame40Time = 0;
+  let lastFps40DisplayTime = 1000;
+  
+  function frame40() {
+    if (Date.now() - lastFps40DisplayTime >= 500) {
+      fps40Txt.innerHTML = (1000 / (Date.now() - lastFrame40Time)).toFixed(1);
+      lastFps40DisplayTime = Date.now();
+    }
+    lastFrame40Time = Date.now();
+    
+    timer40++;
+    if (timer40 > gridSize40 + 1) {
+      timer40 = 0;
+      randomizeRuleString40();
+    }
+    
+    updateGrid40();
+    
+    if (canvas40Running) requestAnimationFrame(frame40);
+  }
+  reset40();
+  
+  function startCanvas40() {
+    if (canvas40Running) canvas40Running = false;
+    else {
+      canvas40Running = true;
+      frame40();
+    }
+  }
+</script>
+<canvas id = "canvas39" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "startCanvas39()">Start/Stop</button>
+<button onclick = "reset39()">Reset</button>
+<br>
+<input type = "checkbox" id = "turbo39Checkbox" oninput = "turbo39 = this.checked">
+<label for = "turbo39Checkbox">Turbo</label>
+<div><b><u>Number of Lines:</u></b> <span id = "numLines39Txt">0</span></div>
+<div><b><u>Current Ratio:</u></b> <span id = "currRatio39Txt">0</span>% (Ideal: 33.33333%)</div>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps39Txt"></span></b></i></div>
+<div class = "desc"><b><i>(12/20/2021)</i></b> Simple simulation I made to replicate the first problem in <a href = "https://www.youtube.com/watch?v=mZBwsm6B280" target = "_blank">this</a> Numberphile video, demonstrating the 1/3 probability that a random chord drawn in a circle will have a greater side length than its inscribed triangle.</div>
+<hr><hr>
+<script>
+  const ctx39 = canvas39.getContext("2d");
+  canvas39.width = canvas39.height = 1000;
+  let canvas39Running = false;
+  
+  let radius39 = canvas39.width / 2;
+  let lineWidth39 = 1;
+  let opacity39 = 0.5;
+  let targetLen39 = Math.sqrt(3) * radius39;
+  let targetLen39Sq = targetLen39 * targetLen39;
+  let numGreater39 = 0;
+  let numLess39 = 0;
+  let stepsPerFrame39 = 10;
+  let turbo39 = false;
+  
+  function drawRandChord39() {
+    stepsPerFrame39 = turbo39 ? 1000 : 10;
+    for (let i = 0; i < stepsPerFrame39; i++) {
+      let a1 = Math.random() * Math.PI * 2;
+      let x1 = radius39 + (radius39 * Math.cos(a1));
+      let y1 = radius39 + (radius39 * Math.sin(a1));
+      
+      let a2 = Math.random() * Math.PI * 2;
+      let x2 = radius39 + (radius39 * Math.cos(a2));
+      let y2 = radius39 + (radius39 * Math.sin(a2));
+      
+      let dx = x2 - x1;
+      let dy = y2 - y1;
+      let distSq = (dx * dx) + (dy * dy);
+      
+      let greater = distSq > targetLen39Sq;
+      if (greater) numGreater39++;
+      else numLess39++;
+      
+      ctx39.globalAlpha = opacity39;
+      ctx39.strokeStyle = greater ? "lime" : "red";
+      ctx39.lineWidth = lineWidth39;
+      ctx39.beginPath();
+      ctx39.moveTo(x1, y1);
+      ctx39.lineTo(x2, y2);
+      ctx39.stroke();
+    }
+    
+    numLines39Txt.innerHTML = (numGreater39 + numLess39).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    currRatio39Txt.innerHTML = ((numGreater39 / (numGreater39 + numLess39)) * 100).toFixed(5);
+  }
+  
+  let lastFrame39Time = 0;
+  let lastFps39DisplayTime = 1000;
+  function frame39() {
+    if (Date.now() - lastFps39DisplayTime >= 500) {
+      fps39Txt.innerHTML = (1000 / (Date.now() - lastFrame39Time)).toFixed(1);
+      lastFps39DisplayTime = Date.now();
+    }
+    lastFrame39Time = Date.now();
+    
+    drawRandChord39();
+    
+    if (canvas39Running) requestAnimationFrame(frame39);
+  }
+  
+  function startCanvas39() {
+    if (canvas39Running) canvas39Running = false;
+    else {
+      canvas39Running = true;
+      frame39();
+    }
+  }
+  
+  function reset39() {
+    ctx39.globalAlpha = 1;
+    ctx39.fillStyle = "black";
+    ctx39.fillRect(0, 0, canvas39.width, canvas39.height);
+    numGreater39 = 0;
+    numLess39 = 0;
+    drawRandChord39();
+  }
+  reset39();
+  frame39();
+</script>
+<canvas id = "canvas38" style = "width: 400px; height: 400px"></canvas>
+<button onclick = "drawPattern38()">Redraw</button>
+<div><b><u>Grid Size:</u></b> <span id = "gridSize38Txt">25&times;25</span></div>
+<input type = "range" min = "5" max = "50" step = "5" value = "25" id = "gridSize38Range" oninput = "updateSettings38()">
+<div><b><u>Randomness:</u></b> <span id = "randomness38Txt">100</span>%</div>
+<input type = "range" min = "0" max = "100" step = "5" value = "100" id = "randomness38Range" oninput = "updateSettings38()">
+<div><b><u>Selected Lines:</u></b></div>
+<input type = "checkbox" id = "drawnLines38Checkbox1" oninput = "updateSettings38()" CHECKED>
+<label for = "drawnLines38Checkbox1">Horizontal</label>
+<br>
+<input type = "checkbox" id = "drawnLines38Checkbox2" oninput = "updateSettings38()">
+<label for = "drawnLines38Checkbox2">Vertical</label>
+<br>
+<input type = "checkbox" id = "drawnLines38Checkbox3" oninput = "updateSettings38()" CHECKED>
+<label for = "drawnLines38Checkbox3"><b>/</b> Diagonal</label>
+<br>
+<input type = "checkbox" id = "drawnLines38Checkbox4" oninput = "updateSettings38()" CHECKED>
+<label for = "drawnLines38Checkbox4"><b>\</b> Diagonal</label>
+<div class = "desc"><b><i>(12/9/2021)</i></b> Random Hitomezashi stitch patterns, based on <a href = "https://www.youtube.com/watch?v=JbfhzlMk2eY" target = "_blank">this</a> Numberphile video. I changed the algorithm some to add both sets of diagonal lines across the square.<br><b><i>(12/10/2021)</i></b> Added sliders and settings.<br><b><i>(12/11/2021)</i></b> I realized the way I was drawing the diagonal lines was a bit off, which didn't make a difference unless you turned the randomness down. But now it's fixed and everything is drawing correctly and evenly, even with 0% randomness. The code's an absolute mess and there's definitely a better way to do this algorithm, but somehow it works so I'm not gonna touch it.</div>
+<hr><hr>
+<script>
+  const ctx38 = canvas38.getContext("2d");
+  canvas38.width = canvas38.height = 1000;
+  
+  let gridSize38 = 25;
+  let tileSize38 = canvas38.width / gridSize38;
+  let randomness38 = 1;
+  let lineWidth38 = 5;
+  let drawnLines38 = [1, 3, 4];
+  
+  function drawPattern38() {
+    let l1, l2;
+    if (Math.random() >= 0.5) {
+      l1 = randBetween(20, 40);
+      l2 = randBetween(60, 80);
+    }
+    else {
+      l2 = randBetween(20, 40);
+      l1 = randBetween(60, 80);
+    }
+    let h1 = Math.random() * 360;
+    let h2 = h1 + (randBetween(60, 180) * randSign());
+    h2 = (h2 + 360) % 360;
+    ctx38.fillStyle = `hsl(${h1}deg, 100%, ${l1}%)`;
+    ctx38.strokeStyle = `hsl(${h2}deg, 100%, ${l2}%)`;
+    ctx38.fillRect(0, 0, canvas38.width, canvas38.height);
+    
+    tileSize38 = canvas38.width / gridSize38;
+    
+    ctx38.lineWidth = lineWidth38;
+    ctx38.lineCap = ctx38.lineJoin = "round";
+    
+    if (drawnLines38.includes(1)) { // Draw dashed columns
+      for (let x = 0; x <= gridSize38; x++) {
+        let cy = rand38() ? 1 : 0;
+        
+        while (cy <= gridSize38) {
+          ctx38.beginPath();
+          ctx38.moveTo(x * tileSize38, cy * tileSize38);
+          ctx38.lineTo(x * tileSize38, (cy + 1) * tileSize38);
+          ctx38.stroke();
+          ctx38.stroke(); // Draw twice to fix visual blurring
+          
+          cy += 2;
+        }
+      }
+    }
+    
+    if (drawnLines38.includes(2)) { // Draw dashed rows
+      for (let y = 0; y <= gridSize38; y++) {
+        let cx = rand38() ? 1 : 0;
+        
+        while (cx <= gridSize38) {
+          ctx38.beginPath();
+          ctx38.moveTo(cx * tileSize38, y * tileSize38);
+          ctx38.lineTo((cx + 1) * tileSize38, y * tileSize38);
+          ctx38.stroke();
+          ctx38.stroke(); // Draw twice to fix visual blurring
+          
+          cx += 2;
+        }
+      }
+    }
+    
+    if (drawnLines38.includes(3)) { // Draw BL - TR diagonals ( / )
+      // First half
+      let offset = false;
+      for (let i = 0; i <= gridSize38; i++) {
+        offset = !offset;
+        let cx = 0;
+        let cy = 0;
+        if (!offset) {
+          cx = rand38() ? 1 : 0;
+          cy = i - cx;
+        }
+        else {
+          cx = (rand38() ? 1 : 0) + 1;
+          cy = i - cx;
+        }
+        while (cx <= gridSize38 && cy <= gridSize38) {
+          ctx38.beginPath();
+          ctx38.moveTo(cx * tileSize38, cy * tileSize38);
+          ctx38.lineTo((cx + 1) * tileSize38, (cy - 1) * tileSize38);
+          ctx38.stroke();
+          ctx38.stroke(); // Draw twice to fix visual blurring
+          
+          cx += 2;
+          cy -= 2;
+        }
+      }
+      // Second half
+      for (let i = 1; i <= gridSize38; i++) {
+        let r = (rand38() ? 1 : 0) + (offset ? 1 : 0);
+        let cy = gridSize38 - r;
+        let cx = i + r;
+        while (cx <= gridSize38 && cy <= gridSize38) {
+          ctx38.beginPath();
+          ctx38.moveTo(cx * tileSize38, cy * tileSize38);
+          ctx38.lineTo((cx + 1) * tileSize38, (cy - 1) * tileSize38);
+          ctx38.stroke();
+          ctx38.stroke(); // Draw twice to fix visual blurring
+          
+          cx += 2;
+          cy -= 2;
+        }
+      }
+    }
+    
+    if (drawnLines38.includes(4)) { // Draw BR - TL diagonals ( \ )
+      // First half
+      for (let i = 0; i <= gridSize38; i++) {
+        let r = rand38() ? 1 : 0;
+        let cx = gridSize38 - r;
+        let cy = gridSize38 - i - r + 1;
+        while (cx >= 0 && cy >= 0) {
+          ctx38.beginPath();
+          ctx38.moveTo(cx * tileSize38, cy * tileSize38);
+          ctx38.lineTo((cx - 1) * tileSize38, (cy - 1) * tileSize38);
+          ctx38.stroke();
+          ctx38.stroke(); // Draw twice to fix visual blurring
+          
+          cx -= 2;
+          cy -= 2;
+        }
+      }
+      // Second half
+      let offset = false;
+      for (let i = 1; i <= gridSize38; i++) {
+        offset = !offset;
+        let r = rand38() ? 1 : 0 - (offset ? 1 : 0)
+        let cx = gridSize38 - i - r;
+        let cy = gridSize38 - r + 1;
+        while (cx >= 0 && cy >= 0) {
+          ctx38.beginPath();
+          ctx38.moveTo(cx * tileSize38, cy * tileSize38);
+          ctx38.lineTo((cx - 1) * tileSize38, (cy - 1) * tileSize38);
+          ctx38.stroke();
+          ctx38.stroke(); // Draw twice to fix visual blurring
+          
+          cx -= 2;
+          cy -= 2;
+        }
+      }
+    }
+  }
+  drawPattern38();
+  
+  function rand38() {
+    return Math.random() < (randomness38 * 0.5);
+  }
+  
+  function updateSettings38() {
+    drawnLines38 = [];
+    if (drawnLines38Checkbox1.checked) drawnLines38.push(1);
+    if (drawnLines38Checkbox2.checked) drawnLines38.push(2);
+    if (drawnLines38Checkbox3.checked) drawnLines38.push(3);
+    if (drawnLines38Checkbox4.checked) drawnLines38.push(4);
+    
+    gridSize38 = Number(gridSize38Range.value);
+    gridSize38Txt.innerHTML = gridSize38 + "&times;" + gridSize38;
+    
+    randomness38 = Number(randomness38Range.value) / 100;
+    randomness38Txt.innerHTML = randomness38Range.value;
+    
+    drawPattern38();
+  }
+</script>
+<canvas id = "canvas37" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "startCanvas37()">Start/Stop</button>
+<button onclick = "reset37(true)">Reset and Clear</button>
+<button onclick = "reset37(false)">Spawn New Walkers</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps37Txt"></span></b></i></div>
+<div><b><u>Walker Alignment:</u></b> <span id = "turnRandomlyChance37Txt">50</span>%</div>
+<input type = "range" min = "0" max = "100" step = "5" value = "50" id = "turnRandomlyChance37Range" oninput = "updateSettings37(false)">
+<div><b><u>Number of Walkers:</u></b> <span id = "numWalkers37Txt">100</span></div>
+<input type = "range" min = "0" max = "10" step = "1" value = "0" id = "numWalkers37Range" oninput = "updateSettings37(true)">
+<div class = "desc"><b><i>(12/6/2021)</i></b> Aligned random walker generative art - a line of random walkers are spawned at the bottom with alignment towards the top and a chance to walk in a random direction, making colorful streaks across the screen. I could add sliders later but I don't want to right now.<br><b><i>(12/7/2021)</i></b> Added sliders and buttons.</div>
+<hr><hr>
+<script>
+  const ctx37 = canvas37.getContext("2d");
+  canvas37.width = canvas37.height = 1000;
+  let canvas37Running = false;
+  
+  let turnRandomlyChance37 = 0.5;
+  let lineWidth37 = 1;
+  let hue37 = 0;
+  let numWalkers37 = 100;
+  let stepsPerFrame37 = 25;
+  let walker37StepSize = 1;
+  let randAngle37 = 5;
+  
+  function Walker37(x, y, directionBias, color) {
+    this.x = x;
+    this.y = y;
+    this.directionBias = directionBias;
+    this.color = color;
+  }
+  Walker37.prototype.walk = function() {
+    let lastX = this.x;
+    let lastY = this.y;
+    
+    let rand = Math.random();
+    if (Math.random() >= turnRandomlyChance37) rand *= Math.random(); // Chance to either align, or just turn randomly
+    let angle = this.directionBias + (rand * Math.PI * 2 * randSign());
+    let vel = walker37StepSize * randBetween(0.5, 1);
+    
+    this.x += vel * Math.cos(angle);
+    this.y += vel * Math.sin(angle);
+    
+    if (this.x > canvas37.width) this.x = lastX = 0;
+    else if (this.x < 0) this.x = lastX = canvas37.width;
+    if (this.y > canvas37.height) this.y = canvas37.height;
+    
+    ctx37.strokeStyle = this.color;
+    ctx37.lineWidth = lineWidth37;
+    ctx37.lineCap = ctx37.lineJoin = "round";
+    ctx37.beginPath();
+    ctx37.moveTo(lastX, lastY);
+    ctx37.lineTo(this.x, this.y);
+    ctx37.stroke();
+  };
+  let walker37Array = [];
+  
+  function reset37(clear) {
+    if (clear) {
+      ctx37.fillStyle = "black";
+      ctx37.fillRect(0, 0, canvas37.width, canvas37.height);
+    }
+    
+    hue37 = Math.random() * 360;
+    
+    walker37Array = [];
+    for (let i = 0; i < numWalkers37; i++) {
+      let _i = i + randBetween(0.25, 0.75);
+      let x = ((_i + 0.5) / numWalkers37) * canvas37.width;
+      let color = `hsl(${hue37 + randBetween(-30, 30)}deg, ${randBetween(70, 100)}%, ${randBetween(30, 60)}%)`;
+      walker37Array.push(new Walker37(x, canvas37.height, toRad(270 + randBetween(-randAngle37, randAngle37)), color));
+    }
+  }
+  reset37(true);
+  
+  let lastFrame37Time = 0;
+  let lastFps37DisplayTime = 1000;
+  function frame37() {
+    if (Date.now() - lastFps37DisplayTime >= 500) {
+      fps37Txt.innerHTML = (1000 / (Date.now() - lastFrame37Time)).toFixed(1);
+      lastFps37DisplayTime = Date.now();
+    }
+    lastFrame37Time = Date.now();
+    
+    for (let j = 0; j < stepsPerFrame37; j++) {
+      for (let i = 0; i < walker37Array.length; i++) walker37Array[i].walk();
+    }
+    
+    if (canvas37Running) requestAnimationFrame(frame37);
+  }
+  frame37();
+  
+  function startCanvas37() {
+    if (canvas37Running) canvas37Running = false;
+    else {
+      canvas37Running = true;
+      frame37();
+    }
+  }
+  
+  let numWalkers37RangeArray = [1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 125, 150, 200, 300];
+  numWalkers37Range.max = numWalkers37RangeArray.length - 1;
+  numWalkers37Range.value = numWalkers37RangeArray.indexOf(200);
+  
+  function updateSettings37(reset) {
+    turnRandomlyChance37 = 1 - (Number(turnRandomlyChance37Range.value) / 100);
+    turnRandomlyChance37Txt.innerHTML = turnRandomlyChance37Range.value;
+    
+    numWalkers37 = numWalkers37Txt.innerHTML = numWalkers37RangeArray[Number(numWalkers37Range.value)];
+    
+    if (reset) reset37(true);
+  }
+</script>
+<canvas id = "canvas36" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "splitShapes36(1)">Split Corners</button>
+<button onclick = "splitShapes36(2)">Split Edges</button>
+<button onclick = "splitShapes36(3)">Split Random</button>
+<button onclick = "reset36()">Reset</button>
+<div><b><u>Splits:</u></b> <span id = "currLevel36Txt">1</span> level<span id = "plural36Txt1"></span></div>
+<div class = "desc"><b><i>(12/2/2021)</i></b> Another variation on fracture, this time combining both triangles and quadrilaterals.</div>
+<hr><hr>
+<script>
+  const ctx36 = canvas36.getContext("2d");
+  canvas36.width = canvas36.height = 2000;
+  
+  let currLevel36 = 1;
+  let maxLevel36 = 7;
+  let hueVariation36 = 0.1;
+  let outline36 = true;
+  let fill36 = true;
+  let lineWidth36 = 2;
+  let reverseContrast36 = false;
+  
+  function Shape36(points, hue) {
+    this.points = points;
+    this.isTriangle = this.points.length === 3;
+    this.hue = hue;
+    this.draw();
+  }
+  Shape36.prototype.draw = function() {
+    let color = `hsl(${this.hue}deg, 100%, 50%)`;
+    let noColor = reverseContrast36 ? "white" : "black";
+    ctx36.fillStyle = fill36 ? color : noColor;
+    ctx36.strokeStyle = outline36 ? color : noColor;
+    ctx36.lineWidth = lineWidth36;
+    
+    ctx36.beginPath();
+    ctx36.moveTo(this.points[this.points.length - 1].x, this.points[this.points.length - 1].y);
+    for (let i = 0; i < this.points.length; i++) {
+      ctx36.lineTo(this.points[i].x, this.points[i].y);
+    }
+    
+    if (fill36) ctx36.fill();
+    ctx36.stroke();
+  };
+  Shape36.prototype.split = function(connectCorners) {
+    shape36Array.splice(shape36Array.indexOf(this), 1);
+    
+    if (this.isTriangle) {
+      let a = this.points[0];
+      let b = this.points[1];
+      let c = this.points[2];
+      let m = {x: (a.x + b.x + c.x) / 3, y: (a.y + b.y + c.y) / 3};
+      if (connectCorners) {
+        shape36Array.push(new Shape36([a, b, m], this.randHue()));
+        shape36Array.push(new Shape36([b, c, m], this.randHue()));
+        shape36Array.push(new Shape36([c, a, m], this.randHue()));
+      }
+      else {
+        let ab = this.midpoint(a, b);
+        let bc = this.midpoint(b, c);
+        let ca = this.midpoint(c, a);
+        shape36Array.push(new Shape36([a, ab, m, ca], this.randHue()));
+        shape36Array.push(new Shape36([b, bc, m, ab], this.randHue()));
+        shape36Array.push(new Shape36([c, ca, m, bc], this.randHue()));
+      }
+    }
+    else {
+      let a = this.points[0];
+      let b = this.points[1];
+      let c = this.points[2];
+      let d = this.points[3];
+      let m = {x: (a.x + b.x + c.x + d.x) / 4, y: (a.y + b.y + c.y + d.y) / 4};
+      if (connectCorners) {
+        shape36Array.push(new Shape36([a, b, m], this.randHue()));
+        shape36Array.push(new Shape36([b, c, m], this.randHue()));
+        shape36Array.push(new Shape36([c, d, m], this.randHue()));
+        shape36Array.push(new Shape36([d, a, m], this.randHue()));
+      }
+      else {
+        let ab = this.midpoint(a, b);
+        let bc = this.midpoint(b, c);
+        let cd = this.midpoint(c, d);
+        let da = this.midpoint(d, a);
+        shape36Array.push(new Shape36([a, ab, m, da], this.randHue()));
+        shape36Array.push(new Shape36([b, bc, m, ab], this.randHue()));
+        shape36Array.push(new Shape36([c, cd, m, bc], this.randHue()));
+        shape36Array.push(new Shape36([d, da, m, cd], this.randHue()));
+      }
+    }
+  };
+  Shape36.prototype.randHue = function() {
+    let hue = this.hue + randBetween(-180 * hueVariation36, 180 * hueVariation36);
+    return (hue + 360) % 360;
+  };
+  Shape36.prototype.midpoint = function(p1, p2) {
+    return {x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2};
+  };
+  let shape36Array = [];
+  
+  function reset36() {
+    ctx36.fillStyle = reverseContrast36 ? "black" : "white";
+    ctx36.fillRect(0, 0, canvas36.width, canvas36.height);
+    
+    shape36Array = [];
+    currLevel36 = 1;
+    
+    let a = {x: 0, y: 0};
+    let b = {x: canvas36.width, y: 0};
+    let c = {x: canvas36.width, y: canvas36.height};
+    let d = {x: 0, y: canvas36.height};
+    shape36Array.push(new Shape36([a, b, c, d], Math.random() * 360));
+    
+    currLevel36Txt.innerHTML = "1";
+    plural36Txt1.innerHTML = "";
+  }
+  reset36();
+  
+  function splitShapes36(splitMode) {
+    if (currLevel36 >= maxLevel36) {
+      redrawShapes36();
+      return;
+    }
+    
+    ctx36.fillStyle = reverseContrast36 ? "black" : "white";
+    ctx36.fillRect(0, 0, canvas36.width, canvas36.height);
+    
+    currLevel36++;
+    
+    let copy = [];
+    for (let i = 0; i < shape36Array.length; i++) copy.push(shape36Array[i]);
+    for (let i = 0; i < copy.length; i++) copy[i].split(splitMode === 1 ? true : splitMode === 2 ? false : Math.random() >= 0.5);
+    
+    currLevel36Txt.innerHTML = currLevel36;
+    plural36Txt1.innerHTML = currLevel36 === 1 ? "" : "s";
+  }
+  
+  function redrawShapes36() {
+    ctx36.fillStyle = reverseContrast36 ? "black" : "white";
+    ctx36.fillRect(0, 0, canvas36.width, canvas36.height);
+    for (let i = 0; i < shape36Array.length; i++) shape36Array[i].draw();
+  }
+</script>
+<canvas id = "canvas35"></canvas>
+<button onclick = "startCanvas35()">Start/Stop</button>
+<button onclick = "reset35()">Reset</button>
+<br>
+<input type = "checkbox" id = "turbo35Checkbox" oninput = "updateSettings35()">
+<label for = "turbo35Checkbox">Turbo (&times;10)</label>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps35Txt"></span></b></i></div>
+<div><b><u>Turn chance:</u></b> <span id = "turnChance35Txt">1</span>%</div>
+<input type = "range" min = "0" max = "10" step = "1" value = "0" id = "turnChance35Range" oninput = "updateSettings35()">
+<div class = "desc"><b><i>(12/1/2021)</i></b> Another random walker creation I tried, which ended up failing pretty miserably. The way it works is the random walker goes in a straight line until it comes to a square it has already visited, and then it turns to a random direction. I'm not sure what I was expecting, but it's pretty boring.<br><b><i>Update: (Later that day)</i></b> I managed to salvage this project, somewhat. I added colors (that randomize each reset) so that the color drawn is based on the walker's direction (e.g., moving up might mean red, moving right might mean green, etc.). I also added a turn chance variable so that the walker has a chance to turn on newly visited squares as well, giving it more interesting patterns.</div>
+<hr><hr>
+<script>
+  const ctx35 = canvas35.getContext("2d");
+  canvas35.width = canvas35.height = 1000;
+  let canvas35Running = false;
+  
+  let gridSize35 = 200;
+  let tileSize35 = canvas35.width / gridSize35;
+  let grid35 = [];
+  let colors35 = [];
+  let turnChance35 = 0.01;
+  
+  let stepsPerFrame35 = 500;
+  
+  let Walker35 = {
+    x: 0,
+    y: 0,
+    dir: 0
+  };
+  Walker35.walk = function() {
+    if (grid35[this.x][this.y] || Math.random() < turnChance35) this.dir = Math.floor(Math.random() * 4); // If already visited or random chance, turn randomly
+    grid35[this.x][this.y] = true; // Set current position to visited
+    
+    if (this.dir === 0) this.y--; // Up
+    else if (this.dir === 1) this.x++; // Right
+    else if (this.dir === 2) this.y++; // Down
+    else if (this.dir === 3) this.x--; // Left
+    
+    this.x = (this.x + gridSize35) % gridSize35;
+    this.y = (this.y + gridSize35) % gridSize35;
+    
+    if (!grid35[this.x][this.y]) {
+      ctx35.fillStyle = colors35[this.dir];
+      ctx35.fillRect(this.x * tileSize35, this.y * tileSize35, tileSize35, tileSize35);
+    }  
+  };
+  
+  function reset35() {
+    ctx35.fillStyle = "black";
+    ctx35.fillRect(0, 0, canvas35.width, canvas35.height);
+    
+    colors35 = [];
+    for (let i = 0; i < 4; i++) colors35.push(`rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`);
+    
+    tileSize35 = canvas35.width / gridSize35;
+    grid35 = [];
+    for (let x = 0; x < gridSize35; x++) {
+      let row = [];
+      for (let y = 0; y < gridSize35; y++) {
+        row.push(false);
+      }
+      grid35.push(row);
+    }
+    
+    Walker35.x = Math.floor(Math.random() * gridSize35);
+    Walker35.y = Math.floor(Math.random() * gridSize35);
+    Walker35.dir = Math.floor(Math.random() * 4);
+  }
+  reset35();
+  
+  let lastFrame35Time = 0;
+  let lastFps35DisplayTime = 1000;
+  function frame35() {
+    if (Date.now() - lastFps35DisplayTime >= 500) {
+      fps35Txt.innerHTML = (1000 / (Date.now() - lastFrame35Time)).toFixed(1);
+      lastFps35DisplayTime = Date.now();
+    }
+    lastFrame35Time = Date.now();
+    
+    for (let i = 0; i < stepsPerFrame35; i++) Walker35.walk();
+    
+    if (canvas35Running) requestAnimationFrame(frame35);
+  }
+  frame35();
+  
+  function startCanvas35() {
+    if (canvas35Running) canvas35Running = false;
+    else {
+      canvas35Running = true;
+      frame35();
+    }
+  }
+  
+  let turnChance35RangeArray = [0, 0.1, 0.25, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100];
+  turnChance35Range.max = turnChance35RangeArray.length - 1;
+  turnChance35Range.value = turnChance35RangeArray.indexOf(1);
+  
+  function updateSettings35() {
+    turnChance35 = turnChance35RangeArray[Number(turnChance35Range.value)] / 100;
+    turnChance35Txt.innerHTML = turnChance35RangeArray[Number(turnChance35Range.value)];
+    
+    stepsPerFrame35 = turbo35Checkbox.checked ? 5000 : 500;
+  }
+</script>
+<canvas id = "canvas34" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "splitQuads34()">Split</button>
+<button onclick = "reset34()">Reset</button>
+<div><b><u>Splits:</u></b> <span id = "currLevel34Txt">1</span> level<span id = "plural34Txt1"></span></div>
+<div><b><u>Skew factor:</u></b> <span id = "skew34Txt">50</span>%</div>
+<input type = "range" min = "0" max = "100" step = "5" value = "50" id = "skew34Range" oninput = "updateSettings34(false)">
+<br>
+<input type = "checkbox" id = "fill34Checkbox" oninput = "updateSettings34(true)" CHECKED>
+<label for = "fill34Checkbox">Color fill</label>
+<br>
+<input type = "checkbox" id = "outline34Checkbox" oninput = "updateSettings34(true)" CHECKED>
+<label for = "outline34Checkbox">Color outline</label>
+<br>
+<input type = "checkbox" id = "reverseContrast34Checkbox" oninput = "updateSettings34(true)">
+<label for = "reverseContrast34Checkbox">Reverse contrast</label>
+<br>
+<div><b><u>Hue Variation:</u></b> <span id = "hueVariation34Txt">10</span>%</div>
+<input type = "range" min = "0" max = "100" step = "5" value = "10" id = "hueVariation34Range" oninput = "updateSettings34(false)">
+<div class = "desc"><b><i>(11/30/2021)</i></b> Quadrilateral frature splitting - I ealized I could use the same code I wrote for triangle fracture and make it work for four-sided shapes. I also was able to add a skew variable that makes the splitting more or less distorted.<br><b><i>(12/1/2021)</i></b> Changed some code and added a slider for skew.</div>
+<hr><hr>
+<script>
+  const ctx34 = canvas34.getContext("2d");
+  canvas34.width = canvas34.height = 2000;
+  
+  let currLevel34 = 1;
+  let maxLevel34 = 7;
+  let hueVariation34 = 0.1;
+  let outline34 = true;
+  let fill34 = true;
+  let lineWidth34 = 2;
+  let reverseContrast34 = false;
+  let skew34 = 0.5;
+  
+  function Quad34(a, b, c, d, hue) {
+    this.a = a;
+    this.b = b;
+    this.c = c;
+    this.d = d;
+    this.hue = hue;
+    this.draw();
+  }
+  Quad34.prototype.draw = function() {
+    let color = `hsl(${this.hue}deg, 100%, 50%)`;
+    let noColor = reverseContrast34 ? "white" : "black";
+    ctx34.fillStyle = fill34 ? color : noColor;
+    ctx34.strokeStyle = outline34 ? color : noColor;
+    ctx34.lineWidth = lineWidth34;
+    ctx34.beginPath();
+    ctx34.moveTo(this.a.x, this.a.y);
+    ctx34.lineTo(this.b.x, this.b.y);
+    ctx34.lineTo(this.c.x, this.c.y);
+    ctx34.lineTo(this.d.x, this.d.y);
+    ctx34.lineTo(this.a.x, this.a.y);
+    if (fill34) ctx34.fill();
+    ctx34.stroke();
+  };
+  Quad34.prototype.split = function() {
+    quad34Array.splice(quad34Array.indexOf(this), 1);
+    
+    let ab = lerp34(this.a, this.b, randT34()); // Random point along AB
+    let bc = lerp34(this.b, this.c, randT34()); // Random point along BC
+    let cd = lerp34(this.c, this.d, randT34()); // Random point along CD
+    let da = lerp34(this.d, this.a, randT34()); // Random point along DA
+    
+    let m = {x: (this.a.x + this.b.x + this.c.x + this.d.x) / 4, y: (this.a.y + this.b.y + this.c.y + this.d.y) / 4}; // Center point
+    
+    quad34Array.push(new Quad34(this.a, ab, m, da, this.randHue()));
+    quad34Array.push(new Quad34(this.b, bc, m, ab, this.randHue()));
+    quad34Array.push(new Quad34(this.c, cd, m, bc, this.randHue()));
+    quad34Array.push(new Quad34(this.d, da, m, cd, this.randHue()));
+  };
+  Quad34.prototype.randHue = function() {
+    let hue = this.hue + randBetween(-180 * hueVariation34, 180 * hueVariation34);
+    return (hue + 360) % 360;
+  };
+  
+  function randT34() {
+    return 0.5 + randBetween(-skew34 * 0.5, skew34 * 0.5);
+  }
+  function lerp34(p1, p2, t) {
+    return {x: ((1 - t) * p1.x) + (t * p2.x), y: ((1 - t) * p1.y) + (t * p2.y)};
+  }
+  
+  let quad34Array = [];
+  
+  function reset34() {
+    ctx34.fillStyle = reverseContrast34 ? "black" : "white";
+    ctx34.fillRect(0, 0, canvas34.width, canvas34.height);
+    
+    quad34Array = [];
+    currLevel34 = 1;
+    
+    let a = {x: 0, y: 0};
+    let b = {x: canvas34.width, y: 0};
+    let c = {x: canvas34.width, y: canvas34.height};
+    let d = {x: 0, y: canvas34.height};
+    quad34Array.push(new Quad34(a, b, c, d, Math.random() * 360));
+    quad34Array[0].split();
+  }
+  reset34();
+  
+  function splitQuads34() {
+    if (currLevel34 >= maxLevel34) {
+      redrawQuads34();
+      return;
+    }
+    ctx34.fillStyle = reverseContrast34 ? "black" : "white";
+    ctx34.fillRect(0, 0, canvas34.width, canvas34.height);
+    currLevel34++;
+    let copy = [];
+    for (let i = 0; i < quad34Array.length; i++) copy.push(quad34Array[i]);
+    for (let i = 0; i < copy.length; i++) copy[i].split();
+    
+    currLevel34Txt.innerHTML = currLevel34;
+    plural34Txt1.innerHTML = currLevel34 === 1 ? "" : "s";
+  }
+  
+  function redrawQuads34() {
+    ctx34.fillStyle = reverseContrast34 ? "black" : "white";
+    ctx34.fillRect(0, 0, canvas34.width, canvas34.height);
+    for (let i = 0; i < quad34Array.length; i++) quad34Array[i].draw();
+  }
+  
+  function updateSettings34(redraw) {
+    outline34 = outline34Checkbox.checked;
+    fill34 = fill34Checkbox.checked;
+    reverseContrast34 = reverseContrast34Checkbox.checked;
+    hueVariation34 = Number(hueVariation34Range.value) / 100;
+    hueVariation34Txt.innerHTML = hueVariation34Range.value;
+    
+    skew34 = Number(skew34Range.value) / 100;
+    skew34Txt.innerHTML = skew34Range.value;
+    
+    if (redraw) redrawQuads34();
+  }
+</script>
+<canvas id = "canvas33" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "reset33()">Reset</button>
+<button onclick = "splitTriangles33()">Split</button>
+<div><b><u>Splits:</u></b> <span id = "currLevel33Txt">1</span> level<span id = "plural33Txt1"></span></div>
+<input type = "checkbox" id = "fill33Checkbox" oninput = "updateSettings33()" CHECKED>
+<label for = "fill33Checkbox">Color fill</label>
+<br>
+<input type = "checkbox" id = "outline33Checkbox" oninput = "updateSettings33()" CHECKED>
+<label for = "outline33Checkbox">Color outline</label>
+<br>
+<input type = "checkbox" id = "reverseContrast33Checkbox" oninput = "updateSettings33()">
+<label for = "reverseContrast33Checkbox">Reverse contrast</label>
+<br>
+<div><b><u>Hue Variation:</u></b> <span id = "hueVariation33Txt">5</span>%</div>
+<input type = "range" min = "0" max = "100" step = "5" value = "5" id = "hueVariation33Range" oninput = "updateSettings33()">
+<div class = "desc"><b><i>(11/28/2021)</i></b> Triangle fracture fractal, based on <a href = "https://geozone.neocities.org/trianglesplit.html" target = "_blank">this</a> Neocities page.</div>
+<hr><hr>
+<script>
+  const ctx33 = canvas33.getContext("2d");
+  canvas33.width = canvas33.height = 2000;
+  
+  let currLevel33 = 1;
+  let maxLevel33 = 8;
+  let hueVariation33 = 0.05;
+  let outline33 = true;
+  let fill33 = true;
+  let lineWidth33 = 2;
+  let reverseContrast33 = false;
+  
+  function Triangle33(a, b, c, hue) {
+    this.a = a;
+    this.b = b;
+    this.c = c;
+    this.hue = hue;
+    this.draw();
+  }
+  Triangle33.prototype.draw = function() {
+    let color = `hsl(${this.hue}deg, 100%, 50%)`;
+    let noColor = reverseContrast33 ? "white" : "black";
+    ctx33.fillStyle = fill33 ? color : noColor;
+    ctx33.strokeStyle = outline33 ? color : noColor;
+    ctx33.lineWidth = lineWidth33;
+    ctx33.beginPath();
+    ctx33.moveTo(this.a.x, this.a.y);
+    ctx33.lineTo(this.b.x, this.b.y);
+    ctx33.lineTo(this.c.x, this.c.y);
+    ctx33.lineTo(this.a.x, this.a.y);
+    if (fill33) ctx33.fill();
+    ctx33.stroke();
+  };
+  Triangle33.prototype.split = function() {
+    triangle33Array.splice(triangle33Array.indexOf(this), 1);
+    let m = {x: (this.a.x + this.b.x + this.c.x) / 3, y: (this.a.y + this.b.y + this.c.y) / 3};
+    triangle33Array.push(new Triangle33(this.a, this.b, m, this.randHue()));
+    triangle33Array.push(new Triangle33(this.b, this.c, m, this.randHue()));
+    triangle33Array.push(new Triangle33(this.c, this.a, m, this.randHue()));
+  };
+  Triangle33.prototype.randHue = function() {
+    let hue = this.hue + randBetween(-180 * hueVariation33, 180 * hueVariation33);
+    return (hue + 360) % 360;
+  }
+  let triangle33Array = [];
+  
+  function reset33() {
+    ctx33.fillStyle = reverseContrast33 ? "black" : "white";
+    ctx33.fillRect(0, 0, canvas33.width, canvas33.height);
+    triangle33Array = [];
+    let a = {x: 0, y: 0};
+    let b = {x: canvas33.width, y: 0};
+    let c = {x: canvas33.width, y: canvas33.height};
+    let d = {x: 0, y: canvas33.height};
+    let m = {x: canvas33.width * randBetween(0.1, 0.9), y: canvas33.height * randBetween(0.1, 0.9)};
+    triangle33Array.push(new Triangle33(a, b, m, Math.random() * 360));
+    triangle33Array.push(new Triangle33(b, c, m, Math.random() * 360));
+    triangle33Array.push(new Triangle33(c, d, m, Math.random() * 360));
+    triangle33Array.push(new Triangle33(a, d, m, Math.random() * 360));
+    currLevel33 = 1;
+  }
+  reset33();
+  
+  function splitTriangles33() {
+    if (currLevel33 >= maxLevel33) {
+      redrawTriangles33();
+      return;
+    }
+    ctx33.fillStyle = reverseContrast33 ? "black" : "white";
+    ctx33.fillRect(0, 0, canvas33.width, canvas33.height);
+    currLevel33++;
+    let copy = [];
+    for (let i = 0; i < triangle33Array.length; i++) copy.push(triangle33Array[i]);
+    for (let i = 0; i < copy.length; i++) copy[i].split();
+    currLevel33Txt.innerHTML = currLevel33;
+    plural33Txt1.innerHTML = currLevel33 === 1 ? "" : "s";
+  }
+  
+  function updateSettings33() {
+    outline33 = outline33Checkbox.checked;
+    fill33 = fill33Checkbox.checked;
+    reverseContrast33 = reverseContrast33Checkbox.checked;
+    hueVariation33 = Number(hueVariation33Range.value) / 100;
+    hueVariation33Txt.innerHTML = hueVariation33Range.value;
+    
+    redrawTriangles33();
+  }
+  
+  function redrawTriangles33() {
+    ctx33.fillStyle = reverseContrast33 ? "black" : "white";
+    ctx33.fillRect(0, 0, canvas33.width, canvas33.height);
+    for (let i = 0; i < triangle33Array.length; i++) triangle33Array[i].draw();
+  }
+</script>
 <canvas id = "canvas32" style = "width: 400px; height: 400px"></canvas>
 <button onclick = "startCanvas32()">Start/Stop</button>
 <button onclick = "reset32()">Reset</button>
@@ -69,15 +2383,25 @@
     </td>
     <td style = "padding: 10px; width: 180px">
       <input type = "checkbox" id = "blackBackground32Checkbox" oninput = "updateSettings32(true)" CHECKED>
-      <label for = "blackBackground32Checkbox">Black background</label>
+      <label for = "blackBackground32Checkbox">Black Background</label>
     </td>
   </tr>
   <tr>
-    <td>
+    <td style = "padding: 10px">
+      <div><b><u>Turn Rate:</u></b> ~<span id = "turnAge32Txt">1</span> step<span id = "plural32Txt1"></span></div>
+      <input type = "range" min = "1" max = "20" step = "1" value = "1" id = "turnAge32Range" oninput = "updateSettings32(false)">
+    </td>
+    <td style = "padding: 10px">
+      <div><b><u>Draw Chance:</u></b> <span id = "drawChance32Txt">100</span>%</div>
+      <input type = "range" min = "5" max = "100" step = "5" value = "100" id = "drawChance32Range" oninput = "updateSettings32(false)">
+    </td>
+  </tr>
+  <tr>
+    <td style = "padding: 10px">
       <div><b><u>Line Length:</u></b> <span id = "lineLength32Txt">400</span>%</div>
       <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "lineLength32Range" oninput = "updateSettings32(false)">
     </td>
-    <td>
+    <td style = "padding: 10px">
       <div><b><u>Line Thickness:</u></b> <span id = "lineThickness32Txt">100</span>%</div>
       <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "lineThickness32Range" oninput = "updateSettings32(false)">
     </td>
@@ -92,7 +2416,7 @@
       <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "lineOpacity32Range" oninput = "updateSettings32(false)">
     </td>
     <td style = "padding: 10px">
-      <div><b><u>Line Hue Variation:</u></b> <span id = "hueVariation32Txt">0.5</span>%</div>
+      <div><b><u>Line Color Variation:</u></b> <span id = "hueVariation32Txt">0.5</span>%</div>
       <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "hueVariation32Range" oninput = "updateSettings32(false)">
     </td>
   </tr>
@@ -103,7 +2427,7 @@
     </td>
   </tr>
 </table>
-<div class = "desc"><b><i>(11/28/2021)</i></b> Generative art made by a random walker, each step it moves either left/right/up/down, and draws a rectangle in the direction it moved, with a set thickness and length and opacity. The hue changes some per step as well, and it creates interesting intricate patterns.<br><b><i>Update: (Later that day)</i></b> Added more settings and sliders, and added settings presets.</div>
+<div class = "desc"><b><i>(11/28/2021)</i></b> Generative art made by a random walker, each step it moves either left/right/up/down, and draws a rectangle in the direction it moved, with a set thickness and length and opacity. The hue changes some per step as well, and it creates interesting intricate patterns.<br><b><i>Update: (Later that day)</i></b> Added more settings and sliders, and added settings presets.<br><b><i>(11/29/2021)</i></b> Added draw chance and turn rate settings and sliders, and more presets.</div>
 <hr><hr>
 <script>
   const ctx32 = canvas32.getContext("2d");
@@ -119,6 +2443,8 @@
   let lineBrightness32 = 70;
   let blackBackground32 = true;
   let hueVariation32 = 0.005;
+  let drawChance32 = 1;
+  let turnAge32 = 1;
   
   let presets32 = [
     { // Default
@@ -128,7 +2454,9 @@
       lineThickness32: 100,
       lineBrightness32: 70,
       blackBackground32: true,
-      hueVariation32: 0.5
+      hueVariation32: 0.5,
+      turnAge32: 1,
+      drawChance32: 100
     },
     {
       gridSize32: 50,
@@ -137,7 +2465,9 @@
       lineThickness32: 15,
       lineBrightness32: 70,
       blackBackground32: true,
-      hueVariation32: 2
+      hueVariation32: 2,
+      turnAge32: 1,
+      drawChance32: 100
     },
     {
       gridSize32: 100,
@@ -146,7 +2476,9 @@
       lineThickness32: 30,
       lineBrightness32: 70,
       blackBackground32: true,
-      hueVariation32: 1
+      hueVariation32: 1,
+      turnAge32: 1,
+      drawChance32: 100
     },
     {
       gridSize32: 100,
@@ -155,7 +2487,9 @@
       lineThickness32: 100,
       lineBrightness32: 50,
       blackBackground32: true,
-      hueVariation32: 0.5
+      hueVariation32: 0.5,
+      turnAge32: 1,
+      drawChance32: 100
     },
     {
       gridSize32: 100,
@@ -164,7 +2498,9 @@
       lineThickness32: 70,
       lineBrightness32: 50,
       blackBackground32: true,
-      hueVariation32: 1
+      hueVariation32: 1,
+      turnAge32: 1,
+      drawChance32: 100
     },
     {
       gridSize32: 100,
@@ -173,7 +2509,9 @@
       lineThickness32: 400,
       lineBrightness32: 0,
       blackBackground32: false,
-      hueVariation32: 0.5
+      hueVariation32: 0.5,
+      turnAge32: 1,
+      drawChance32: 100
     },
     {
       gridSize32: 100,
@@ -182,7 +2520,42 @@
       lineThickness32: 400,
       lineBrightness32: 40,
       blackBackground32: true,
-      hueVariation32: 3
+      hueVariation32: 3,
+      turnAge32: 1,
+      drawChance32: 100
+    },
+    {
+      gridSize32: 50,
+      lineOpacity32: 10,
+      lineLength32: 100,
+      lineThickness32: 50,
+      lineBrightness32: 50,
+      blackBackground32: true,
+      hueVariation32: 5,
+      turnAge32: 1,
+      drawChance32: 100
+    },
+    {
+      gridSize32: 100,
+      lineOpacity32: 25,
+      lineLength32: 100,
+      lineThickness32: 100,
+      lineBrightness32: 50,
+      blackBackground32: true,
+      hueVariation32: 1,
+      turnAge32: 1,
+      drawChance32: 25
+    },
+    { // Default
+      gridSize32: 100,
+      lineOpacity32: 100,
+      lineLength32: 100,
+      lineThickness32: 30,
+      lineBrightness32: 50,
+      blackBackground32: true,
+      hueVariation32: 0.25,
+      turnAge32: 5,
+      drawChance32: 100
     }
   ];
   function loadPreset32(n) {
@@ -194,6 +2567,8 @@
     lineBrightness32Range.value = p.lineBrightness32;
     blackBackground32Checkbox.checked = p.blackBackground32;
     hueVariation32Range.value = hueVariation32RangeArray.indexOf(p.hueVariation32);
+    turnAge32Range.value = p.turnAge32;
+    drawChance32Range.value = p.drawChance32;
     
     updateSettings32(true);
   }
@@ -216,20 +2591,30 @@
   let Walker32 = {
     x: 0,
     y: 0,
-    hue: 0
+    hue: 0,
+    dir: 0,
+    age: 0,
+    turnAge: 0
   };
   Walker32.walk = function() {
-    let dir = Math.floor(Math.random() * 4);
-    if (dir === 0) this.y--; // Top
-    else if (dir === 1) this.x++; // Right
-    else if (dir === 2) this.y++; // Bottom
+    if (this.age >= this.turnAge) {
+      this.dir = Math.floor(Math.random() * 4);
+      this.turnAge = Math.round(turnAge32 * randBetween(0.5, 1));
+      this.age = 0;
+    }
+    this.age++;
+    if (this.dir === 0) this.y--; // Top
+    else if (this.dir === 1) this.x++; // Right
+    else if (this.dir === 2) this.y++; // Bottom
     else this.x--; // Left
     this.x = (this.x + gridSize32) % gridSize32;
     this.y = (this.y + gridSize32) % gridSize32;
     
+    if (Math.random() >= drawChance32) return; // Don't draw
+    
     this.hue += Math.random() * randSign() * hueVariation32 * 360;
     ctx32.fillStyle = `hsla(${this.hue}deg, 100%, ${lineBrightness32}%, ${lineOpacity32})`;
-    if (dir === 0 || dir === 2) {
+    if (this.dir === 0 || this.dir === 2) {
       ctx32.fillRectFromCenter(this.x * tileSize32, this.y * tileSize32, tileSize32 * lineThickness32, tileSize32 * lineLength32);
     }
     else {
@@ -244,6 +2629,9 @@
     Walker32.x = Math.floor(Math.random() * gridSize32);
     Walker32.y = Math.floor(Math.random() * gridSize32);
     Walker32.hue = Math.random() * 360;
+    Walker32.dir = Math.floor(Math.random() * 4);
+    Walker32.age = 0;
+    Walker32.turnAge = Math.round(Math.random() * turnAge32);
   }
   reset32();
   
@@ -277,7 +2665,7 @@
   lineThickness32Range.max = line32RangeArray.length - 1;
   lineThickness32Range.value = line32RangeArray.indexOf(100);
   
-  let lineOpacity32RangeArray = [1, 2, 3, 4, 5, 10, 15, 20, 25, 50, 75, 100];
+  let lineOpacity32RangeArray = [1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 80, 90, 100];
   lineOpacity32Range.max = lineOpacity32RangeArray.length - 1;
   lineOpacity32Range.value = lineOpacity32RangeArray.indexOf(5);
   
@@ -304,6 +2692,12 @@
     
     hueVariation32 = hueVariation32RangeArray[Number(hueVariation32Range.value)] / 100;
     hueVariation32Txt.innerHTML = hueVariation32RangeArray[Number(hueVariation32Range.value)];
+    
+    turnAge32 = turnAge32Txt.innerHTML = Number(turnAge32Range.value);
+    plural32Txt1.innerHTML = turnAge32 === 1 ? "" : "s";
+    
+    drawChance32 = Number(drawChance32Range.value)  / 100;
+    drawChance32Txt.innerHTML = drawChance32Range.value;
     
     for (let i = 0; i < presets32.length; i++) {
       document.getElementById("presetBtn32" + i).style.backgroundColor = "white";
@@ -769,9 +3163,9 @@
   };
   
   let card29Img = new Image();
-  card29Img.src = "https://e4494s.neocities.org/images/card-sheet.png";
+  card29Img.src = "images/card-sheet.png";
   let background29Img = new Image();
-  background29Img.src = "https://e4494s.neocities.org/images/card-table-background.jpg";
+  background29Img.src = "images/card-table-background.jpg";
   let card29ImgWidth = 71;
   let card29ImgHeight = 96;
   let card29Width = card29ImgWidth * 2;
@@ -4942,6 +7336,7 @@
 
 </body>
 </html>
+
 
 
 
