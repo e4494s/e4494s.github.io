@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -56,6 +57,1993 @@
   }
 </script>
 -->
+<canvas id = "canvas57" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "startCanvas57(this)">Start</button>
+<button onclick = "reset57()">Reset</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps57Txt"></span></b></i></div>
+<div class = "desc"><b><i>(2/7/2022)</i></b> (Click to add "flowers") I'm honestly not sure what this is...I was going for some interesting interactive generative art and ended up with a weird "flower"-like thing. I'm not sure how I feel about this one, but I don't like deleting work so it's gonna stay here.</div>
+<hr><hr>
+<script>
+  const ctx57 = canvas57.getContext("2d");
+  canvas57.width = canvas57.height = 1000;
+  let canvas57Running = false;
+  let canvas57Rect = canvas57.getBoundingClientRect();
+  let canvas57Ratio = canvas57.width / 500;
+  
+  let startGrid57DotSize = 0;
+  let maxGrid57DotSize = 30;
+  let maxGrid57VisualDotSize = 15;
+  let grid57DotGrowRate = 0.5;
+  let stepsPerFrame57 = 4;
+  let grid57DotOpacity = 0.05;
+  
+  function Grid57(x, y, gridSize) {
+    this.x = x;
+    this.y = y;
+    this.gridSize = gridSize;
+    this.dotSize = startGrid57DotSize;
+    
+    this.dead = false;
+    
+    this.color = `hsl(${Math.random() * 360}deg, 100%, 30%)`;
+    
+    this.dotSizeRatio = randBetween(0.75, 1.25);
+  }
+  Grid57.prototype.update = function() {
+    this.dotSize += grid57DotGrowRate;
+    if (this.dotSize >= maxGrid57DotSize) this.dead = true;
+  };
+  Grid57.prototype.draw = function() {
+    if (this.dead) return;
+    
+    ctx57.globalAlpha = grid57DotOpacity;
+    ctx57.fillStyle = this.color;
+    
+    for (let x = 0; x < this.gridSize; x++) {
+      for (let y = 0; y < this.gridSize; y++) {
+        let _x = this.x + ((x - (this.gridSize / 2) + 0.5) * this.dotSize);
+        let _y = this.y + ((y - (this.gridSize / 2) + 0.5) * this.dotSize);
+        
+        let s = Math.min(this.dotSize * 0.4, maxGrid57VisualDotSize) * this.dotSizeRatio * 1.5;
+        
+        //ctx57.fillCircle(_x, _y, s);
+        ctx57.fillRectFromCenter(_x, _y, s, s);
+      }
+    }
+    
+    ctx57.globalAlpha = 1;
+  };
+  let grid57Array = [];
+  
+  let lastFrame57Time = 0;
+  let lastFps57DisplayTime = 1000;
+  function frame57() {
+    if (Date.now() - lastFps57DisplayTime >= 500) {
+      fps57Txt.innerHTML = (1000 / (Date.now() - lastFrame57Time)).toFixed(1);
+      lastFps57DisplayTime = Date.now();
+    }
+    lastFrame57Time = Date.now();
+    
+    for (let i = 0; i < grid57Array.length; i++) {
+      for (let j = 0; j < stepsPerFrame57; j++) {
+        grid57Array[i].update();
+        grid57Array[i].draw();
+      }
+      
+      if (grid57Array[i].dead) {
+        grid57Array.splice(i, 1);
+        i--;
+      }
+    }
+    
+    if (canvas57Running) requestAnimationFrame(frame57);
+  }
+  
+  function reset57() {
+    let hue = Math.random() * 360;
+    ctx57.fillStyle = `hsl(${hue}deg, 60%, 80%)`;
+    ctx57.fillRect(0, 0, canvas57.width, canvas57.height);
+    ctx57.lineWidth = 10;
+    
+    let gridSize = Math.round(randBetween(5, 10));
+    let tileSize = canvas57.width / gridSize;
+    
+    for (let x = 0; x < gridSize; x++) {
+      ctx57.strokeStyle = `hsla(${hue + 180 + randBetween(-15, 15)}deg, 100%, 50%, 0.2)`;
+      
+      let o = randBetween(-0.2, 0.2);
+      
+      ctx57.beginPath();
+      ctx57.moveTo((x + o) * tileSize, 0);
+      o = randBetween(-0.2, 0.2);
+      ctx57.lineTo((x + o) * tileSize, canvas57.height);
+      ctx57.stroke();
+    }
+    for (let y = 0; y < gridSize; y++) {
+      ctx57.strokeStyle = `hsla(${hue + 180 + randBetween(-15, 15)}deg, 100%, 50%, 0.2)`;
+      
+      let o = randBetween(-0.2, 0.2);
+      
+      ctx57.beginPath();
+      ctx57.moveTo(0, (y + o) * tileSize);
+      o = randBetween(-0.2, 0.2);
+      ctx57.lineTo(canvas57.width, (y + o) * tileSize);
+      ctx57.stroke();
+    }
+    
+    grid57Array = [];
+    
+    if (!canvas57Running) frame57();
+  }
+  reset57();
+  
+  function startCanvas57(caller) {
+    if (canvas57Running) {
+      canvas57Running = false;
+      caller.innerHTML = "Start";
+    }
+    else {
+      canvas57Running = true;
+      caller.innerHTML = "Stop";
+      frame57();
+    }
+  }
+  
+  canvas57.addEventListener("mousedown", e => {
+    if (!canvas57Running) return;
+    
+    e.preventDefault();
+    canvas57Rect = canvas57.getBoundingClientRect();
+    
+    let mouseX = (e.clientX - canvas57Rect.left) * canvas57Ratio;
+    let mouseY = (e.clientY - canvas57Rect.top) * canvas57Ratio;
+    
+    grid57Array.push(new Grid57(mouseX, mouseY, Math.round(randBetween(2, 6))));
+  });
+</script>
+<canvas id = "canvas56" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "reset56()">Reset</button>
+<button onclick = "switchMode56()" id = "mode56Btn">Current Mode: Human vs. Computer</button>
+<div class = "desc"><b><i>(2/5/2022)</i></b> Simple Tic-Tac-Toe game, currently only works for 2 human players and has no ending. I want to add an AI algorithm for playing against a human, as well as sensing when the game is over and who won.<br><b><i>Update: (Later that day)</i></b> Added an AI that currently just places an O in a random spot, as well as tracking for when the board is full (but not if a line is made, which should also end the game).<br><b><i>(2/7/2022)</i></b> Added a button to switch between 2 player and 1 player. Eventually I want to add AI to the computer using <a href = "https://www.youtube.com/watch?v=trKjYdBASyQ" target = "_blank">this</a> Coding Train tutorial, but for now the computer just plays randomly.</div>
+<hr><hr>
+<script>
+  const ctx56 = canvas56.getContext("2d");
+  canvas56.width = canvas56.height = 1000;
+  let canvas56Running = false;
+  let canvas56Rect = canvas56.getBoundingClientRect();
+  let canvas56Ratio = canvas56.width / 500;
+  
+  let padding56 = 150;
+  let gridSize56 = 3;
+  let tileSize56 = (canvas56.width - (padding56 * 2)) / gridSize56;
+  let pieceSizeRatio56 = 0.5;
+  let currTurn56 = "X";
+  let twoPlayer56 = false;
+  let computerTimeout56;
+  let gameOver56 = false;
+  
+  let grid56 = [];
+  
+  function drawGrid56() {
+    ctx56.clearRect(0, 0, canvas56.width, canvas56.height);
+    
+    gameOver56 = !openSpots56();
+    
+    ctx56.strokeStyle = "black";
+    ctx56.lineWidth = tileSize56 * 0.04;
+    ctx56.lineCap = ctx56.lineJoin = "round";
+    
+    ctx56.beginPath();
+    
+    // Vertical lines
+    for (let i = 1; i < gridSize56; i++) {
+      ctx56.moveTo(padding56 + (i * tileSize56), padding56);
+      ctx56.lineTo(padding56 + (i * tileSize56), canvas56.height - padding56);
+    }
+    
+    // Horizontal lines
+    for (let i = 1; i < gridSize56; i++) {
+      ctx56.moveTo(padding56, padding56 + (i * tileSize56));
+      ctx56.lineTo(canvas56.width - padding56, padding56 + (i * tileSize56));
+    }
+    
+    ctx56.stroke();
+    
+    ctx56.lineWidth = tileSize56 * 0.06;
+    
+    for (let x = 0; x < gridSize56; x++) {
+      for (let y = 0; y < gridSize56; y++) {
+        let P = gridToCanvas56(x, y);
+        let piece = grid56[x][y];
+        if (piece === "X") {
+          ctx56.strokeStyle = "red";
+          drawX56(P.x, P.y, tileSize56 * pieceSizeRatio56);
+        }
+        else if (piece === "O") {
+          ctx56.strokeStyle = "blue";
+          ctx56.strokeCircle(P.x, P.y, tileSize56 * pieceSizeRatio56 * 0.5);
+        }
+      }
+    }
+    
+    if (!gameOver56) {
+      ctx56.fillStyle = "black";
+      ctx56.font = "bold 40px verdana";
+      ctx56.textBaseline = "top";
+      ctx56.fillText("Playing:", 40, 40);
+      
+      ctx56.lineWidth = 5;
+      if (currTurn56 === "X") {
+        ctx56.strokeStyle = "red";
+        drawX56(265, 60, 40);
+      }
+      else {
+        ctx56.strokeStyle = "blue";
+        ctx56.strokeCircle(265, 60, 20);
+      }
+      
+      ctx56.font = "bold 30px verdana";
+      let txt = "";
+      if (twoPlayer56) {
+        txt = currTurn56 === "X" ? "Player 1" : "Player 2";
+      }
+      else {
+        txt = currTurn56 === "X" ? "Player" : "Computer";
+      }
+      ctx56.fillText(txt, 300, 46);
+      
+      ctx56.lineWidth = 50;
+      ctx56.fillStyle = currTurn56 === "X" ? "red" : "blue";
+      ctx56.globalAlpha = 0.75;
+      ctx56.strokeRect(0, 0, canvas56.width, canvas56.height);
+      ctx56.globalAlpha = 1;
+    }
+  }
+  
+  function drawX56(x, y, size) {
+    let s2 = size / 2;
+    
+    ctx56.beginPath();
+    
+    ctx56.moveTo(x - s2, y - s2);
+    ctx56.lineTo(x + s2, y + s2);
+    ctx56.moveTo(x - s2, y + s2);
+    ctx56.lineTo(x + s2, y - s2);
+    
+    ctx56.stroke();
+  }
+  
+  function openSpots56() {
+    let playable = false;
+    for (let x = 0; x < gridSize56; x++) {
+      for (let y = 0; y < gridSize56; y++) {
+        if (grid56[x][y] === "") playable = true;
+      }
+    }
+    return playable;
+  }
+  
+  function playComputer56() {
+    if (!openSpots56()) {
+      gameOver56 = true;
+      drawGrid56();
+      return;
+    }
+    
+    let x = Math.floor(Math.random() * gridSize56);
+    let y = Math.floor(Math.random() * gridSize56);
+    while (grid56[x][y] !== "") {
+      x = Math.floor(Math.random() * gridSize56);
+      y = Math.floor(Math.random() * gridSize56);
+    }
+    computerTimeout56 = setTimeout(() => {
+      grid56[x][y] = "O";
+      currTurn56 = "X";
+      drawGrid56();
+    }, 1000);
+  }
+  
+  function reset56() {
+    currTurn56 = Math.random() < 0.5 ? "X" : "O";
+    
+    window.clearTimeout(computerTimeout56);
+    
+    gameOver56 = false;
+    
+    tileSize56 = (canvas56.width - (padding56 * 2)) / gridSize56;
+    
+    grid56 = [];
+    for (let x = 0; x < gridSize56; x++) {
+      let row = [];
+      for (let y = 0; y < gridSize56; y++) {
+        row.push("");
+      }
+      grid56.push(row);
+    }
+    
+    if (!twoPlayer56 && currTurn56 === "O") playComputer56();
+    
+    drawGrid56();
+  }
+  reset56();
+  
+  function gridToCanvas56(x, y) {
+    return {x: ((x + 0.5) * tileSize56) + padding56, y: ((y + 0.5) * tileSize56) + padding56};
+  }
+  
+  function switchMode56() {
+    if (twoPlayer56) {
+      twoPlayer56 = false;
+      mode56Btn.innerHTML = "Current Mode: Human vs. Computer";
+    }
+    else {
+      twoPlayer56 = true;
+      mode56Btn.innerHTML = "Current Mode: Human vs. Human";
+    }
+    
+    reset56();
+  }
+  
+  canvas56.addEventListener("mousedown", e => {
+    canvas56Rect = canvas56.getBoundingClientRect();
+    
+    let mouseX = (e.clientX - canvas56Rect.left) * canvas56Ratio;
+    let mouseY = (e.clientY - canvas56Rect.top) * canvas56Ratio;
+    
+    for (let x = 0; x < gridSize56; x++) {
+      for (let y = 0; y < gridSize56; y++) {
+        if (grid56[x][y] === "") {
+          let tileX = (x * tileSize56) + padding56;
+          let tileY = (y * tileSize56) + padding56;
+          let xAligned = mouseX >= tileX && mouseX < tileX + tileSize56;
+          let yAligned = mouseY >= tileY && mouseY < tileY + tileSize56;
+          if (xAligned && yAligned) {
+            grid56[x][y] = currTurn56;
+            currTurn56 = currTurn56 === "X" ? "O" : "X";
+            if (!twoPlayer56 && currTurn56 === "O") playComputer56();
+            drawGrid56();
+          }
+        }
+      }
+    }
+  });
+</script>
+<canvas id = "canvas55" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "reset55()">Regenerate</button>
+<button onclick = "test55()">Many</button>
+<br>
+<input type = "checkbox" id = "rainbow55Checkbox" oninput = "rainbow55 = this.checked">
+<label for = "rainbow55Checkbox">Rainbow</label>
+<div class = "desc"><b><i>(2/2/2022)</i></b> Started following <a href = "https://www.youtube.com/playlist?list=PLyRZnpOSgMj3K8AV2I6UldnvTj6d_Zrf0" target = "_blank">this</a> generative art tutorial for random crystals by Matthew Epler.<br><b><i>(2/3/2022)</i></b> I finished the tutorial, this time I didn't change very much about how it works (my code is completely different, but the output is basically the same), except making some layers more transparent so it gets less crowded. I also added a setting for rainbow colors instead of the default blue/pink palette.</div>
+<hr><hr>
+<script>
+  const ctx55 = canvas55.getContext("2d");
+  canvas55.width = canvas55.height = 2000;
+  
+  const twoRoot3Minus3 = (Math.sqrt(3) * 2) - 3;
+  const twoOverRoot3 = 2 / Math.sqrt(3);
+  let fillOpacity55 = 0.5;
+  let rainbow55 = false;
+  
+  let colors55 = [
+    "rgb(255, 52, 154)", // pink
+    "rgb(4, 0, 152)" // blue
+  ];
+  function randColor55() {
+    if (rainbow55) return `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
+    else return colors55[Math.floor(Math.random() * colors55.length)];
+  }
+  function randWeight55(size) {
+    return size * randBetween(0.25, 1);//randBetween(2, 4);
+  }
+  
+  function strokeHexagon55(x, y, radius, offsetAngle) {
+    ctx55.beginPath();
+    for (let i = 0; i < 8; i++) { // Wrap around 2 extra edges to complete the path and make a clean edge
+      let a = ((i / 6) * Math.PI * 2) + offsetAngle;
+      ctx55.lineTo(x + (radius * Math.cos(a)), y + (radius * Math.sin(a)));
+    }
+    ctx55.stroke();
+  }
+  function fillHexagon55(x, y, radius, offsetAngle) {
+    ctx55.beginPath();
+    for (let i = 0; i < 8; i++) { // Wrap around 2 extra edges to complete the path and make a clean edge
+      let a = ((i / 6) * Math.PI * 2) + offsetAngle;
+      ctx55.lineTo(x + (radius * Math.cos(a)), y + (radius * Math.sin(a)));
+    }
+    ctx55.fill();
+  }
+  
+  let layerChanceArray55 = [
+    0.7, // Shape outline
+    0.8, // Solid lines
+    0.7, // Circles
+    0.8, // Dotted lines
+    0.8, // Centered shape
+    0.7, // Ring of shapes
+    0.3 // Stepped hexagons
+  ];
+  
+  function drawCrystal55(x, y, radius, accentSize) {
+    let allLayers = [1, 2, 3, 4, 5, 6, 7];
+    let layers = [];
+    
+    for (let i = 0; i < allLayers.length; i++) {
+      if (Math.random() < layerChanceArray55[i]) layers.push(i + 1);
+    }
+    if (layers.length === 0) layers.push(allLayers[Math.floor(Math.random() * allLayers.length)]);
+    
+    /*let numLayers = Math.round(randBetween(2, allLayers.length));
+    for (let i = 0; i < numLayers; i++) {
+      let j = Math.floor(Math.random() * allLayers.length);
+      layers.push(allLayers[j]);
+      allLayers.splice(j, 1);
+    }*/
+    //layers = [7];
+    
+    ctx55.lineCap = ctx55.lineJoin = "round";
+    
+    let symmetry = Math.random() < 0.5 ? 6 : 12;
+    let numSteps = Math.random() < 0.5 ? 8 : 10; // 8 or 10 steps
+    let stepSize = radius / numSteps;
+    let offsetAngle = Math.random() < 0.5 ? Math.PI / 6 : 0;
+    
+    //
+    // LAYER 5: Centered shape
+    //
+    
+    if (layers.includes(5)) {
+      ctx55.fillStyle = randColor55();
+      ctx55.globalAlpha = fillOpacity55;
+      
+      let shapeRadius = Math.round(randBetween(1, numSteps)) * stepSize;
+      let shapeType = Math.floor(Math.random() * 3);
+      if (shapeType === 0) { // Square
+        ctx55.fillRectFromCenter(x, y, shapeRadius * Math.SQRT2, shapeRadius * Math.SQRT2);
+      }
+      else if (shapeType === 1) { // Circle
+        ctx55.fillCircle(x, y, shapeRadius);
+      }
+      else if (shapeType === 2) { // Hexagon
+        fillHexagon55(x, y, shapeRadius, offsetAngle);
+      }
+      
+      ctx55.globalAlpha = 1;
+    }
+    
+    //
+    // LAYER 6: Ring of shapes
+    //
+    
+    if (layers.includes(6)) {
+      ctx55.fillStyle = ctx55.strokeStyle = randColor55();
+      ctx55.lineWidth = randWeight55(accentSize);
+      let willFill = Math.random() < 0.5;
+      
+      let distOut = Math.floor(randBetween(1, numSteps));
+      let shapeType = Math.floor(Math.random() * 3);
+      let shapeDiameter = 0;
+      let backwards = Math.random() < 0.5;
+      
+      if (distOut < numSteps / 2) shapeDiameter = Math.floor(randBetween(1, distOut)) * stepSize;
+      else if (distOut > numSteps / 2) shapeDiameter = Math.floor(randBetween(1, numSteps - distOut)) * stepSize;
+      else shapeDiameter = Math.floor(randBetween(1, (numSteps / 2) + 1)) * stepSize;
+      
+      let shapeRadius = shapeDiameter / 2;
+      
+      for (let i = 0; i < 6; i++) {
+        let a = (i / 6) * Math.PI * 2
+        
+        if (shapeType === 0) { // Circle
+          ctx55.beginPath();
+          ctx55.arc(x + (distOut * stepSize * Math.cos(a)), y + (distOut * stepSize * Math.sin(a)), shapeRadius, 0, Math.PI * 2);
+        }
+        
+        else if (shapeType === 1) { // Square
+          let rectRadius = shapeRadius * Math.SQRT1_2;
+          let rectDiameter = shapeDiameter * Math.SQRT1_2;
+          
+          let edge = (distOut * stepSize) - rectRadius;
+          let cx = x + (edge * Math.cos(a));
+          let cy = y + (edge * Math.sin(a));
+          let ca = a;
+          
+          ctx55.beginPath();
+          ctx55.moveTo(cx, cy);
+          
+          ca += Math.PI / 2;
+          cx += rectRadius * Math.cos(ca);
+          cy += rectRadius * Math.sin(ca);
+          ctx55.lineTo(cx, cy);
+          
+          for (let j = 0; j < 3; j++) {
+            ca -= Math.PI / 2;
+            cx += rectDiameter * Math.cos(ca);
+            cy += rectDiameter * Math.sin(ca);
+            ctx55.lineTo(cx, cy);
+          }
+          
+          ca -= Math.PI / 2;
+          cx += rectRadius * Math.cos(ca);
+          cy += rectRadius * Math.sin(ca);
+          ctx55.lineTo(cx, cy);
+        }
+        
+        else if (shapeType === 2) { // Triangle
+          let edge = (distOut * stepSize) - shapeRadius;
+          if (backwards) edge += shapeDiameter * twoOverRoot3;
+          let cx = x + (edge * Math.cos(a));
+          let cy = y + (edge * Math.sin(a));
+          let ca = a;
+          if (backwards) ca += Math.PI;
+          
+          ctx55.beginPath();
+          ctx55.moveTo(cx, cy);
+          
+          ca += Math.PI / 6;
+          cx += shapeDiameter * Math.cos(ca);
+          cy += shapeDiameter * Math.sin(ca);
+          ctx55.lineTo(cx, cy);
+          
+          for (let i = 0; i < 2; i++) {
+            ca -= Math.PI * (2 / 3);
+            cx += shapeDiameter * Math.cos(ca);
+            cy += shapeDiameter * Math.sin(ca);
+            ctx55.lineTo(cx, cy);
+          }
+        }
+        
+        if (willFill) {
+          ctx55.globalAlpha = fillOpacity55;
+          ctx55.fill();
+          ctx55.globalAlpha = 1;
+        }
+        else ctx55.stroke();
+      }
+    }
+    
+    //
+    // LAYER 7: Stepped hexagons
+    //
+    
+    if (layers.includes(7)) {
+      ctx55.strokeStyle = randColor55();
+      ctx55.lineWidth = randWeight55(accentSize)
+      
+      let center = Math.round(randBetween(1, 3));
+      for (let i = center; i < numSteps; i++) {
+        strokeHexagon55(x, y, i * stepSize, offsetAngle);
+      }
+    }
+    
+    //
+    // LAYER 1: Shape outline
+    //
+    
+    if (layers.includes(1)) {
+      ctx55.strokeStyle = randColor55();
+      ctx55.lineWidth = randWeight55(accentSize);
+      
+      let isHexagon = Math.random() < 0.5;
+      
+      if (isHexagon) strokeHexagon55(x, y, radius, offsetAngle);
+      else ctx55.strokeCircle(x, y, radius);
+    }
+    
+    //
+    // LAYER 2: Solid lines
+    //
+    
+    if (layers.includes(2)) {
+      ctx55.strokeStyle = randColor55();
+      ctx55.lineWidth = randWeight55(accentSize);
+      let lineStart = Math.round(randBetween(0, numSteps - 1));
+      let lineEnd = Math.round(randBetween(lineStart + 1, numSteps));
+      lineStart *= stepSize;
+      lineEnd *= stepSize;
+      
+      for (let i = 0; i < symmetry; i++) {
+        let a = (i / symmetry) * Math.PI * 2;
+        ctx55.beginPath();
+        ctx55.moveTo(x + (lineStart * Math.cos(a)), y + (lineStart * Math.sin(a)));
+        ctx55.lineTo(x + (lineEnd * Math.cos(a)), y + (lineEnd * Math.sin(a)));
+        ctx55.stroke();
+      }
+    }
+    
+    //
+    // LAYER 3: Circles
+    //
+    
+    if (layers.includes(3)) {
+      ctx55.strokeStyle = randColor55();
+      ctx55.lineWidth = randWeight55(accentSize);
+      
+      let touchAdjacent = Math.random() < 0.5;
+      let ratio = touchAdjacent ? 1 / 3 : twoRoot3Minus3;
+      let circleRadius = radius * ratio;
+      let circlePosition = radius - circleRadius;
+      for (let i = 0; i < 6; i++) {
+        let a = (i / 6) * Math.PI * 2;
+        ctx55.strokeCircle(x + (circlePosition * Math.cos(a)), y + (circlePosition * Math.sin(a)), circleRadius);
+      }
+    }
+    
+    //
+    // LAYER 4: Dotted lines
+    //
+    
+    if (layers.includes(4)) {
+      ctx55.fillStyle = randColor55();
+      
+      for (let i = 0; i < symmetry; i++) {
+        let a = (i / symmetry) * Math.PI * 2;
+        for (let j = 1; j < numSteps; j++) {
+          ctx55.fillCircle(x + (j * stepSize * Math.cos(a)), y + (j * stepSize * Math.sin(a)), accentSize);
+        }
+      }
+    }
+  }
+  
+  function reset55() {
+    ctx55.clearRect(0, 0, canvas55.width, canvas55.height);
+    
+    drawCrystal55(canvas55.width / 2, canvas55.height / 2, (canvas55.width / 2) - 100, 10);
+  }
+  reset55();
+  
+  function test55() {
+    ctx55.clearRect(0, 0, canvas55.width, canvas55.height);
+    
+    let gridSize = 6;
+    let tileSize = canvas55.width / gridSize;
+    for (let x = 0; x < gridSize; x++) {
+      for (let y = 0; y < gridSize; y++) {
+        drawCrystal55((x + 0.5) * tileSize, (y + 0.5) * tileSize, tileSize * 0.45, 4);
+      }
+    }
+  }
+</script>
+<canvas id = "canvas54"></canvas>
+<button onclick = "Turtle54.move()">Draw More</button>
+<div><b><u>d&theta;:</u></b> <span id = "turtle54TurnStepTxt">1.01</span>&deg;</div>
+<br>
+<button onclick = "Turtle54.turnStep = Number((Turtle54.turnStep + 0.1).toFixed(6)); reset54()">+0.1&deg;</button>
+<button onclick = "Turtle54.turnStep = Number((Turtle54.turnStep - 0.1).toFixed(6)); reset54()">-0.1&deg;</button>
+<br><br>
+<button onclick = "Turtle54.turnStep = Number((Turtle54.turnStep + 0.001).toFixed(6)); reset54()">+0.001&deg;</button>
+<button onclick = "Turtle54.turnStep = Number((Turtle54.turnStep - 0.001).toFixed(6)); reset54()">-0.001&deg;</button>
+<br><br>
+<button onclick = "Turtle54.turnStep = Number((Turtle54.turnStep + 0.000001).toFixed(6)); reset54()">+0.000001&deg;</button>
+<button onclick = "Turtle54.turnStep = Number((Turtle54.turnStep - 0.000001).toFixed(6)); reset54()">-0.000001&deg;</button>
+<br><br>
+<button onclick = "Turtle54.turnStep = 1; reset54()">Reset to 1&deg;</button>
+<div class = "desc"><b><i>(2/1/2022)</i></b> Turtle graphics plotting Euler spirals, inspired by <a href = "https://www.youtube.com/watch?v=kMBj2fp52tA" target = "_blank">this</a> Numberphile video, with added buttons to change d&theta;, showing how sensitive the pattern is to intial conditions. Basically the turtle starts out moves forward and turns <b>d&theta;&deg;</b>, then moves and turns 2<b>d&theta;&deg;</b>, and then moves and turns 3<b>d&theta;&deg;</b>, and then 4<b>d&theta;&deg;</b>, and so on. By changing <b>d&theta;&deg;</b>, even by an incredibly small amount, it greatly changes the complexity of the resulting designs.</div>
+<hr><hr>
+<script>
+  const ctx54 = canvas54.getContext("2d");
+  canvas54.width = canvas54.height = 1000;
+  
+  let Turtle54 = {
+    x: canvas54.width / 2,
+    y: canvas54.height / 2,
+    angle: 0,
+    turnStep: 1.01,
+    currMult: 1,
+    iterations: 100000,
+    stepSize: 2
+  };
+  Turtle54.move = function() {
+    ctx54.beginPath();
+    ctx54.moveTo(this.x, this.y);
+    
+    for (let i = 0; i < this.iterations; i++) {
+      this.x += this.stepSize * Math.cos(this.angle);
+      this.y += this.stepSize * Math.sin(this.angle);
+      
+      ctx54.lineTo(this.x, this.y);
+      
+      this.angle += this.currMult * toRad(this.turnStep);
+      this.currMult++;
+    }
+    
+    ctx54.stroke();
+  };
+  
+  function reset54() {
+    ctx54.clearRect(0, 0, canvas54.width, canvas54.height);
+    
+    Turtle54.x = canvas54.width / 2;
+    Turtle54.y = canvas54.height / 2;
+    Turtle54.angle = 0;
+    Turtle54.currMult = 1;
+    
+    turtle54TurnStepTxt.innerHTML = Turtle54.turnStep;
+    
+    Turtle54.move();
+  }
+  reset54();
+</script>
+<canvas id = "canvas53"></canvas>
+<button onclick = "draw53()">Regenerate</button>
+<div class = "desc"><b><i>(2/1/2022)</i></b> More generative art, this time inspired by <a href = "https://tylerxhobbs.com/works/2018/fragments-of-vision-b" target = "_blank">this</a> artwork by Tyler Hobbs. There's lots of paramaters like brightness variation, saturation, etc. that are randomized every generation so that every time it looks similar but distinct.</div>
+<hr><hr>
+<script>
+  const ctx53 = canvas53.getContext("2d");
+  canvas53.width = canvas53.height = 1000;
+  
+  let columns53 = 10;
+  let rows53 = 100;
+  let drawChance53 = 0.5;
+  let brightness53 = 50;
+  let brightnessVariation53 = 1;
+  let outline53 = false;
+  let saturation53 = 50;
+  let hueVariation53 = 0.1;
+  let whiteLines53 = true;
+  
+  function drawDiamond53(x, y, size, color, outline) {
+    ctx53.fillStyle = color;
+    
+    ctx53.lineWidth = 1;
+    ctx53.strokeStyle = "black";
+    
+    let half = size / 2;
+    
+    ctx53.beginPath();
+    ctx53.moveTo(x, y);
+    ctx53.lineTo(x + half, y + half);
+    ctx53.lineTo(x + size, y);
+    ctx53.lineTo(x + half, y - half);
+    ctx53.lineTo(x, y);
+    
+    ctx53.fill();
+    if (outline) ctx53.stroke();
+  }
+  
+  function draw53() {
+    ctx53.fillStyle = "white";
+    ctx53.fillRect(0, 0, canvas53.width, canvas53.height);
+    
+    columns53 = Math.round(randBetween(2, 16));
+    rows53 = Math.random() < 0.5 ? Math.round(randBetween(25, 50)) : Math.round(randBetween(100, 200));
+    
+    let arr = [0.2, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1];
+    drawChance53 = arr[Math.floor(Math.random() * arr.length)];
+    
+    brightness53 = Math.round(randBetween(0, 10)) * 10;
+    
+    outline53 = Math.random() < 0.25;
+    
+    brightnessVariation53 = Math.random();
+    
+    saturation53 = randBetween(0, 100);
+    
+    hueVariation53 = Math.random() * Math.random();
+    
+    
+    
+    let scaleX = canvas53.width / columns53;
+    let scaleY = canvas53.height / rows53;
+    let offsetY = Math.ceil(scaleX / scaleY);
+    
+    for (let x = 0; x < columns53; x++) {
+      let hue = Math.random() * 360;
+      let vHue = randSign() * (randBetween(90, 360) / rows53);
+      
+      for (let y = -offsetY; y < rows53 + offsetY; y++) {
+        let _y1 = y * scaleY;
+        let _y2 = x % 2 === 0 ? _y1 : canvas53.height - _y1;
+        
+        let brightness = 0;
+        if (Math.random() < 0.5) brightness = randBetween(brightness53, ((100 - brightness53) * brightnessVariation53) + brightness53);
+        else brightness = randBetween(brightness53, brightness53 * (1 - brightnessVariation53));
+        
+        if (Math.random() < drawChance53) drawDiamond53(x * scaleX, _y2, scaleX, `hsl(${hue + randBetween(-180 * hueVariation53, 180 * hueVariation53)}deg, ${randBetween(saturation53, 100)}%, ${brightness}%)`, outline53);
+        
+        hue += vHue;
+      }
+    }
+    
+    if (whiteLines53) {
+      for (let x = 0; x <= columns53; x++) {
+        let _x = x * scaleX;
+        ctx53.lineWidth = scaleY;
+        ctx53.strokeStyle = "white";
+        
+        ctx53.beginPath();
+        ctx53.moveTo(_x, 0);
+        ctx53.lineTo(_x, canvas53.height);
+        ctx53.stroke();
+      }
+    }
+  }
+  draw53();
+</script>
+<canvas id = "canvas52"></canvas>
+<button onclick = "startCanvas52(this)">Start</button>
+<button onclick = "reset52()">Reset</button>
+<br>
+<div><b><u>Mode:</u></b></div>
+<button onclick = "mode52 = 1; reset52()">1</button>
+<button onclick = "mode52 = 2; reset52()">2</button>
+<button onclick = "mode52 = 3; reset52()">3</button>
+<button onclick = "mode52 = 4; reset52()">4</button>
+<button onclick = "mode52 = 5; reset52()">5</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps52Txt"></span></b></i></div>
+<div class = "desc"><b><i>(1/31/2022)</i></b> More generative art experimenting, with selectable modes for several different artworks, all based on a similar particle system that moves arounds and shrinks, leaving colored trails behind.<br><b><i>(2/1/2021)</i></b> Added more modes.</div>
+<hr><hr>
+<script>
+  const ctx52 = canvas52.getContext("2d");
+  canvas52.width = canvas52.height = 1000;
+  let canvas52Running = false;
+  
+  let mode52 = 1;
+  
+  let spawnRadius52 = 300;
+  let fallRate52 = 4;
+  let shrinkRate52 = 0.1;
+  let particle52Radius = 10;
+  let t52 = 0;
+  let period52 = 400;
+  let wiggle52 = 2;
+  let slideSpeed52 = 15;
+  
+  function Particle52() {
+    if (mode52 === 1) {
+      let a = Math.random() * Math.PI * 2;
+      let r = spawnRadius52 + randBetween(-10, 10);
+      this.x = (canvas52.width / 2) + (r * Math.cos(a));
+      this.y = (canvas52.height / 3) + (r * Math.sin(a));
+      
+      if (Math.random() < 0.03) {
+        this.x = Math.random() * canvas52.width;
+        this.y = Math.random() * canvas52.height;
+      }
+      
+      this.radius = particle52Radius * randBetween(0.75, 1);
+      this.color = `hsla(${t52 * 720}deg, ${randBetween(80, 100)}%, ${randBetween(30, 50)}%, 0.25)`;
+      
+      this.done = false;
+      
+      this.fallRate = randBetween(0.75, 1) * fallRate52;
+      this.shrinkRate = randBetween(0.75, 1) * shrinkRate52;
+    }
+    
+    else if (mode52 === 2) {
+      let a = Math.random() * Math.PI * 2;
+      let r = spawnRadius52 + 50;
+      this.x = (canvas52.width / 2) + (r * Math.cos(a));
+      this.y = (canvas52.height / 2) + (r * Math.sin(a));
+      
+      this.color = `hsla(${120 + randBetween(-60, 60)}deg, 100%, ${randBetween(30, 50)}%, 0.25)`;
+      this.done = false;
+      
+      this.radius = particle52Radius * randBetween(0.75, 1);
+      
+      this.shrinkRate = randBetween(0.75, 1) * shrinkRate52;
+      
+      this.slideSpeed = slideSpeed52 * randBetween(0.75, 1);
+    }
+    
+    else if (mode52 === 3) {
+      this.angle = Math.random() * Math.PI * 2;
+      let r = spawnRadius52 + 25 + randBetween(-10, 10);
+      this.x = (canvas52.width / 2) + (r * Math.cos(this.angle));
+      this.y = (canvas52.height / 2) + (r * Math.sin(this.angle));
+      this.done = false;
+      
+      this.radius = particle52Radius * randBetween(0.75, 1);
+      
+      this.shrinkRate = randBetween(0.75, 1) * shrinkRate52;
+      
+      this.slideSpeed = slideSpeed52 * randBetween(0.15, 0.33) * randSign();
+      
+      let hue = this.slideSpeed < 1 ? randBetween(-30, 30) : 240 + randBetween(-30, 30);
+      let brightness = this.slideSpeed < 1 ? randBetween(30, 50) : randBetween(50, 80);
+      this.color = `hsla(${hue}deg, ${randBetween(80, 100)}%, ${brightness}%, 0.25)`;
+    }
+    
+    else if (mode52 === 4) {
+      this.angle = Math.random() * Math.PI * 2;
+      let r = spawnRadius52 + 50;
+      this.x = (canvas52.width / 2) + (r * Math.cos(this.angle));
+      this.y = (canvas52.height / 2) + (r * Math.sin(this.angle));
+      
+      this.angle += toRad(120);//randBetween(-10, 10));
+      
+      this.done = false;
+      
+      this.radius = particle52Radius * randBetween(0.75, 1);
+      
+      this.shrinkRate = randBetween(0.75, 1) * shrinkRate52;
+      
+      this.slideSpeed = slideSpeed52 * randBetween(0.75, 1) * 2;
+      this.color = `hsla(${t52 * 360}deg, ${randBetween(50, 100)}%, ${randBetween(30, 50)}%, 0.25)`;
+    }
+    
+    else if (mode52 === 5) {
+      this.done = false;
+      
+      this.radius = particle52Radius * randBetween(0.75, 1);
+      
+      this.shrinkRate = randBetween(0.75, 1) * shrinkRate52;
+      
+      this.slideSpeed = slideSpeed52 * randBetween(0.75, 1);
+      this.dir = Math.round(Math.random());
+      
+      this.color = Math.random() < 0.5 ? "rgba(255, 255, 255, 0.25)" : "black";
+      
+      let a = Math.random() * Math.PI * 2;
+      let r = spawnRadius52 + 50 + randBetween(-25, 25);//this.color === "black" ? (spawnRadius52 + 50 + randBetween(-10, 10)) : (spawnRadius52 + 50);
+      this.x = (canvas52.width / 2) + (r * Math.cos(a));
+      this.y = (canvas52.height / 2) + (r * Math.sin(a));
+    }
+  }
+  Particle52.prototype.render = function() {
+    if (this.done) return;
+    
+    if (mode52 === 1) {
+      this.y += this.fallRate;
+      this.x += Math.random() * randSign() * wiggle52;
+      this.radius -= this.shrinkRate;
+      if (this.radius <= 0) {
+        this.done = true;
+        return;
+      }
+      
+      ctx52.fillStyle = this.color;
+      ctx52.fillCircle(this.x, this.y, this.radius);
+    }
+    
+    else if (mode52 === 2) {
+      if (this.done) return;
+      
+      this.x += Math.random() * randSign() * this.slideSpeed;
+      
+      this.radius -= this.shrinkRate;
+      if (this.radius <= 0) {
+        this.done = true;
+        return;
+      }
+      
+      ctx52.fillStyle = this.color;
+      ctx52.fillCircle(this.x, this.y, this.radius / 2);
+    }
+    
+    else if (mode52 === 3) {
+      if (this.done) return;
+      
+      let r = Math.random() * this.slideSpeed;
+      this.x += r * Math.cos(this.angle);
+      this.y += r * Math.sin(this.angle);
+      
+      this.radius -= this.shrinkRate;
+      if (this.radius <= 0) {
+        this.done = true;
+        return;
+      }
+      
+      ctx52.fillStyle = this.color;
+      ctx52.fillCircle(this.x, this.y, this.radius / 2);
+    }
+    
+    else if (mode52 === 4) {
+      if (this.done) return;
+      
+      let lastX = this.x;
+      let lastY = this.y;
+      
+      let r = Math.random() * randSign() * this.slideSpeed;
+      this.x += r * Math.cos(this.angle);
+      this.y += r * Math.sin(this.angle);
+      
+      this.radius -= this.shrinkRate;
+      if (this.radius <= 0) {
+        this.done = true;
+        return;
+      }
+      
+      ctx52.lineCap = ctx52.lineJoin = "round";
+      ctx52.strokeStyle = this.color;
+      ctx52.lineWidth = this.radius;
+      ctx52.beginPath();
+      ctx52.moveTo(lastX, lastY);
+      ctx52.lineTo(this.x, this.y);
+      ctx52.stroke();
+    }
+    
+    else if (mode52 === 5) {
+      if (this.done) return;
+      
+      if (this.dir === 0) this.x += Math.random() * randSign() * Math.round(randBetween(1, this.slideSpeed));
+      else this.y += Math.random() * randSign() * Math.round(randBetween(1, this.slideSpeed));
+      
+      this.radius -= this.shrinkRate;
+      if (this.radius <= 0) {
+        this.done = true;
+        return;
+      }
+      
+      ctx52.fillStyle = this.color;
+      ctx52.fillCircle(this.x, this.y, this.color === "black" ? 2 : 1);
+    }
+  };
+  let particle52Array = [];
+  
+  let lastFrame52Time = 0;
+  let lastFps52DisplayTime = 1000;
+  function frame52() {
+    if (Date.now() - lastFps52DisplayTime >= 500) {
+      fps52Txt.innerHTML = (1000 / (Date.now() - lastFrame52Time)).toFixed(1);
+      lastFps52DisplayTime = Date.now();
+    }
+    lastFrame52Time = Date.now();
+    
+    t52 += 1 / period52;
+    t52 = (t52 + 1) % 1;
+    
+    let n = 3;
+    if (mode52 === 5) n = 6;
+    for (let i = 0; i < n; i++) particle52Array.push(new Particle52());
+    
+    for (let i = 0; i < particle52Array.length; i++) {
+      particle52Array[i].render();
+      
+      if (particle52Array[i].done) {
+      particle52Array.splice(i, 1);
+        i--;
+      }
+    }
+    
+    if (canvas52Running) requestAnimationFrame(frame52);
+  }
+  
+  function reset52() {
+    ctx52.fillStyle = "black";
+    ctx52.fillRect(0, 0, canvas52.width, canvas52.height);
+    
+    particle52Array = [];
+    
+    if (!canvas52Running) frame52();
+  }
+  reset52();
+  
+  function startCanvas52(caller) {
+    if (canvas52Running) {
+      canvas52Running = false;
+      caller.innerHTML = "Start";
+    }
+    else {
+      canvas52Running = true;
+      caller.innerHTML = "Stop";
+      frame52();
+    }
+  }
+</script>
+<canvas id = "canvas51" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "startCanvas51(this)">Start</button>
+<button onclick = "reset51()">Reset</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps51Txt"></span></b></i></div>
+<div class = "desc"><b><i>(1/31/2022)</i></b> Experimenting with <a href = "https://archive.lib.msu.edu/crcmath/math/math/c/c850.htm" target = "_blank">curlicue fractals</a> gave me an idea for this "galaxy" generator. Each walker is a curlicue fractal, but it's step size is randomized every 500 steps (500 steps are taken per frame). This creates interesting and intricate doodle-like designs and patterns.</div>
+<hr><hr>
+<script>
+  const ctx51 = canvas51.getContext("2d");
+  canvas51.width = canvas51.height = 2000;
+  let canvas51Running = false;
+  
+  let stepsPerFrame51 = 500;
+  let numWalkers51 = 10;
+  let precision51 = 50;
+  
+  function Walker51(hue) {
+    this.x = Math.random() * canvas51.width;
+    this.y = Math.random() * canvas51.height;
+    this.theta = Math.random() * Math.PI * 2;
+    this.phi = Math.random() * Math.PI * 2;
+    this.s = 0;
+    this.sPeriod = 0;
+    this.cs = 0;
+    this.velocity = 0;
+    this.color = `hsla(${hue}deg, 100%, ${randBetween(70, 90)}%, 0.1)`;
+    this.randomize();
+  }
+  Walker51.prototype.randomize = function() {
+    this.s = Number(Math.random().toFixed(precision51))//Math.random();
+    this.sPeriod = Math.round(randBetween(0, 5));
+    this.cs = 0;
+    this.velocity = randBetween(0.5, 2);
+  };
+  Walker51.prototype.walk = function() {
+    this.cs++;
+    if (this.cs >= this.sPeriod) {
+      this.randomize();
+    }
+    for (let i = 0; i < stepsPerFrame51; i++) {
+      this.theta = (this.theta + (this.s * Math.PI * 2)) % (Math.PI * 2);
+      this.phi = (this.phi + this.theta) % (Math.PI * 2);
+      
+      this.x += this.velocity * Math.cos(this.phi);
+      this.y += this.velocity * Math.sin(this.phi);
+      
+      this.x = (this.x + canvas51.width) % canvas51.width;
+      this.y = (this.y + canvas51.height) % canvas51.height;
+      
+      ctx51.fillStyle = this.color;
+      ctx51.fillRect(this.x, this.y, 1, 1);
+    }
+  };
+  let walker51Array = [];
+  
+  let lastFrame51Time = 0;
+  let lastFps51DisplayTime = 1000;
+  function frame51() {
+    if (Date.now() - lastFps51DisplayTime >= 500) {
+      fps51Txt.innerHTML = (1000 / (Date.now() - lastFrame51Time)).toFixed(1);
+      lastFps51DisplayTime = Date.now();
+    }
+    lastFrame51Time = Date.now();
+    
+    for (let i = 0; i < walker51Array.length; i++) walker51Array[i].walk();
+    
+    if (canvas51Running) requestAnimationFrame(frame51);
+  }
+  
+  function reset51() {
+    ctx51.fillStyle = "black";
+    ctx51.fillRect(0, 0, canvas51.width, canvas51.height);
+    
+    walker51Array = [];
+    for (let i = 0; i < numWalkers51; i++) walker51Array.push(new Walker51((i / numWalkers51) * 360));
+    
+    if (!canvas51Running) frame51();
+  }
+  reset51();
+  
+  function startCanvas51(caller) {
+    if (canvas51Running) {
+      canvas51Running = false;
+      caller.innerHTML = "Start";
+    }
+    else {
+      canvas51Running = true;
+      caller.innerHTML = "Stop";
+      frame51();
+    }
+  }
+</script>
+<canvas id = "canvas50"></canvas>
+<button onclick = "startCanvas50(this)">Start</button>
+<button onclick = "reset50()">Reset</button>
+<button onclick = "trailing50 = !trailing50">Toggle Trailing</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps50Txt"></span></b></i></div>
+<div class = "desc"><b><i>(1/31/2022)</i></b> Inspired by <a href = "https://www.dwitter.net/d/24844" target = "_blank">this</a> Dweet, I made a simple recreation of it that turned out pretty underwhelming. I tried adding color and trailing so it's a bit more interesting but this took like 5 minutes and I'm not super proud of the end result.</div>
+<hr><hr>
+<script>
+  const ctx50 = canvas50.getContext("2d");
+  canvas50.width = canvas50.height = 1000;
+  let canvas50Running = false;
+  
+  let numVertices50 = 25;
+  let stepsPerFrame50 = 2;
+  let trailing50 = true;
+  
+  function Vertex50(x, y, angle, velocity) {
+    this.x = x;
+    this.y = y;
+    this.vx = velocity * Math.cos(toRad(angle));
+    this.vy = velocity * Math.sin(toRad(angle));
+    this.color = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;//color;
+  }
+  Vertex50.prototype.draw = function() {
+    ctx50.strokeStyle = this.color;
+    ctx50.lineWidth = 1;
+    for (let i = 0; i < vertex50Array.length; i++) {
+      if (i !== vertex50Array.indexOf(this)) {
+        ctx50.beginPath();
+        ctx50.moveTo(this.x, this.y);
+        ctx50.lineTo(vertex50Array[i].x, vertex50Array[i].y);
+        ctx50.stroke();
+      }
+    }
+  };
+  Vertex50.prototype.update = function() {
+    this.x += this.vx;
+    this.y += this.vy;
+    
+    if (this.x < 0) {
+      this.x = 0;
+      this.vx *= -1;
+    }
+    if (this.x > canvas50.width) {
+      this.x = canvas50.width;
+      this.vx *= -1;
+    }
+    if (this.y < 0) {
+      this.y = 0;
+      this.vy *= -1;
+    }
+    if (this.y > canvas50.height) {
+      this.y = canvas50.height;
+      this.vy *= -1;
+    }
+  };
+  let vertex50Array = [];
+  
+  let lastFrame50Time = 0;
+  let lastFps50DisplayTime = 1000;
+  
+  function frame50() {
+    if (Date.now() - lastFps50DisplayTime >= 500) {
+      fps50Txt.innerHTML = (1000 / (Date.now() - lastFrame50Time)).toFixed(1);
+      lastFps50DisplayTime = Date.now();
+    }
+    lastFrame50Time = Date.now();
+    
+    ctx50.fillStyle = `rgba(0, 0, 0, ${trailing50 ? 0.1 : 1})`;
+    ctx50.fillRect(0, 0, canvas50.width, canvas50.height);
+    
+    for (let i = 0; i < vertex50Array.length; i++) {
+      for (let j = 0; j < stepsPerFrame50; j++) vertex50Array[i].update();
+      vertex50Array[i].draw();
+    }
+    
+    if (canvas50Running) requestAnimationFrame(frame50);
+  }
+  
+  function reset50() {
+    ctx50.fillStyle = "black";
+    ctx50.fillRect(0, 0, canvas50.width, canvas50.height);
+    
+    vertex50Array = [];
+    for (let i = 0; i < numVertices50; i++) {
+      vertex50Array.push(new Vertex50(
+        canvas50.width / 2,//Math.random() * canvas50.width, // x
+        canvas50.height / 2,//Math.random() * canvas50.height, // y
+        ((i / numVertices50) * 360) + randBetween(-10, 10), // angle
+        4 // velocity
+      ));
+    }
+    
+    if (!canvas50Running) frame50();
+  }
+  reset50();
+  
+  function startCanvas50(caller) {
+    if (canvas50Running) {
+      canvas50Running = false;
+      caller.innerHTML = "Start";
+    }
+    else {
+      canvas50Running = true;
+      caller.innerHTML = "Stop";
+      frame50();
+    }
+  }
+</script>
+<canvas id = "canvas49" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "startCanvas49(this)">Start</button>
+<button onclick = "if (window.confirm('Are you sure you want to reset your highscore?')) {highScore49 = 0; window.localStorage.setItem('highscore', 0);}">Reset Highscore</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps49Txt"></span></b></i></div>
+<div class = "desc"><b><i>(1/25/2022)</i></b> Interactive Plinko board game, click at the top to add a ball. I possibly want to add like some scoring system with different sections at the bottom but I'm not sure yet and it'll probably stay like this for awhile.<br><b><i>(1/27/2022)</i></b> I added better UI for the remaining pinballs and made a little particle cloud when a ball falls off the screen, which I'll have change based on what section it landed in, when I add them.<br><b><i>(1/29/2022)</i></b> Added some more randomness in the pegs, so that when a ball bounces off a peg, the angle and bounciness is randomized slightly.<br><b><i>(1/30/2022)</i></b> I finally added the buckets at the bottom, and made an animation for scoring along with a total score variable. There is an array of buckets that get shuffled around every reset, to guarantee a good variety of bucket values. The reason I was delaying adding buckets is that I didn't want to try to figure out how to add add physics for the bucket edges, but I decided to make the edges not have any collision and it still looks fine.<br><b><i>Update: (Later that day)</i></b> I added a game over screen so you can keep replaying the game like an arcade.<br><b><i>Update: (Even later that day)</i></b> I added three different powerups that slide across the board -- there's a pink +1 ball powerup, a yellow x2 mult powerup (which makes the ball that collects it worth twice as much when falling into a bucket), and a gray elevator powerup, which makes the ball that collects it slide straight down, so you can align with a high value bucket for more strategy. I also added game stats to the game over page.<br><b><i>(1/31/2022)</i></b> Made highscore saved in local storage, so it is retained on page reload, and slightly modified the animation when a peg is hit.</div>
+<hr><hr>
+<script>
+  const ctx49 = canvas49.getContext("2d");
+  canvas49.width = canvas49.height = 1000;
+  let canvas49Running = false;
+  let canvas49Ratio = canvas49.width / 500;
+  let canvas49Rect = canvas49.getBoundingClientRect();
+  
+  let peg49Radius = 10;
+  let pegRows49 = 13;
+  let peg49Bounciness = 0.8;
+  let ball49Color = "#f05ba8";
+  let ball49Radius = 20;
+  let gravity49 = 0.3;
+  let glowFade49 = 0.02;
+  let defaultMaxBalls49 = 5;
+  let maxBalls49 = defaultMaxBalls49;
+  let numBuckets49 = 10;
+  let bucket49Height = 60;
+  let bucket49Thickness = 5;
+  let bucket49TemplateArray = [];
+  let score49 = 0;
+  let highScore49 = 0;
+  if (window.localStorage.getItem("highscore") !== "null") highScore49 = window.localStorage.getItem("highscore");
+  else window.localStorage.setItem("highscore", 0);
+  let replenishBalls49 = false;
+  let gameOver49 = false;
+  let gameOver49Opacity = 0;
+  let powerUp49Radius = 15;
+  let numPowerUp49Array = [3, 4, 2]; // +1 Ball, x2 Mult, Elevator
+  let powerUp49SlidePeriod = 800;
+  let powerUp49Value = 100;
+  let peg49Value = 5;
+  let ball49SlideSpeed = 5;
+  let stats49 = {
+    pegsTouched: 0,
+    extraBalls: 0,
+    powerUpsCollected: 0,
+    gameStartTime: 0,
+    gameLength: 0
+  };
+  let playableY49 = 100;
+  
+  function Ball49(x, y) {
+    this.x = x;
+    this.y = y;
+    
+    this.vx = 0;
+    this.vy = 0;
+    
+    this.dead = false;
+    
+    this.glowOpacity = 0;
+    this.mult = 1;
+    this.slidingDown = false;
+  }
+  Ball49.prototype.draw = function() {
+    if (this.dead) return;
+    if (this.slidingDown) { // Draw pole if sliding
+      ctx49.beginPath();
+      ctx49.moveTo(this.x, 0);
+      ctx49.lineTo(this.x, canvas49.height);
+      
+      ctx49.strokeStyle = "black";
+      ctx49.lineWidth = 6;
+      ctx49.stroke();
+      
+      ctx49.strokeStyle = "hsl(0deg, 0%, 70%)";
+      ctx49.lineWidth = 3;
+      ctx49.stroke();
+    }
+    
+    ctx49.fillStyle = ball49Color;
+    ctx49.fillCircle(this.x, this.y, ball49Radius);
+    
+    if (this.mult > 1) {
+      ctx49.fillStyle = "yellow";
+      ctx49.globalAlpha = 0.75;
+      ctx49.fillCircle(this.x, this.y, ball49Radius);
+      ctx49.globalAlpha = 1;
+      
+      ctx49.fillStyle = "black";
+      ctx49.font = "bold 20px verdana";
+      ctx49.textAlign = "center";
+      ctx49.textBaseline = "middle";
+      if (!this.slidingDown) ctx49.fillText(`x${this.mult}`, this.x, this.y);
+    }
+    
+    ctx49.strokeStyle = "black";
+    ctx49.lineWidth = 2;
+    ctx49.strokeCircle(this.x, this.y, ball49Radius);
+    
+    if (this.slidingDown) { // Draw down arrow if sliding
+      ctx49.lineWidth = 4;
+      ctx49.beginPath();
+      ctx49.moveTo(this.x, this.y - (ball49Radius * 0.5));
+      ctx49.lineTo(this.x, this.y + (ball49Radius * 0.5));
+      ctx49.moveTo(this.x - (ball49Radius * 0.5), this.y);
+      ctx49.lineTo(this.x, this.y + (ball49Radius * 0.5));
+      ctx49.lineTo(this.x + (ball49Radius * 0.5), this.y);
+      ctx49.stroke();
+    }
+  };
+  Ball49.prototype.update = function() {
+    if (this.dead) return;
+    this.glowOpacity -= glowFade49;
+    if (this.glowOpacity < 0) this.glowOpacity = 0;
+    
+    this.x += this.vx;
+    this.y += this.vy;
+    if (!this.slidingDown) this.vy += gravity49;
+    else this.vy = ball49SlideSpeed;
+    
+    if (!this.slidingDown) { // If not sliding, check for collisions with pegs
+      for (let i = 0; i < peg49Array.length; i++) {
+        let dx = this.x - peg49Array[i].x;
+        let dy = this.y - peg49Array[i].y;
+        let distSq = (dx * dx) + (dy * dy);
+        let rad = ball49Radius + peg49Radius;
+        if (distSq <= rad * rad) {
+          let angle = Math.atan2(dy, dx) + randBetween(-0.02, 0.02);
+          let collX = Math.cos(angle);
+          let collY = Math.sin(angle);
+          let speed = ((this.vx * collX) + (this.vy * collY)) * 2;
+          let bounciness = peg49Bounciness * randBetween(0.9, 1);
+          this.vx -= bounciness * speed * collX;
+          this.vy -= bounciness * speed * collY;
+          let r = rad + 0.01;
+          this.x = peg49Array[i].x + (r * collX);
+          this.y = peg49Array[i].y + (r * collY);
+          this.glowOpacity = peg49Array[i].glowOpacity = 0.75;
+          score49 += peg49Value * this.mult;
+          stats49.pegsTouched++;
+        }
+      }
+    }
+    
+    if (this.x > canvas49.width + ball49Radius) this.x = -ball49Radius;
+    if (this.x < -ball49Radius) this.x = canvas49.width + ball49Radius;
+    
+    for (let i = 0; i < powerUp49Array.length; i++) {
+      let dx = powerUp49Array[i].x - this.x;
+      let dy = powerUp49Array[i].y - this.y;
+      let distSq = (dx * dx) + (dy * dy);
+      let rad = ball49Radius + powerUp49Radius;
+      if (distSq <= rad * rad && !powerUp49Array[i].collected) {
+        powerUp49Array[i].collect(this);
+        stats49.powerUpsCollected++;
+      }
+    }
+    
+    if (this.y > canvas49.height + (ball49Radius * 2)) this.score();
+  };
+  Ball49.prototype.score = function() {
+    this.dead = true;
+    
+    this.x = this.x.clamp(5, canvas49.width - 5);
+    
+    for (let i = 0; i < bucket49Array.length; i++) {
+      let b = bucket49Array[i];
+      if (this.x >= b.x && this.x < b.x + b.width) {
+        this.x = b.x + (b.width / 2);
+        score49 += b.value * this.mult;
+        if (b.value === 0) {
+          b.glowOpacity = 1.25;
+          return;
+        }
+        b.glowOpacity = 1;
+      }
+    }
+    
+    for (let i = 0; i < 100; i++) {
+      particle49Array.push(new Particle49(
+        randBetween(this.x - ball49Radius, this.x + ball49Radius), // x
+        this.y - (Math.random() * ball49Radius * 2), // y
+        randBetween(255, 285), // angle
+        randBetween(3, 8), // velocity
+        `hsl(${randBetween(-60, 60)}deg, 100%, ${randBetween(30, 50)}%)`, // color
+        randBetween(5, 10), // size
+        randBetween(0.5, 1), // opacity
+        randBetween(0.008, 0.015), // fadeRate
+        false, // hasFriction
+        false // hasOutline
+      ));
+    }
+  };
+  let ball49Array = [];
+  
+  function Peg49(x, y, color) {
+    this.x = x;
+    this.y = y;
+    this.color = color;
+    this.glowOpacity = 0;
+  }
+  Peg49.prototype.draw = function() {
+    ctx49.fillStyle = this.color;
+    
+    ctx49.globalAlpha = this.glowOpacity;
+    ctx49.fillCircle(this.x, this.y, peg49Radius * (1 + (this.glowOpacity * 1.33)));
+    
+    ctx49.globalAlpha = 1;
+    ctx49.fillCircle(this.x, this.y, peg49Radius);
+  };
+  Peg49.prototype.update = function() {
+    this.glowOpacity -= glowFade49;
+    if (this.glowOpacity < 0) this.glowOpacity = 0;
+  };
+  let peg49Array = [];
+  
+  function Particle49(x, y, angle, velocity, color, size, opacity, fadeRate, hasFriction, hasOutline) {
+    this.x = x;
+    this.y = y;
+    this.velocity = velocity;
+    this.angle = angle;
+    this.vx = velocity * Math.cos(toRad(angle));
+    this.vy = velocity * Math.sin(toRad(angle));
+    this.color = color;
+    this.size = size;
+    this.opacity = opacity;
+    this.fadeRate = fadeRate;
+    this.hasFriction;
+    this.hasOutline = hasOutline;
+  }
+  Particle49.prototype.update = function() {
+    this.opacity -= this.fadeRate;
+    if (this.opacity <= 0) {
+      this.opacity = 0;
+      this.dead = true;
+      return;
+    }
+    
+    this.vx = this.velocity * Math.cos(toRad(this.angle)) * (this.hasFriction ? this.opacity : 1);
+    this.vy = this.velocity * Math.sin(toRad(this.angle)) * (this.hasFriction ? this.opacity : 1);
+    
+    this.x += this.vx;
+    this.y += this.vy;
+  };
+  Particle49.prototype.draw = function() {
+    ctx49.fillStyle = this.color;
+    ctx49.strokeStyle = "black";
+    ctx49.lineWidth = 2;
+    ctx49.globalAlpha = this.opacity;
+    
+    ctx49.fillCircle(this.x, this.y, this.size * this.opacity);
+    
+    if (this.hasOutline) ctx49.strokeCircle(this.x, this.y, this.size * this.opacity);
+    
+    ctx49.globalAlpha = 1;
+  };
+  let particle49Array = [];
+  
+  function Bucket49(x, y, width, height, value, color, textColor) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.value = value;
+    this.color = color;
+    this.textColor = textColor;
+    
+    this.glowOpacity = 0;
+  }
+  Bucket49.prototype.draw = function() {
+    ctx49.strokeStyle = "black";
+    ctx49.lineWidth = bucket49Thickness;
+    ctx49.lineCap = ctx49.lineJoin = "round";
+    
+    ctx49.fillStyle = this.color; // Draw bucket color
+    ctx49.fillRect(this.x, this.y, this.width, this.height);
+    
+    ctx49.globalAlpha = this.glowOpacity; // Draw bucket glow
+    ctx49.fillRect(this.x, playableY49 + 2, this.width, canvas49.height - this.height - playableY49 - 2);
+    ctx49.globalAlpha = 1;
+    
+    ctx49.beginPath(); // Draw bucket edges
+    ctx49.moveTo(this.x, this.y);
+    ctx49.lineTo(this.x, this.y + this.height);
+    ctx49.moveTo(this.x + this.width, this.y);
+    ctx49.lineTo(this.x + this.width, this.y + this.height);
+    ctx49.stroke();
+    
+    ctx49.fillStyle = this.textColor;
+    ctx49.font = "bold 30px verdana";
+    ctx49.textAlign = "center";
+    ctx49.textBaseline = "top";
+    ctx49.fillText(this.value, this.x + (this.width / 2), this.y + (this.height / 2) - 15);
+  };
+  Bucket49.prototype.update = function() {
+    this.glowOpacity -= glowFade49;
+    if (this.glowOpacity < 0) this.glowOpacity = 0;
+  };
+  let bucket49Array = [];
+  
+  function PowerUp49(y, type) {
+    this.x = 0;
+    this.y = y;
+    this.type = type;
+    
+    this.theta = Math.random();
+    this.sign = randSign();
+    
+    this.collected = false;
+    
+    this.update();
+  }
+  PowerUp49.prototype.draw = function() {
+    if (this.collected) return;
+    if (this.type === 1) { // +1 Ball
+      ctx49.fillStyle = ball49Color;
+      ctx49.strokeStyle = "black";
+      ctx49.lineWidth = 2;
+      ctx49.fillCircle(this.x, this.y, powerUp49Radius);
+      ctx49.strokeCircle(this.x, this.y, powerUp49Radius);
+      
+      ctx49.lineWidth = 4; // Draw plus
+      ctx49.beginPath();
+      ctx49.moveTo(this.x, this.y - (powerUp49Radius * 0.5));
+      ctx49.lineTo(this.x, this.y + (powerUp49Radius * 0.5));
+      ctx49.moveTo(this.x - (powerUp49Radius * 0.5), this.y);
+      ctx49.lineTo(this.x + (powerUp49Radius * 0.5), this.y);
+      ctx49.stroke();
+    }
+    
+    else if (this.type === 2) { // x2 Mult
+      ctx49.fillStyle = "yellow";
+      ctx49.strokeStyle = "black";
+      ctx49.lineWidth = 2;
+      ctx49.fillCircle(this.x, this.y, powerUp49Radius);
+      ctx49.strokeCircle(this.x, this.y, powerUp49Radius);
+      
+      ctx49.fillStyle = "black";
+      ctx49.font = "bold 15px verdana";
+      ctx49.textAlign = "center";
+      ctx49.textBaseline = "middle";
+      ctx49.fillText("x2", this.x, this.y);
+    }
+    
+    else if (this.type === 3) { // Elevator
+      ctx49.fillStyle = "hsl(0deg, 0%, 70%)";
+      ctx49.strokeStyle = "black";
+      ctx49.lineWidth = 2;
+      ctx49.fillCircle(this.x, this.y, powerUp49Radius);
+      ctx49.strokeCircle(this.x, this.y, powerUp49Radius);
+      
+      ctx49.lineWidth = 4; // Draw arrow
+      ctx49.beginPath();
+      ctx49.moveTo(this.x, this.y - (powerUp49Radius * 0.5));
+      ctx49.lineTo(this.x, this.y + (powerUp49Radius * 0.5));
+      ctx49.moveTo(this.x - (powerUp49Radius * 0.5), this.y);
+      ctx49.lineTo(this.x, this.y + (powerUp49Radius * 0.5));
+      ctx49.lineTo(this.x + (powerUp49Radius * 0.5), this.y);
+      ctx49.stroke();
+    }
+  };
+  PowerUp49.prototype.update = function() {
+    this.theta += this.sign * (1 / powerUp49SlidePeriod);
+    this.theta = (this.theta + 1) % 1;
+    this.x = ((1 - Math.cos(Math.PI * 2 * this.theta)) / 2) * (canvas49.width - (powerUp49Radius * 2)) + powerUp49Radius;
+  };
+  PowerUp49.prototype.collect = function(caller) {
+    this.collected = true;
+    let n = 30;
+    for (let i = 0; i < n; i++) {
+      particle49Array.push(new Particle49(
+        this.x, // x
+        this.y, // y
+        ((i / n) * 360) + randBetween(-5, 5), // angle
+        randBetween(2, 4), // velocity
+        "white", // color
+        randBetween(5, 10), // size
+        1, // opacity
+        randBetween(0.008, 0.015), // fadeRate
+        false, // hasFriction
+        false // hasOutline
+      ));
+    }
+    
+    if (this.type === 1) { // +1 Ball
+      maxBalls49++;
+      stats49.extraBalls++;
+    }
+    else if (this.type === 2) caller.mult *= 2; // x2 Mult
+    else if (this.type === 3) { // Elevator
+      caller.slidingDown = true;
+      caller.vx = caller.vy = 0;
+    }
+    
+    score49 += powerUp49Value * caller.mult;
+  };
+  let powerUp49Array = [];
+  
+  let lastFrame49Time = 0;
+  let lastFps49DisplayTime = 1000;
+  function frame49() {
+    if (Date.now() - lastFps49DisplayTime >= 500) {
+      fps49Txt.innerHTML = (1000 / (Date.now() - lastFrame49Time)).toFixed(1);
+      lastFps49DisplayTime = Date.now();
+    }
+    lastFrame49Time = Date.now();
+    
+    ctx49.fillStyle = "#00e35b";
+    ctx49.fillRect(0, 0, canvas49.width, canvas49.height); // Background
+    
+    ctx49.strokeStyle = "black"; // Playable line
+    ctx49.lineWidth = 4;
+    ctx49.beginPath();
+    ctx49.moveTo(0, playableY49);
+    ctx49.lineTo(canvas49.width, playableY49);
+    ctx49.stroke();
+    
+    for (let i = 0; i < maxBalls49; i++) { // Draw remaining balls
+      let x = 15 + ball49Radius + ((i * 3) * ball49Radius);
+      let y = ball49Radius + 15;
+      if (i < maxBalls49 - ball49Array.length) { // Draw ball
+        ctx49.fillStyle = ball49Color;
+        
+        ctx49.fillCircle(x, y, ball49Radius);
+        ctx49.strokeStyle = "black";
+        ctx49.lineWidth = 2;
+        ctx49.strokeCircle(x, y, ball49Radius);
+      }
+      else { // Draw empty slot
+        ctx49.fillStyle = "rgba(0, 0, 0, 0.4)";
+        ctx49.fillCircle(x, y, ball49Radius);
+      }
+    }
+    
+    for (let i = 0; i < bucket49Array.length; i++) { // Render buckets
+      bucket49Array[i].update();
+      bucket49Array[i].draw();
+    }
+    
+    for (let i = 0; i < peg49Array.length; i++) { // Render pegs
+      peg49Array[i].update();
+      peg49Array[i].draw();
+    }
+    
+    for (let i = 0; i < powerUp49Array.length; i++) { // Render powerups
+      powerUp49Array[i].draw();
+      powerUp49Array[i].update();
+      
+      if (powerUp49Array[i].collected) {
+        powerUp49Array.splice(i, 1);
+        i--;
+      }
+    }
+    
+    for (let i = 0; i < ball49Array.length; i++) { // Render balls
+      ball49Array[i].update();
+      ball49Array[i].draw();
+      
+      if (ball49Array[i].dead && replenishBalls49) {
+        ball49Array.splice(i, 1);
+        i--;
+      }
+    }
+    
+    for (let i = 0; i < particle49Array.length; i++) { // Render particles
+      particle49Array[i].update();
+      particle49Array[i].draw();
+      
+      if (particle49Array[i].dead) {
+        particle49Array.splice(i, 1);
+        i--;
+      }
+    }
+    
+    if (score49 > highScore49) highScore49 = score49;
+    window.localStorage.setItem("highscore", highScore49);
+    ctx49.fillStyle = "black";
+    ctx49.font = "bold 25px verdana";
+    ctx49.textBaseline = "top";
+    ctx49.textAlign = "right";
+    ctx49.fillText(`Score: ${score49.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, canvas49.width - 15, 15);
+    ctx49.fillText(`Highscore: ${highScore49.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, canvas49.width - 15, 45);
+    
+    if (ball49Array.length >= maxBalls49) {
+      gameOver49 = true;
+      for (let i = 0; i < ball49Array.length; i++) {
+        if (!ball49Array[i].dead) gameOver49 = false;
+      }
+    }
+    
+    if (!gameOver49) stats49.gameLength = ((Date.now() - stats49.gameStartTime) / 1000).toFixed(1);
+    
+    ctx49.textAlign = "center";
+    ctx49.fillText(stats49.gameLength + "s", canvas49.width / 2, 15);
+    
+    if (gameOver49) {
+      gameOver49Opacity += 0.01;
+      if (gameOver49Opacity >= 1) gameOver49Opacity = 1;
+      
+      ctx49.globalAlpha = gameOver49Opacity;
+      ctx49.fillStyle = "black";
+      
+      ctx49.fillRect(0, 0, canvas49.width, canvas49.height);
+      
+      ctx49.fillStyle = "red"//"hsl(0deg, 80%, 60%)";
+      ctx49.strokeStyle = "white";
+      ctx49.lineWidth = 5;
+      ctx49.font = "bold 75px verdana";
+      ctx49.textAlign = "center";
+      ctx49.textBaseline = "top";
+      ctx49.strokeText("G A M E", canvas49.width / 2, 100);
+      ctx49.strokeText("O V E R", canvas49.width / 2, 200);
+      ctx49.fillText("G A M E", canvas49.width / 2, 100);
+      ctx49.fillText("O V E R", canvas49.width / 2, 200);
+      
+      ctx49.font = "bold 40px verdana";
+      ctx49.fillStyle = "hsl(120deg, 100%, 35%)";
+      ctx49.fillText(`Score: ${score49.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, canvas49.width / 2, 350);
+      
+      ctx49.fillStyle = "white";
+      ctx49.font = "25px verdana";
+      ctx49.fillText(`${stats49.pegsTouched.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} peg${stats49.pegsTouched === 1 ? "" : "s"} hit`, canvas49.width / 2, 425);
+      ctx49.fillText(`${stats49.powerUpsCollected} power-up${stats49.powerUpsCollected === 1 ? "" : "s"} collected`, canvas49.width / 2, 475);
+      ctx49.fillText(`${stats49.extraBalls} extra ball${stats49.extraBalls === 1 ? "" : "s"} collected`, canvas49.width / 2, 525);
+      ctx49.fillText(`${stats49.gameLength} seconds played`, canvas49.width / 2, 575);
+      
+      ctx49.font = "bold 40px verdana";
+      ctx49.fillStyle = "yellow";
+      ctx49.fillText(`Highscore: ${highScore49.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, canvas49.width / 2, 650);
+      
+      ctx49.fillStyle = "hsl(240deg, 100%, 70%)";
+      ctx49.font = "italic 25px verdana";
+      ctx49.fillText("Click anywhere to start a new game", canvas49.width / 2, 750);
+      
+      ctx49.globalAlpha = 1;
+    }
+    
+    if (canvas49Running) requestAnimationFrame(frame49);
+  }
+  
+  function reset49() {
+    score49 = 0;
+    gameOver49 = false;
+    gameOver49Opacity = 0;
+    
+    stats49 = {
+      pegsTouched: 0,
+      extraBalls: 0,
+      powerUpsCollected: 0,
+      gameStartTime: Date.now(),
+      gameLength: 0
+    };
+    
+    window.localStorage.setItem("highscore", highScore49);
+    
+    maxBalls49 = defaultMaxBalls49;
+    
+    particle49Array = [];
+    
+    peg49Array = [];
+    let spacing = canvas49.width / pegRows49;
+    for (let x = 0; x <= pegRows49; x++) {
+      for (let y = 0; y < 10; y++) {
+        let _x = y % 2 === 0 ? x + 1 : x + 0.5;
+        let hue = y % 2 === 0 ? 240 : 0;
+        let color = y % 2 === 0 ? "blue" : "#d40202";
+        let last = y % 2 === 0 && x > pegRows49 - 2;
+        if (!last) peg49Array.push(new Peg49(_x * spacing, (y + 2) * spacing, color));
+      }
+    }
+    
+    ball49Array = [];
+    //ball49Array.push(new Ball49(randBetween(200, 800), 100));
+    
+    bucket49TemplateArray.push({value: 1000, color: "hsl(240deg, 80%, 50%)", textColor: "black"});
+    bucket49TemplateArray.push({value: 500, color: "hsl(300deg, 60%, 60%)", textColor: "black"});
+    for (let i = 0; i < 2; i++) bucket49TemplateArray.push({value: 250, color: "hsl(120deg, 60%, 40%)", textColor: "black"});
+    for (let i = 0; i < 3; i++) bucket49TemplateArray.push({value: 100, color: "hsl(0deg, 80%, 60%)", textColor: "black"});
+    for (let i = 0; i < 2; i++) bucket49TemplateArray.push({value: 50, color: "hsl(60deg, 100%, 60%)", textColor: "black"});
+    for (let i = 0; i < 1; i++) bucket49TemplateArray.push({value: 0, color: "hsl(0deg, 0%, 10%)", textColor: "white"});
+    
+    bucket49Array = [];
+    let width = canvas49.width / numBuckets49;
+    for (let i = 0; i < numBuckets49; i++) {
+      let j = Math.floor(Math.random() * bucket49TemplateArray.length);
+      let template = bucket49TemplateArray[j];
+      bucket49TemplateArray.splice(j, 1);
+      bucket49Array.push(new Bucket49(
+        i * width, // x
+        canvas49.height - bucket49Height, // y
+        width, // width
+        bucket49Height, // height
+        template.value, // value
+        template.color, // color
+        template.textColor // textColor
+      ));
+    }
+    
+    powerUp49Array = [];
+    for (let i = 0; i < numPowerUp49Array.length; i++) {
+      for (let j = 0; j < numPowerUp49Array[i]; j++) {
+        let py = 0;
+        if (i === 0) py = Math.round(randBetween(2, 10)) + 0.5; // +1 Ball, generates anywhere on screen
+        else if (i === 1) py = Math.round(randBetween(2, 6)) + 0.5; // x2 Mult, generates at top half of screen
+        else if (i === 2) py = 2.5; // Elevator, generates in top row only
+        
+        powerUp49Array.push(new PowerUp49(py * spacing, i + 1));
+      }
+    }
+    
+    if (!canvas49Running) frame49();
+  }
+  reset49();
+  
+  function startCanvas49(caller) {
+    if (canvas49Running) {
+      canvas49Running = false;
+      caller.innerHTML = "Start";
+    }
+    else {
+      canvas49Running = true;
+      caller.innerHTML = "Stop";
+      frame49();
+    }
+  }
+  
+  canvas49.addEventListener("mousedown", e => {
+    if (!canvas49Running) return;
+    e.preventDefault();
+    
+    canvas49Rect = canvas49.getBoundingClientRect();
+    let eX = (e.clientX - canvas49Rect.left) * canvas49Ratio;
+    eX = eX.clamp(ball49Radius, canvas49.width - ball49Radius);
+    let eY = (e.clientY - canvas49Rect.top) * canvas49Ratio;
+    
+    if (gameOver49 && eY >= playableY49) {
+      reset49();
+      return;
+    }
+    
+    let a = Math.random() * Math.PI * 2;
+    let r = Math.random() * 0.5;
+    if (ball49Array.length < maxBalls49 && eY <= playableY49) {
+      let newBall = new Ball49(eX, eY);
+      newBall.vx = r * Math.cos(a);
+      newBall.vy = r * Math.sin(a);
+      ball49Array.push(newBall);
+    }
+  });
+</script>
+<canvas id = "canvas48"></canvas>
+<button onclick = "startCanvas48()">Start/Stop</button>
+<button onclick = "reset48()">Reset</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps48Txt"></span></b></i></div>
+<div class = "desc"><b><i>(1/25/2022)</i></b> Genuary 2022's prompt for January 24th, "Create your own pseudo-random number generator and visually check the results." I'm not super proud of this but I'm just gonna leave it how it is.</div>
+<hr><hr>
+<script>
+  const ctx48 = canvas48.getContext("2d");
+  canvas48.width = canvas48.height = 1000;
+  let canvas48Running = false;
+  
+  let i48 = 0;
+  function random48() {
+    i48++;
+    return Math.abs(Math.tan((i48 * i48) + i48)) % 1;//Math.abs(Math.sin(Math.sin(i48 ** 2)));
+  }
+  
+  let Walker48 = {
+    x: canvas48.width / 2,
+    y: canvas48.height / 2,
+    hue: 0
+  };
+  Walker48.walk = function() {
+    //let lastX = this.x;
+    //let lastY = this.y;
+    let a = random48() * Math.PI * 2;
+    this.x += 5 * Math.cos(a);
+    this.y += 5 * Math.sin(a);
+    
+    this.hue += (random48() * 0.5) - 0.25;
+    
+    this.x = (this.x + canvas48.width) % canvas48.width;
+    this.y = (this.y + canvas48.height) % canvas48.height;
+    
+    ctx48.fillStyle = `hsl(${this.hue}deg, 100%, 50%)`;
+    ctx48.fillCircle(this.x, this.y, 3);
+  };
+  
+  let lastFrame48Time = 0;
+  let lastFps48DisplayTime = 1000;
+  
+  function frame48() {
+    if (Date.now() - lastFps48DisplayTime >= 500) {
+      fps48Txt.innerHTML = (1000 / (Date.now() - lastFrame48Time)).toFixed(1);
+      lastFps48DisplayTime = Date.now();
+    }
+    lastFrame48Time = Date.now();
+    
+    /*for (let i = 0; i < 10; i++) {
+      ctx48.fillStyle = `hsl(${random48() * 360}deg, ${(random48() * 20) + 80}%, ${(random48() * 20) + 40}%)`;
+      ctx48.fillCircle(random48() * canvas48.width, random48() * canvas48.height, (random48() * 5) + 5);
+    }*/
+    for (let i = 0; i < 1000; i++) Walker48.walk();
+    
+    if (canvas48Running) requestAnimationFrame(frame48);
+  }
+  frame48();
+  
+  function reset48() {
+    ctx48.clearRect(0, 0, canvas48.width, canvas48.height);
+    i48 = 0;
+    Walker48.x = canvas48.width / 2;
+    Walker48.y = canvas48.height / 2;
+    Walker48.hue = 0;
+    if (!canvas48Running) frame48();
+  }
+  
+  function startCanvas48() {
+    if (canvas48Running) canvas48Running = false;
+    else {
+      canvas48Running = true;
+      frame48();
+    }
+  }
+</script>
 <canvas id = "canvas47"></canvas>
 <button onclick = "startCanvas47()">Start/Stop</button>
 <div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps47Txt"></span></b></i></div>
@@ -345,7 +2333,7 @@
 <canvas id = "canvas46" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "startCanvas46()">Start/Stop</button>
 <div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps46Txt"></span></b></i></div>
-<div class = "desc"><b><i>(1/23/2022)</i></b> I want to make another FABRIK-based animation, with colored claws reaching for colored boxes and placing them offscreen, and repeating. I have the arms working but the grabbing and placing down doesn't work yet.<br><b><i>(1/24/2022)</i></b> I finally got everything working properly, each arm bends to grab its box and places it offscreen, and repeats. It might not be super impressive but I like this project and I'm pretty proud of it, and it's really satisfying to watch. I also got the claw part of the arms to look right, and added text to show each arm's total number of collected boxes.</div>
+<div class = "desc"><b><i>(1/23/2022)</i></b> I want to make another FABRIK-based animation, with colored claws reaching for colored boxes and placing them offscreen, and repeating. I have the arms working but the grabbing and placing down doesn't work yet.<br><b><i>(1/24/2022)</i></b> I finally got everything working properly, each arm bends to grab its box and places it offscreen, and repeats. It might not be super impressive but I like this project and I'm pretty proud of it, and it's really satisfying to watch. I also got the claw part of the arms to look right, and added text to show each arm's total number of collected boxes. This is easily one of my favorite projects I've made.</div>
 <hr><hr>
 <script>
   const ctx46 = canvas46.getContext("2d");
