@@ -1,108 +1,106 @@
-  const ctx2 = canvas2.getContext("2d");
-  canvas2.width = canvas2.height = 1500;
+  const ctx3 = canvas3.getContext("2d");
+  canvas3.width = canvas3.height = 1000;
+  let canvas3Running = false;
   
-  let Tree2 = {
-    startX: 0.5,
-    startY: 0.9,
-    startLength: 250,
-    startAngle: 270,
-    startWidth: 15,
-    minWidth: 0.5,
-    maxSplits: 8,
-    minSplits: 2,
-    maxLayers: 7,
-    startHue: 0,
-    startBend: 0.5,
-    startLerp: 0.5,
-    currentTotalBranches: 0,
-    stopped: false,
-    leafChance: 0.5,
-    minRandLengthRatio: 0.5,
-    minRandWidthRatio: 0.5,
-    randOffsetAngle: 45,
-    randOffsetHue: 30,
-    randBend: 0.5
-  };
-  Tree2.draw = function() {
-    ctx2.globalAlpha = 1;
-    ctx2.fillStyle = "black";
-    ctx2.fillRect(0, 0, canvas2.width, canvas2.height);
-    ctx2.lineCap = ctx2.lineJoin = "round";
-    ctx2.globalAlpha = 0.5;
-    this.startHue = Math.random() * 360;
-    this.startBend = randBetween(-this.randBend / 2, this.randBend / 2);
-    this.startLerp = Math.random();
-    this.currentTotalBranches = 0;
-    this.stopped = false;
-    this.drawBranch(this.startX * canvas2.width, this.startY * canvas2.height, this.startLength, this.startBend, this.startLerp, this.startWidth, this.startAngle, this.startHue, 1);
-  };
-  Tree2.drawBranch = function(x, y, length, bend, lerp, width, angle, hue, currLayer) {
-    if (currLayer > this.maxLayers || this.stopped) return;
-    this.currentTotalBranches++;
-    if (this.currentTotalBranches >= 100000) {
-      this.stopped = true;
-      return;
-    }
-    let endX = x + (length * Math.cos(toRad(angle)));
-    let endY = y + (length * Math.sin(toRad(angle)));
-    let dx = endX - x;
-    let dy = endY - y;
-    let midpointX = ((1 - lerp) * x) + (lerp * endX);
-    let midpointY = ((1 - lerp) * y) + (lerp * endY);
-    let normal = toRad(angle + 90);
-    let controlX = midpointX + (length * bend * Math.cos(normal));
-    let controlY = midpointY + (length * bend * Math.sin(normal));
-    ctx2.lineWidth = Math.max(width, this.minWidth);
-    ctx2.strokeStyle = `hsl(${hue}deg, 100%, 30%)`;
-    ctx2.beginPath();
-    ctx2.moveTo(x, y);
-    ctx2.quadraticCurveTo(controlX, controlY, endX, endY);
-    ctx2.stroke();
-    let splits = Math.round(randBetween(this.minSplits, this.maxSplits));
-    if (currLayer === this.maxLayers || splits === 0) {
-      if (Math.random() > this.leafChance) return;
-      let lengthRatio = randBetween(this.minRandLengthRatio, 0.9);
-      let offsetAngle = randBetween(-this.randOffsetAngle, this.randOffsetAngle);
-      let offsetHue = randBetween(-this.randOffsetHue, this.randOffsetHue);
-      let bend = randBetween(0.25, 0.5);
-      let lerp = Math.random();
-      this.drawLeaf(endX, endY, length * lengthRatio, bend, lerp, angle + offsetAngle, hue + offsetHue);
-      return;
-    }
-    for (let i = 0; i < splits; i++) {
-      let lengthRatio = randBetween(this.minRandLengthRatio, 0.9);
-      let widthRatio = randBetween(this.minRandWidthRatio, 0.9);
-      let offsetAngle = randBetween(-this.randOffsetAngle, this.randOffsetAngle);
-      let offsetHue = randBetween(-this.randOffsetHue, this.randOffsetHue);
-      let bend = randBetween(-this.randBend, this.randBend);
-      let lerp = Math.random();
-      this.drawBranch(endX, endY, length * lengthRatio, bend, lerp, width * widthRatio, angle + offsetAngle, hue + offsetHue, currLayer + 1);
-    }
-  };
-  Tree2.drawLeaf = function(x, y, length, bend, lerp, angle, hue) {
-    this.currentTotalBranches++;
-    ctx2.fillStyle = `hsl(${hue}deg, 100%, 70%)`;
-    let endX = x + (length * Math.cos(toRad(angle)));
-    let endY = y + (length * Math.sin(toRad(angle)));
-    let dx = endX - x;
-    let dy = endY - y;
-    let normal = toRad(angle + 90);
-    let midpointX1 = ((1 - lerp) * x) + (lerp * endX);
-    let midpointY1 = ((1 - lerp) * y) + (lerp * endY);
-    let controlX1 = midpointX1 + (length * -bend * Math.cos(normal));
-    let controlY1 = midpointY1 + (length * -bend * Math.sin(normal));
-    let midpointX2 = ((1 - lerp) * x) + (lerp * endX);
-    let midpointY2 = ((1 - lerp) * y) + (lerp * endY);
-    let controlX2 = midpointX2 + (length * bend * Math.cos(normal));
-    let controlY2 = midpointY2 + (length * bend * Math.sin(normal));
-    ctx2.beginPath();
-    ctx2.moveTo(x, y);
-    ctx2.quadraticCurveTo(controlX1, controlY1, endX, endY);
-    ctx2.quadraticCurveTo(controlX2, controlY2, x, y);
-    ctx2.fill();
-  };
+  let friction3 = 0.1;
+  let numBlackHoles3 = 25;
+  let numPoints3 = 1000;
+  let minDist3 = 5;
+  let minAcceleration3 = 0.01;
+  let blackHole3Power = 15;
+  let brightness3 = 60;
+  let lineWidth3 = 0.5;
+  let opacity3 = 1;
+  let edgeSpawning3 = true;
+  let hue3 = 0;
+  let stepsPerFrame3 = 1;
+  let spawningVelocity3 = 0;
+  let colorVariation3 = 0.4;
   
-  function draw2() {
-    Tree2.draw();
+  function randCanvas3EdgePos() {
+    let r = Math.floor(Math.random() * 4);
+    if (r === 0) return {x: Math.random() * canvas3.width, y: 0};
+    else if (r === 1) return {x: canvas3.width, y: Math.random() * canvas3.height};
+    else if (r === 2) return {x: Math.random() * canvas3.width, y: canvas3.height};
+    else return {x: 0, y: Math.random() * canvas3.height};
   }
-  draw2();
+  
+  function Point3() {
+    let p = randCanvas3EdgePos();
+    this.x = edgeSpawning3 ? p.x : Math.random() * canvas3.width;
+    this.y = edgeSpawning3 ? p.y : Math.random() * canvas3.height;
+    let a = Math.random() * Math.PI * 2;
+    this.vx = spawningVelocity3 * Math.cos(a);
+    this.vy = spawningVelocity3 * Math.sin(a);
+    this.stopped = false;
+    let hue = hue3 + (Math.random() * colorVariation3 * 0.5 * 360 * randSign());
+    this.color = `hsl(${hue}deg, 100%, ${brightness3}%)`;
+  }
+  Point3.prototype.render = function() {
+    let lastX = this.x;
+    let lastY = this.y;
+    this.x += this.vx;
+    this.y += this.vy;
+    this.vx *= 1 - friction3;
+    this.vy *= 1 - friction3;
+    for (let i = 0; i < blackHole3Array.length; i++) {
+      let dx = blackHole3Array[i].x - this.x;
+      let dy = blackHole3Array[i].y - this.y;
+      let distSq = (dx * dx) + (dy * dy);
+      let dist = Math.sqrt(distSq);
+      if (dist <= minDist3) {
+        this.stopped = true;
+        this.x = blackHole3Array[i].x;
+        this.y = blackHole3Array[i].y;
+      }
+      let invDist = 1 / dist;
+      let angle = Math.atan2(dy, dx);
+      let velocity = blackHole3Array[i].powerRatio * blackHole3Power * invDist;
+      velocity = Math.max(velocity, minAcceleration3);
+      this.vx += velocity * Math.cos(angle);
+      this.vy += velocity * Math.sin(angle);
+    }
+    ctx3.strokeStyle = this.color;
+    ctx3.lineWidth = lineWidth3;
+    ctx3.globalAlpha = opacity3;
+    ctx3.lineCap = ctx3.lineJoin = "round";
+    ctx3.beginPath();
+    ctx3.moveTo(lastX, lastY);
+    ctx3.lineTo(this.x, this.y);
+    ctx3.stroke();
+  };
+  let point3Array = [];
+  for (let i = 0; i < numPoints3; i++) point3Array.push(new Point3());
+  
+  function BlackHole3() {
+    this.x = Math.random() * canvas3.width;
+    this.y = Math.random() * canvas3.height;
+    this.powerRatio = randBetween(0.5, 1);
+  }
+  let blackHole3Array = [];
+  for (let i = 0; i < numBlackHoles3; i++) blackHole3Array.push(new BlackHole3());
+  
+  function frame3() {
+    for (let j = 0; j < stepsPerFrame3; j++) {
+      for (let i = 0; i < point3Array.length; i++) {
+        point3Array[i].render();
+        if (point3Array[i].stopped) {
+          point3Array.splice(i, 1);
+          i--;
+        }
+      }
+    }
+  }
+  
+  function reset3() {
+    ctx3.clearRect(0, 0, canvas3.width, canvas3.height);
+    blackHole3Array = [];
+    while (blackHole3Array.length < numBlackHoles3) blackHole3Array.push(new BlackHole3());
+    point3Array = [];
+    while (point3Array.length < numPoints3) point3Array.push(new Point3());
+  }
+  
+  function draw3() {
+    reset3();
+    frame3();
+  }
