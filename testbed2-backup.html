@@ -57,6 +57,2297 @@
   }
 </script>
 -->
+<div>Click and drag to zoom. Make sure the animation is running by toggling the <b><i>Paused</i></b> button. The render gets more accurate every swipe.</div>
+<canvas id = "canvas78"></canvas>
+<button onclick = "startCanvas78(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>[ FPS: <span id = "fps78Txt"></span> ]</b></i></div>
+<br><br>
+<button onclick = "multScale78(0.5)">Zoom In</button>
+<button onclick = "multScale78(2)">Zoom Out</button>
+<br><br>
+<input type = "checkbox" id = "intenseColoring78Checkbox" oninput = "updateSettings78()" CHECKED>
+<label for = "intenseColoring78Checkbox">Intensified Coloring (may get whitewashed at deeper zooms)</label>
+<br><br>
+<div><b><u>Fractal Hue:</u></b> <span id = "hue78Txt">300</span>&deg;</div>
+<input type = "range" min = "0" max = "360" step = "30" value = "300" id = "hue78Range" oninput = "updateSettings78()">
+<br><br>
+<b>Fractal:</b>
+<button onclick = "setFractalMode78(1)" id = "fractalMode78Btn1" class = "fractalMode78Btns" style = "background-color: gray">Mandelbrot</button>
+<button onclick = "setFractalMode78(2)" id = "fractalMode78Btn2" class = "fractalMode78Btns">Mindlebrit</button>
+<button onclick = "setFractalMode78(3)" id = "fractalMode78Btn3" class = "fractalMode78Btns">Cosine Fractal</button>
+<button onclick = "setFractalMode78(4)" id = "fractalMode78Btn4" class = "fractalMode78Btns">Two-Cosine Fractal</button>
+<p>
+The <b>Mindlebrit Fractal</b> is a fractal that is generated the exact same as the Mandelbrot--except z_0 = i, instead of 0.
+<br><br>
+The <b>Cosine Fractal</b> is generated similar to the Mandelbrot, except instead of squaring z_n and adding c every iteration, you take the cosine of z_n and add c (and color based on escape iterations similarly).
+<br><br>
+The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 times cosine each step.
+</p>
+<div class = "desc"><b><i>(3/30/2022)</i></b> I tried making a faster Mandelbrot set visualizer than the <a href = "https://e4494s.neocities.org/mandelbrot.html">old one</a> I had, but it's not much faster. I did add dragging and zooming though, which was really difficult to get working properly. It still loses a lot of detail at higher zoom levels, but I'm not sure how to fix that without waiting like 30 seconds for it to render. I also made it where the escape iterations for each point also affect the hue, not just the brightness, which creates a really interesting effect.<br><b><i>(3/31/2022)</i></b> Added buttons for different fractal modes.<br><b><i>(3/31/2022)</i></b> I significantly improved runtime and performance by adding an update frame function instead of just rendering the fractal all at once, one time. It instead now passes down the screen, rendering as it goes. Each time it reaches the bottom of the screen, it does another pass with higher iterations. (Deeper zooms will take longer to render as they have a higher iteration escape period).<br><b><i>Update: (Later that day)</i></b> I made the rendering passes happen twice at once, moving from the center of the screen, and also added a setting to intensify the coloring, which means the intensity is multiplied based on the maximum iterations (as the higher the max iterations are, the less intense the colors typically are). I added it as an optional setting since sometimes it looks whitewashed with intense colors on.</div>
+<hr><hr>
+<script>
+  const ctx78 = canvas78.getContext("2d");
+  canvas78.width = canvas78.height = 500;
+  let canvas78Running = false;
+  let canvas78Rect = canvas78.getBoundingClientRect();
+  let canvas78Ratio = canvas78.width / 300;
+  
+  const Complex78 = {};
+  Complex78.number = function(a, b) { // a + bi
+    this.re = a;
+    this.im = b;
+  };
+  Complex78.string = function(z) {
+  	return `${z.re} ${Math.sign(z.im) === -1 ? "-" : "+"} ${Math.abs(z.im)}i`;
+  };
+  
+  Complex78.iSquared = new Complex78.number(-1, 0); // i^2 = -1
+  
+  Complex78.add = function(x, y) {
+    if (typeof x === "number") x = new Complex78.number(x, 0);
+    if (typeof y === "number") y = new Complex78.number(y, 0); 
+    
+    return new Complex78.number(x.re + y.re, x.im + y.im);
+  };
+  Complex78.subtract = function(x, y) {
+    if (typeof x === "number") x = new Complex78.number(x, 0);
+    if (typeof y === "number") y = new Complex78.number(y, 0); 
+    
+    return new Complex78.number(x.re - y.re, x.im - y.im);
+  };
+  Complex78.multiply = function(x, y) {
+    if (typeof x === "number") x = new Complex78.number(x, 0);
+    if (typeof y === "number") y = new Complex78.number(y, 0); 
+    
+    let iSq = new Complex78.number(Complex78.iSquared.re * x.im * y.im, Complex78.iSquared.im * x.im * y.im);
+    
+    let real = (x.re * y.re) + iSq.re;
+    let imaginary = (x.re * y.im) + (x.im * y.re) + iSq.im;
+    
+    return new Complex78.number(real, imaginary);
+  };
+  Complex78.power = function(x, n) {
+  	let result = new Complex78.number(1, 0);
+    for (let i = 0; i < n; i++) {
+    	result = Complex78.multiply(result, x);
+    }
+    return result;
+  }
+  
+  Complex78.inMandelbrot = function(c) {
+  	let z = new Complex78.number(0, 0);
+    
+  	for (let i = 0; i < maxIterations78; i++) {
+    	z = Complex78.add(Complex78.power(z, 2), c);
+      if (z.re * z.im > 5) return i / maxIterations78;
+    }
+    
+    return 0;
+  };
+  function inMandelbrot78(re, im) {
+  	let a = 0;
+    let b = fractalMode78 === 2 ? 1 : 0;
+    
+    if ((a + a) * (b + b) > 4) return 1;
+    
+    for (let i = 0; i < maxIterations78; i++) {
+    	let _a = (a * a) - (b * b);
+      let _b = 2 * a * b;
+      a = _a + re;
+      b = _b + im;
+      
+      if ((a * a) + (b * b) > 4) return i / maxIterations78;
+    }
+    
+    return 0;
+  }
+  function inCosFractal78(re, im) { // z_n+1 = cos(z_n) + c
+  	let a = re;
+    let b = im;
+    
+    for (let i = 0; i < maxIterations78; i++) {
+    	let eB = Math.exp(b); // e^b
+      let eNegB = 1 / eB; // e^-b
+      let c = Math.cos(a);
+      let s = Math.sin(a);
+      
+      let _a = (c * (eB + eNegB)) / (fractalMode78 === 4 ? 1 : 2);
+      let _b = (s * (eNegB - eB)) / (fractalMode78 === 4 ? 1 : 2);
+      a = _a + re;
+      b = _b + im;
+      
+      if (a * b > 5) return i / maxIterations78;
+    }
+    
+    return 0;
+  }
+  
+  let pan78X = -0.23;
+  let pan78Y = 0;
+  let hue78 = 300;
+  let scale78 = 2;
+  let fractalMode78 = 1;
+  let intenseColoring78 = true;
+  
+  /*
+    1: Mandelbrot
+    2: Mandelbrot with z_0 = i
+    3: Cosine Fractal
+    4: Two-Cosine Fractal
+  */
+  
+  let scale78Array = [
+  	2, // Mandelbrot
+    1, // Mindlebrit
+    4, // Cosine Fractal
+    1 // Two-Cosine Fractal
+  ];
+  let pan78XArray = [
+  	-0.23, // Mandelbrot
+    0, // Mindlebrit
+    0.39, // Cosine Fractal
+    -0.5 // Two-Cosine Fractal
+  ];
+  let pan78YArray = [
+  	0, // Mandelbrot
+    -0.5, // Mindlebrit
+    0, // Cosine Fractal
+    0 // Two-Cosine Fractal
+  ];
+  
+  function plotPoint78(x, y) {
+  	let _x = x - (canvas78.width / 2);
+    let _y = y - (canvas78.height / 2);
+    _x /= canvas78.width;
+    _y /= canvas78.height;
+    _x += pan78X;
+    _y += pan78Y;
+    _x *= scale78;
+    _y *= scale78;
+    
+  	let escape = 0;
+    if (fractalMode78 === 1 || fractalMode78 === 2) escape = inMandelbrot78(_x, _y);
+    else if (fractalMode78 === 3 || fractalMode78 === 4) escape = inCosFractal78(_x, _y);
+    if (intenseColoring78) escape *= (maxIterations78 / iterationsPerPass78);
+    let brightness = escape * 100;
+    let hue = hue78 + (180 * escape);
+    
+    ctx78.fillStyle = `hsl(${hue}deg, 100%, ${brightness}%)`;
+    ctx78.fillRect(x, y, 1, 1);
+  }
+  
+  function plotFractal78() {
+  	ctx78.fillStyle = "white";
+  	ctx78.fillRect(0, 0, canvas78.width, canvas78.height);
+    
+    for (let x = 0; x < canvas78.width; x++) {
+    	for (let y = 0; y < canvas78.height; y++) {
+      	plotPoint78(x, y);
+      }
+    }
+  }
+  //plotFractal78();
+  
+  let currPixel78 = 0;
+  let numPasses78 = 0;
+  let maxIterations78 = 200;
+  let iterationsPerPass78 = 200;
+  let maxPasses78 = 5;
+  let stepsPerFrame78 = 4000;
+  
+  let lastFrame78Time = 0;
+  let lastFps78DisplayTime = 1000;
+  function frame78() {
+    if (Date.now() - lastFps78DisplayTime >= 500) {
+      fps78Txt.innerHTML = (1000 / (Date.now() - lastFrame78Time)).toFixed(1);
+      lastFps78DisplayTime = Date.now();
+    }
+    lastFrame78Time = Date.now();
+    
+    for (let i = 0; i < stepsPerFrame78; i++) {
+    	if (numPasses78 < maxPasses78) {
+    		let x = Math.floor(currPixel78 / 2) % canvas78.width;
+      	let y = Math.floor(Math.floor(currPixel78 / 2) / canvas78.width);
+      	if (currPixel78 % 2 === 0) {
+        	y += canvas78.height / 2;
+      	}
+      	else {
+      		y = (canvas78.height / 2) - y;
+        	y--;
+      	}
+      	
+    		plotPoint78(x, y);
+      	
+      	currPixel78++;
+      	
+      	if (currPixel78 > canvas78.width * canvas78.height) {
+      		currPixel78 = 0;
+        	numPasses78++;
+        	maxIterations78 = (numPasses78 + 1) * iterationsPerPass78;
+      	}
+      }
+    }
+    
+    if (canvas78Running) requestAnimationFrame(frame78);
+  }
+  
+  function startCanvas78(caller) {
+    if (canvas78Running) {
+      canvas78Running = false;
+      caller.innerHTML = "<b><i>Paused</i></b>";
+      caller.style.color = caller.style.borderColor = "red";
+    }
+    else {
+      canvas78Running = true;
+      caller.innerHTML = "<b><i>Running</i></b>";
+      caller.style.color = caller.style.borderColor = "green";
+      frame78();
+    }
+  }
+  
+  function resetDrawing78() {
+  	ctx78.fillStyle = "black";
+    ctx78.fillRect(0, 0, canvas78.width, canvas78.height);
+    
+    currPixel78 = 0;
+    numPasses78 = 0;
+    maxIterations78 = iterationsPerPass78;
+  }
+  function redrawLastPass78() {
+  	currPixel78 = 0;
+  	numPasses78--;
+   	numPasses78 = Math.max(0, numPasses78);
+    maxIterations78 = (numPasses78 + 1) * iterationsPerPass78;
+  }
+  
+  function updateSettings78() {
+  	intenseColoring78 = intenseColoring78Checkbox.checked;
+    hue78 = hue78Txt.innerHTML = Number(hue78Range.value);
+    
+    redrawLastPass78();
+  }
+  
+  function resetFractal78() {
+  	scale78 = scale78Array[fractalMode78 - 1];
+  	pan78X = pan78XArray[fractalMode78 - 1];
+  	pan78Y = pan78YArray[fractalMode78 - 1];
+    
+    resetDrawing78();
+  }
+  //plotFractal78();
+  
+  function multScale78(factor) {
+  	scale78 *= factor;
+    
+    pan78X /= factor;
+    pan78Y /= factor;
+    
+    resetDrawing78();
+  }
+  function setFractalMode78(n) {
+  	fractalMode78 = n;
+    let btns = document.getElementsByClassName("fractalMode78Btns");
+    for (let i = 0; i < btns.length; i++) btns[i].style.backgroundColor = "white";
+    
+    document.getElementById("fractalMode78Btn" + n).style.backgroundColor = "gray";
+    
+    resetFractal78();
+  }
+  
+  function drawPanIcon78(x, y) {
+  	return;
+  	let size = 30;
+    let s3 = size / 3;
+    
+    ctx78.fillStyle = "white";
+    ctx78.strokeStyle = "black";
+    ctx78.lineWidth = 2;
+    
+    let cx = x - (s3 / 2);
+    let cy = y - (s3 * 1.5);
+    
+    ctx78.beginPath();
+    ctx78.moveTo(cx, cy);
+    cx += s3;
+    ctx78.lineTo(cx, cy);
+    cy += s3;
+    ctx78.lineTo(cx, cy);
+    cx += s3;
+    ctx78.lineTo(cx, cy);
+    cy += s3;
+    ctx78.lineTo(cx, cy);
+    cx -= s3;
+    ctx78.lineTo(cx, cy);
+    cy += s3;
+    ctx78.lineTo(cx, cy);
+    cx -= s3;
+    ctx78.lineTo(cx, cy);
+    cy -= s3;
+    ctx78.lineTo(cx, cy);
+    cx -= s3;
+    ctx78.lineTo(cx, cy);
+    cy -= s3;
+    ctx78.lineTo(cx, cy);
+    cx += s3;
+    ctx78.lineTo(cx, cy);
+    cy -= s3;
+    ctx78.lineTo(cx, cy);
+    
+    ctx78.fill();
+    ctx78.stroke();
+  }
+  
+  let Mouse78 = {
+  	down: false,
+    downX: 0,
+    downY: 0,
+    willRedraw: false
+  };
+  
+  canvas78.addEventListener("mousedown", e => {
+ 		canvas78Rect = canvas78.getBoundingClientRect();
+    
+  	e.preventDefault();
+    
+    Mouse78.down = true;
+    Mouse78.downX = (e.clientX - canvas78Rect.left) * canvas78Ratio;
+    Mouse78.downY = (e.clientY - canvas78Rect.top) * canvas78Ratio;
+    
+    drawPanIcon78(Mouse78.downX, Mouse78.downY);
+  });
+  window.addEventListener("mouseup", e => {
+  	Mouse78.down = false;
+    if (Mouse78.willRedraw) {
+    	canvas78Rect = canvas78.getBoundingClientRect();
+      
+      let mX = (e.clientX - canvas78Rect.left) * canvas78Ratio;
+    	let mY = (e.clientY - canvas78Rect.top) * canvas78Ratio;
+  		
+    	pan78X -= (mX - Mouse78.downX) / canvas78.width;
+    	pan78Y -= (mY - Mouse78.downY) / canvas78.height;
+      
+      resetDrawing78();
+    }
+    Mouse78.willRedraw = false;
+  });
+  window.addEventListener("mousemove", e => {
+  	if (!Mouse78.down) return;
+    
+    Mouse78.willRedraw = true;
+    
+  	e.preventDefault();
+  });
+</script>
+<!--Idea?: Triangle grid with random tile size, rounded to multiple of 0.25 so they connect better-->
+<canvas id = "canvas77"></canvas>
+<button onclick = "startCanvas77(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
+<button onclick = "reset77()">Reset</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>[ FPS: <span id = "fps77Txt"></span> ]</b></i></div>
+<div class = "desc"><b><i>(3/10/2022)</i></b> I decided to go with an animated design with a triangle grid this time. Each triangle slowly fades in and out with size and brightness, but the offset it has increases the further it is from the center, which makes a really cool rippling or breaking away effect.</div>
+<hr><hr>
+<script>
+  const ctx77 = canvas77.getContext("2d");
+  canvas77.width = canvas77.height = 1000;
+  let canvas77Running = false;
+  
+  const ratio77 = Math.sqrt(3) / 2;
+  let gridSize77 = 7;
+  let t77 = 0;
+  let period77 = 250;
+  let hue77 = 0;
+  let clearOpacity77 = 1;
+  let flatness77 = 1.7;
+  
+  function smooth77(t) {
+    return Math.min((1 - Math.cos(t * Math.PI * 2)) / flatness77, 1);
+  }
+  
+  function drawTriangle77(x, y, sideLength, flip) { //    >: Normal    <: flipped
+    let cx = x;
+    let cy = y;
+    let ca = -Math.PI / 2;
+    
+    ctx77.lineWidth = 1;
+    ctx77.lineCap = ctx77.lineJoin = "round";
+    
+    ctx77.beginPath();
+    ctx77.moveTo(cx, cy);
+    for (let i = 0; i < 3; i++) {
+      cx += sideLength * Math.cos(ca);
+      cy += sideLength * Math.sin(ca);
+      ca += ((2 * Math.PI) / 3) * (flip ? -1 : 1);
+      ctx77.lineTo(cx, cy);
+    }
+    
+    ctx77.fill();
+    ctx77.stroke();
+  }
+  
+  function drawTriangle77FromCenter(x, y, sideLength, flip) { //    >: Normal    <: flipped
+    if (!flip) drawTriangle77(x - (sideLength * 0.25 * (1 / ratio77)), y + (sideLength * 0.5), sideLength, flip);
+    if (flip) drawTriangle77(x + (sideLength * 0.25 * (1 / ratio77)), y + (sideLength * 0.5), sideLength, flip);
+  }
+  
+  function Triangle77(x, y, normSize, flip) { //    >: Normal    <: flipped
+    this.x = x + (normSize * ratio77 * (flip ? -1 : 1));
+    if (!flip) this.x += normSize * 0.5 * (1 / ratio77);
+    this.y = y - (normSize / 2);
+    
+    let dx = Math.abs((canvas77.width / 2) - this.x);
+    let dy = Math.abs((canvas77.height / 2) - this.y);
+    let dist = Math.sqrt((dx * dx) + (dy * dy));
+    let distRatio = dist / canvas77.width;
+    
+    this.normSize = normSize;
+    this.currSize = normSize;
+    
+    this.flip = flip;
+    
+    this.hue = (distRatio * 360) + hue77;
+    this.saturation = 100;
+    this.brightess = 0;
+    
+    this.tOffset = distRatio;
+  }
+  Triangle77.prototype.update = function() {
+    let t = smooth77((t77 + this.tOffset) % 1);
+    this.currSize = this.normSize * t;
+    this.brightness = ((1 - t) * 60) + 40;
+  };
+  Triangle77.prototype.draw = function() {
+    ctx77.fillStyle = ctx77.strokeStyle = `hsl(${this.hue}deg, ${this.saturation}%, ${this.brightness}%)`;
+    drawTriangle77FromCenter(this.x, this.y, this.currSize, this.flip);
+  };
+  let triangle77Array = [];
+  
+  let lastFrame77Time = 0;
+  let lastFps77DisplayTime = 1000;
+  function frame77() {
+    if (Date.now() - lastFps77DisplayTime >= 500) {
+      fps77Txt.innerHTML = (1000 / (Date.now() - lastFrame77Time)).toFixed(1);
+      lastFps77DisplayTime = Date.now();
+    }
+    lastFrame77Time = Date.now();
+    
+    ctx77.fillStyle = `hsla(0deg, 0%, 0%, ${clearOpacity77})`;
+    ctx77.fillRect(0, 0, canvas77.width, canvas77.height);
+    
+    t77 += 1 / period77;
+    t77 %= 1;
+    
+    for (let i = 0; i < triangle77Array.length; i++) {
+      triangle77Array[i].update();
+      triangle77Array[i].draw();
+    }
+    
+    if (canvas77Running) requestAnimationFrame(frame77);
+  }
+  
+  function reset77() {
+    ctx77.fillStyle = "black";
+    ctx77.fillRect(0, 0, canvas77.width, canvas77.height);
+    
+    t77 = Math.random();
+    hue77 = Math.random() * 360;
+    
+    triangle77Array = [];
+    
+    let tileSize = canvas77.width / gridSize77;
+    let numX = Math.ceil(gridSize77 / ratio77) + 2;
+    let numY = gridSize77 + 2;
+    let xOffset = tileSize * 0.22 * (1 / ratio77);
+    
+    for (let x = -2; x < numX; x++) {
+      for (let y = -1; y < numY; y++) {
+        let _x = x * tileSize * ratio77;
+        let _y = x % 2 === 0 ? y : y - 0.5;
+        _y *= tileSize;
+        
+        triangle77Array.push(new Triangle77(_x - xOffset, _y, tileSize, true));
+        triangle77Array.push(new Triangle77(_x - xOffset, _y, tileSize, false));
+      }
+    }
+    
+    if (!canvas77Running) frame77();
+  }
+  reset77();
+  
+  function startCanvas77(caller) {
+    if (canvas77Running) {
+      canvas77Running = false;
+      caller.innerHTML = "<b><i>Paused</i></b>";
+      caller.style.color = caller.style.borderColor = "red";
+    }
+    else {
+      canvas77Running = true;
+      caller.innerHTML = "<b><i>Running</i></b>";
+      caller.style.color = caller.style.borderColor = "green";
+      frame77();
+    }
+  }
+</script>
+<canvas id = "canvas76"></canvas>
+<button onclick = "draw76()">Redraw</button>
+<div class = "desc"><b><i>(3/7/2022)</i></b> I tried to use something I implemented in the previous project, by connecting lines with random quadratic curves, but the result is pretty underwhelming.</div>
+<hr><hr>
+<script>
+  const ctx76 = canvas76.getContext("2d");
+  canvas76.width = canvas76.height = 1000;
+  
+  let points76 = [];
+  let numPoints76 = 200;
+  let connectDist76 = 150;
+  let lineWidth76 = 2;
+  let lineBend76 = 100;
+  let shadow76 = 5;
+  
+  function resetPoints76() {
+    points76 = [];
+    for (let i = 0; i < numPoints76; i++) {
+      points76.push({
+        x: Math.random() * canvas76.width,
+        y: Math.random() * canvas76.height
+      });
+    }
+  }
+  
+  function connectPoints76() {
+    for (let i = 0; i < points76.length; i++) {
+      let connections = [];
+      for (let j = 0; j < points76.length; j++) {
+        if (i !== j) {
+          let dx = points76[i].x - points76[j].x;
+          let dy = points76[i].y - points76[j].y;
+          let distSq = (dx * dx) + (dy * dy);
+          if (distSq <= connectDist76 * connectDist76) connections.push(points76[j]);
+        }
+      }
+      for (let k = 0; k < connections.length; k++) {
+        ctx76.lineWidth = (lineWidth76 / connections.length) + 0.1;
+        ctx76.lineCap = ctx76.lineJoin = "round";
+        ctx76.strokeStyle = `hsl(${Math.random() * 360}deg, 80%, 40%)`;
+        ctx76.shadowBlur = shadow76;
+        ctx76.shadowColor = "white";
+        
+        let mX = (points76[i].x + connections[k].x) / 2;
+        let mY = (points76[i].y + connections[k].y) / 2;
+        let a = Math.random() * Math.PI * 2;
+        let bend = Math.random() * lineBend76;
+        let cx = mX + (bend * Math.cos(a));
+        let cy = mY + (bend * Math.sin(a));
+        
+        ctx76.beginPath();
+        ctx76.moveTo(points76[i].x, points76[i].y);
+        ctx76.quadraticCurveTo(cx, cy, connections[k].x, connections[k].y);
+        ctx76.stroke();
+        
+        ctx76.shadowBlur = 0;
+      }
+    }
+  }
+  
+  function draw76() {
+    ctx76.fillStyle = "black";
+    ctx76.fillRect(0, 0, canvas76.width, canvas76.height);
+    
+    resetPoints76();
+    connectPoints76();
+  }
+  draw76();
+</script>
+<canvas id = "canvas75" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "draw75()">Redraw</button>
+<div class = "desc"><b><i>(3/5/2022)</i></b> Experimenting with point networks. At first I just made a phyllotaxis spiral and connected the nearest points but it looked pretty bland. Then I added randomness to how offset each point is, and then finally changed the golden angle from &approx;137.5078&deg; to 2-4&deg; and made the connections get lighter and thinner as they go out. Now it resembles some kind of mystic tribal rune, or magical energy...<br><b><i>Update: (A few minutes later)</i></b> I wanted to emphasize the theme of mysterious ancient energy so I changed the connections from simple line to quadratic curves, with a random offset bend that increases towards the edge of the circle. This creates an interesting contrast between the geometric design of the center and the stringy loops of the edge.<br><b><i>(3/6/2022)</i></b> I added white shadows to everything to create a glowing effect and added random white glowing dots around to emphasize the energy theme.<br><b><i><mark>Actually finished! (3/6/2022)</mark> Added to <a href = "generative-art-gallery.html" target = "_blank">generative-art-gallery.html</a>.</i></b></div>
+<hr><hr>
+<script>
+  const ctx75 = canvas75.getContext("2d");
+  canvas75.width = canvas75.height = 1000;
+  
+  let cachedSqrt75 = [];
+  for (let i = 0; i < 1100; i++) cachedSqrt75.push(Math.sqrt(i));
+  
+  let connectDist75 = 40;
+  let spiralScale75 = 15;
+  let spiralJitter75 = 25;
+  let lineWidth75 = 5;
+  let lineBend75 = 50;
+  let minBend75 = 0;
+  let numDots75 = 150;
+  let dotSize75 = 6;
+  let hue75 = 0;
+  let dotOpacity75 = 1//0.35;
+  let shadowSize75 = 10//5;
+  let shadowRatio75 = 0//0.8;
+  
+  let goldenAngle75 = toRad(3);//Math.PI * (3 - Math.sqrt(5));
+  
+  let points75 = [];
+  
+  function drawDot75(x, y, isSquare) {
+    ctx75.fillStyle = `hsla(${hue75}deg, 100%, 100%, ${dotOpacity75})`;
+    ctx75.shadowColor = `hsl(${hue75}deg, 100%, 100%)`;
+    ctx75.shadowBlur = 10;
+    let r = dotSize75 * randBetween(0.5, 1);
+    let offset = Math.random() * Math.PI * 2;
+    
+    for (let j = 0; j < 3; j++) {
+      if (!isSquare) ctx75.fillCircle(x, y, r / 1.3);
+      else {
+        ctx75.beginPath();
+        for (let i = 0; i < 4; i++) {
+          let a = ((i / 4) * Math.PI * 2) + offset;
+          ctx75.lineTo(x + (r * Math.cos(a)), y + (r * Math.sin(a)));
+        }
+        ctx75.fill();
+      }
+    }
+    ctx75.shadowBlur = 0;
+  }
+  
+  function spiralPoints75() {
+    points75 = [];
+    let offset = Math.random() * Math.PI * 2;
+    
+    for (let i = 0; i < 1000; i++) {
+      let a = (i * goldenAngle75) + offset;
+      let r = cachedSqrt75[i] * spiralScale75;
+      
+      let x = (canvas75.width / 2) + (r * Math.cos(a));
+      let y = (canvas75.height / 2) + (r * Math.sin(a));
+      
+      let a2 = Math.random() * Math.PI * 2;
+      let r2 = Math.random() * spiralJitter75;
+      
+      points75.push({x: x + (r2 * Math.cos(a2)), y: y + (r2 * Math.sin(a2))});
+    }
+  }
+  
+  function connectPoints75() {
+    ctx75.lineCap = ctx75.lineJoin = "round";
+    ctx75.shadowColor = "white";
+    let hue = hue75;
+    
+    for (let i = 0; i < points75.length; i++) {
+      for (let j = 0; j < points75.length; j++) {
+        if (i !== j) {
+          let dx = points75[i].x - points75[j].x;
+          let dy = points75[i].y - points75[j].y;
+          let distSq = (dx * dx) + (dy * dy);
+          if (distSq <= connectDist75 * connectDist75) {
+            let iRatio = i / points75.length;
+            ctx75.strokeStyle = ctx75.shadowColor = `hsl(${hue}deg, 100%, ${(iRatio * 95) + 10}%)`;
+            ctx75.lineWidth = ((1 - iRatio) * lineWidth75) + 0.2;
+            ctx75.shadowBlur = iRatio > shadowRatio75 ? shadowSize75 : 0;
+            
+            let p = {};
+            let a = Math.random() * Math.PI * 2;
+            let bend = (iRatio * lineBend75) + minBend75;
+            let r = Math.random() * bend;
+            p.x = ((points75[i].x + points75[j].x) / 2) + (r * Math.cos(a));
+            p.y = ((points75[i].y + points75[j].y) / 2) + (r * Math.sin(a));
+            
+            ctx75.beginPath();
+            ctx75.moveTo(points75[i].x, points75[i].y);
+            ctx75.quadraticCurveTo(p.x, p.y, points75[j].x, points75[j].y);
+            ctx75.stroke();
+          }
+        }
+      }
+    }
+    ctx75.shadowBlur = 0;
+  }
+  
+  function draw75() {
+    ctx75.fillStyle = "black";
+    ctx75.fillRect(0, 0, canvas75.width, canvas75.height);
+    
+    hue75 = Math.random() * 360;
+    goldenAngle75 = toRad(randBetween(2, 4));
+    if (Math.random() < 0.5) goldenAngle75 *= -1;
+    
+    spiralPoints75();
+    
+    connectPoints75();
+    
+    for (let i = 0; i < numDots75; i++) {
+      let r = (canvas75.width / 2) - ((canvas75.width / 2) * Math.random() * Math.random());
+      let a = Math.random() * Math.PI * 2;
+      drawDot75((canvas75.width / 2) + (r * Math.cos(a)), (canvas75.height / 2) + (r * Math.sin(a)), Math.random() < 0);
+    }
+  }
+  draw75();
+</script>
+<canvas id = "canvas74" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "draw74()">Redraw</button>
+<div class = "desc"><b><i>(3/4/2022)</i></b> I worked out a program to draw the impossible Penrose Triangle.<br><b><i>(3/5/2022)</i></b> Went from drawing one large triangle, to drawing lots of them in a hexagon grid. I really like the design of the triangles but I'm not happy with this arrangement of them and I want to find a more cool looking way to put them on the screen.</div>
+<hr><hr>
+<script>
+  const ctx74 = canvas74.getContext("2d");
+  canvas74.width = canvas74.height = 1000;
+  
+  const ratio74 = Math.sqrt(3) / 2;
+  let gridSize74 = 6;
+  let hueVariation74 = 0.1;
+  
+  function drawTriangle74(x, y, radius, angle, hue) {
+    ctx74.strokeStyle = "white";
+    ctx74.lineWidth = 1;
+    ctx74.lineCap = ctx74.lineJoin = "round";
+    
+    let side = radius / (ratio74 * 5.5);
+    let h = hue + randBetween(-180 * hueVariation74, 180 * hueVariation74);
+    let s = randBetween(50, 100);
+    
+    for (let i = 2; i >= 0; i--) {
+      ctx74.fillStyle = `hsl(${h}deg, ${s}%, ${((i / 2) * 70) + 15}%)`;
+      
+      let ca = 30 + (i * 120) + angle;
+      let r = side * (4 / 3) * ratio74;
+      let cx = x + (r * Math.cos(toRad(ca)));
+      let cy = y + (r * Math.sin(toRad(ca)));
+      
+      ctx74.beginPath();
+      ctx74.moveTo(cx, cy);
+      
+      ca -= 30;
+      cx += side * Math.cos(toRad(ca));
+      cy += side * Math.sin(toRad(ca));
+      ctx74.lineTo(cx, cy);
+      
+      ca -= 120;
+      cx += side * 5 * Math.cos(toRad(ca));
+      cy += side * 5 * Math.sin(toRad(ca));
+      ctx74.lineTo(cx, cy);
+      
+      ca -= 120;
+      cx += side * 6 * Math.cos(toRad(ca));
+      cy += side * 6 * Math.sin(toRad(ca));
+      ctx74.lineTo(cx, cy);
+      
+      ca -= 60;
+      cx += side * Math.cos(toRad(ca));
+      cy += side * Math.sin(toRad(ca));
+      ctx74.lineTo(cx, cy);
+      
+      ca -= 120;
+      cx += side * 5 * Math.cos(toRad(ca));
+      cy += side * 5 * Math.sin(toRad(ca));
+      ctx74.lineTo(cx, cy);
+      
+      ca += 120;
+      cx += side * 3 * Math.cos(toRad(ca));
+      cy += side * 3 * Math.sin(toRad(ca));
+      ctx74.lineTo(cx, cy);
+      
+      ctx74.fill();
+      //ctx74.stroke();
+    }
+  }
+  
+  function draw74() {
+    ctx74.fillStyle = "black";
+    ctx74.fillRect(0, 0, canvas74.width, canvas74.height);
+    
+    gridSize74 = Math.round(randBetween(3, 10));
+    
+    let tileSize = canvas74.width / gridSize74;
+    let numX = gridSize74 + 2; // Compensate for staggered rows and x-offset
+    let numY = Math.ceil(gridSize74 * (1 / ratio74)) + 1; // Compensate for vertical compression and y-offset
+    let hue = Math.random() * 360;
+    
+    let offsetX = Math.random() * tileSize;
+    let offsetY = Math.random() * tileSize;
+    
+    for (let x = 0; x < numX; x++) {
+      for (let y = 0; y < numY; y++) {
+        let _x = y % 2 === 0 ? x : x - 0.5;
+        _x += 0.5;
+        _y = y * ratio74;
+        _y += 0.5;
+        
+        let tileX = (_x * tileSize) - offsetX;
+        let tileY = (_y * tileSize) - offsetY;
+        
+        let dx = tileX - (canvas74.width / 2)// - tileX;
+        let dy = tileY - (canvas74.height / 2)// - tileY;
+        let a = Math.random() * 360//toDeg(Math.atan2(dy, dx)) + 30;
+        
+        drawTriangle74(tileX, tileY, tileSize * 0.5, a, hue);
+      }
+    }
+  }
+  draw74();
+</script>
+<canvas id = "canvas73"></canvas>
+<button onclick = "draw73()">Redraw</button>
+<div class = "desc"><b><i>(3/1/2022)</i></b> More variation circle packing, this time with random triangles drawn instead of circles, and with a visual size ratio of 1.5x so they overlap each other but still are spaced out nicely.<br><b><i>Update: (Later that day)</i></b> Added more paramaters that get randomized. Lines are drawn on every triangle either from its center to its corners or its center to its edges, randomized every generation. There is also a random tilt factor for how rotated each triangle will be off the global angle, and a skew angle for how skewed the triangles will be from a perfect equilateral.<br><b><i><mark>Actually finished! (3/1/2022)</mark> Added to <a href = "generative-art-gallery.html" target = "_blank">generative-art-gallery.html</a>.</i></b></div>
+<hr><hr>
+<script>
+  const ctx73 = canvas73.getContext("2d");
+  canvas73.width = canvas73.height = 1000;
+  
+  let maxCircles73 = 2000;
+  let canvas73Filled = false;
+  let minCircle73Size = 5;
+  let maxCircle73Size = 100;
+  let circle73SizeRatio = 1.5;
+  let brightnessRatio73 = 1;
+  let hue73 = 0;
+  let angleOffset73 = 0;
+  let sides73 = 3//Math.round(randBetween(3, 5));
+  let skew73 = 0;
+  let edges73 = false;
+  let tilt73 = 15;
+  
+  function randColor73() {
+    let s = Math.random() * Math.random() * 40;
+    return `hsl(${hue73 + randBetween(-5, 5)}deg, ${randBetween(20, 40) + s}%, ${randBetween(30, 60) * brightnessRatio73}%)`;
+  }
+  
+  function drawCircle73(x, y, radius) {
+    //angleOffset73 = Math.random() * Math.PI * 2;
+    ctx73.fillStyle = randColor73();
+    
+    ctx73.lineWidth = 2;
+    ctx73.lineCap = ctx73.lineJoin = "round";
+    ctx73.strokeStyle = "black";
+    
+    let numPoints = sides73;
+    let angle = (Math.PI * 2) / numPoints;
+    let corners = [];
+    let offset = toRad(randBetween(-tilt73, tilt73));
+    
+    ctx73.beginPath();
+    for (let i = 0; i < numPoints; i++) {
+      let a = (angle * i) + angleOffset73 + offset + toRad(randBetween(-skew73, skew73));
+      let r = radius;
+      let iX = x + (r * Math.cos(a));
+      let iY = y + (r * Math.sin(a));
+      corners.push({x: iX, y: iY});
+      ctx73.lineTo(iX, iY);
+    }
+    ctx73.lineTo(corners[0].x, corners[0].y);
+    ctx73.lineTo(corners[1].x, corners[1].y);
+    
+    ctx73.fill();
+    ctx73.stroke();
+    
+    ctx73.beginPath();
+    
+    let mX = (corners[0].x + corners[1].x + corners[2].x) / 3;
+    let mY = (corners[0].y + corners[1].y + corners[2].y) / 3;
+    let edges = [];
+    for (let i = 0; i < 3; i++) {
+      let j = corners[i];
+      let k = corners[(i + 1) % 3];
+      edges.push({x: (j.x + k.x) / 2, y: (j.y + k.y) / 2});
+    }
+    
+    for (let i = 0; i < 3; i++) {
+      ctx73.moveTo(mX, mY);
+      if (edges73) ctx73.lineTo(edges[i].x, edges[i].y);
+      else ctx73.lineTo(corners[i].x, corners[i].y);
+    }
+    
+    ctx73.stroke();
+    
+  }
+  
+  function Circle73() {
+    let x = Math.random() * canvas73.width;
+    let y = Math.random() * canvas73.height;
+    let tries = 0;
+    while (!validatePoint73(x, y)) {
+      if (tries > 1000) {
+        canvas73Filled = true;
+        return;
+      }
+      x = Math.random() * canvas73.width;
+      y = Math.random() * canvas73.height;
+      tries++;
+    }
+    this.x = x;
+    this.y = y;
+    this.radius = 0;
+    this.grow();
+  }
+  Circle73.prototype.grow = function() {
+    let smallestDist = Infinity;
+    for (let i = 0; i < circle73Array.length; i++) {
+      if (i != circle73Array.indexOf(this)) {
+        let dx = this.x - circle73Array[i].x;
+        let dy = this.y - circle73Array[i].y;
+        let distSq = (dx * dx) + (dy * dy);
+        let dist = Math.sqrt(distSq) - circle73Array[i].radius;
+        if (dist <= smallestDist) smallestDist = dist;
+      }
+    }
+    // Uncomment to constrain within canvas edges:
+    /*let distToTop = this.y;
+    if (distToTop <= smallestDist) smallestDist = distToTop;
+    let distToRight = canvas73.width - this.x;
+    if (distToRight <= smallestDist) smallestDist = distToRight;
+    let distToBottom = canvas73.height - this.y;
+    if (distToBottom <= smallestDist) smallestDist = distToBottom;
+    let distToLeft = this.x;
+    if (distToLeft <= smallestDist) smallestDist = distToLeft;*/
+    this.radius = Math.min(smallestDist, maxCircle73Size);
+    drawCircle73(this.x, this.y, this.radius * circle73SizeRatio);
+  };
+  let circle73Array = [];
+  
+  function validatePoint73(x, y) {
+    for (let i = 0; i < circle73Array.length; i++) {
+      let dx = circle73Array[i].x - x;
+      let dy = circle73Array[i].y - y;
+      let distSq = (dx * dx) + (dy * dy);
+      let r = circle73Array[i].radius + minCircle73Size;
+      if (distSq <= r * r) return false; // Too close to a circle
+    }
+    // Uncomment to constrain within canvas edges:
+    /*if (x < minCircle73Size || x > canvas73.width - minCircle73Size) return false; // Too close to left/right
+    if (y < minCircle73Size || y > canvas73.height - minCircle73Size) return false; // Too close to top/bottom*/
+    return true;
+  }
+  
+  function draw73() {
+    brightnessRatio73 = randBetween(0.8, 1.1);
+    angleOffset73 = Math.random() * Math.PI * 2;
+    hue73 = Math.random() * 360;
+    edges73 = Math.random() < 0.5;
+    tilt73 = randBetween(0, 15);
+    skew73 = randBetween(0, 15);
+    
+    ctx73.fillStyle = `hsl(${hue73}deg, 80%, 15%)`;
+    ctx73.fillRect(0, 0, canvas73.width, canvas73.height);
+    
+    canvas73Filled = false;
+    circle73Array = [];
+    while (circle73Array.length < maxCircles73 && !canvas73Filled) circle73Array.push(new Circle73());
+  }
+  draw73();
+</script>
+<canvas id = "canvas72"></canvas>
+<button onclick = "draw72()">Redraw</button>
+<div class = "desc"><b><i>(2/28/2022)</i></b> Random rock path generator, it's based on circle packing but instead of drawing circles it draws random rock shapes. I also worked with better color manipulation here, because each rock is colored as a random variation on a basic brown color, but less saturated. The orangey-brown shade of the rocks reminds me of a dry desert canyon.<br><b><i>Update: (Later that day)</i></b> I added a few more settings so I could test some ideas for variations but none of them really interested me so they're all at their default values.<br><b><i><mark>Actually finished! (2/28/2022)</mark> Added to <a href = "generative-art-gallery.html" target = "_blank">generative-art-gallery.html</a>.</i></b></div>
+<hr><hr>
+<script>
+  const ctx72 = canvas72.getContext("2d");
+  canvas72.width = canvas72.height = 1000;
+  
+  let maxCircles72 = 2000;
+  let canvas72Filled = false;
+  let minCircle72Size = 5;
+  let maxCircle72Size = 100;
+  let circle72SizeRatio = 1.1;
+  let brightnessRatio72 = 1;
+  let hue72 = 0;
+  let drawChance72 = 1;
+  let tinyRatio72 = 0.5; // Ratio at which rocks are considered "tiny" and take drawChance into account for if they will draw or not
+  let firstRatio72 = 2; // Ratio that the first circle is drawn at
+  let drawSpecialFirst72 = false; // Draw "pond" for first rock or not
+  let minRockRadiusRatio72 = 0.8; // Lowest ratio of radius that rock vertices can be located at when drawing
+  
+  function randColor72() {
+    let s = Math.random() * Math.random() * 40;
+    return `hsl(${randBetween(25, 33) + hue72}deg, ${randBetween(20, 40) + s}%, ${randBetween(30, 60) * brightnessRatio72}%)`;
+  }
+  
+  function drawCircle72(x, y, radius, isFirst) {
+    if (isFirst) {
+      ctx72.fillStyle = `hsl(${randBetween(220, 260)}deg, ${randBetween(75, 100)}%, ${randBetween(60, 75)}%)`;
+      ctx72.fillCircle(x, y, radius);
+      return;
+    }
+    ctx72.fillStyle = randColor72();
+    
+    let numPoints = 7;
+    let angle = (Math.PI * 2) / numPoints;
+    let offset = Math.random() * Math.PI * 2;
+    let start = {};
+    
+    ctx72.beginPath();
+    for (let i = 0; i < numPoints; i++) {
+      let a = (angle * i) + offset + randBetween(-angle / 3, angle / 3);
+      let r = radius * randBetween(minRockRadiusRatio72, 1);
+      let iX = x + (r * Math.cos(a));
+      let iY = y + (r * Math.sin(a));
+      if (i === 0) start = {x: iX, y: iY};
+      ctx72.lineTo(iX, iY);
+    }
+    ctx72.lineTo(start.x, start.y);
+    
+    ctx72.fill();
+  }
+  
+  function Circle72(isFirst) {
+    this.isFirst = isFirst;
+    let x = Math.random() * canvas72.width;
+    let y = Math.random() * canvas72.height;
+    let tries = 0;
+    while (!validatePoint72(x, y)) {
+      if (tries > 1000) {
+        canvas72Filled = true;
+        return;
+      }
+      x = Math.random() * canvas72.width;
+      y = Math.random() * canvas72.height;
+      tries++;
+    }
+    this.x = x;
+    this.y = y;
+    this.radius = 0;
+    this.grow();
+  }
+  Circle72.prototype.grow = function() {
+    let smallestDist = Infinity;
+    for (let i = 0; i < circle72Array.length; i++) {
+      if (i != circle72Array.indexOf(this)) {
+        let dx = this.x - circle72Array[i].x;
+        let dy = this.y - circle72Array[i].y;
+        let distSq = (dx * dx) + (dy * dy);
+        let dist = Math.sqrt(distSq) - circle72Array[i].radius;
+        if (dist <= smallestDist) smallestDist = dist;
+      }
+    }
+    // Uncomment to constrain within canvas edges:
+    /*let distToTop = this.y;
+    if (distToTop <= smallestDist) smallestDist = distToTop;
+    let distToRight = canvas72.width - this.x;
+    if (distToRight <= smallestDist) smallestDist = distToRight;
+    let distToBottom = canvas72.height - this.y;
+    if (distToBottom <= smallestDist) smallestDist = distToBottom;
+    let distToLeft = this.x;
+    if (distToLeft <= smallestDist) smallestDist = distToLeft;*/
+    this.radius = Math.min(smallestDist, maxCircle72Size);
+    let c = 0;
+    if (this.radius < maxCircle72Size * tinyRatio72) c = drawChance72;
+    else c = 1;
+    let ratio = this.isFirst ? 1 + ((circle72SizeRatio - 1) / 2) : circle72SizeRatio;
+    if (Math.random() < c) drawCircle72(this.x, this.y, this.radius * ratio, this.isFirst);
+  };
+  let circle72Array = [];
+  
+  function validatePoint72(x, y) {
+    for (let i = 0; i < circle72Array.length; i++) {
+      let dx = circle72Array[i].x - x;
+      let dy = circle72Array[i].y - y;
+      let distSq = (dx * dx) + (dy * dy);
+      let r = circle72Array[i].radius + minCircle72Size;
+      if (distSq <= r * r) return false; // Too close to a circle
+    }
+    // Uncomment to constrain within canvas edges:
+    /*if (x < minCircle72Size || x > canvas72.width - minCircle72Size) return false; // Too close to left/right
+    if (y < minCircle72Size || y > canvas72.height - minCircle72Size) return false; // Too close to top/bottom*/
+    return true;
+  }
+  
+  function draw72() {
+    ctx72.fillStyle = "hsl(29deg, 82%, 22%)"; // Brown
+    ctx72.fillRect(0, 0, canvas72.width, canvas72.height);
+    
+    brightnessRatio72 = randBetween(0.8, 1.1);
+    
+    canvas72Filled = false;
+    circle72Array = [];
+    
+    if (drawSpecialFirst72) {
+      maxCircle72Size *= firstRatio72;
+      circle72Array.push(new Circle72(true));
+      maxCircle72Size /= firstRatio72;
+    }
+    while (circle72Array.length < maxCircles72 && !canvas72Filled) circle72Array.push(new Circle72(false));
+  }
+  draw72();
+</script>
+<canvas id = "canvas71"></canvas>
+<button onclick = "draw71()">Redraw</button>
+<div class = "desc"><b><i>(2/28/2022)</i></b> I finally got a triangle grid working, but I wasn't really sure what to do with it so I have this kind of kite pattern thing, which isn't super interesting. It sort of reminds me of square holes covering the ground.</div>
+<hr><hr>
+<script>
+  const ctx71 = canvas71.getContext("2d");
+  canvas71.width = canvas71.height = 1000;
+  
+  const ratio71 = Math.sqrt(3) / 2;
+  
+  let gridSize71 = 6;
+  
+  function drawTriangle71(x, y, sideLength, flip, color) { //    /\: Normal    \/: flipped
+    let cx = x;
+    let cy = y;
+    let ca = -Math.PI / 2;
+    
+    ctx71.lineWidth = 2;
+    ctx71.lineCap = ctx71.lineJoin = "round";
+    ctx71.fillStyle = color;
+    
+    ctx71.beginPath();
+    ctx71.moveTo(cx, cy);
+    for (let i = 0; i < 3; i++) {
+      cx += sideLength * Math.cos(ca);
+      cy += sideLength * Math.sin(ca);
+      ca += ((2 * Math.PI) / 3) * (flip ? -1 : 1);
+      ctx71.lineTo(cx, cy);
+    }
+    
+    /*let mx = (points[0].x + points[1].x + points[2].x) / 3;
+    let my = (points[0].y + points[1].y + points[2].y) / 3;
+    
+    for (let i = 0; i < 3; i++) {
+      ctx71.moveTo(points[i].x, points[i].y);
+      ctx71.lineTo(mx, my);
+    }*/
+    
+    ctx71.fill();
+    ctx71.stroke();
+  }
+  
+  function draw71() {
+    ctx71.fillStyle = "white";
+    ctx71.fillRect(0, 0, canvas71.width, canvas71.height);
+    
+    let tileSize = canvas71.width / gridSize71;
+    let numX = Math.ceil(gridSize71 / ratio71) + 1;
+    let numY = gridSize71 + 2;
+    
+    for (let x = -1; x < numX; x++) {
+      for (let y = -1; y < numY; y++) {
+        let _x = x * tileSize * ratio71;
+        let _y = x % 2 === 0 ? y : y - 0.5;
+        _y *= tileSize;
+        
+        let hue = Math.random() * 360;
+        let saturation = randBetween(50, 100);
+        let layers = Math.round(randBetween(5, 10));
+        let darkness = randBetween(5, 20);
+        
+        for (let i = layers; i > 0; i--) {
+          let iRatio = i / layers;
+          let color = `hsl(${hue}deg, ${saturation}%, ${(iRatio * 60) + darkness}%)`;
+          drawTriangle71(_x, _y, tileSize * iRatio, false, color);
+          drawTriangle71(_x, _y, tileSize * iRatio, true, color);
+        }
+      }
+    }
+  }
+  draw71();
+</script>
+<canvas id = "canvas70"></canvas>
+<button onclick = "draw70()">Redraw</button>
+<div class = "desc"><b><i>(2/26/2022)</i></b> Nested tangent circles, each circle (inside the main circles) touches the edge of the one around it.<br><b><i>(3/1/2022)</i></b> Decreased the grid size and increased the outline width to make everything more visible.</div>
+<hr><hr>
+<script>
+  const ctx70 = canvas70.getContext("2d");
+  canvas70.width = canvas70.height = 1000;
+  
+  let gridSize70 = 5;
+  let ratio70 = Math.sqrt(3) / 2;
+  
+  function drawCircle70(x, y, radius) {
+    ctx70.beginPath();
+    ctx70.arc(x, y, radius, 0, Math.PI * 2);
+  }
+  
+  function draw70() {
+    ctx70.fillStyle = "white";
+    ctx70.fillRect(0, 0, canvas70.width, canvas70.height);
+    
+    let tileSize = canvas70.width / gridSize70;
+    let columns = gridSize70 + 2; // Compensate for staggered rows and x-offset
+    let rows = Math.ceil(gridSize70 * (1 / ratio70)) + 1; // Compensate for horizontal compression and y-offset
+    
+    let offsetX = Math.random() * tileSize;
+    let offsetY = Math.random() * tileSize;
+    
+    for (let x = 0; x < columns; x++) {
+      for (let y = -1; y < rows; y++) {
+        let _x = y % 2 === 0 ? x : x - 0.5;
+        _x += 0.5;
+        _y = y * ratio70;
+        _y += 0.5;
+        
+        let cx = (_x * tileSize) - offsetX; // Current x
+        let cy = (_y * tileSize) - offsetY; // Current y
+        let ca = Math.random() * Math.PI * 2; // Current angle
+        let cr = tileSize / 2; // Current radius
+        let sign = Math.random() < 0.5 ? 1 : -1;
+        
+        let layers = Math.round(randBetween(3, 5));
+        let hue = Math.random() * 360;
+        
+        for (let i = 0; i < layers; i++) {
+          ctx70.fillStyle = `hsla(${hue}deg, 50%, 15%, 0.4)`;
+          ctx70.lineWidth = 2;
+          drawCircle70(cx, cy, cr);
+          ctx70.fill();
+          ctx70.stroke();
+          
+          //ca += (Math.PI / 3) * sign;
+          let lastCr = cr;
+          cr *= randBetween(0.6, 0.8);
+          let r = lastCr - cr;
+          cx += r * Math.cos(ca);
+          cy += r * Math.sin(ca);
+        }
+      }
+    }
+  }
+  draw70();
+</script>
+<canvas id = "canvas69"></canvas>
+<button onclick = "Walker69.draw()">Redraw</button>
+<div class = "desc"><b><i>(2/25/2022)</i></b> Random walker but it has 3 degrees of freedom - hue, saturation, and/or lightness - which are randomly turned on or off every generation. If they are turned on, that degree will change randomly as it walks.</div>
+<hr><hr>
+<script>
+  const ctx69 = canvas69.getContext("2d");
+  canvas69.width = canvas69.height = 1000;
+  
+  let gridSize69 = 100;
+  let variation69 = 5;
+  let steps69 = 30000;
+  
+  let Walker69 = {};
+  Walker69.walk = function() {
+    let d = Math.floor(Math.random() * 4);
+    
+    if (d === 0) this.y--; // Up
+    else if (d === 1) this.x++; // Right
+    else if (d === 2) this.y++; // Down
+    else if (d === 3) this.x--; // Left
+    
+    this.x = (this.x + gridSize69) % gridSize69;
+    this.y = (this.y + gridSize69) % gridSize69;
+    
+    if (this.changeH) {
+      this.H += Math.random() * variation69 * randSign();
+    }
+    if (this.changeS) {
+      let step = Math.random() * variation69;
+      if (this.S < step) this.S += step;
+      else if (this.S > 100 - step) this.S -= step;
+      else this.S += step * randSign();
+    }
+    if (this.changeL) {
+      let step = Math.random() * variation69;
+      if (this.L < step) this.L += step;
+      else if (this.L > 100 - step) this.L -= step;
+      else this.L += step * randSign();
+    }
+    
+    ctx69.fillStyle = `hsl(${this.H}deg, ${this.S}%, ${this.L}%)`;
+    let tileSize = canvas69.width / gridSize69;
+    ctx69.fillRect(this.x * tileSize, this.y * tileSize, tileSize, tileSize);
+  };
+  Walker69.draw = function() {
+    ctx69.fillStyle = "white";
+    ctx69.fillRect(0, 0, canvas69.width, canvas69.height);
+    
+    this.x = Math.floor(gridSize69 / 2);
+    this.y = Math.floor(gridSize69 / 2);
+    
+    this.changeH = Math.random() < 0.5;
+    this.changeS = Math.random() < 0.5;
+    this.changeL = Math.random() < 0.5;
+    if (!this.changeH && !this.changeS && !this.changeL) {
+      this.changeH = this.changeS = this.changeL = true;
+    }
+    
+    this.H = Math.random() * 360;
+    this.S = randBetween(25, 100);
+    this.L = randBetween(25, 75);
+    
+    for (let i = 0; i < steps69; i++) this.walk();
+  };
+  Walker69.draw();
+</script>
+<canvas id = "canvas68"></canvas>
+<button onclick = "draw68()">Redraw</button>
+<div class = "desc"><b><i>(2/24/2022)</i></b> Random <a href = "https://en.wikipedia.org/wiki/Pythagorean_tiling" target = "_blank">Pythagorean tiling</a> with the same concentric coloring from the hexagon grid.<br><b><i>(2/25/2022)</i></b> Added more randomness, the grid size and size of the smaller square is randomized every generation.</div>
+<hr><hr>
+<script>
+  const ctx68 = canvas68.getContext("2d");
+  canvas68.width = canvas68.height = 1000;
+  
+  let gridSize68 = 5;
+  let ratio68 = 0.3;
+  
+  function drawTile68(x, y, size, flip) {
+    let cx = x + (size / 2);
+    let cy = y + (size / 2);
+    
+    let hue = Math.random() * 360;
+    let saturation = randBetween(50, 100);
+    
+    let layers = Math.round(randBetween(2, 5));
+    for (let i = layers; i > 0; i--) {
+      let iRatio = i / layers;
+      let bRatio = flip ? 1 - iRatio : iRatio;
+      ctx68.fillStyle = ctx68.strokeStyle = `hsl(${hue}deg, ${saturation}%, ${(bRatio * 40) + 25}%)`;
+      ctx68.fillRectFromCenter(cx, cy, size * iRatio, size * iRatio);
+      ctx68.strokeRectFromCenter(cx, cy, size * iRatio, size * iRatio);
+    }
+  }
+  
+  function draw68() {
+    ctx68.fillStyle = "white";
+    ctx68.fillRect(0, 0, canvas68.width, canvas68.height);
+    
+    ratio68 = randBetween(0.2, 0.6);
+    gridSize68 = Math.round(randBetween(3, 8));
+    
+    let tileSize = canvas68.width / gridSize68;
+    let offset = Math.ceil(gridSize68 * ratio68) + 1;
+    let sign = Math.random() < 0.5 ? 1 : -1;
+    let flip = Math.random() < 0.5;
+    
+    for (let x = -offset; x < gridSize68 + offset; x++) {
+      for (let y = -offset; y < gridSize68 + offset; y++) {
+        let _x = x + (y * ratio68 * sign);
+        let _y = y + (x * ratio68 * -sign);
+        drawTile68(_x * tileSize, _y * tileSize, tileSize, flip); // Big square
+        
+        _x = (_x * tileSize) + tileSize;
+        _y = (_y * tileSize) + (sign === 1 ? tileSize - (tileSize * ratio68) : 0);
+        drawTile68(_x, _y, tileSize * ratio68, !flip); // Little square
+      }
+    }
+  }
+  draw68();
+</script>
+<canvas id = "canvas67"></canvas>
+<button onclick = "draw67()">Redraw</button>
+<div class = "desc"><b><i>(2/22/2022)</i></b> Random concentric hexagon grid tiling.</div>
+<hr><hr>
+<script>
+  const ctx67 = canvas67.getContext("2d");
+  canvas67.width = canvas67.height = 1000;
+  
+  const ratio67 = Math.sqrt(3) / 2;
+  let gridSize67 = 20;
+  
+  function drawHexagon67(x, y, radius) { // Radius: side to opposite side
+    let side = radius / ratio67;
+    
+    let cx = x - radius;
+    let cy = y - (side / 2);
+    let ca = 90;
+    
+    ctx67.lineWidth = 2;
+    ctx67.lineCap = ctx67.lineJoin = "round";
+    
+    let vertices = [];
+    
+    ctx67.beginPath();
+    ctx67.moveTo(cx, cy);
+    for (let i = 0; i < 6; i++) {
+      vertices.push({x: cx, y: cy});
+      cx += side * Math.cos(toRad(ca));
+      cy += side * Math.sin(toRad(ca));
+      ca -= 60;
+      ctx67.lineTo(cx, cy);
+    }
+  }
+  
+  function draw67() {
+    ctx67.fillStyle = "white";
+    ctx67.fillRect(0, 0, canvas67.width, canvas67.height);
+    
+    gridSize67 = Math.round(randBetween(5, 15));
+    
+    let tileSize = canvas67.width / gridSize67;
+    let columns = gridSize67 + 2; // Compensate for staggered rows and x-offset
+    let rows = Math.ceil(gridSize67 * (1 / ratio67)) + 1; // Compensate for horizontal compression and y-offset
+    
+    let offsetX = Math.random() * tileSize;
+    let offsetY = Math.random() * tileSize;
+    
+    for (let x = 0; x < columns; x++) {
+      for (let y = -1; y < rows; y++) {
+        let _x = y % 2 === 0 ? x : x - 0.5;
+        _x += 0.5;
+        _y = y * ratio67;
+        _y += 0.5;
+        
+        let hexX = (_x * tileSize) - offsetX;
+        let hexY = (_y * tileSize) - offsetY;
+        
+        let layers = Math.round(randBetween(Math.random() < 0.5 ? 1 : 2, 5));
+        let hue = Math.random() * 360;
+        let swap = Math.random() < 0.5;
+        let saturation = randBetween(50, 100);
+        for (let i = layers; i > 0; i--) {
+          let iRatio = i / layers;
+          let bRatio = swap ? 1 - iRatio : iRatio;
+          let brightness = (bRatio * 40) + 25;
+          ctx67.fillStyle = ctx67.strokeStyle = `hsl(${hue}deg, ${saturation}%, ${brightness}%)`;
+          drawHexagon67(hexX, hexY, tileSize * 0.5 * iRatio);
+          ctx67.fill();
+          ctx67.stroke();
+        }
+      }
+    }
+  }
+  draw67();
+</script>
+<canvas id = "canvas66"></canvas>
+<button onclick = "draw66()">Redraw</button>
+<div class = "desc"><b><i>(2/22/2022)</i></b> Random cubic optical illusion generator, it looks 3D and you can make it flip orientations in your mind.</div>
+<hr><hr>
+<script>
+  const ctx66 = canvas66.getContext("2d");
+  canvas66.width = canvas66.height = 1000;
+  
+  const ratio66 = Math.sqrt(3) / 2;
+  let gridSize66 = 25;
+  let brightColor66;
+  let darkColor66;
+  
+  function drawHexagon66(x, y, radius, flip) { // Radius: side to opposite side
+    let side = radius / ratio66;
+    
+    let cx = x - radius;
+    let cy = y - (side / 2);
+    let ca = 90;
+    
+    ctx66.lineWidth = 2;
+    ctx66.lineCap = ctx66.lineJoin = "round";
+    
+    let vertices = [];
+    
+    for (let i = 0; i < 6; i++) {
+      vertices.push({x: cx, y: cy});
+      cx += side * Math.cos(toRad(ca));
+      cy += side * Math.sin(toRad(ca));
+      ca -= 60;
+    }
+    
+    let offset = flip ? 1 : 0;
+    
+    for (let i = 0; i < 3; i++) {
+      let brightSide;
+      if (!flip) brightSide = i === 2;
+      else brightSide = i === 0;
+      
+      let j = (i * 2) + offset;
+      let v1 = vertices[j];
+      let v2 = vertices[(j + 1) % 6];
+      let v3 = vertices[(j + 2) % 6];
+      
+      ctx66.fillStyle = brightSide ? brightColor66 : darkColor66;
+      
+      ctx66.beginPath();
+      ctx66.moveTo(x, y);
+      ctx66.lineTo(v1.x, v1.y);
+      ctx66.lineTo(v2.x, v2.y);
+      ctx66.lineTo(v3.x, v3.y);
+      ctx66.lineTo(x, y);
+      ctx66.fill();
+      ctx66.stroke();
+    }
+  }
+  
+  function draw66() {
+    ctx66.fillStyle = "white";
+    ctx66.fillRect(0, 0, canvas66.width, canvas66.height);
+    
+    gridSize66 = Math.round(randBetween(5, 25));
+    
+    let tileSize = canvas66.width / gridSize66;
+    let offsetX = Math.random() * tileSize;
+    let offsetY = Math.random() * tileSize;
+    
+    let hue = Math.random() * 360;
+    brightColor66 = `hsl(${hue}deg, 100%, 60%)`;
+    darkColor66 = `hsl(${hue + 180}deg, 50%, 40%)`;
+    
+    for (let x = 0; x < gridSize66 + 2; x++) {
+      for (let y = -1; y < gridSize66 + 6; y++) {
+        let _x = y % 2 === 0 ? x : x - 0.5;
+        _x += 0.5;
+        _y = y * ratio66;
+        _y += 0.5;
+        drawHexagon66((_x * tileSize) - offsetX, (_y * tileSize) - offsetY, tileSize / 2, Math.random() < 0.5);
+      }
+    }
+  }
+  draw66();
+</script>
+<canvas id = "canvas65"></canvas>
+<button onclick = "draw65()">Redraw</button>
+<div class = "desc"><b><i>(2/21/2022)</i></b> I tried to make a different snowflake generator than the one I made for <a href = "snowflake.html" target = "_blank">snowflake.html</a> by using symmetric fractal trees, but I'm not super impressed with the result.</div>
+<hr><hr>
+<script>
+  const ctx65 = canvas65.getContext("2d");
+  canvas65.width = canvas65.height = 1000;
+  
+  let maxDepth65 = 8;
+  let symmetry65 = 6;
+  let startLength65 = 150;
+  let startWidth65 = 10;
+  let lengthRatio65 = 0.75;
+  let widthRatio65 = 0.8;
+  let branchAngle65 = 60;
+  
+  function drawBranch65(x, y, angle, length, width, depth) {
+    if (depth > maxDepth65) return;
+    
+    let endX = x + (length * Math.cos(angle));
+    let endY = y + (length * Math.sin(angle));
+    
+    ctx65.strokeStyle = `hsl(240deg, 100%, ${((depth / maxDepth65) * 70) + 30}%)`;
+    ctx65.lineWidth = width;
+    ctx65.lineCap = ctx65.lineJoin = "round";
+    ctx65.beginPath();
+    ctx65.moveTo(x, y);
+    ctx65.lineTo(endX, endY);
+    ctx65.stroke();
+    
+    let newLength = length * lengthRatio65;
+    let newWidth = width * widthRatio65;
+    
+    if (depth + 1 <= maxDepth65) {
+      drawBranch65(endX, endY, angle - toRad(branchAngle65), newLength, newWidth, depth + 1);
+      drawBranch65(endX, endY, angle + toRad(branchAngle65), newLength, newWidth, depth + 1);
+    }
+  }
+  
+  function draw65() {
+    ctx65.fillStyle = "black";
+    ctx65.fillRect(0, 0, canvas65.width, canvas65.height);
+    
+    lengthRatio65 = randBetween(0.6, 0.75);
+    branchAngle65 = randBetween(20, 45);
+    symmetry65 = Math.round(randBetween(3, 8));
+    
+    for (let i = 0; i < symmetry65; i++) {
+      drawBranch65(
+        canvas65.width / 2, // x
+        canvas65.height / 2, // y
+        ((i / symmetry65) * Math.PI * 2) - (Math.PI / 2), // angle
+        startLength65, // length
+        startWidth65, // width
+        1 // depth
+      );
+    }
+  }
+  draw65();
+</script>
+<canvas id = "canvas64"></canvas>
+<button onclick = "draw64()">Redraw</button>
+<div class = "desc"><b><i>(2/21/2022)</i></b> Tiling the plane with Tetris-style T-blocks, along with some random coloring.</div>
+<hr><hr>
+<script>
+  const ctx64 = canvas64.getContext("2d");
+  canvas64.width = canvas64.height = 1000;
+  
+  let gridSize64 = 10;
+  let sizeRatio64 = 1;
+  
+  function drawTBlock64(x, y, size, flip) {
+    let xSign = flip ? -1 : 1;
+    let s2 = size / 2;
+    
+    let cx = x + (s2 * xSign) + ((size / 4) * xSign);
+    let cy = y - (size / 4);
+    
+    ctx64.beginPath();
+    ctx64.moveTo(cx, cy);
+    
+    cx -= s2 * xSign;
+    ctx64.lineTo(cx, cy);
+    
+    cy -= s2;
+    ctx64.lineTo(cx, cy);
+    
+    cx -= s2 * xSign;
+    ctx64.lineTo(cx, cy);
+    
+    cy += s2 * 3;
+    ctx64.lineTo(cx, cy);
+    
+    cx += s2 * xSign;
+    ctx64.lineTo(cx, cy);
+    
+    cy -= s2;
+    ctx64.lineTo(cx, cy);
+    
+    cx += s2 * xSign;
+    ctx64.lineTo(cx, cy);
+    
+    cy -= s2;
+    ctx64.lineTo(cx, cy);
+  }
+  
+  function draw64() {
+    ctx64.fillStyle = "white";
+    ctx64.fillRect(0, 0, canvas64.width, canvas64.height);
+    
+    gridSize64 = Math.round(randBetween(5, 25));
+    let tileSize = canvas64.width / gridSize64;
+    let hueOffset = Math.random() * 360;
+    
+    for (let x = 0; x < gridSize64; x++) {
+      for (let y = -1; y < gridSize64 + 1; y++) {
+        let sign = x % 2 !== 0;
+        if (y % 2 !== 0) sign = !sign;
+        
+        let yRatio = y / gridSize64;
+        let xRatio = x / gridSize64;
+        
+        ctx64.fillStyle = ctx64.strokeStyle = `hsl(${hueOffset + (yRatio * 360) + randBetween(-15, 15)}deg, ${randBetween(50, 100)}%, ${((xRatio * 50) + 25) + randBetween(-15, 15)}%)`;
+        let size = tileSize * sizeRatio64;
+        drawTBlock64(((x + 0.5) * tileSize) - ((size / 4) * (sign ? -1 : 1)), (y + 0.5) * tileSize, size, sign);
+        ctx64.fill();
+        ctx64.stroke();
+      }
+    }
+  }
+  draw64();
+</script>
+<canvas id = "canvas63" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "ShapeWalker63.walk()">Regenerate</button>
+<div><b><u>Turn Chance:</u></b> <span id = "turnChance63Txt">100</span>%</div>
+<input type = "range" min = "0" max = "100" step = "10" value = "100" id = "turnChance63Range" oninput = "updateSettings63()">
+<div class = "desc"><b><i>(2/17/2022)</i></b> A variation on the previous project, with the same shape walker idea but uncontstrained, and it cycles through a few different shapes and colors every time.</div>
+<hr><hr>
+<script>
+  const ctx63 = canvas63.getContext("2d");
+  canvas63.width = canvas63.height = 1000;
+  
+  let stepSize63 = 20;
+  let stepsToChange63 = 5000;
+  let turnChance63 = 1;
+  let numWalks63 = 5;
+  let opacity63 = 0.5;
+  let lineWidth63 = 2;
+  let shadowOpacity63 = 0.5;
+  let shadowScale63 = 10;
+  
+  let shape63Array = [
+    { // Triangle
+      angle: 120,
+      scale: 1,
+      hue: 0
+    },
+    { // Square
+      angle: 90,
+      scale: 0.8,
+      hue: 120
+    },
+    { // Hexagon
+      angle: 60,
+      scale: 0.5,
+      hue: 240
+    }
+  ];
+  
+  function randShape63() {
+    return shape63Array[Math.floor(Math.random() * shape63Array.length)];
+  }
+  
+  let ShapeWalker63 = {};
+  ShapeWalker63.resetPos = function() {
+    this.x = Math.random() * canvas63.width;
+    this.y = Math.random() * canvas63.height;
+    this.angle = Math.random() * 360;
+    
+    this.shape = randShape63();
+    this.color = `hsla(${Math.random() * 360}deg, 50%, ${randBetween(50, 70)}%, ${opacity63})`;
+  };
+  ShapeWalker63.walk = function() {
+    ctx63.fillStyle = "black";
+    ctx63.fillRect(0, 0, canvas63.width, canvas63.height);
+    
+    this.stepSize = randBetween(0.5, 1) * stepSize63;
+    
+    for (let i = 0; i < numWalks63; i++) {
+      this.resetPos();
+      
+      ctx63.strokeStyle = this.color;
+      ctx63.lineWidth = 2;
+      ctx63.lineCap = ctx63.lineJoin = "round";
+      
+      ctx63.beginPath();
+      ctx63.moveTo(this.x, this.y);
+      
+      for (let j = 0; j < stepsToChange63; j++) {
+        if (Math.random() < turnChance63) this.angle += this.shape.angle * randSign();
+        this.x += this.stepSize * this.shape.scale * Math.cos(toRad(this.angle));
+        this.y += this.stepSize * this.shape.scale * Math.sin(toRad(this.angle));
+        
+        ctx63.lineTo(this.x, this.y);
+      }
+      
+      ctx63.globalAlpha = shadowOpacity63;
+      ctx63.lineWidth = lineWidth63 * shadowScale63;
+      ctx63.stroke();
+      
+      ctx63.globalAlpha = 1;
+      ctx63.lineWidth = lineWidth63;
+      ctx63.stroke();
+    }
+  };
+  ShapeWalker63.walk();
+  
+  function updateSettings63() {
+    turnChance63Txt.innerHTML = turnChance63Range.value;
+    turnChance63 = Number(turnChance63Range.value) / 100;
+  }
+</script>
+<canvas id = "canvas62" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "draw62()">Regenerate</button>
+<div class = "desc"><b><i>(2/16/2022)</i></b> Small clusters of connected shapes generated by a grid of random walkers that each have a set turn size (120&deg;, 90&deg;, or 60&deg; (for triangle, square, or hexagon, respectively)) and walk around randomly until they leave their square.</div>
+<hr><hr>
+<script>
+  const ctx62 = canvas62.getContext("2d");
+  canvas62.width = canvas62.height = 1000;
+  
+  let gridSize62 = 8;
+  let padding62 = 0;
+  let drawChance62 = 1;
+  let turnChance62 = 1;
+  let hueOffset62 = Math.random() * 360;
+  
+  let shape62Array = [
+    { // Triangle
+      angle: 120,
+      scale: 1,
+      hue: 0
+    },
+    { // Square
+      angle: 90,
+      scale: 0.8,
+      hue: 120
+    },
+    { // Hexagon
+      angle: 60,
+      scale: 0.5,
+      hue: 240
+    }
+  ];
+  
+  function randShape62() {
+    return shape62Array[Math.floor(Math.random() * shape62Array.length)];
+  }
+  
+  function drawShape62(x, y, size) {
+    let shape = randShape62();
+    
+    ctx62.strokeStyle = `hsl(${shape.hue + hueOffset62}deg, 50%, ${randBetween(40, 60)}%)`;
+    ctx62.lineWidth = 2;
+    ctx62.lineCap = ctx62.lineJoin = "round";
+    
+    let cx = x + (size / 2);
+    let cy = y + (size / 2);
+    let ca = Math.random() * 360;
+    let stepSize = size * randBetween(0.08, 0.2) * shape.scale;
+    
+    ctx62.beginPath();
+    ctx62.moveTo(cx, cy);
+    
+    while (true) {
+      let lastX = cx;
+      let lastY = cy;
+      if (Math.random() < turnChance62) ca += shape.angle * randSign();
+      cx += stepSize * Math.cos(toRad(ca));
+      cy += stepSize * Math.sin(toRad(ca));
+      
+      let xOff = cx < x || cx > x + size;
+      let yOff = cy < y || cy > y + size;
+      
+      if (xOff || yOff) {
+        ctx62.stroke();
+        return;
+      }
+      
+      ctx62.lineTo(cx.clamp(x, x + size), cy.clamp(y, y + size));
+    }
+  }
+  
+  function draw62() {
+    ctx62.fillStyle = "black";
+    ctx62.fillRect(0, 0, canvas62.width, canvas62.height);
+    
+    hueOffset62 = Math.random() * 360;
+    
+    let tileSize = canvas62.width / gridSize62;
+    let padding = tileSize * padding62;
+    
+    for (let x = 0; x < gridSize62; x++) {
+      for (let y = 0; y < gridSize62; y++) {
+        let _x = (x * tileSize) + padding;
+        let _y = (y * tileSize) + padding;
+        if (Math.random() < drawChance62) drawShape62(_x, _y, tileSize - (padding * 2));
+      }
+    }
+  }
+  draw62();
+</script>
+<canvas id = "canvas61"></canvas>
+<button onclick = "startCanvas61(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>[ FPS: <span id = "fps61Txt"></span> ]</b></i></div>
+<div class = "desc"><b><i>(2/16/2022)</i></b> Experimenting with more particle physics, this time with "blades" cutting around the screen and shooting sparks.</div>
+<hr><hr>
+<script>
+  const ctx61 = canvas61.getContext("2d");
+  canvas61.width = canvas61.height = 1000;
+  let canvas61Running = false;
+  
+  let ratio61 = Math.random();
+  let period61 = 300;
+  
+  let showPaths61 = false;
+  
+  let maxSpark61Age = 200;
+  let spark61Size = 3;
+  let spark61Bounciness = 0.5;
+  let spark61Gravity = 0.25;
+  
+  function smoothEase61(ratio) {
+    // Map number between 0 and 1 to partial cosine wave, smoothing out the ends and wrapping around
+    return (1 - Math.cos(Math.PI * 2 * ratio)) / 2;
+  }
+  
+  function Blade61(pathType, pathSpecs) {
+    this.ratioOffset = Math.random();
+    
+    this.pathType = pathType;
+    if (this.pathType === 0) { // Line
+      this.start = pathSpecs.start;
+      this.end = pathSpecs.end;
+      this.dx = this.end.x - this.start.x;
+      this.dy = this.end.y - this.start.y;
+    }
+    else if (this.pathType === 1) { // Ellipse
+      this.ellipse = pathSpecs.ellipse;
+      this.radiusX = pathSpecs.radiusX;
+      this.radiusY = pathSpecs.radiusY;
+    }
+  }
+  Blade61.prototype.update = function() {
+    if (this.pathType === 0) { // Line
+      let smoothRatio = smoothEase61((ratio61 + this.ratioOffset) % 1);
+      this.x = this.start.x + (this.dx * smoothRatio);
+      this.y = this.start.y + (this.dy * smoothRatio);
+    }
+    else if (this.pathType === 1) { // Ellipse
+      let angle = ((ratio61 + this.ratioOffset) % 1) * Math.PI * 2;
+      this.x = this.ellipse.x + (this.radiusX * Math.cos(angle));
+      this.y = this.ellipse.y + (this.radiusY * Math.sin(angle));
+    }
+    
+    let dx = this.x - this.lastX;
+    let dy = this.y - this.lastY;
+    for (let i = 0; i < 2; i++) spark61Array.push(new Spark61(this.x, this.y, -dx, -dy));
+    
+    this.lastX = this.x;
+    this.lastY = this.y;
+  };
+  Blade61.prototype.draw = function() {
+    if (showPaths61) {
+      ctx61.strokeStyle = "gray";
+      ctx61.lineWidth = 2;
+      if (this.pathType === 0) { // Line
+        ctx61.beginPath();
+        ctx61.moveTo(this.start.x, this.start.y);
+        ctx61.lineTo(this.end.x, this.end.y);
+        ctx61.stroke();
+      }
+      else if (this.pathType === 1) { // Ellipse
+        ctx61.beginPath();
+        ctx61.ellipse(this.ellipse.x, this.ellipse.y, this.radiusX, this.radiusY, 0, 0, Math.PI * 2);
+        ctx61.stroke();
+      }
+    }
+    
+    ctx61.fillCircle(this.x, this.y, 5);
+  };
+  let blade61Array = [];
+  
+  function Spark61(x, y, vx, vy) {
+    this.x = x;
+    this.y = y;
+    this.lastX = this.x;
+    this.lastY = this.y;
+    this.vx = vx + randBetween(-2, 2);
+    this.vy = vy + randBetween(-2, 2);
+    this.age = 0;
+    this.maxAge = Math.round(randBetween(0.5, 1) * maxSpark61Age);
+    this.size = randBetween(0.75, 1) * spark61Size;
+    
+    this.dead = false;
+    
+    this.hue = 60//240 + randBetween(-15, 15);
+  }
+  Spark61.prototype.update = function() {
+    this.age++;
+    if (this.age >= this.maxAge) {
+      this.dead = true;
+      return;
+    }
+    
+    this.vy += spark61Gravity;
+    
+    this.x += this.vx;
+    this.y += this.vy;
+    
+    if (this.x < 0) {
+      this.x = 0;
+      this.vx *= -spark61Bounciness;
+    }
+    if (this.x > canvas61.width) {
+      this.x = canvas61.width;
+      this.vx *= -spark61Bounciness;
+    }
+    if (this.y < 0) {
+      this.y = 0;
+      this.vy *= -spark61Bounciness;
+    }
+    if (this.y > canvas61.height) {
+      this.y = canvas61.height;
+      this.vy *= -spark61Bounciness;
+    }
+  };
+  Spark61.prototype.draw = function() {
+    let ratio = 1 - (this.age / this.maxAge);
+    if (ratio < 0) ratio = 0;
+    
+    ctx61.lineCap = ctx61.lineJoin = "round";
+    ctx61.strokeStyle = `hsl(${this.hue}deg, 100%, ${ratio * 75}%)`;
+    ctx61.lineWidth = this.size//(this.size * 0.5) + (this.size * 0.5 * ratio);
+    
+    
+    ctx61.beginPath();
+    ctx61.moveTo(this.lastX, this.lastY);
+    ctx61.lineTo(this.x, this.y);
+    ctx61.stroke();
+    
+    this.lastX = this.x;
+    this.lastY = this.y;
+  };
+  let spark61Array = [];
+  
+  let lastFrame61Time = 0;
+  let lastFps61DisplayTime = 1000;
+  function frame61() {
+    if (Date.now() - lastFps61DisplayTime >= 500) {
+      fps61Txt.innerHTML = (1000 / (Date.now() - lastFrame61Time)).toFixed(1);
+      lastFps61DisplayTime = Date.now();
+    }
+    lastFrame61Time = Date.now();
+    
+    ctx61.fillStyle = "black";
+    ctx61.fillRect(0, 0, canvas61.width, canvas61.height);
+    
+    ratio61 += 1 / period61;
+    ratio61 %= 1;
+    
+    for (let i = 0; i < blade61Array.length; i++) {
+      blade61Array[i].update();
+      //blade61Array[i].draw();
+    }
+    
+    for (let i = 0; i < spark61Array.length; i++) {
+      spark61Array[i].update();
+      spark61Array[i].draw();
+      
+      if (spark61Array[i].dead) {
+        spark61Array.splice(i, 1);
+        i--;
+      }
+    }
+    
+    if (canvas61Running) requestAnimationFrame(frame61);
+  }
+  
+  function reset61() {
+    ctx61.fillStyle = "black";
+    ctx61.fillRect(0, 0, canvas61.width, canvas61.height);
+    
+    ratio61 = Math.random();
+    
+    blade61Array = [];
+    spark61Array = [];
+    
+    for (let i = 0; i < 1; i++) {
+      blade61Array.push(new Blade61(
+        1, // Path Type
+        { // Path Specs
+          ellipse: {
+            x: 500,
+            y: 500
+          },
+          radiusX: 400,
+          radiusY: 400
+        }
+      ));
+    }
+    
+    let padding = 100;
+    blade61Array.push(new Blade61(
+      0, // Path Type
+      { // Path Specs
+        start: {
+          x: padding,
+          y: padding
+        },
+        end: {
+          x: canvas61.width - padding,
+          y: canvas61.height - padding
+        }
+      }
+    ));
+    blade61Array.push(new Blade61(
+      0, // Path Type
+      { // Path Specs
+        start: {
+          x: canvas61.width - padding,
+          y: padding
+        },
+        end: {
+          x: padding,
+          y: canvas61.height - padding
+        }
+      }
+    ));
+    
+    if (!canvas61Running) frame61();
+  }
+  reset61();
+  
+  function startCanvas61(caller) {
+    if (canvas61Running) {
+      canvas61Running = false;
+      caller.innerHTML = "<b><i>Paused</i></b>";
+      caller.style.color = caller.style.borderColor = "red";
+    }
+    else {
+      canvas61Running = true;
+      caller.innerHTML = "<b><i>Running</i></b>";
+      caller.style.color = caller.style.borderColor = "green";
+      frame61();
+    }
+  }
+</script>
+<canvas id = "canvas60"></canvas>
+<button onclick = "draw60()">Regenerate</button>
+<div class = "desc"><b><i>(2/12/2022)</i></b> Another Genuary 2021 prompt, this time from January 25th's "Make a grid of permutations of something." I'm not super happy with how this turned out but it looks sort of interesting. It's a 23x23 grid where each square shows the next number in binary (backwards) (with lime being 0 and black being 1) drawn in another smaller 3x3 grid. So, the first tile is 0 in binary, being<br><b>000<br>000<br>000</b><br> And the next one is 1 in binary, being<br><b>100<br>000<br>000</b>, and so on.<br>For example the 21st tile would be<br><b>101<br>010<br>000</b>.<br><b><i>(2/15/2022)</i></b> Added randomness--it works in the same way except that the first tile isn't always 0, it's a random number between 1 and 511. Then the next tile isn't always just one more, it's a random amount more. It's still pretty dull for the most part but at least it's not always the exact same.<br><b><i>Update: (A few minutes later)</i></b> I added some more randomness so that the color is random as well as the size of each tile when it's drawn, to give some more variation.</div>
+<hr><hr>
+<script>
+  const ctx60 = canvas60.getContext("2d");
+  canvas60.width = canvas60.height = 1000;
+  
+  let colors60 = [`hsl(120deg, 100%, 50%)`, "black"];
+  let ratio60 = 2;
+  let stepSize60 = 3;
+  let opacity60 = 0.5;
+  
+  function drawTile60(_x, _y, size, string) {
+    let tileSize = size / 3;
+    
+    let i = 0;
+    
+    for (let y = 0; y < 3; y++) {
+      for (let x = 0; x < 3; x++) {
+        ctx60.fillStyle = ctx60.strokeStyle = colors60[Number(string.charAt(string.length - 1 - i))];
+        ctx60.globalAlpha = opacity60;
+        ctx60.lineWidth = 2;
+        
+        let tileX = _x + (x * tileSize);
+        let tileY = _y + (y * tileSize);
+        let tileSizeScaled = tileSize * ratio60;
+        
+        let tileCX = tileX + (tileSizeScaled / 2);
+        let tileCY = tileY + (tileSizeScaled / 2);
+        
+        ctx60.fillRectFromCenter(tileCX, tileCY, tileSizeScaled, tileSizeScaled);
+        ctx60.strokeRectFromCenter(tileCX, tileCY, tileSizeScaled, tileSizeScaled);
+        
+        ctx60.globalAlpha = 1;
+        
+        i++;
+      }
+    }
+  }
+  
+  function draw60() {
+    ctx60.globalAlpha = 1;
+    ctx60.fillStyle = "black";
+    ctx60.fillRect(0, 0, canvas60.width, canvas60.height);
+    
+    colors60[0] = `hsl(${Math.random() * 360}deg, 100%, 50%)`;
+    ratio60 = randBetween(1, 2);
+    
+    let tileSize = canvas60.width / 23;
+    
+    let i = Math.floor(Math.random() * 511);
+    
+    for (let y = 0; y < 23; y++) {
+      for (let x = 0; x < 23; x++) {
+        drawTile60(x * tileSize, y * tileSize, tileSize, i.toString(2).padStart(9, "0"));
+        i += Math.round(randBetween(1, stepSize60));
+        //if (i > 511) return;
+      }
+    }
+  }
+  draw60();
+</script>
+<canvas id = "canvas59" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "draw59()">Regenerate</button>
+<div class = "desc"><b><i>(2/12/2022)</i></b> Another late Genuary project, this time inspired from last year's prompt for January 4th: "Small areas of symmetry." Each tile has vertical and horizontal symmetry, and a randomized grid size.</div>
+<hr><hr>
+<script>
+  const ctx59 = canvas59.getContext("2d");
+  canvas59.width = canvas59.height = 1000;
+  
+  let hueVariation59 = 0.1;
+  
+  function randGridSize59() {
+    let arr = [5, 10, 20, 25];
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+  
+  function drawTile59(_x, _y, size, hue) {
+    let gridSize = randGridSize59();
+    let tileSize = size / gridSize;
+    
+    let hue1 = hue + randBetween(hueVariation59 * -180, hueVariation59 * 180);
+    let hue2 = hue1 + 180 + randBetween(hueVariation59 * -180, hueVariation59 * 180);
+    let color1 = `hsl(${hue1}deg, ${randBetween(50, 100)}%, ${randBetween(40, 60)}%)`;
+    let color2 = `hsl(${hue2}deg, ${randBetween(50, 100)}%, ${randBetween(40, 60)}%)`;
+    
+    for (let x = 0; x < gridSize / 2; x++) {
+      for (let y = 0; y < gridSize / 2; y++) {
+        let xM = gridSize - x - 1; // Mirrored x
+        let yM = gridSize - y - 1; // Mirrored y
+        
+        ctx59.fillStyle = Math.random() < 0.5 ? color1 : color2;
+        
+        ctx59.fillRect(_x + (x * tileSize), _y + (y * tileSize), tileSize, tileSize);
+        ctx59.fillRect(_x + (xM * tileSize), _y + (y * tileSize), tileSize, tileSize);
+        ctx59.fillRect(_x + (x * tileSize), _y + (yM * tileSize), tileSize, tileSize);
+        ctx59.fillRect(_x + (xM * tileSize), _y + (yM * tileSize), tileSize, tileSize);
+      }
+    }
+  }
+  
+  function draw59() {
+    ctx59.fillStyle = "white";
+    ctx59.fillRect(0, 0, canvas59.width, canvas59.height);
+    
+    let gridSize = 10;
+    let tileSize = canvas59.width / gridSize;
+    let hue = Math.random() * 360;
+    
+    for (let x = 0; x < gridSize; x++) {
+      for (let y = 0; y < gridSize; y++) {
+        drawTile59(x * tileSize, y * tileSize, tileSize, hue);
+      }
+    }
+  }
+  draw59();
+</script>
+<canvas id = "canvas58" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "draw58()">Regenerate</button>
+<div class = "desc"><b><i>(2/10/2022)</i></b> A late project inspired by Genuary 2022's prompt for January 20th: "Make a sea of shapes."</div>
+<hr><hr>
+<script>
+  const ctx58 = canvas58.getContext("2d");
+  canvas58.width = canvas58.height = 1000;
+  
+  function multRand58(n) { // Multiply n random numbers together
+    let prod = 1;
+    for (let i = 0; i < n; i++) prod *= Math.random();
+    return prod;
+  }
+  
+  function colorFromRatio58(ratio, hue) {
+    return `hsl(${hue + (ratio * 80) - 40}deg, 80%, ${75 - (ratio * 40)}%)`;
+  }
+  function sizeFromRatio58(ratio) {
+    return 20 * ((ratio * 0.75) + 0.25);
+  }
+  
+  function drawRandSquare58(_x, hue) {
+    let x = _x + (multRand58(3) * canvas58.width * 0.5 * randSign());
+    let y = (canvas58.height / 2) + (multRand58(2) * canvas58.height * 0.5 * randSign());
+    
+    let ratioX = x / canvas58.width;
+    let ratioY = 1 - (Math.abs(y - (canvas58.height / 2)) / (canvas58.height / 2));
+    
+    ctx58.fillStyle = colorFromRatio58(ratioX, hue);
+    ctx58.globalAlpha = ratioY;
+    
+    let s = sizeFromRatio58(ratioY);
+    let s2 = s / 2;
+    
+    ctx58.fillRect(x - s2, y - s2, s, s);
+    ctx58.strokeRect(x - s2, y - s2, s, s);
+  }
+  
+  function drawRandTriangle58(_x, hue) {
+    for (let j = 0; j < 2; j++) {
+      let x = _x + (multRand58(3) * canvas58.width * 0.5 * randSign());
+      let y = (canvas58.height / 2) + (multRand58(2) * canvas58.height * 0.5 * randSign());
+      
+      let ratioX = x / canvas58.width;
+      let ratioY = 1 - (Math.abs(y - (canvas58.height / 2)) / (canvas58.height / 2));
+      
+      ctx58.fillStyle = colorFromRatio58(ratioX, hue);
+      ctx58.globalAlpha = ratioY;
+      
+      let s = sizeFromRatio58(ratioY);
+      let s2 = s / 2;
+      
+      ctx58.beginPath();
+      ctx58.moveTo(x, y - s2);
+      ctx58.lineTo(x + s2, y + s2);
+      ctx58.lineTo(x - s2, y + s2);
+      ctx58.lineTo(x, y - s2);
+      ctx58.lineTo(x + s2, y + s2);
+      
+      ctx58.fill();
+      ctx58.stroke();
+    }
+  }
+  
+  function drawRandCircle58(_x, hue) {
+    let x = _x + (multRand58(3) * canvas58.width * 0.5 * randSign());
+    let y = (canvas58.height / 2) + (multRand58(2) * canvas58.height * 0.5 * randSign());
+    
+    let ratioX = x / canvas58.width;
+    let ratioY = 1 - (Math.abs(y - (canvas58.height / 2)) / (canvas58.height / 2));
+    
+    ctx58.fillStyle = colorFromRatio58(ratioX, hue);
+    ctx58.globalAlpha = ratioY;
+    
+    let s = sizeFromRatio58(ratioY);
+    let s2 = s / 2;
+    
+    ctx58.fillCircle(x, y, s2);
+    ctx58.strokeCircle(x, y, s2);
+  }
+  
+  function draw58() {
+    ctx58.fillStyle = "white";
+    ctx58.globalAlpha = 1;
+    ctx58.fillRect(0, 0, canvas58.width, canvas58.height);
+    
+    ctx58.strokeStyle = "black";
+    ctx58.lineWidth = 1;
+    
+    for (let i = 0; i < 5000; i++) {
+      drawRandSquare58(0, 0);
+      drawRandCircle58(canvas58.width * 0.25, 60);
+      
+      drawRandTriangle58(canvas58.width * 0.5, 30);
+      
+      drawRandSquare58(canvas58.width * 0.75, 120);
+      drawRandCircle58(canvas58.width, 90);
+    }
+  }
+  draw58();
+</script>
 <canvas id = "canvas57" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "startCanvas57(this)">Start</button>
 <button onclick = "reset57()">Reset</button>
@@ -9324,8 +11615,6 @@
 
 </body>
 </html>
-
-
 
 
 
