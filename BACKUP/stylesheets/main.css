@@ -1,0 +1,72 @@
+html, body, button, input {
+  font-family: monospace;
+}
+
+canvas {
+  border: 1px solid black;
+}
+
+button {
+  background: white;
+  border: 3px solid black;
+  border-radius: 0;
+  cursor: pointer;
+}
+button:hover {
+  background: lightgray;
+}
+button:active {
+  background: gray;
+}
+button:focus, input:focus {
+  outline: none;
+}
+
+input[type = range] {
+  height: 5px;
+  border-radius: 5px;
+  width: 100px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: #bdbdbd;
+}
+input[type = range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 10px;
+  background-color: #7a7a7a;
+  border-radius: 10px;
+  cursor: pointer;
+}
+input[type = range]::-moz-range-thumb {
+  width: 25px;
+  height: 20px;
+  border-radius: 10px;
+  background: #7a7a7a;
+  cursor: pointer;
+}
+input[type = range]::-webkit-slider-thumb:hover {
+  background-color: #4d4d4d;
+}
+input[type = range]::-moz-range-thumb:hover {
+  background-color: #4d4d4d;
+}
+input[type = range]::-webkit-slider-thumb:active {
+  background-color: black;
+}
+input[type = range]::-moz-range-thumb:active {
+  background-color: black;
+}
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  margin: 0;
+}
+
+input[type = text] {
+  border: 3px solid black;
+  border-radius: 0;
+}
