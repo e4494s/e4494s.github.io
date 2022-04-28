@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png"/>
+    <title>e4494s</title>
+    <style>
+      :root {
+        --textShadow: 0 0 14px white, 0 0 14px white;
+      }
+      
+      html {
+        min-height: 100%;
+        position: relative;
+      }
+      
+      html, body {
+        font-family: monospace;
+        font-size: 14px;
+      }
+      
+      h1 {
+        font-weight: bold;
+        font-size: 45px;
+        text-align: center;
+      }
+      
+      h2 {
+        font-size: 25px;
+        text-align: center;
+        text-decoration: underline;
+      }
+      
+      a {
+        color: blue;
+        background-color: rgba(50, 50, 255, 0.4);
+        font-size: 20px;
+        padding: 2px;
+        border-radius: 5px;
+        text-decoration: none;
+      }
+      a:hover {
+        background-color: rgba(50, 50, 255, 0.55);
+      }
+      a:active {
+        background-color: rgba(50, 50, 255, 0.7);
+      }
+      
+      #email-link {
+        padding: 0;
+        border-radius: 0;
+        font-size: 16px;
+      }
+      
+      .links {
+        line-height: 25px;
+      }
+      
+      .wip {
+        color: red;
+        font-weight: bold;
+        font-style: italic;
+      }
+      
+      #current {
+        border: 3px dashed blue;
+        width: 250px;
+        padding: 5px;
+      }
+      
+      .desc {
+        padding: 10px;
+        text-align: center;
+        font-style: italic;
+        font-weight: bold;
+        background: rgba(0, 0, 0, 0.33);
+        border-radius: 10px;
+        border: 2px solid rgba(0, 0, 0, 0.15);
+      }
+      
+      .gallery {
+        padding: 20px;
+        font-size: 20px;
+        text-decoration: none;
+        width: 200px;
+        border: 4px solid blue;
+        color: white;
+        border-radius: 15px;
+        text-align: center;
+        font-style: italic;
+        vertical-align: middle;
+        font-weight: bold;
+        background: linear-gradient(to bottom, rgba(0, 0, 255, 0.5), rgba(100, 100, 255, 0.5));
+        display: inline-block;
+      }
+      
+      .section {
+        border: 4px solid rgba(0, 0, 0, 0.75);
+        padding: 5px;
+        border-radius: 25px;
+      }
+      
+      .gallery-link {
+        width: 170px;
+        height: 170px;
+        display: inline-block;
+        margin: 2px;
+        border-radius: 10px;
+        border: 2px solid black;
+        background-size: 100% 100%;
+        background-color: white;
+        opacity: 100%;
+        padding: 0;
+      }unf
+      .gallery-link:hover {
+        opacity: 75%;
+      }
+      .gallery-link:active {
+        opacity: 50%;
+      }
+      
+      #secret-btn {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        border: none;
+        border-radius: 0;
+        background-color: transparent;
+      }
+      
+      button {
+        margin: 3px;
+        border-radius: 10px;
+        font-family: monospace;
+        font-weight: bold;
+        background-color: rgb(255, 255, 100);
+        border: 3px solid black;
+        cursor: pointer;
+        vertical-align: middle;
+      }
+      button:hover {
+        background-color: rgb(170, 170, 80);
+      }
+      button:active {
+        background-color: rgb(110, 110, 0);
+      }
+      
+      button.selected, button.selected:hover, button.selected:active {
+        background-color: rgb(110, 110, 0);
+      }
+      
+      #section-btn-8, #section-btn-0 {
+        background-color: white;
+      }
+      #section-btn-8:hover, #section-btn-0:hover {
+        background-color: rgb(200, 200, 200);
+      }
+      #section-btn-8:active, #section-btn-8.selected, #section-btn-8.selected:hover, #section-btn-8.selected:active, #section-btn-0:active, #section-btn-0.selected, #section-btn-0.selected:hover, #section-btn-0.selected:active {
+        background-color: rgb(100, 100, 100);
+      }
+      
+      .btn-divider-left {
+        margin: 3px;
+        margin-left: 5px;
+        margin-right: -2px;
+        border-radius: 10px;
+        background-color: black;
+        display: inline-block;
+        height: 30px;
+        vertical-align: middle;
+        cursor: default;
+        width: 3px;
+      }
+      .btn-divider-right {
+        margin: 3px;
+        margin-left: -2px;
+        margin-right: 5px;
+        border-radius: 10px;
+        background-color: black;
+        display: inline-block;
+        height: 30px;
+        vertical-align: middle;
+        cursor: default;
+        width: 3px;
+      }
+      
+      #section-button-div {
+        text-align: center;
+        background-color: rgba(255, 255, 255, 0.4);
+        border: 2px solid rgba(0, 0, 0, 0.4);
+        border-radius: 10px;
+        padding: 10px;
+        cursor: default;
+      }
+      
+      .date-span {
+        font-weight: bold;
+        font-style: italic;
+        font-size: 12px;
+        color: #636300; /* Dark Yellow */
+      }
+    </style>
+  </head>
+<body>
+<!--<button id = "secret-btn" onclick = "secretFunction()"></button>-->
+<!--<h1 id = "title-txt">e4494s</h1>-->
+<div style = "text-align: center">
+  <img src = "images/e4494s-title.png" style = "height: 80px; width: 320px">
+</div>
+<br>
+<div class = "desc">This is where I make games, generators, simulations, and other random things to waste time on. Sometimes I make kinda cool stuff.</div>
+<!--<div id = "current">
+  <b><u>My Current Project:</u></b>
+  <p class = "links">
+    <a target = "_blank" href = "art.html">Living Art Gallery</a> - an abstract, moving art gallery
+  </p>
+</div>-->
+<br>
+<div id = "section-button-div">
+  <button onclick = "showSection(1)" id = "section-btn-1">Art</button>
+  <button onclick = "showSection(2)" id = "section-btn-2">Games</button>
+  <button onclick = "showSection(3)" id = "section-btn-3">Physics Games</button>
+  <button onclick = "showSection(4)" id = "section-btn-4">Fractals</button>
+  <button onclick = "showSection(5)" id = "section-btn-5">Cellular Automata</button>
+  <button onclick = "showSection(6)" id = "section-btn-6">Random Things</button>
+  <button onclick = "showSection(7)" id = "section-btn-7">Generators</button>
+  <div class = "btn-divider-left"></div>
+  <div class = "btn-divider-right"></div>
+  <button onclick = "showSection(0)" id = "section-btn-0">Unfinished Projects</button>
+  <button onclick = "showSection(8)" id = "section-btn-8">Other Websites</button>
+</div>
+<br>
+<div class = "section" id = "section0">
+  <h2>Unfinished Projects</h2>
+  <p class = "links">
+    <i>This is where I put everything I'm working on, from game ideas to random projects. Most of them are unfinished or not working, or just random mini projects.</i>
+    <br><br>
+    <a target = "_blank" href = "testbed.html">Test Bed 1</a> - <b><i>June 30, 2021</i></b> to <b><i>October 17, 2021</i></b>
+    <br><br>
+    <a target = "_blank" href = "testbed2.html">Test Bed 2</a> - <b><i>October 17, 2021</i></b> to <b><i>present</i></b>
+  </p>
+  <br><br>
+  <p class = "links">
+    <a target = "_blank" href = "misc-math.html">Random Math</a> - This is just a page where I have random math-related things and numbers that were calculated and compiled.
+  </p>
+</div>
+<!---->
+<div class = "section" id = "section1">
+  <h2>Art</h2>
+  <p class = "links">
+    <a target = "_blank" href = "what-is-generative-art.html">What is Generative Art?</a> - an interactive article that gives an overview of what exactly generative art is, and explains key concepts behind it <span class = "date-span">(2022)</span>
+    <br><br><br><br>
+    <a target = "_blank" href = "generative-art-gallery.html">Generative Art Gallery</a> - a collection of diverse interactive generative artworks I've created. The page will look different every time you view it, or when you redraw each piece <span class = "date-span">(2022)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "generative-art-gallery.html" style = "background-image: url('images/gallery/generative-art-gallery1.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "generative-art-gallery.html" style = "background-image: url('images/gallery/generative-art-gallery2.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "generative-art-gallery.html" style = "background-image: url('images/gallery/generative-art-gallery3.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "generative-art-gallery.html" style = "background-image: url('images/gallery/generative-art-gallery4.png')"></a>
+    <br><br>
+    <a target = "_blank" href = "generative-sketch.html">Generative Art Sketchpad</a> - draw abstract designs using different brushes that each create unique, interesting patterns and shapes <span class = "date-span">(2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "generative-sketch.html" style = "background-image: url('images/gallery/generative-sketch.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "generative-sketch.html" style = "background-image: url('images/gallery/generative-sketch4.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "generative-sketch.html" style = "background-image: url('images/gallery/generative-sketch2.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "generative-sketch.html" style = "background-image: url('images/gallery/generative-sketch3.png')"></a>
+    <br><br>
+    <a target = "_blank" href = "branching.html">Branching</a> - create lots of intricate patterns with colorful, branching trails <span class = "date-span">(2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "branching.html" style = "background-image: url('images/gallery/branching.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "branching.html" style = "background-image: url('images/gallery/branching4.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "branching.html" style = "background-image: url('images/gallery/branching2.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "branching.html" style = "background-image: url('images/gallery/branching3.png')"></a>
+    <br><br>
+    <a target = "_blank" href = "dots.html">Dots</a> - create spirograph-like patterns by changing how colored dots move around in ellipse paths <span class = "date-span">(2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "dots.html" style = "background-image: url('images/gallery/dots.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "dots.html" style = "background-image: url('images/gallery/dots4.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "dots.html" style = "background-image: url('images/gallery/dots2.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "dots.html" style = "background-image: url('images/gallery/dots3.png')"></a>
+    <br><br>
+    <a target = "_blank" href = "servo.html">Servo</a> - control how synchronized jointed arms rotate around each other, creating mesmerizing motions and designs <span class = "date-span">(2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "servo.html" style = "background-image: url('images/gallery/servo.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "servo.html" style = "background-image: url('images/gallery/servo4.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "servo.html" style = "background-image: url('images/gallery/servo2.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "servo.html" style = "background-image: url('images/gallery/servo3.png')"></a>
+    <br><br>
+    <a target = "_blank" href = "bands.html">Bands</a> - generative designs made up of colorful interlocking bands that resemble make interesting patterns <span class = "date-span">(2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "bands.html" style = "background-image: url('images/gallery/bands.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "bands.html" style = "background-image: url('images/gallery/bands2.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "bands.html" style = "background-image: url('images/gallery/bands3.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "bands.html" style = "background-image: url('images/gallery/bands4.png')"></a>
+    <br><br>
+    <a target = "_blank" href = "brownian-tree.html">Brownian Tree</a> - generate and customize colorful tree-like growths made out of dots generated by Brownian motion <span class = "date-span">(2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "brownian-tree.html" style = "background-image: url('images/gallery/brownian-tree.png'); background-color: black"></a>
+    <a class = "gallery-link" target = "_blank" href = "brownian-tree.html" style = "background-image: url('images/gallery/brownian-tree2.png'); background-color: black"></a>
+    <a class = "gallery-link" target = "_blank" href = "brownian-tree.html" style = "background-image: url('images/gallery/brownian-tree3.png'); background-color: black"></a>
+    <a class = "gallery-link" target = "_blank" href = "brownian-tree.html" style = "background-image: url('images/gallery/brownian-tree4.png'); background-color: black"></a>
+    <br><br>
+    <a target = "_blank" href = "snowflake.html">Brownian Snowflake</a> - generate icy, colorful snowflakes using symmetrical Brownian motion <span class = "date-span">(2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "snowflake.html" style = "background-image: url('images/gallery/snowflake.png'); background-color: black"></a>
+    <a class = "gallery-link" target = "_blank" href = "snowflake.html" style = "background-image: url('images/gallery/snowflake2.png'); background-color: black"></a>
+    <a class = "gallery-link" target = "_blank" href = "snowflake.html" style = "background-image: url('images/gallery/snowflake4.png'); background-color: black"></a>
+    <a class = "gallery-link" target = "_blank" href = "snowflake.html" style = "background-image: url('images/gallery/snowflake3.png'); background-color: black"></a>
+    <br><br>
+    <a target = "_blank" href = "metaballs.html">Metaballs</a> - watch as colorful, blobby metaballs float and squish around the screen in a lava lamp-like way <span class = "date-span">(2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "metaballs.html" style = "background-image: url('images/gallery/metaballs.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "metaballs.html" style = "background-image: url('images/gallery/metaballs2.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "metaballs.html" style = "background-image: url('images/gallery/metaballs3.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "metaballs.html" style = "background-image: url('images/gallery/metaballs4.png')"></a>
+    <br><br>
+    <a target = "_blank" href = "walker.html">Random Walker Shading</a> - a plane is shaded and colored based on the movements of a random walker through thousands of steps, creating colorful and intricate designs resembling galaxies or clouds <span class = "date-span">(2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "walker.html" style = "background-image: url('images/gallery/walker.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "walker.html" style = "background-image: url('images/gallery/walker2.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "walker.html" style = "background-image: url('images/gallery/walker4.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "walker.html" style = "background-image: url('images/gallery/walker3.png')"></a>
+    <br><br>
+    <a target = "_blank" href = "art.html">Living Art Gallery</a> - an abstract, moving art gallery <span class = "date-span">(&lt;2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "art.html" style = "background-image: url('images/gallery/art.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "art.html" style = "background-image: url('images/gallery/art2.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "art.html" style = "background-image: url('images/gallery/art3.png')"></a>
+    <br><br>
+    <a target = "_blank" href = "image-bleeding.html">Image Bleeding</a> - bleed colors from images or shapes together to create random, colorful results <span class = "date-span">(&lt;2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "image-bleeding.html" style = "background-image: url('images/gallery/image-bleeding.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "image-bleeding.html" style = "background-image: url('images/gallery/image-bleeding2.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "image-bleeding.html" style = "background-image: url('images/gallery/image-bleeding3.png')"></a>
+    <!--<br><br>
+    <a target = "_blank" href = "sketch.html">Sketch</a> - a simple sketchpad <span class = "wip">(work in progress)</span>-->
+  </p>
+</div>
+<!---->
+<div class = "section" id = "section2">
+  <h2>Games</h2>
+  <p class = "links">
+    <a target = "_blank" href = "jetpack.html">Jetpack Blob</a> - a side scroller jetpack game about collecting coins and avoiding spikes <span class = "date-span">(2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "jetpack.html" style = "background-image: url('images/gallery/jetpack.png')"></a>
+    <br><br>
+    <a target = "_blank" href = "pinball.html">Pinball</a> - a random-gen physics game where you navigate a ball to a portal, avoiding large colorful blocks in the way <span class = "date-span">(2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "pinball.html" style = "background-image: url('images/gallery/pinball.png')"></a>
+  </p>
+</div>
+<!---->
+<div class = "section" id = "section3">
+  <h2>Physics Games</h2>
+  <p class = "links">
+    <a target = "_blank" href = "neon-pendulum.html">Neon Double Pendulum</a> - an interactive physics simulation of a colorful, chaotic double pendulum <span class = "date-span">(2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "neon-pendulum.html" style = "background-image: url('images/gallery/neon-pendulum.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "neon-pendulum.html" style = "background-image: url('images/gallery/neon-pendulum2.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "neon-pendulum.html" style = "background-image: url('images/gallery/neon-pendulum3.png')"></a>
+    <br><br>
+    <a target = "_blank" href = "bounce.html">Bounce</a> - a physics simulation about bouncing spheres with lots of customization <span class = "date-span">(2020)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "bounce.html" style = "background-image: url('images/gallery/bounce.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "bounce.html" style = "background-image: url('images/gallery/bounce2.png')"></a>
+    <br><br>
+    <a target = "_blank" href = "circles.html">Circles</a> - a physics simulation about colliding spheres with different customization <span class = "date-span">(&lt;2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "circles.html" style = "background-image: url('images/gallery/circles.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "circles.html" style = "background-image: url('images/gallery/circles2.png')"></a>
+    <br><br>
+    <a target = "_blank" href = "pendulum.html">Double Pendulum</a> - (old version of Neon Double Pendulum) the chaos of a double pendulum creates intricate and seemingly random line designs <span class = "date-span">(&lt;2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "pendulum.html" style = "background-image: url('images/gallery/pendulum.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "pendulum.html" style = "background-image: url('images/gallery/pendulum2.png')"></a>
+  </p>
+</div>
+<!---->
+<div class = "section" id = "section4">
+  <h2>Fractals</h2>
+  <p class = "links">
+    <a target = "_blank" href = "fractalization.html">Fractalization</a> - a simple, colorful custom fractal generator that can create lots of different designs <span class = "date-span">(&lt;2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "fractalization.html" style = "background-image: url('images/gallery/fractalization.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "fractalization.html" style = "background-image: url('images/gallery/fractalization2.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "fractalization.html" style = "background-image: url('images/gallery/fractalization3.png')"></a>
+    <br><br>
+    <a target = "_blank" href = "fractal-tree.html">Fractal Tree</a> - a customizable, colorful fractal tree generator <span class = "date-span">(&lt;2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "fractal-tree.html" style = "background-image: url('images/gallery/fractal-tree.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "fractal-tree.html" style = "background-image: url('images/gallery/fractal-tree2.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "fractal-tree.html" style = "background-image: url('images/gallery/fractal-tree3.png')"></a>
+    <br><br>
+    <a target = "_blank" href = "mandelbrot.html">Mandelbrot Set</a> - a colorful Mandelbrot set visualizer <span class = "date-span">(&lt;2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "mandelbrot.html" style = "background-image: url('images/gallery/mandelbrot.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "mandelbrot.html" style = "background-image: url('images/gallery/mandelbrot2.png')"></a>
+    <a class = "gallery-link" target = "_blank" href = "mandelbrot.html" style = "background-image: url('images/gallery/mandelbrot3.png')"></a>
+  </p>
+</div>
+<!---->
+<div class = "section" id = "section5">
+  <h2>Cellular Automata</h2>
+  <p class = "links">
+    <a target = "_blank" href = "elementary.html">Elementary Cellular Automata</a> - a simple, two-state 1D cellular automata simulation with 256 selectable rules <span class = "date-span">(2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "elementary.html" style = "background-image: url('images/gallery/elementary.png')"></a>
+    <br><br>
+    <a target = "_blank" href = "ternary-elementary.html">Ternary Elementary Cellular Automata</a> - a colorful, complex, three-state 1D cellular automata simulation with over 7 trillion selectable rules <span class = "date-span">(2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "ternary-elementary.html" style = "background-image: url('images/gallery/ternary-elementary.png')"></a>
+    <br><br>
+    <a target = "_blank" href = "totalistic.html">Totalistic Cellular Automata</a> - a four-state 1D cellular automata with a over 1 million simple rules that result in interesting results <span class = "date-span">(2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "totalistic.html" style = "background-image: url('images/gallery/totalistic.png')"></a>
+    <br><br>
+    <a target = "_blank" href = "block.html">Block Cellular Automata</a> - a basic two-state, 1D block-neighborhood cellular automata with 256 selectable rules <span class = "date-span">(2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "block.html" style = "background-image: url('images/gallery/block.png')"></a>
+    <br><br>
+    <a target = "_blank" href = "continuous.html">Continuous Cellular Automata</a> - a cellular automata where each cell can range from 0% to 100% brightness, creating complex gradient patterns <span class = "date-span">(2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "continuous.html" style = "background-image: url('images/gallery/continuous.png')"></a>
+    <br><br>
+    <a target = "_blank" href = "life.html">Conway's Game of Life</a> - a customizable 2D cellular automata simulation based in simple rules that creates complex results <span class = "date-span">(2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "life.html" style = "background-image: url('images/gallery/life.png')"></a>
+    <br><br>
+    <a target = "_blank" href = "ant.html">Langton's Ant</a> - a customizable 2D cellular automata simulation involving simple ants <span class = "wip">(work in progress)</span> <span class = "date-span">(2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "ant.html" style = "background-image: url('images/gallery/ant.png')"></a>
+  </p>
+</div>
+<!---->
+<div class = "section" id = "section6">
+  <h2>Random Things</h2>
+  <p class = "links">
+    <a target = "_blank" href = "chat.html">Lonely Chat Room</a> - chat alone in a chat room with gary271. Because you're lonely. <span class = "date-span">(2021)</span>
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "chat.html" style = "background-image: url('images/gallery/chat.png')"></a>
+  </p>
+</div>
+<!---->
+<div class = "section" id = "section7">
+  <h2>Generators</h2>
+  <p class = "links">
+    <a target = "_blank" href = "gradient.html">Gradient</a> - a customizable color gradient generator <span class = "date-span">(&lt;2021)</span>
+    <br><br>
+    <a target = "_blank" href = "cipher.html">Cipher</a> - a tool to encode and decode using various ciphers <span class = "wip">(work in progress)</span> <span class = "date-span">(&lt;2021)</span>
+  </p>
+</div>
+<!---->
+<div class = "section" id = "section8">
+  <h2>Other Sites</h2>
+  <p class = "links">
+    <i>If you like this website, here's some other sites I'd highly recommend checking out. These are my personal favorite websites that have a similar style to mine, and I've sometimes gotten inspiration from them in the past.</i>
+    <br><br>
+    <a target = "_blank" href = "https://bicornum.neocities.org">Bicornum</a> - lots of unique and interesting stand-alone projects, ranging from 3D fractals to algorithm visualizations to pattern generators
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "https://bicornum.neocities.org/Ranking/Ranking.html" style = "background-image: url('images/gallery/bicornum.png'); width: 130px; height: 130px"></a>
+    <a class = "gallery-link" target = "_blank" href = "https://bicornum.neocities.org/SierpinskiPyramid/SierpinskiPyramid.html" style = "background-image: url('images/gallery/bicornum2.png'); width: 130px; height: 130px"></a>
+    <a class = "gallery-link" target = "_blank" href = "https://bicornum.neocities.org/emerge/emerge.html" style = "background-image: url('images/gallery/bicornum3.png'); width: 130px; height: 130px"></a>
+    <br><br>
+    <a target = "_blank" href = "https://geozone.neocities.org">Geozone</a> - a collection of some extremely satisfying and aesthetic animations and art generators, many mathematically based
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "https://geozone.neocities.org/trianglesplit.html" style = "background-image: url('images/gallery/geozone.png'); width: 130px; height: 130px"></a>
+    <a class = "gallery-link" target = "_blank" href = "https://geozone.neocities.org/incirclezone.html" style = "background-image: url('images/gallery/geozone3.png'); width: 130px; height: 130px"></a>
+    <a class = "gallery-link" target = "_blank" href = "https://geozone.neocities.org/sierpinskiwhirlpool.html" style = "background-image: url('images/gallery/geozone2.png'); width: 130px; height: 130px"></a>
+    <br><br>
+    <a target = "_blank" href = "https://williamhoza.com/misc">William Hoza</a> - William Hoza is a postdoctoral researcher at UC Berkeley and has a collection of fun miscellaneous projects that encourage procrastination
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "https://williamhoza.com/sproing" style = "background-image: url('images/gallery/williamhoza2.png'); width: 130px; height: 130px"></a>
+    <a class = "gallery-link" target = "_blank" href = "https://williamhoza.com/volleyball" style = "background-image: url('images/gallery/williamhoza3.png'); width: 130px; height: 130px"></a>
+    <a class = "gallery-link" target = "_blank" href = "https://williamhoza.com/text/?t=Hello" style = "background-image: url('images/gallery/williamhoza.png'); width: 130px; height: 130px"></a>
+    <br><br>
+    <a target = "_blank" href = "https://www.dwitter.net">Dwitter</a> - A website where coders are challenged to create amazing projects, animations, or works of art using JavaScript -- except the source code has to fit in a Tweet, so every project is limited to 140 characters of code
+    <br>
+    <a class = "gallery-link" target = "_blank" href = "https://www.dwitter.net/d/10534" style = "background-image: url('images/gallery/dwitter.png'); width: 130px; height: 130px"></a>
+    <a class = "gallery-link" target = "_blank" href = "https://www.dwitter.net/d/547" style = "background-image: url('images/gallery/dwitter2.png'); width: 130px; height: 130px"></a>
+    <a class = "gallery-link" target = "_blank" href = "https://www.dwitter.net/d/18461" style = "background-image: url('images/gallery/dwitter3.png'); width: 130px; height: 130px"></a>
+    <a class = "gallery-link" target = "_blank" href = "https://www.dwitter.net/d/16091" style = "background-image: url('images/gallery/dwitter4.png'); width: 130px; height: 130px"></a>
+    <a class = "gallery-link" target = "_blank" href = "https://www.dwitter.net/d/6724" style = "background-image: url('images/gallery/dwitter5.png'); width: 130px; height: 130px"></a>
+  </p>
+</div>
+<br>
+<div class = "desc">If you find yourself wanting to contact me for a bug report, a suggestion, or any other reason, you can reach me at <a target = "_blank" href = "mailto: e4494s@gmail.com" id = "email-link">e4494s@gmail.com</a>.</div>
+<script>
+  function showSection(n) {
+    for (let i = 0; i <= 8; i++) {
+      document.getElementById("section" + i).hidden = true;
+      document.getElementById("section-btn-" + i).className = "";
+    }
+    document.getElementById("section" + n).hidden = false;
+    document.getElementById("section-btn-" + n).className = "selected";
+  }
+  showSection(1);
+</script>
+<script>
+  function randBetween(min, max) {
+    return (Math.random() * (max - min)) + min;
+  }
+  let colors = "";
+  for (let i = 0; i < 200; i++) {
+    colors += `,hsl(60deg, 100%, ${randBetween(50, 100)}%)`;
+    //colors += `,rgb(255,255,${Math.random() * 255})`;
+  }
+  document.body.style.backgroundImage = `radial-gradient(ellipse farthest-corner at -5% -5%${colors})`;
+  
+  let titleTxt = document.getElementById("title-txt");
+  let secretBtn = document.getElementById("secret-btn");
+  
+  /*function secretFunction() {
+    secretBtn.style.backgroundColor = "red";
+    secretBtn.style.borderRadius = "50%";
+    secretBtn.style.border = "2px solid black";
+    let div = document.createElement("div");
+    div.style.padding = "25px";
+    div.innerHTML = "Congrats! You clicked the secret button! Here's a link to the page where I put all my unfinished projects, never before seen by the world: <a href = 'testbed.html' target = '_blank'>Test Bed</a>";
+    document.body.insertBefore(div, titleTxt);
+  }*/
+</script>
+</body>
+</html>
