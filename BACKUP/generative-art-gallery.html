@@ -3,7 +3,7 @@
   <head>
     <meta charset = "utf-8">
     <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
-    <link rel = "icon" href = "https://e4494s.neocities.org/images/favicon.png" type = "image/png">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
     <title>Generative Art Gallery ~ e4494s</title>
     <style>
       #everything {
@@ -79,10 +79,19 @@
         width: 300px;
         height: 300px;
       }
+      
+      #top-title {
+        height: 50px;
+        width: 168px;
+        background: url("https://e4494s.neocities.org/images/e4494s-top-title.png");
+        display: inline-block;
+        background-size: 100% 100%;
+      }
     </style>
   </head>
 <body onload = "drawAll()">
 <div id = "everything">
+  <a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
   <div class = "title"><span class = "dash">&mdash;</span>Generative Art Gallery<span class = "dash">&mdash;</span></div>
   <div class = "subtitle">Click "Redraw" to regenerate a new random piece for each artwork.<br>The page may load really slowly at first due to how many things are running at once, but that will only be when you reload (sorry about that).<br>Some artworks are best viewed when zoomed in for a higher resolution.</div>
   <div class = "canvas-div">
@@ -140,10 +149,10 @@
     <canvas id = "canvas7"></canvas>
   </div>
   <div class = "canvas-div">
-    <div class = "canvas-title">Euclid's Hurricane</div>
-    <button class = "canvas-btn" onclick = "draw19()">Redraw</button>
+    <div class = "canvas-title">Rectangular Moss</div>
+    <button class = "canvas-btn" onclick = "draw25()">Redraw</button>
     <br>
-    <canvas id = "canvas19"></canvas>
+    <canvas id = "canvas25"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Banded Orbs</div>
@@ -180,6 +189,12 @@
     <button class = "canvas-btn" onclick = "draw8()">Redraw</button>
     <br>
     <canvas id = "canvas8"></canvas>
+  </div>
+  <div class = "canvas-div">
+    <div class = "canvas-title">Euclid's Hurricane</div>
+    <button class = "canvas-btn" onclick = "draw19()">Redraw</button>
+    <br>
+    <canvas id = "canvas19"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Recursive Descent</div>
@@ -233,7 +248,7 @@
 
 <!-- JavaScript -->
 
-<script src = "https://e4494s.neocities.org/scripts/main.js"></script>
+<script src = "scripts/main.js"></script>
 <script>
   function drawAll() {
     draw1();
@@ -260,6 +275,124 @@
     draw22();
     draw23();
     draw24();
+    draw25();
+  }
+  
+  //
+  // Rectangular Moss
+  //
+  
+  const ctx25 = canvas25.getContext("2d");
+  canvas25.width = canvas25.height = 1000;
+  
+  function drawLine25(p1, p2) {
+    ctx25.beginPath();
+    ctx25.moveTo(p1.x, p1.y);
+    ctx25.lineTo(p2.x, p2.y);
+    ctx25.stroke();
+  }
+  
+  let Tree25 = {
+    startX: 500,
+    startY: 500,
+    startSize: 100,
+    startAngle: 0,
+    maxLayers: 10,
+    startLeftBranchAngle: 45,
+    startTopBranchAngle: 90,
+    randomSideBranchAngles: true,
+    randomTopBranchAngles: false,
+    startHue: 0,
+    hueOffsetLeft: 15,
+    hueOffsetRight: 15,
+    rainbowBranches: false,
+    middleType: 1
+  };
+  Tree25.draw = function(startAngle) {
+    let nextTopBranchAngle = this.startTopBranchAngle;
+    let nextLeftBranchAngle = this.startLeftBranchAngle;
+    if (this.randomTopBranchAngles) {
+      nextLeftBranchAngle = this.randomSideBranchAngles ? randBetween(30, 60) : this.startLeftBranchAngle;
+      nextTopBranchAngle = randBetween(60, 175 - nextLeftBranchAngle);
+    }
+    if (this.randomSideBranchAngles) {
+      nextTopBranchAngle = this.randomTopBranchAngles ? randBetween(60, 120) : this.startTopBranchAngle;
+      nextLeftBranchAngle = randBetween(30, 150 - nextTopBranchAngle);
+    }
+    
+    if (startAngle === 0) this.drawSquare(this.startX - (this.startSize / 2), this.startY + (this.startSize / 2) - this.startSize, this.startSize, 0, 1, true, nextLeftBranchAngle, nextTopBranchAngle, this.startHue);
+    else if (startAngle === 1) this.drawSquare(this.startX + (this.startSize / 2) - this.startSize, this.startY + (this.startSize / 2), this.startSize, 90, 1, true, nextLeftBranchAngle, nextTopBranchAngle, this.startHue);
+    else if (startAngle === 2) this.drawSquare(this.startX + (this.startSize / 2), this.startY - (this.startSize / 2) + this.startSize, this.startSize, 180, 1, true, nextLeftBranchAngle, nextTopBranchAngle, this.startHue);
+    else if (startAngle === 3) this.drawSquare(this.startX - (this.startSize / 2) + this.startSize, this.startY - (this.startSize / 2), this.startSize, 270, 1, true, nextLeftBranchAngle, nextTopBranchAngle, this.startHue);
+    //this.drawSquare(this.startX, this.startY, this.startSize, startAngle, 1, true, nextLeftBranchAngle, nextTopBranchAngle, this.startHue);
+    //this.drawSquare(this.startX + ((this.startSize / 2) * Math.cos(-toRad(startAngle + 180))), this.startY + ((this.startSize / 2) * Math.sin(toRad(startAngle + 90))), this.startSize, startAngle, 1, true, nextLeftBranchAngle, nextTopBranchAngle, this.startHue);
+  };
+  Tree25.drawSquare = function(x, y, size, angle, currLayer, isLeft, leftBranchAngle, topBranchAngle, hue) {
+    if (currLayer > this.maxLayers) return;
+    let cx = x;
+    let cy = y;
+    let corners = [];
+    let sign = isLeft ? 1 : -1;
+    ctx25.fillStyle = `hsl(${hue}deg, 80%, ${((currLayer / this.maxLayers) * 70) + 5}%)`;//this.rainbowBranches ? `hsl(${hue}deg, 100%, 60%)` : "black";
+    ctx25.beginPath();
+    ctx25.moveTo(cx, cy);
+    for (let i = 0; i < 4; i++) {
+      corners.push({x: cx, y: cy});
+      cx += size * Math.cos(toRad(angle + (i * sign * 90)));
+      cy -= size * Math.sin(toRad(angle + (i * sign * 90)));
+      ctx25.lineTo(cx, cy);
+    }
+    ctx25.fill();
+    
+    ctx25.strokeStyle = "black";
+      ctx25.lineWidth = Math.max(size * 0.05, 1);
+    if (this.middleType === 1) {
+      let m1 = {x: (corners[0].x + corners[1].x) / 2, y: (corners[0].y + corners[1].y) / 2};
+      let m2 = {x: (corners[1].x + corners[2].x) / 2, y: (corners[1].y + corners[2].y) / 2};
+      let m3 = {x: (corners[2].x + corners[3].x) / 2, y: (corners[2].y + corners[3].y) / 2};
+      let m4 = {x: (corners[3].x + corners[0].x) / 2, y: (corners[3].y + corners[0].y) / 2};
+      drawLine25(m1, m3);
+      drawLine25(m2, m4);
+    }
+    else {
+      drawLine25(corners[0], corners[2]);
+      drawLine25(corners[1], corners[3]);
+    }
+    
+    let nextTopBranchAngle = this.startTopBranchAngle;
+    let nextLeftBranchAngle = this.startLeftBranchAngle;
+    if (this.randomTopBranchAngles) {
+      nextLeftBranchAngle = this.randomSideBranchAngles ? randBetween(30, 60) : this.startLeftBranchAngle;
+      nextTopBranchAngle = randBetween(60, 175 - nextLeftBranchAngle);
+    }
+    if (this.randomSideBranchAngles) {
+      nextTopBranchAngle = this.randomTopBranchAngles ? randBetween(60, 120) : this.startTopBranchAngle;
+      nextLeftBranchAngle = randBetween(30, 150 - nextTopBranchAngle);
+    }
+    
+    let sinTop = 1 / Math.sin(toRad(topBranchAngle));
+    let scaleLeft = sinTop * Math.sin(toRad(leftBranchAngle));
+    let scaleRight = sinTop * Math.sin(toRad(180 - (topBranchAngle + leftBranchAngle)));
+    if (isLeft) {
+      this.drawSquare(corners[3].x, corners[3].y, size * scaleLeft, angle + (180 - (topBranchAngle + leftBranchAngle)), currLayer + 1, true, nextLeftBranchAngle, nextTopBranchAngle, hue - this.hueOffsetLeft);
+      this.drawSquare(corners[2].x, corners[2].y, size * scaleRight, angle - leftBranchAngle + 180, currLayer + 1, false, nextLeftBranchAngle, nextTopBranchAngle, hue + this.hueOffsetRight);
+    }
+    else {
+      this.drawSquare(corners[2].x, corners[2].y, size * scaleLeft, angle + (180 - (topBranchAngle + leftBranchAngle)) + 180, currLayer + 1, true, nextLeftBranchAngle, nextTopBranchAngle, hue - this.hueOffsetLeft);
+      this.drawSquare(corners[3].x, corners[3].y, size * scaleRight, angle - leftBranchAngle, currLayer + 1, false, nextLeftBranchAngle, nextTopBranchAngle, hue + this.hueOffsetRight);
+    }
+  };
+  function draw25() {
+    ctx25.fillStyle = "black";
+    ctx25.fillRect(0, 0, canvas25.width, canvas25.height);
+    
+    Tree25.startHue = Math.random() * 360;
+    Tree25.middleType = Math.random() < 0.5 ? 1 : 2;
+    
+    Tree25.draw(0);
+    Tree25.draw(1);
+    Tree25.draw(2);
+    Tree25.draw(3);
   }
   
   //
@@ -1394,7 +1527,7 @@
   }
   
   //
-  // Tumultous Terrain
+  // Tumultuous Terrain
   //
   
   const ctx13 = canvas13.getContext("2d");
@@ -1496,12 +1629,19 @@
   }
   
   function draw13() {
+    /*let r = Math.random();
+    let oldRand = Math.random;
+    Math.random = () => Math.abs(Math.sin(Date.now()));*/
+    // ^Uncommenting this actually improves how it looks, even though its making Math.random() wayyy less random
+    
     skew13 = 0.5;
     reset13();
     for (let i = 0; i < 2; i++) splitQuads13();
     
     skew13 = 0;
     for (let i = 0; i < 4; i++) splitQuads13();
+    
+    //Math.random = oldRand;
   }
   
   //
