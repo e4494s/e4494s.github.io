@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>Dots ~ e4494s</title>
+  </head>
+<body>
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; Dots &mdash;&mdash;</h1>
+<p id = "how-it-works">
+  <b><i>How It Works:</i></b> Each dot moves around tracing in an ellipse path over time.
+  <br><br>
+  <span class = "setting">Path Width</span> and <span class = "setting">Path Height</span> affect the size of each dot's ellipse.
+  <br><br>
+  <span class = "setting">Dot Offset Factor</span> controls how each dot is placed originally, so that instead of every dot beginning at the same point on each ellipse, they will be offset by some factor, to create more intricate and unique patterns.
+  <br><br>
+  Turning on <span class = "setting">Show Wireframe</span> will connect adjacent dots to create a complete, dynamic path around the canvas.
+  <br><br>
+  Clicking <span class = "setting">Randomize Geometry Settings</span> will randomize every setting, except the settings that are purely visual. Use this if you want a new set of settings with the same visual style.
+</p>
+<hr>
+<div><b>Settings Presets:</b></div>
+<div id = "presets-div"></div>
+<hr>
+<table>
+  <tr valign = "top">
+    <td rowspan = "2">
+      <button id = "start-stop-btn" onclick = "startStop()">Pause</button>
+      <button onclick = "clearCanvas()">Clear Canvas</button>
+      <br><br>
+      <canvas id = "canvas">If you're seeing this text, your browser does not support the canvas element.</canvas>
+      <br>
+      <button class = "download-canvas-btn" onclick = "downloadCanvas()">Download Canvas</button>
+    </td>
+    <td>
+      <button onclick = "resetSettings()">Reset Settings</button>
+      <br><br>
+      <button onclick = "randomizeAllSettings()">Randomize All Settings</button>
+      <br><br>
+      <button onclick = "randomizeGeometrySettings()">Randomize Geometry Settings</button>
+      <hr>
+      <div><b><u>Tracing Mode:</u></b></div>
+      <input type = "radio" name = "tracing-mode-radio" id = "tracing-mode-0-radio" oninput = "updateSettings()">
+      <label for = "tracing-mode-0-radio">No tracing</label>
+      <br>
+      <input type = "radio" name = "tracing-mode-radio" id = "tracing-mode-1-radio" oninput = "updateSettings()" CHECKED>
+      <label for = "tracing-mode-1-radio">Trailing</label>
+      <br>
+      <input type = "radio" name = "tracing-mode-radio" id = "tracing-mode-2-radio" oninput = "updateSettings()">
+      <label for = "tracing-mode-2-radio">Full tracing</label>
+      <hr>
+      <div><b><u>Dot Type:</u></b></div>
+      <input type = "radio" name = "ellipse-dot-type-radio" id = "ellipse-dot-type-0-radio" oninput = "updateSettings()" CHECKED>
+      <label for = "ellipse-dot-type-0-radio">Circles</label>
+      <br>
+      <input type = "radio" name = "ellipse-dot-type-radio" id = "ellipse-dot-type-1-radio" oninput = "updateSettings()">
+      <label for = "ellipse-dot-type-1-radio">Squares</label>
+      <br>
+      <input type = "radio" name = "ellipse-dot-type-radio" id = "ellipse-dot-type-2-radio" oninput = "updateSettings()">
+      <label for = "ellipse-dot-type-2-radio">Lines</label>
+      <hr>
+      <div><b><u>Speed:</u></b> <span id = "anim-time-speed-txt">2</span>x</div>
+      <input type = "range" id = "anim-time-speed-range" min = "0.5" max = "5" step = "0.5" value = "2" oninput = "updateSettings()">
+      <br><br>
+      <label for = "counter-checkbox"><b><u>Counterclockwise:</u></b></label>
+      <input type = "checkbox" id = "counter-checkbox" oninput = "updateSettings()">
+    </td>
+    <td>
+      <div><b><u>Dot Offset Factor:</u></b> <span id = "ellipse-offset-factor-txt">0.3</span>x</div>
+      <input type = "range" id = "ellipse-offset-factor-range" min = "-10" max = "10" step = "0.1" value = "0.3" oninput = "updateSettings()">
+      <hr>
+      <div><b><u>Number of Dots:</u></b> <span id = "ellipse-count-txt">24</span></div>
+      <input type = "range" id = "ellipse-count-range" min = "1" max = "100" step = "1" value = "24" oninput = "updateSettings()">
+      <hr>
+      <div><b><u>Dot Size:</u></b> <span id = "ellipse-dot-size-txt">20</span>px</div>
+      <input type = "range" id = "ellipse-dot-size-range" min = "1" max = "60" step = "1" value = "20" oninput = "updateSettings()">
+      <hr>
+      <div><b><u>Wireframe Thickness:</u></b> <span id = "wireframe-thickness-txt">1</span>px</div>
+      <input type = "range" id = "wireframe-thickness-range" min = "1" max = "20" step = "1" value = "1" oninput = "updateSettings()">
+      <hr>
+      <div><b><u>Path Width:</u></b> <span id = "ellipse-width-txt">40</span>px</div>
+      <input type = "range" id = "ellipse-width-range" min = "0" max = "400" step = "10" value = "40" oninput = "updateSettings()">
+      <br><br>
+      <div><b><u>Path Height:</u></b> <span id = "ellipse-height-txt">200</span>px</div>
+      <input type = "range" id = "ellipse-height-range" min = "0" max = "400" step = "10" value = "200" oninput = "updateSettings()">
+    </td>
+    <td>
+      <label for = "show-paths-checkbox"><b><u>Show Paths:</u></b></label>
+      <input type = "checkbox" id = "show-paths-checkbox" oninput = "updateSettings()">
+      <br><br>
+      <label for = "show-wireframe-checkbox"><b><u>Show Wireframe:</u></b></label>
+      <input type = "checkbox" id = "show-wireframe-checkbox" oninput = "updateSettings()">
+      <br><br>
+      <label for = "show-dots-checkbox"><b><u>Show Dots:</u></b></label>
+      <input type = "checkbox" id = "show-dots-checkbox" oninput = "updateSettings()" CHECKED>
+      <hr>
+      <label for = "rainbow-wireframe-checkbox"><b><u>Rainbow Wireframe:</u></b></label>
+      <input type = "checkbox" id = "rainbow-wireframe-checkbox" oninput = "updateSettings()" CHECKED>
+      <br><br>
+      <label for = "rainbow-dots-checkbox"><b><u>Rainbow Dots:</u></b></label>
+      <input type = "checkbox" id = "rainbow-dots-checkbox" oninput = "updateSettings()" CHECKED>
+    </td>
+  </tr>
+</table>
+<br>
+<div id = "fps-body">FPS: <span id = "fps-txt"></span></div>
+<br>
+<span id = "screensaver-txt"><a href = "dots-screensaver.html" target = "_blank">Check out the screensaver!</a> Every setting is randomized every 5 seconds, creating infinite unique designs.</span>
+<script src = "scripts/main.js"></script>
+<script>
+  let canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 800;
+  let canvasRunning = true;
+  
+  let startStopBtn = document.getElementById("start-stop-btn");
+  let tracingMode0Radio = document.getElementById("tracing-mode-0-radio");
+  let tracingMode1Radio = document.getElementById("tracing-mode-1-radio");
+  let tracingMode2Radio = document.getElementById("tracing-mode-2-radio");
+  let ellipseDotType0Radio = document.getElementById("ellipse-dot-type-0-radio");
+  let ellipseDotType1Radio = document.getElementById("ellipse-dot-type-1-radio");
+  let ellipseDotType2Radio = document.getElementById("ellipse-dot-type-2-radio");
+  let animTimeSpeedTxt = document.getElementById("anim-time-speed-txt");
+  let animTimeSpeedRange = document.getElementById("anim-time-speed-range");
+  let counterCheckbox = document.getElementById("counter-checkbox");
+  let ellipseOffsetFactorTxt = document.getElementById("ellipse-offset-factor-txt");
+  let ellipseOffsetFactorRange = document.getElementById("ellipse-offset-factor-range");
+  let ellipseCountTxt = document.getElementById("ellipse-count-txt");
+  let ellipseCountRange = document.getElementById("ellipse-count-range");
+  let ellipseDotSizeTxt = document.getElementById("ellipse-dot-size-txt");
+  let ellipseDotSizeRange = document.getElementById("ellipse-dot-size-range");
+  let ellipseWidthTxt = document.getElementById("ellipse-width-txt");
+  let ellipseWidthRange = document.getElementById("ellipse-width-range");
+  let ellipseHeightTxt = document.getElementById("ellipse-height-txt");
+  let ellipseHeightRange = document.getElementById("ellipse-height-range");
+  let showPathsCheckbox = document.getElementById("show-paths-checkbox");
+  let showWireframeCheckbox = document.getElementById("show-wireframe-checkbox");
+  let showDotsCheckbox = document.getElementById("show-dots-checkbox");
+  let wireframeThicknessTxt = document.getElementById("wireframe-thickness-txt");
+  let wireframeThicknessRange = document.getElementById("wireframe-thickness-range");
+  let rainbowDotsCheckbox = document.getElementById("rainbow-dots-checkbox");
+  let rainbowWireframeCheckbox = document.getElementById("rainbow-wireframe-checkbox");
+  let presetsDiv = document.getElementById("presets-div");
+  let fpsTxt = document.getElementById("fps-txt");
+  
+  let animTime = 0;
+  let animTimeSpeed = 2;
+  let ellipseOffsetFactor = 0.3;
+  let ellipseCount = 24;
+  let ellipseWidth = 40;
+  let ellipseHeight = 200;
+  let tracingMode = 0;
+  // 0: No tracing | 1: Trailing | 2: Full tracing
+  let ellipseDotSize = 20;
+  let showPaths = false;
+  let ellipseDotType = 0;
+  // 0: Circles | 1: Squares | 2: Lines
+  let showWireframe = false;
+  let showDots = true;
+  let wireframeThickness = 1;
+  let rainbowDots = true;
+  let rainbowWireframe = true;
+  
+  let lastFrameTime = 0;
+  let lastFpsDisplayTime = 1000;
+  
+  let presetsArray = [
+    {
+      name: "Pulsing Star",
+      animTimeSpeed: 2,
+      ellipseOffsetFactor: 6,
+      ellipseCount: 24,
+      ellipseWidth: 20,
+      ellipseHeight: 400,
+      tracingMode: 1,
+      ellipseDotSize: 20,
+      ellipseDotType: 0,
+      showWireframe: true,
+      showDots: false,
+      wireframeThickness: 20,
+      rainbowDots: true,
+      rainbowWireframe: false
+    },
+    {
+      name: "Colored Triangle",
+      animTimeSpeed: 2,
+      ellipseOffsetFactor: 0,
+      ellipseCount: 3,
+      ellipseWidth: 0,
+      ellipseHeight: 400,
+      tracingMode: 2,
+      ellipseDotSize: 20,
+      ellipseDotType: 0,
+      showWireframe: true,
+      showDots: false,
+      wireframeThickness: 20,
+      rainbowDots: true,
+      rainbowWireframe: true
+    },
+    {
+      name: "Rush Hour Traffic",
+      animTimeSpeed: 0.5,
+      ellipseOffsetFactor: -4,
+      ellipseCount: 100,
+      ellipseWidth: 200,
+      ellipseHeight: 400,
+      tracingMode: 0,
+      ellipseDotSize: 14,
+      ellipseDotType: 1,
+      showWireframe: true,
+      showDots: true,
+      wireframeThickness: 20,
+      rainbowDots: true,
+      rainbowWireframe: false
+    },
+    {
+      name: "Pinwheel",
+      animTimeSpeed: 2,
+      ellipseOffsetFactor: -2,
+      ellipseCount: 50,
+      ellipseWidth: 10,
+      ellipseHeight: 400,
+      tracingMode: 1,
+      ellipseDotSize: 15,
+      ellipseDotType: 0,
+      showWireframe: true,
+      showDots: true,
+      wireframeThickness: 5,
+      rainbowDots: true,
+      rainbowWireframe: false
+    },
+    {
+      name: "Tangled Beads",
+      animTimeSpeed: 1,
+      ellipseOffsetFactor: -2.2,
+      ellipseCount: 80,
+      ellipseWidth: 300,
+      ellipseHeight: 50,
+      tracingMode: 0,
+      ellipseDotSize: 50,
+      ellipseDotType: 0,
+      showWireframe: false,
+      showDots: true,
+      wireframeThickness: 1,
+      rainbowDots: true,
+      rainbowWireframe: true
+    },
+    {
+      name: "Rainbow Pointed Star",
+      animTimeSpeed: 1,
+      ellipseOffsetFactor: 10,
+      ellipseCount: 20,
+      ellipseWidth: 0,
+      ellipseHeight: 400,
+      tracingMode: 2,
+      ellipseDotSize: 20,
+      ellipseDotType: 0,
+      showWireframe: true,
+      showDots: false,
+      wireframeThickness: 1,
+      rainbowDots: true,
+      rainbowWireframe: true
+    },
+    {
+      name: "Dreamcatcher",
+      animTimeSpeed: 1.5,
+      ellipseOffsetFactor: 9.7,
+      ellipseCount: 20,
+      ellipseWidth: 220,
+      ellipseHeight: 340,
+      tracingMode: 1,
+      ellipseDotSize: 10,
+      ellipseDotType: 0,
+      showWireframe: true,
+      showDots: true,
+      wireframeThickness: 1,
+      rainbowDots: false,
+      rainbowWireframe: true
+    },
+    {
+      name: "Spinning Pipes",
+      animTimeSpeed: 1,
+      ellipseOffsetFactor: 10,
+      ellipseCount: 99,
+      ellipseWidth: 200,
+      ellipseHeight: 250,
+      tracingMode: 1,
+      ellipseDotSize: 20,
+      ellipseDotType: 2,
+      showWireframe: false,
+      showDots: true,
+      wireframeThickness: 1,
+      rainbowDots: false,
+      rainbowWireframe: true
+    },
+    {
+      name: "Spiked Ring",
+      animTimeSpeed: 2,
+      ellipseOffsetFactor: 0,
+      ellipseCount: 30,
+      ellipseWidth: 100,
+      ellipseHeight: 250,
+      tracingMode: 0,
+      ellipseDotSize: 60,
+      ellipseDotType: 2,
+      showWireframe: true,
+      showDots: true,
+      wireframeThickness: 10,
+      rainbowDots: true,
+      rainbowWireframe: true
+    },
+    {
+      name: "3D Chinese Finger Trap",
+      animTimeSpeed: 1,
+      ellipseOffsetFactor: 10,
+      ellipseCount: 22,
+      ellipseWidth: 100,
+      ellipseHeight: 300,
+      tracingMode: 1,
+      ellipseDotSize: 20,
+      ellipseDotType: 0,
+      showWireframe: true,
+      showDots: false,
+      wireframeThickness: 1,
+      rainbowDots: true,
+      rainbowWireframe: false
+    },
+    {
+      name: "Fireworks",
+      animTimeSpeed: 1,
+      ellipseOffsetFactor: 10,
+      ellipseCount: 94,
+      ellipseWidth: 0,
+      ellipseHeight: 400,
+      tracingMode: 1,
+      ellipseDotSize: 1,
+      ellipseDotType: 0,
+      showWireframe: false,
+      showDots: true,
+      wireframeThickness: 1,
+      rainbowDots: true,
+      rainbowWireframe: true
+    }
+    /*{
+      name: "",
+      animTimeSpeed: 2,
+      ellipseOffsetFactor: 0.3,
+      ellipseCount: 24,
+      ellipseWidth: 40,
+      ellipseHeight: 200,
+      tracingMode: 0,
+      ellipseDotSize: 20,
+      ellipseDotType: 0,
+      showWireframe: false,
+      showDots: true,
+      wireframeThickness: 1,
+      rainbowDots: true,
+      rainbowWireframe: true
+    }*/
+  ];
+  
+  function Ellipse(angle) {
+    this.angle = angle;
+    let normalX = Math.cos(toRad(animTime + (this.angle * ellipseOffsetFactor))) * ellipseWidth;
+    let normalY = Math.sin(toRad(animTime + (this.angle * ellipseOffsetFactor))) * ellipseHeight;
+    this.lastDotX = (canvas.width / 2) + (Math.cos(toRad(this.angle)) * normalX) - Math.sin(toRad(this.angle)) * normalY;
+    this.lastDotY = (canvas.height / 2) + (Math.sin(toRad(this.angle)) * normalX) + (Math.cos(toRad(this.angle)) * normalY);
+  }
+  Ellipse.prototype.render = function() {
+    ctx.strokeStyle = rainbowDots ? `hsl(${this.angle + (animTime / 2)}deg, 100%, 50%)` : "white";
+    ctx.lineWidth = ellipseDotSize;
+    ctx.beginPath();
+    ctx.moveTo(this.lastDotX, this.lastDotY);
+    let normalX = Math.cos(toRad(animTime + (this.angle * ellipseOffsetFactor))) * ellipseWidth;
+    let normalY = Math.sin(toRad(animTime + (this.angle * ellipseOffsetFactor))) * ellipseHeight;
+    this.lastDotX = (canvas.width / 2) + (Math.cos(toRad(this.angle)) * normalX) - Math.sin(toRad(this.angle)) * normalY;
+    this.lastDotY = (canvas.height / 2) + (Math.sin(toRad(this.angle)) * normalX) + (Math.cos(toRad(this.angle)) * normalY);
+    ctx.lineTo(this.lastDotX, this.lastDotY);
+    if (showDots) ctx.stroke();
+    
+    if (showPaths) {
+      ctx.strokeStyle = "dimgray";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.ellipse(canvas.width / 2, canvas.height / 2, ellipseWidth, ellipseHeight, toRad(this.angle), 0, 2 * Math.PI);
+      ctx.stroke();
+    }
+  };
+  let ellipseArray = [];
+  
+  function frame() {
+    if (Date.now() - lastFpsDisplayTime >= 500) {
+      fpsTxt.innerHTML = Math.floor(1000 / (Date.now() - lastFrameTime));
+      lastFpsDisplayTime = Date.now();
+    }
+    lastFrameTime = Date.now();
+    
+    if (tracingMode != 0) {
+      ctx.globalAlpha = tracingMode == 1 ? 0.1 : 0;
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.globalAlpha = 1;
+    }
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    animTime += animTimeSpeed;
+    while (animTime >= 720) animTime -= 720;
+    while (animTime <= 0) animTime += 720;
+    
+    if (showWireframe) {
+      ctx.lineWidth = wireframeThickness;
+      ctx.lineCap = "round";
+      for (let i = 0; i < ellipseArray.length; i++) {
+        ctx.strokeStyle = rainbowWireframe ? `hsl(${ellipseArray[i].angle + (animTime / 2)}deg, 100%, 50%)` : "white";
+        ctx.beginPath();
+        ctx.moveTo(ellipseArray[i].lastDotX, ellipseArray[i].lastDotY);
+        ctx.lineTo(ellipseArray[(i + 1) % ellipseArray.length].lastDotX, ellipseArray[(i + 1) % ellipseArray.length].lastDotY);
+        ctx.stroke();
+      }
+    }
+    
+    ctx.lineCap = ellipseDotType == 0 ? "round" : ellipseDotType == 1 ? "square" : "butt";
+    for (let i = 0; i < ellipseArray.length; i++) ellipseArray[i].render();
+    //ellipseArray.map(x => x.render());
+    
+    if (canvasRunning) requestAnimationFrame(frame);
+  }
+  
+  function startStop() {
+    if (canvasRunning) {
+      canvasRunning = false;
+      startStopBtn.innerHTML = "Play";
+    }
+    else {
+      canvasRunning = true;
+      frame();
+      startStopBtn.innerHTML = "Pause";
+    }
+  }
+  
+  function updateSettings() {
+    animTimeSpeed = Number(animTimeSpeedRange.value);
+    animTimeSpeedTxt.innerHTML = animTimeSpeed;
+    if (counterCheckbox.checked) animTimeSpeed *= -1;
+    ellipseOffsetFactor = Number(ellipseOffsetFactorRange.value);
+    ellipseOffsetFactorTxt.innerHTML = ellipseOffsetFactor;
+    ellipseCount = Number(ellipseCountRange.value);
+    ellipseCountTxt.innerHTML = ellipseCount;
+    ellipseDotSize = Number(ellipseDotSizeRange.value);
+    ellipseDotSizeTxt.innerHTML = ellipseDotSize;
+    ellipseWidth = Number(ellipseWidthRange.value);
+    ellipseWidthTxt.innerHTML = ellipseWidth;
+    ellipseHeight = Number(ellipseHeightRange.value);
+    ellipseHeightTxt.innerHTML = ellipseHeight;
+    if (tracingMode0Radio.checked) tracingMode = 0;
+    if (tracingMode1Radio.checked) tracingMode = 1;
+    if (tracingMode2Radio.checked) tracingMode = 2;
+    showPaths = showPathsCheckbox.checked;
+    if (ellipseDotType0Radio.checked) ellipseDotType = 0;
+    if (ellipseDotType1Radio.checked) ellipseDotType = 1;
+    if (ellipseDotType2Radio.checked) ellipseDotType = 2;
+    showWireframe = showWireframeCheckbox.checked;
+    showDots = showDotsCheckbox.checked;
+    wireframeThickness = Number(wireframeThicknessRange.value);
+    wireframeThicknessTxt.innerHTML = wireframeThickness;
+    rainbowDots = rainbowDotsCheckbox.checked;
+    rainbowWireframe = rainbowWireframeCheckbox.checked;
+    
+    ellipseArray = [];
+    for (let i = 0; i < ellipseCount; i++) {
+      ellipseArray.push(new Ellipse((i / ellipseCount) * 360));
+    }
+  }
+  updateSettings();
+  frame();
+  
+  function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  
+  function resetSettings() {
+    animTime = 0;
+    
+    animTimeSpeedRange.value = animTimeSpeedRange.defaultValue;
+    counterCheckbox.checked = false;
+    ellipseOffsetFactorRange.value = ellipseOffsetFactorRange.defaultValue;
+    ellipseCountRange.value = ellipseCountRange.defaultValue;
+    ellipseDotSizeRange.value = ellipseDotSizeRange.defaultValue;
+    ellipseWidthRange.value = ellipseWidthRange.defaultValue;
+    ellipseHeightRange.value = ellipseHeightRange.defaultValue;
+    tracingMode1Radio.checked = true;
+    ellipseDotType0Radio.checked = true;
+    wireframeThicknessRange.value = wireframeThicknessRange.defaultValue;
+    showDotsCheckbox.checked = true;
+    showWireframeCheckbox.checked = false;
+    rainbowDotsCheckbox.checked = true;
+    rainbowWireframeCheckbox.checked = true;
+    
+    clearCanvas();
+    updateSettings();
+  }
+  
+  function randomizeRange(element) {
+    return Number(randBetween(Number(element.min), Number(element.max))).toMultipleOf(Number(element.step));
+  }
+  const coin = () => Math.random() >= 0.5;
+  
+  function randomizeAllSettings() {
+    animTimeSpeedRange.value = randomizeRange(animTimeSpeedRange);
+    counterCheckbox.checked = coin();
+    ellipseOffsetFactorRange.value = randomizeRange(ellipseOffsetFactorRange);
+    ellipseCountRange.value = randomizeRange(ellipseCountRange);
+    ellipseDotSizeRange.value = randomizeRange(ellipseDotSizeRange);
+    ellipseWidthRange.value = randomizeRange(ellipseWidthRange);
+    ellipseHeightRange.value = randomizeRange(ellipseHeightRange);
+    wireframeThicknessRange.value = randomizeRange(wireframeThicknessRange);
+    let r = Math.floor(Math.random() * 3);
+    if (r == 0) tracingMode0Radio.checked = true;
+    if (r == 1) tracingMode1Radio.checked = true;
+    if (r == 2) tracingMode2Radio.checked = true;
+    r = Math.floor(Math.random() * 3);
+    if (r == 0) ellipseDotType0Radio.checked = true;
+    if (r == 1) ellipseDotType1Radio.checked = true;
+    if (r == 2) ellipseDotType2Radio.checked = true;
+    do {
+      showWireframeCheckbox.checked = coin();
+      showDotsCheckbox.checked = coin();
+    }
+    while (!showWireframeCheckbox.checked && !showDotsCheckbox.checked);
+    rainbowDotsCheckbox.checked = Math.floor(Math.random() * 3) != 0;
+    rainbowWireframeCheckbox.checked = Math.floor(Math.random() * 3) != 0;
+    
+    clearCanvas();
+    updateSettings();
+  }
+  
+  function randomizeGeometrySettings() {
+    animTimeSpeedRange.value = randomizeRange(animTimeSpeedRange);
+    counterCheckbox.checked = coin();
+    ellipseOffsetFactorRange.value = randomizeRange(ellipseOffsetFactorRange);
+    ellipseCountRange.value = randomizeRange(ellipseCountRange);
+    ellipseWidthRange.value = randomizeRange(ellipseWidthRange);
+    ellipseHeightRange.value = randomizeRange(ellipseHeightRange);
+    
+    updateSettings();
+  }
+  
+  function loadSettingsPreset(n) {
+    let preset = presetsArray[n];
+    animTimeSpeedRange.value = preset.animTimeSpeed;
+    ellipseOffsetFactorRange.value = preset.ellipseOffsetFactor;
+    ellipseCountRange.value = preset.ellipseCount;
+    ellipseWidthRange.value = preset.ellipseWidth;
+    ellipseHeightRange.value = preset.ellipseHeight;
+    if (preset.tracingMode == 0) tracingMode0Radio.checked = true;
+    if (preset.tracingMode == 1) tracingMode1Radio.checked = true;
+    if (preset.tracingMode == 2) tracingMode2Radio.checked = true;
+    ellipseDotSizeRange.value = preset.ellipseDotSize;
+    if (preset.ellipseDotType == 0) ellipseDotType0Radio.checked = true;
+    if (preset.ellipseDotType == 1) ellipseDotType1Radio.checked = true;
+    if (preset.ellipseDotType == 2) ellipseDotType2Radio.checked = true;
+    showWireframeCheckbox.checked = preset.showWireframe;
+    showDotsCheckbox.checked = preset.showDots;
+    wireframeThicknessRange.value = preset.wireframeThickness;
+    rainbowDotsCheckbox.checked = preset.rainbowDots;
+    rainbowWireframeCheckbox.checked = preset.rainbowWireframe;
+    
+    clearCanvas();
+    updateSettings();
+  }
+  
+  for (let i = 0; i < presetsArray.length; i++) {
+    let btn = document.createElement("button");
+    btn.innerHTML = presetsArray[i].name;
+    btn.className = "preset-btn";
+    btn.onclick = () => loadSettingsPreset(i);
+    presetsDiv.appendChild(btn);
+  }
+  
+  function downloadCanvas() {
+    let link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "dots.png";
+    link.click();
+  }
+</script>
+</body>
+</html>
