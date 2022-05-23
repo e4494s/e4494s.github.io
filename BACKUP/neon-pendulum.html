@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <title>Neon Double Pendulum ~ e4494s</title>
+    <style>
+      html {
+        background-color: black;
+      }
+      
+      #menus {
+        background-color: rgba(255, 255, 255, 0.25);
+        color: white;
+        padding: 10px;
+        border-radius: 5px;
+        width: 200px;
+        display: inline-block;
+      }
+      
+      body {
+        display: inline-block;
+      }
+      
+      h1 {
+        margin: 0;
+      }
+      
+      #canvas {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        border: none;
+        background-color: black;
+        z-index: -1;
+      }
+      
+      .little-txt {
+        font-size: 12px;
+        font-style: italic;
+      }
+      
+      hr {
+        height: 5px;
+        border: none;
+      }
+      
+      td {
+        padding: 8px;
+        text-align: center;
+      }
+    </style>
+  </head>
+<body>
+<div id = "menus">
+  <h1>Neon Double Pendulum</h1>
+  <div class = "little-txt">Use the mouse to drag the pendulum bobs around. Move the sliders to change the simulation settings.</div>
+  <hr>
+  <table>
+    <tr valign = "top">
+      <td>
+        <div><b><u>Gravity:</u></b> <span id = "pendulum-gravity-txt">10.0</span></div>
+        <input type = "range" min = "0" max = "150" step = "5" value = "100" id = "pendulum-gravity-range" oninput = "updateSettings()">
+        <br>
+        <button onclick = "Pendulum.switchGravity()" style = "margin-top: 3px">Switch Gravity</button>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div><b><u>Bob 1 Mass:</u></b> <span id = "pendulum-mass-1-txt">30</span></div>
+        <input type = "range" min = "5" max = "50" step = "5" value = "30" id = "pendulum-mass-1-range" oninput = "updateSettings()">
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div><b><u>Bob 2 Mass:</u></b> <span id = "pendulum-mass-2-txt">15</span></div>
+        <input type = "range" min = "5" max = "50" step = "5" value = "15" id = "pendulum-mass-2-range" oninput = "updateSettings()">
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div><b><u>Pendulum Hue:</u></b> <span id = "pendulum-hue-txt">120</span>&deg;</div>
+        <input type = "range" min = "0" max = "360" step = "30" value = "120" id = "pendulum-hue-range" oninput = "updateSettings()">
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <button onclick = "Pendulum.randomizeAngles()">Randomize Angles</button>
+      </td>
+    </tr>
+  </table>
+</div>
+<canvas id = "canvas"></canvas>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  let canvasRatio = 2;
+  canvas.width = window.innerWidth * canvasRatio;
+  canvas.height = window.innerHeight * canvasRatio;
+  let canvasRunning = true;
+  
+  let pendulumGravityTxt = document.getElementById("pendulum-gravity-txt");
+  let pendulumGravityRange = document.getElementById("pendulum-gravity-range");
+  let pendulumMass1Txt = document.getElementById("pendulum-mass-1-txt");
+  let pendulumMass1Range = document.getElementById("pendulum-mass-1-range");
+  let pendulumMass2Txt = document.getElementById("pendulum-mass-2-txt");
+  let pendulumMass2Range = document.getElementById("pendulum-mass-2-range");
+  let pendulumHueTxt = document.getElementById("pendulum-hue-txt");
+  let pendulumHueRange = document.getElementById("pendulum-hue-range");
+  
+  let Mouse = {
+    angleToAnchor: 0,
+    distToAnchor: 0,
+    angleToBob: 0,
+    distToBob: 0,
+    down: false,
+    draggingBob: 1
+  };
+  
+  let Pendulum = {
+    anchorX: canvas.width / 2,
+    anchorY: canvas.height * 0.4,
+    gravity: 10,
+    timeSpeed: 0.25,
+    stringLength1: randBetween(130, 170),
+    stringLength2: randBetween(230, 270),
+    mass1: randBetween(25, 35),
+    mass2: randBetween(10, 20),
+    angle1: toRad(randBetween(80, 100) * randSign()),
+    angle2: toRad(randBetween(90, 160) * randSign()),
+    velocity1: 0,
+    velocity2: 0,
+    acceleration1: 0,
+    acceleration2: 0,
+    tail: [],
+    tailLength: 500,
+    x1: 0,
+    y1: 0,
+    x2: 0,
+    y2: 0,
+    hue: 120,
+    dragging: false,
+    switchedGravity: false
+  };
+  Pendulum.tick = function() {
+    if (this.dragging) {
+      if (Mouse.draggingBob === 1) {
+        this.angle1 = Mouse.angleToAnchor;
+        this.stringLength1 = Mouse.distToAnchor;
+      }
+      else if (Mouse.draggingBob === 2) {
+        this.angle2 = Mouse.angleToBob;
+        this.stringLength2 = Mouse.distToBob;
+      }
+      this.velocity1 = this.velocity2 = 0;
+      this.tail = [];
+      this.addTailPoint();
+      return;
+    }
+    
+    let mu = 1 + (this.mass1 / this.mass2);
+    
+    this.acceleration1 = (this.gravity * (Math.sin(this.angle2) * Math.cos(this.angle1 - this.angle2) - mu * Math.sin(this.angle1)) - (this.stringLength2 * this.velocity2 * this.velocity2 + this.stringLength1 * this.velocity1 * this.velocity1 * Math.cos(this.angle1 - this.angle2)) * Math.sin(this.angle1 - this.angle2)) / (this.stringLength1 * (mu - Math.cos(this.angle1 - this.angle2) * Math.cos(this.angle1 - this.angle2)));
+    this.acceleration2 = (mu * this.gravity * (Math.sin(this.angle1) * Math.cos(this.angle1 - this.angle2) - Math.sin(this.angle2)) + (mu * this.stringLength1 * this.velocity1 * this.velocity1 + this.stringLength2 * this.velocity2 * this.velocity2 * Math.cos(this.angle1 - this.angle2)) * Math.sin(this.angle1 - this.angle2)) / (this.stringLength2 * (mu - Math.cos(this.angle1 - this.angle2) * Math.cos(this.angle1 - this.angle2)));
+    
+    this.velocity1 += this.acceleration1 * this.timeSpeed;
+    if (Math.abs(this.velocity1) >= 1.5) this.velocity1 = 1.5 * Math.sign(this.velocity1);
+    this.velocity2 += this.acceleration2 * this.timeSpeed;
+    if (Math.abs(this.velocity2) >= 5) this.velocity2 = 5 * Math.sign(this.velocity2);
+    this.angle1 += this.velocity1 * this.timeSpeed;
+    this.angle1 = (this.angle1 + (Math.PI * 2)) % (Math.PI * 2);
+    this.angle2 += this.velocity2 * this.timeSpeed;
+    this.angle2 = (this.angle2 + (Math.PI * 2)) % (Math.PI * 2);
+    
+    if (
+      Number.isNaN(this.acceleration1) ||
+      Number.isNaN(this.acceleration2) ||
+      Number.isNaN(this.velocity1) ||
+      Number.isNaN(this.velocity2) ||
+      Number.isNaN(this.angle1) ||
+      Number.isNaN(this.angle2)
+    ) {
+      this.acceleration1 =
+      this.acceleration2 =
+      this.velocity1 =
+      this.velocity2 =
+      this.angle1 =
+      this.angle2 = 0;
+      this.tail = [];
+      this.stringLength1 = 150;
+      this.stringLength2 = 250;
+    }
+    
+    this.addTailPoint();
+  };
+  Pendulum.getBobPos = function() {
+    let bob1x = this.anchorX + (this.stringLength1 * Math.cos(this.angle1 + (Math.PI / 2)));
+    let bob1y = this.anchorY + (this.stringLength1 * Math.sin(this.angle1 + (Math.PI / 2)));
+    let bob2x = bob1x + (this.stringLength2 * Math.cos(this.angle2 + (Math.PI / 2)));
+    let bob2y = bob1y + (this.stringLength2 * Math.sin(this.angle2 + (Math.PI / 2)));
+    this.x1 = bob1x;
+    this.y1 = bob1y;
+    this.x2 = bob2x;
+    this.y2 = bob2y;
+  };
+  Pendulum.addTailPoint = function() {
+    this.getBobPos();
+    this.tail.push({x: this.x2, y: this.y2});
+    while (this.tail.length > this.tailLength) this.tail.shift();
+  };
+  Pendulum.draw = function() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    if (!this.dragging) {
+      ctx.lineWidth = 3;
+      ctx.shadowBlur = 0;
+      for (let i = 0; i < this.tail.length; i++) {
+        ctx.strokeStyle = `hsl(${(i / this.tail.length) * 1800}deg, 100%, 50%)`;
+        ctx.beginPath();
+        ctx.moveTo(this.tail[Math.max(0, i - 1)].x, this.tail[Math.max(0, i - 1)].y);
+        ctx.lineTo(this.tail[i].x, this.tail[i].y);
+        ctx.stroke();
+      }
+    }
+    
+    ctx.lineWidth = 5;
+    ctx.lineCap = ctx.lineJoin = "round";
+    ctx.strokeStyle = ctx.shadowColor = `hsl(${this.hue}deg, 100%, 50%)`;
+    ctx.shadowBlur = 15;
+    
+    this.getBobPos();
+    
+    ctx.beginPath();
+    ctx.moveTo(this.anchorX, this.anchorY);
+    ctx.lineTo(this.x1, this.y1);
+    ctx.lineTo(this.x2, this.y2);
+    ctx.stroke();
+    
+    if (this.dragging && Mouse.draggingBob === 1) ctx.fillStyle = `hsl(${this.hue}deg, 100%, 50%)`;
+    else ctx.fillStyle = "black";
+    ctx.fillCircle(this.x1, this.y1, this.mass1);
+    ctx.strokeCircle(this.x1, this.y1, this.mass1);
+    
+    if (this.dragging && (Mouse.draggingBob === 2 || Mouse.draggingBob === 1.5)) ctx.fillStyle = `hsl(${this.hue}deg, 100%, 50%)`;
+    else ctx.fillStyle = "black";
+    ctx.fillCircle(this.x2, this.y2, this.mass2);
+    ctx.strokeCircle(this.x2, this.y2, this.mass2);
+  };
+  Pendulum.switchGravity = function() {
+    this.switchedGravity = !this.switchedGravity;
+    updateSettings();
+  };
+  Pendulum.randomizeAngles = function() {
+    this.angle1 = Math.random() * Math.PI * 2;
+    this.angle2 = Math.random() * Math.PI * 2;
+    this.velocity1 = this.velocity2 = 0;
+    this.tail = [];
+    this.addTailPoint();
+  };
+  
+  
+  function frame() {
+    Pendulum.tick();
+    Pendulum.draw();
+    
+    if (canvasRunning) requestAnimationFrame(frame);
+  }
+  frame();
+  
+  function startCanvas() {
+    if (canvasRunning) canvasRunning = false;
+    else {
+      canvasRunning = true;
+      frame();
+    }
+  }
+  
+  canvas.addEventListener("mousedown", e => {
+    if (!canvasRunning) return;
+    e.preventDefault();
+    Mouse.down = true;
+    if (!Pendulum.dragging) {
+      Pendulum.dragging = true;
+      Mouse.draggingBob = 1;
+    }
+    if (Mouse.draggingBob === 1.5) Mouse.draggingBob = 2;
+    canvasRect = canvas.getBoundingClientRect();
+    Pendulum.getBobPos();
+    let eX = (e.clientX - canvasRect.left) * canvasRatio;
+    let eY = (e.clientY - canvasRect.top) * canvasRatio;
+    let dax = Pendulum.anchorX - eX;
+    let day = Pendulum.anchorY - eY;
+    let dbx = Pendulum.x1 - eX;
+    let dby = Pendulum.y1 - eY;
+    let angleToAnchor = Math.atan2(day, dax);
+    let angleToBob = Math.atan2(dby, dbx);
+    let distToAnchor = Math.sqrt((dax * dax) + (day * day));
+    let distToBob = Math.sqrt((dbx * dbx) + (dby * dby));
+    Mouse.angleToAnchor = angleToAnchor + (Math.PI / 2);
+    Mouse.distToAnchor = distToAnchor;
+    Mouse.angleToBob = angleToBob + (Math.PI / 2);
+    Mouse.distToBob = distToBob;
+  });
+  window.addEventListener("mouseup", e => {
+    if (!canvasRunning || !Mouse.down) return;
+    Mouse.down = false;
+    if (Pendulum.dragging) {
+      if (Mouse.draggingBob === 1) Mouse.draggingBob = 1.5;
+      else Pendulum.dragging = false;
+    }
+  });
+  window.addEventListener("mousemove", e => {
+    if (!canvasRunning || !Mouse.down) return;
+    e.preventDefault();
+    Pendulum.dragging = true;
+    canvasRect = canvas.getBoundingClientRect();
+    Pendulum.getBobPos();
+    let eX = (e.clientX - canvasRect.left) * canvasRatio;
+    let eY = (e.clientY - canvasRect.top) * canvasRatio;
+    let dax = Pendulum.anchorX - eX;
+    let day = Pendulum.anchorY - eY;
+    let dbx = Pendulum.x1 - eX;
+    let dby = Pendulum.y1 - eY;
+    let angleToAnchor = Math.atan2(day, dax);
+    let angleToBob = Math.atan2(dby, dbx);
+    let distToAnchor = Math.sqrt((dax * dax) + (day * day));
+    let distToBob = Math.sqrt((dbx * dbx) + (dby * dby));
+    Mouse.angleToAnchor = angleToAnchor + (Math.PI / 2);
+    Mouse.distToAnchor = distToAnchor;
+    Mouse.angleToBob = angleToBob + (Math.PI / 2);
+    Mouse.distToBob = distToBob;
+  });
+  
+  function updateSettings() {
+    Pendulum.gravity = Number(pendulumGravityRange.value) / 10;
+    if (Pendulum.switchedGravity) Pendulum.gravity *= -1;
+    pendulumGravityTxt.innerHTML = (Pendulum.switchedGravity && Pendulum.gravity !== 0 ? "-" : "") + (Number(pendulumGravityRange.value) / 10).toFixed(1);
+    Pendulum.mass1 = pendulumMass1Txt.innerHTML = Number(pendulumMass1Range.value);
+    Pendulum.mass2 = pendulumMass2Txt.innerHTML = Number(pendulumMass2Range.value);
+    Pendulum.hue = pendulumHueTxt.innerHTML = Number(pendulumHueRange.value);
+    
+    if (!canvasRunning) Pendulum.draw();
+  }
+  
+  window.onresize = () => {
+    canvas.width = window.innerWidth * canvasRatio;
+    canvas.height = window.innerHeight * canvasRatio;
+  };
+</script>
+</body>
+</html>
