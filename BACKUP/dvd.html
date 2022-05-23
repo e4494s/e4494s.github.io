@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>body{background-color: black;}</style>
+    <link rel="icon"  href="images/favicon.png" type="image/png"/>
+    <title>DVD on a TV ~ e4494s</title>
+  </head>
+<body>
+<canvas id="dvdCanvas" width=300 height=300 style="background-color: #121212">
+</canvas>
+<script>
+  var ctx = dvdCanvas.getContext("2d");
+  dvdCanvas.width = window.innerWidth - 20;
+  dvdCanvas.height = window.innerHeight - 20;
+  
+  var update_rate = 20;
+  
+  function sprite(img_url) {
+    this.visible = true;
+    this.speed_x = 3;
+    this.speed_y = 3;
+    this.image = new Image();
+    this.image.src = img_url;
+    this.x = Math.random() * (dvdCanvas.width - this.image.width);
+    this.y = Math.random() * (dvdCanvas.height - this.image.height);
+  }
+  
+  var dvd = new sprite("images/dvd.png");
+  
+  function frame() {
+    ctx.clearRect(0, 0, dvdCanvas.width, dvdCanvas.height);
+    dvd.render();
+  }
+  
+  sprite.prototype.render = function() {
+    if (this.visible) ctx.drawImage(this.image, this.x, this.y);
+    this.x += this.speed_x;
+    this.y += this.speed_y;
+    if (this.x < 0) {this.speed_x *= -1;}
+    if (this.x + this.image.width > dvdCanvas.width) {this.speed_x *= -1;}
+    if (this.y + this.image.height > dvdCanvas.height) {this.speed_y *= -1;}
+    if (this.y < 0) {this.speed_y *= -1;}
+  }
+  
+  setInterval(frame, update_rate);
+</script>
+</body>
+</html>
