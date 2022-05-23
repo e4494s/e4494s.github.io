@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="icon"  href="images/favicon.png" type="image/png"/>
+    <title>Catcher ~ e4494s</title>
+  </head>
+<body>
+<canvas id="catcherCanvas" width=300 height=300 style="background:url('images/background.jpg'); background-size: cover">
+</canvas>
+<script>
+  var ctx = catcherCanvas.getContext("2d");
+  
+  bug_x = 0;
+  bug_y = 0;
+  bug_speed_x = 0;
+  bugSprite = new Image();
+  bugSprite.src = "images/buggy.png";
+  
+  var melon_x = 0;
+  var melon_y = 0;
+  var melonSprite = new Image();
+  melonSprite.src = "images/watermelon.png";
+  
+  var score = 0;
+  var melon_speed = 5;
+  var FPS = 40;
+  var time_remaining = 30;
+  
+  function resetGame() {
+    bug_x = 0;
+    bug_y = catcherCanvas.height - bugSprite.height;
+    melon_x = Math.random() * (catcherCanvas.width - melonSprite.width);
+    melon_y = -1 * melonSprite.height;
+    time_remaining = 30;
+    score = 0;
+    melon_speed = 5;
+  }
+  
+  function spritesTouching(x1, y1, img1, x2, y2, img2) {
+    if (x1 >= x2+img2.width || x1+img1.width <= x2) return false;
+    if (y1 >= y2+img2.height || y1+img1.height <= y2) return false;
+    return true;   
+  }
+  
+  function frame () {
+    ctx.clearRect(0, 0, catcherCanvas.width, catcherCanvas.height);
+    
+    ctx.fillStyle = "black";
+    ctx.font = "20px Arial";
+    ctx.fillText("Score: " + score, 0, 20);
+    ctx.fillText("Time Remaining: " + Math.round(time_remaining), 0, 45);
+    
+    bug_y = catcherCanvas.height - bugSprite.height;
+    bug_x += bug_speed_x;
+    ctx.drawImage(bugSprite, bug_x, bug_y);
+    
+    if (time_remaining <= 0) {
+      ctx.fillStyle = "red";
+      ctx.font = "bold 50px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("Game Over!", catcherCanvas.width / 2, catcherCanvas.height / 2);
+      ctx.font = "bold 20px Arial";
+      ctx.fillText("Press R to play again", catcherCanvas.width / 2, (catcherCanvas.height / 2) + 50);
+      ctx.textAlign = "left";
+    }
+    else {
+      time_remaining = time_remaining - 1/FPS;
+      
+      melon_y = melon_y + melon_speed;
+      
+      if (melon_y > catcherCanvas.height) {
+        melon_y = -1 * melonSprite.height;
+        melon_x = Math.random() * (catcherCanvas.width - melonSprite.width);
+      }
+    }
+    ctx.drawImage(melonSprite, melon_x, melon_y);
+    
+    if (spritesTouching(bug_x, bug_y, bugSprite, melon_x, melon_y, melonSprite)) {
+      score = score + 1;
+      melon_x = -1 * melonSprite.width;
+      melon_speed = melon_speed + 0.5;
+    }
+  }
+  setInterval(frame, 1000/FPS);
+  
+  function keyDownHandler (keyDownEvent) {
+    if (keyDownEvent.keyCode == 37 && bug_x > 0) {bug_speed_x = -10;}
+    if (keyDownEvent.keyCode == 39 && bug_x + bugSprite.width < catcherCanvas.width) {bug_speed_x = 10;}
+    else {bug_speed = 0;}
+    if (keyDownEvent.keyCode == 82) {resetGame();}
+    keyDownEvent.preventDefault();
+  }
+  
+  function keyUpHandler (keyUpEvent) {
+    if (keyUpEvent.keyCode == 37) {bug_speed_x = 0;}
+    if (keyUpEvent.keyCode == 39) {bug_speed_x = 0;}
+  }
+    
+  
+  addEventListener("keydown", keyDownHandler);
+  addEventListener("keyup", keyUpHandler);
+  
+  catcherCanvas.width = window.innerWidth - 20;
+  catcherCanvas.height = window.innerHeight - 20;
+</script>
+</body>
+</html>
