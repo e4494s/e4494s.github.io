@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = 'icon'  href = 'images/favicon.png' type = 'image/png'/>
+    <title>e4494s</title>
+    <style>
+      canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: lime;
+      }
+    </style>
+  </head>
+<body>
+<canvas id = 'canvas'></canvas>
+<script>
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  
+  
+  let keys = {
+    left: false,
+    up: false,
+    right: false,
+    down: false,
+    a: false,
+    w: false,
+    d: false,
+    s: false
+  };
+  
+  
+  let jerry = {};
+  jerry.x = 0;
+  jerry.y = 0;
+  jerry.z = 0;
+  jerry.velocity_z = 0;
+  jerry.jump_height = 70;
+  jerry.width = 70;
+  jerry.height = 70;
+  jerry.sprite = new Image();
+  jerry.sprite.src = 'images/jerry/stand_R.png';
+  jerry.pose = 'stand';
+  jerry.jumping = false;
+  jerry.direction = 'R';
+  jerry.speed = 5;
+  jerry.shadow = new Image();
+  jerry.shadow.src = 'images/jerry/shadow1.png';
+  
+  jerry.render = function() {
+    if (keys.left || keys.a) {
+      jerry.x -= jerry.speed;
+      jerry.direction = 'L';
+    }
+    if (keys.up || keys.w) {
+      jerry.y -= jerry.speed;
+    }
+    if (keys.right || keys.d) {
+      jerry.x += jerry.speed;
+      jerry.direction = 'R';
+    }
+    if (keys.down || keys.s) {
+      jerry.y += jerry.speed;
+    }
+    if (keys.space && !jerry.jumping) {
+      jerry.jumping = true;
+      jerry.velocity_z = 3;
+    }
+    
+    if (jerry.jumping) {
+      if (jerry.z >= jerry.jump_height) {
+        jerry.velocity_z *= -1;
+      }
+      jerry.z += jerry.velocity_z;
+      if (jerry.z <= 0) {
+        jerry.z = 0;
+        jerry.velocity_z = 0;
+        jerry.jumping = false;
+      }
+    }
+    jerry.sprite.src = `images/jerry/${jerry.pose}_${jerry.direction}.png`;
+    ctx.drawImage(
+      jerry.shadow, // img
+      jerry.x + (jerry.z / 10) + (jerry.width / 12), // x
+      jerry.y + jerry.height - 10 + ((jerry.z / 10) * 0.4), // y
+      jerry.width - (jerry.z / 5) - (jerry.height / 6), // width
+      (jerry.height * 0.4) - ((jerry.z / 5) * 0.4) // height
+    );
+    ctx.drawImage(jerry.sprite, jerry.x, jerry.y - jerry.z, jerry.width, jerry.height);
+  };
+  
+  
+  function frame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    jerry.render();
+    requestAnimationFrame(frame);
+  }
+  frame();
+  
+  
+  function keyDownHandler(e) {
+    if (e.keyCode == 37) keys.left = true;
+    if (e.keyCode == 65) keys.a = true;
+    if (e.keyCode == 38) keys.up = true;
+    if (e.keyCode == 87) keys.w = true;
+    if (e.keyCode == 39) keys.right = true;
+    if (e.keyCode == 68) keys.d = true;
+    if (e.keyCode == 40) keys.down = true;
+    if (e.keyCode == 83) keys.s = true;
+    if (e.keyCode == 32) keys.space = true;
+  }
+  addEventListener('keydown', keyDownHandler);
+  
+  function keyUpHandler(e) {
+    if (e.keyCode == 37) keys.left = false;
+    if (e.keyCode == 65) keys.a = false;
+    if (e.keyCode == 38) keys.up = false;
+    if (e.keyCode == 87) keys.w = false;
+    if (e.keyCode == 39) keys.right = false;
+    if (e.keyCode == 68) keys.d = false;
+    if (e.keyCode == 40) keys.down = false;
+    if (e.keyCode == 83) keys.s = false;
+    if (e.keyCode == 32) keys.space = false;
+  }
+  addEventListener('keyup', keyUpHandler);
+</script>
+</body>
+</html>
