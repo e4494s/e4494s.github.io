@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <style>body{background-color: black;}</style>
+    <link rel="icon" href = "images/favicon.png" type = "image/png"/>
+    <title>Atomacy ~ e4494s</title>
+  </head>
+<body>
+<canvas id = "canvas" width = 300 height = 300 style = "background-color: black">
+</canvas>
+<script>
+  var ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth - 20;
+  canvas.height = window.innerHeight - 20;
+  ctx.font = "30px Courier";
+  var time_unlocked = false;
+  var time_available = false;
+  var planck_seconds = 0;
+  var duration_mult = 1;
+  var instants = 0;
+  var energy = 10;
+  var strings = 0;
+  var quarks = 0;
+  var protons = 0;
+  var neutrons = 0;
+  var electrons = 0;
+  var atoms = 0;
+  var total_energy = 0;
+  var total_strings = 0;
+  var string_formula = 0.55;
+  var particle_formula= 0.55;
+  var protons_total_quarks = 0;
+  var neutrons_total_quarks = 0;
+  var electrons_total_quarks = 0;
+  var quark_formula = 0.55;
+  var total_protons = 0;
+  var total_neutrons = 0;
+  var total_electrons = 0;
+  var total_subatomic_particles = 0;
+  var energy_per_second = 0;
+  var strings_energy_per_second = 0;
+  var quarks_energy_per_second = 0;
+  var protons_energy_per_second = 0;
+  var neutrons_energy_per_second = 0;
+  var electrons_energy_per_second = 0;
+  var atoms_energy_per_second = 0;
+  var protons_string_quark_boost = 0;
+  var neutrons_particle_boost = 0;
+  var electrons_energy_boost = 0;
+  var quarks_unlocked = false;
+  var subatomic_particles_unlocked = false;
+  var atoms_unlocked = false;
+  function frame() {
+    ctx.textAlign = "center";
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.font = "15px Courier";
+    ctx.fillStyle = "white";
+    if (time_unlocked) {
+      if (energy_per_second < 1000) {ctx.fillText("You are generating " + energy_per_second.toFixed(2) + " Energy per second.", canvas.width / 2, 25);}
+      else {ctx.fillText("You are generating " + energy_per_second.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2") + " Energy per second.", canvas.width / 2, 25);}
+    }
+    else {
+      if (quarks_unlocked === false) {ctx.fillText("Press Space to generate Energy from Strings.", canvas.width / 2, 25);}
+      if (quarks_unlocked === true && subatomic_particles_unlocked === false) {ctx.fillText("Press Space to generate Energy from Strings and Quarks.", canvas.width / 2, 25);}
+      if (subatomic_particles_unlocked && atoms_unlocked === false) {ctx.fillText("Press Space to generate Energy from Strings, Quarks, and Subatomic Particles.", canvas.width / 2, 25);}
+      if (atoms_unlocked) {ctx.fillText("Press Space to generate Energy from Strings, Quarks, Subatomic Particles, and Atoms.", canvas.width / 2, 25);}
+    } 
+    ctx.font = "20px Courier";
+    if (energy < 1000) {ctx.fillText("You have " + energy.toFixed(2) + " Energy.", canvas.width / 2, 50);}
+    else {ctx.fillText("You have " + energy.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2") + " Energy.", canvas.width / 2, 50);}
+    ctx.fillStyle = "#579b2b";
+    ctx.font = "15px Courier";
+    ctx.fillText("Press S to convert Energy to Strings.", canvas.width / 2, 95);
+    ctx.font = "20px Courier";
+    if (strings < 1000) {ctx.fillText("You have " + strings.toFixed(2) + " Strings.", canvas.width / 2, 120);}
+    else {ctx.fillText("You have " + strings.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2") + " Strings.", canvas.width / 2, 120);}
+    ctx.font = "13px Courier";
+    if (time_unlocked) {
+      if (strings_energy_per_second < 1000) {ctx.fillText("Your Strings are generating " + strings_energy_per_second.toFixed(2) + " Energy per second.", canvas.width / 2, 140);}
+      else {ctx.fillText("Your Strings are generating " + strings_energy_per_second.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2") + " Energy per second.", canvas.width / 2, 140);}
+    }
+    ctx.font = "20px Courier";
+    ctx.fillStyle = "#ff8000";
+    if (strings >= 100) {quarks_unlocked = true;}
+    if (quarks >= 100) {subatomic_particles_unlocked = true;}
+    if (protons + neutrons + electrons >= 10) {atoms_unlocked = true;}
+    if (instants >= 1000) {time_available = true;}
+    if (quarks_unlocked === false) {ctx.fillText("Reach 100 Strings to unlock Quarks.", canvas.width / 2, 190);}
+    if (quarks_unlocked) {
+      ctx.font = "15px Courier";
+      ctx.fillText("Press Q to convert Strings to Quarks.", canvas.width / 2, 165);
+      ctx.font = "20px Courier";
+      ctx.fillText("You have " + quarks.toFixed(2) + " Quarks.", canvas.width / 2, 190);
+      ctx.font = "13px Courier";
+      if (time_unlocked) {
+        if (quarks_energy_per_second < 1000) {ctx.fillText("Your Quarks are generating " + quarks_energy_per_second.toFixed(2) + " Energy per second.", canvas.width / 2, 210);}
+        else {ctx.fillText("Your Quarks are generating " + quarks_energy_per_second.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2") + " Energy per second.", canvas.width / 2, 210);}
+      }
+      ctx.font = "20px Courier";
+      ctx.fillStyle = "white";
+      if (subatomic_particles_unlocked === false) {ctx.fillText("Reach 100 Quarks to unlock Subatomic Particles.", canvas.width / 2, 260);}
+    }
+    if (subatomic_particles_unlocked) {
+      ctx.font = "15px Courier";
+      ctx.fillStyle = "red";
+      ctx.fillText("Press P to convert Quarks to Protons.", canvas.width / 6, 235);
+      ctx.fillStyle = "blue";
+      ctx.fillText("Press N to convert Quarks to Neutrons.", canvas.width / 2, 235);
+      ctx.fillStyle = "yellow";
+      ctx.fillText("Press E to convert Quarks to Electrons.", canvas.width * (5 / 6), 235);
+      ctx.font = "20px Courier";
+      ctx.fillStyle = "red";
+      ctx.fillText("You have " + protons.toFixed(2) + " Protons.", canvas.width / 6, 260);
+      ctx.font = "13px Courier";
+      ctx.fillText("Your Protons are", canvas.width / 6, 280);
+      if (time_unlocked) {ctx.fillText("making Strings and Quarks " + protons_string_quark_boost.toFixed(2) +"% easier to get,", canvas.width / 6, 300);}
+      else {ctx.fillText("making Strings and Quarks " + protons_string_quark_boost.toFixed(2) + "% easier to get.", canvas.width / 6, 300);}
+      if (time_unlocked) {
+        if (protons_energy_per_second < 1000) {ctx.fillText("and generating " + protons_energy_per_second.toFixed(2) + " Energy per second.", canvas.width / 6, 320);}
+        else {ctx.fillText("and generating " + protons_energy_per_second.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2") + " Energy per second.", canvas.width / 6, 320);}
+      }
+      ctx.fillStyle = "blue";
+      ctx.font = "20px Courier";
+      ctx.fillText("You have " + neutrons.toFixed(2) + " Neutrons.", canvas.width / 2, 260);
+      ctx.font = "13px Courier";
+      ctx.fillText("Your Neutrons are", canvas.width / 2, 280);
+      if (time_unlocked) {ctx.fillText("making Subatomic Particles " + neutrons_particle_boost.toFixed(2) +"% easier to get,", canvas.width / 2, 300);}
+      if (time_unlocked) {
+        if (neutrons_energy_per_second < 1000) {ctx.fillText("and generating " + neutrons_energy_per_second.toFixed(2) + " Energy per second.", canvas.width / 2, 320);}
+        else {ctx.fillText("and generating " + neutrons_energy_per_second.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2") + " Energy per second.", canvas.width / 2, 320);}
+      }
+      else {ctx.fillText("making Subatomic Particles " + neutrons_particle_boost.toFixed(2) +"% easier to get.", canvas.width / 2, 300);}
+      ctx.fillStyle = "yellow";
+      ctx.font = "20px Courier";
+      ctx.fillText("You have " + electrons.toFixed(2) + " Electrons.", canvas.width * (5 / 6), 260);
+      ctx.font = "13px Courier";
+      ctx.fillText("Your Electrons are", canvas.width * (5 / 6), 280);
+      if (time_unlocked) {ctx.fillText("providing a " + electrons_energy_boost.toFixed(2) +"x boost to Energy production,", canvas.width * (5 / 6), 300);}
+      else {ctx.fillText("providing a " + electrons_energy_boost.toFixed(2) + "x boost to Energy production.", canvas.width * (5 / 6), 300);}
+      if (time_unlocked) {
+        if (electrons_energy_per_second < 1000) {ctx.fillText("and generating " + electrons_energy_per_second.toFixed(2) + " Energy per second.", canvas.width * (5 / 6), 320);}
+        else {ctx.fillText("and generating " + electrons_energy_per_second.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2") + " Energy per second.", canvas.width * (5 / 6), 320);}
+      }
+      ctx.fillStyle = "#707070"
+      ctx.font = "20px Courier";
+      if (atoms_unlocked === false) {ctx.fillText("Reach 100 Subatomic Particles to unlock Atoms.", canvas.width / 2, 370);}
+    }
+    if (time_unlocked === false) {
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#b58855";
+      ctx.font = "15px Courier";
+      if (time_available === false) {ctx.fillText(instants.toFixed(2) + " Instants have passed.", 30, 40);
+      ctx.fillText("Reach 1000 Instants to unlock Time.", 30, 65);
+      instants += 10 * (atoms + 1);}
+      if (time_available) {
+        ctx.font = "15px Courier";
+        ctx.fillText("Press T to reset Energy and Universal Components", 30, 30);
+        ctx.fillText("to unlock Time. Time will automatically generate", 30, 55);
+        ctx.fillText("Energy from Universal Components, and provide an", 30, 80);
+        ctx.fillText("increasing bonus to Energy.", 30, 105);
+      }
+    }
+    if (time_unlocked) {
+      ctx.fillStyle = "#b58855";
+      ctx.font = "15px Courier";
+      ctx.textAlign = "left";
+      ctx.fillText(planck_seconds.toFixed(2) + " Planck seconds have passed.", 40, 50);
+      ctx.fillText("Your Duration multiplier to Energy is " + duration_mult.toFixed(2) + "x.", 40, 75);
+      planck_seconds += 0.1 * (atoms + 1);
+      duration_mult = Math.pow(planck_seconds, 0.1); 
+    }
+    if (atoms_unlocked) {
+      ctx.font = "15px Courier";
+      ctx.fillStyle = "#707070"
+      ctx.textAlign = "center";
+      ctx.fillText("Press A to convert Subatomic Particles to Atoms.", canvas.width / 2, 345);
+      ctx.font = "20px Courier";
+      if (atoms < 1000) {ctx.fillText("You have " + atoms.toFixed(2) + " Atoms.", canvas.width / 2, 370);}
+      else {ctx.fillText("You have " + atoms.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2") + " Atoms.", canvas.width / 2, 370);}
+      ctx.font = "13px Courier";
+      if (time_unlocked) {
+        if (atoms_energy_per_second < 1000) {ctx.fillText("Your Atoms are generating " + atoms_energy_per_second.toFixed(2) + " Energy per second.", canvas.width / 2, 390);}
+        else {ctx.fillText("Your Atoms are generating " + atoms_energy_per_second.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2") + " Energy per second.", canvas.width / 2, 390);}
+      }
+    }
+    energy_per_second = ((strings / 5) * 20) + ((quarks * 15) * 20) + ((protons * 100) * 20) + ((neutrons * 100) * 20) + ((electrons * 100) * 20) + ((atoms *500) * 20);
+    strings_energy_per_second = (strings / 5) * 20;
+    quarks_energy_per_second = (quarks * 15) * 20;
+    protons_energy_per_second = (protons * 100) * 20;
+    neutrons_energy_per_second = (neutrons * 100) * 20;
+    electrons_energy_per_second = (electrons * 100) * 20;
+    atoms_energy_per_second = (atoms * 500) * 20;
+    if (time_unlocked) {
+      generateEnergy();
+      generateEnergy();
+      generateEnergy();
+      generateEnergy();
+    }
+  }
+  setInterval(frame, 50);
+  
+  function generateEnergy() {
+    energy += ((strings / 5) + electrons_energy_boost) * duration_mult;
+    energy += ((quarks * 15) + electrons_energy_boost) * duration_mult;
+    energy += ((protons * 100) + electrons_energy_boost) * duration_mult;
+    energy += ((neutrons * 100) + electrons_energy_boost * duration_mult);
+    energy += ((electrons * 100) + electrons_energy_boost) * duration_mult;
+    energy += ((atoms * 200) + electrons_energy_boost) * duration_mult;
+  }
+  
+  function energyToStrings() {
+    total_energy += energy;
+    strings = Math.pow(total_energy, string_formula);
+    energy = 0;
+  }
+  
+  function stringsToQuarks() {
+    if (quarks_unlocked) {
+      total_energy = 0;
+      total_strings += strings;
+      quarks = Math.pow(total_strings, quark_formula);
+      strings = 0;
+    }
+  }
+  
+  function quarksToProtons() {
+    if (subatomic_particles_unlocked && quarks > 0) {
+      total_energy = 0;
+      total_strings = 0;
+      protons_total_quarks += quarks;
+      protons = Math.pow(protons_total_quarks, particle_formula);
+      total_protons += protons;
+      quarks = 0;
+      string_formula = 0.55 + (Math.pow(total_protons, 0.01) - 1);
+      quark_formula = 0.55 + (Math.pow(total_protons, 0.01) - 1);
+      protons_string_quark_boost = ((0.55 + (Math.pow(total_protons, 0.01) - 1))- 0.55) / 0.55;
+    }
+  }
+  
+  function quarksToNeutrons() {
+    if (subatomic_particles_unlocked && quarks > 0) {
+      total_energy = 0;
+      total_strings = 0;
+      neutrons_total_quarks += quarks;
+      neutrons = Math.pow(neutrons_total_quarks, particle_formula);
+      total_neutrons += neutrons;
+      particle_formula = 0.55 + (Math.pow(total_neutrons, 0.008) - 1);
+      neutrons_particle_boost = ((0.55 + (Math.pow(total_neutrons, 0.008) - 1)) - 0.55) / 0.55;
+      quarks = 0;
+    }
+  }
+  
+  function quarksToElectrons() {
+    if (subatomic_particles_unlocked && quarks > 0) {
+      total_energy = 0;
+      total_strings = 0;
+      electrons_total_quarks += quarks;
+      electrons = Math.pow(electrons_total_quarks, particle_formula);
+      total_electrons += electrons;
+      electrons_energy_boost = Math.pow(total_electrons, 0.08);
+      quarks = 0;
+    }
+  }
+  
+  function subatomicParticlesToAtoms() {
+    if (atoms_unlocked) {
+      if (protons > 0 && neutrons > 0 && electrons > 0) {
+        protons_string_quark_boost = 0;
+        neutrons_particle_boost = 0;
+        electrons_energy_boost = 0;
+        total_energy = 0;
+        total_strings = 0;
+        total_quarks = 0;
+        total_subatomic_particles += total_protons + total_neutrons + total_electrons;
+        atoms = Math.pow(total_subatomic_particles, 0.55);
+        protons = 0;
+        neutrons = 0;
+        electrons = 0;
+      }
+    }
+  }
+  
+  function softReset() {
+    energy = 10;
+    total_energy = 0;
+    strings = 0;
+    total_strings = 0;
+    quarks = 0;
+    protons_total_quarks = 0;
+    neutrons_total_quarks = 0;
+    electrons_total_quarks = 0;
+    protons = 0;
+    total_protons = 0;
+    protons_string_quark_boost = 0;
+    neutrons_particle_boost = 0;
+    electrons_energy_boost = 0;
+    neutrons = 0;
+    total_neutrons = 0;
+    electrons = 0;
+    total_electrons = 0;
+    atoms = 0;
+  }
+  
+  function unlockTime() {
+    if (time_available) {
+      softReset();
+      time_unlocked = true;
+      time_available = false;
+      instants = 0;
+    }
+  }
+  
+  function keyDownHandler(keyDownEvent) {
+    if (time_unlocked === false) {if (keyDownEvent.keyCode == 32) {generateEnergy();}}
+    if (keyDownEvent.keyCode == 83) {energyToStrings();}
+    if (keyDownEvent.keyCode == 81) {stringsToQuarks();}
+    if (keyDownEvent.keyCode == 80) {quarksToProtons();}
+    if (keyDownEvent.keyCode == 78) {quarksToNeutrons();}
+    if (keyDownEvent.keyCode == 69) {quarksToElectrons();}
+    if (keyDownEvent.keyCode == 65) {subatomicParticlesToAtoms();}
+    if (keyDownEvent.keyCode == 84) {unlockTime();}
+  }
+  addEventListener("keydown", keyDownHandler);
+</script>
+</body>
+</html>
