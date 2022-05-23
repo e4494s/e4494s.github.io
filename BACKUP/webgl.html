@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = 'icon'  href = 'images/favicon.png' type = 'image/png'/>
+    <title>WebGL ~ e4494s</title>
+  </head>
+<body>
+<canvas id = 'canvas' width = '800' height = '600'>If you are seeing this message, it means your browser does not support HTML5.</canvas>
+<script>
+  let gl = canvas.getContext('webgl');
+  if (!gl) gl = canvas.getContext('experimental-webgl');
+  if (!gl) alert('Your browser does not support WebGL.');
+  
+  gl.clearColor(0.75, 0.85, 0.8, 1.0);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  
+  /*function vertexShader(vertPosition, vertColor) {
+    return {
+      fragColor: vertColor,
+      gl_Position: [vertPosition.x, vertPosition.y, 0.0, 1.0]
+    };
+  }*/
+  
+  let vertexShaderText = [
+    'precision mediump float;',
+    '',
+    'attribute vec2 vertPosition;',
+    '',
+    'void main()',
+    '{',
+    '  gl_Position = vec4(vertPosition, 0.0, 1.0);',
+    '}'
+  ].join('\n');
+  
+  let fragmentShaderText = [
+    'precision mediump float;',
+    '',
+    'void main()',
+    '{',
+    '  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);',
+    '}'
+  ].join('\n');
+  
+  let vertexShader = gl.createShader(gl.VERTEX_SHADER);
+  let fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+  
+  gl.shaderSource(vertexShader, vertexShaderText);
+  gl.shaderSource(fragmentShader, fragmentShaderText);
+  
+  gl.compileShader(vertexShader);
+  gl.compileShader(fragmentShader);
+  
+  let program = gl.createProgram();
+  gl.attachShader(program, vertexShader);
+  gl.attachShader(program, fragmentShader);
+  gl.linkProgram(program);
+  
+  let triangleVertices = [
+    0.0, 0.5,
+    -0.5, -0.5,
+    0.5, -0.5
+  ];
+  
+  let triangleVertexBufferObject = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexBufferObject);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleVertices), gl.STATIC_DRAW);
+</script>
+<!--<script>
+  let gravity = 0.1;
+  let bounciness = 0.8;
+  let friction = 0.1;
+  let air_resistance = 0.01;
+  
+  let rotation_speed = 0.01;
+  
+  let x_velocity = 0;
+  let y_velocity = 0;
+  let z_velocity = 0;
+  
+  let scene = new THREE.Scene();
+  
+  let camera = new THREE.PerspectiveCamera(40, (window.innerWidth / window.innerHeight), 0.1, 1000);
+  
+  let renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+  
+  let light = new THREE.PointLight(0xffffff);
+  light.position.set(-100, 200, 100);
+  scene.add(light);
+  
+  let light2 = new THREE.PointLight(0xffff00);
+  light2.position.set(100, -2000, -100);
+  scene.add(light2); 
+  
+  let geometry = new THREE.BoxGeometry(4, 4);
+  let material = new THREE.MeshLambertMaterial({color: 0x579b2b});
+  let cube = new THREE.Mesh(geometry, material);
+  cube.position.z = -100;
+  scene.add(cube);
+  
+  camera.position.z = 30;
+  
+  let render = function() {
+    requestAnimationFrame(render);
+    cube.position.x += x_velocity;
+    cube.position.y += y_velocity;
+    cube.position.z += z_velocity;
+    x_velocity *= 1 - air_resistance;
+    y_velocity *= 1 - air_resistance;
+    z_velocity += gravity;
+    if (cube.position.z >= 10) {
+      cube.position.z = 10;
+      z_velocity *= -bounciness;
+      x_velocity *= 1 - friction;
+      y_velocity *= 1 - friction;
+    }
+    renderer.render(scene, camera);
+  }
+  render();
+  
+  function keyDownHandler(e) {
+    if (e.keyCode == 65) x_velocity -= 0.1;
+    if (e.keyCode == 87) y_velocity += 0.1;
+    if (e.keyCode == 68) x_velocity += 0.1;
+    if (e.keyCode == 83) y_velocity -= 0.1;
+    if (e.keyCode == 32) z_velocity -= 1;
+  }
+  addEventListener('keydown', keyDownHandler);
+</script>-->
+</body>
+</html>
