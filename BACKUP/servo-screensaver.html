@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <title>Servo Screensaver ~ e4494s</title>
+    <style>
+      #canvas {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        background-color: black;
+      }
+    </style>
+  </head>
+<body>
+<canvas id = "canvas"></canvas>
+<script src = "scripts/main.js"></script>
+<script>
+  let canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth * 2;
+  canvas.height = window.innerHeight * 2;
+  let canvasRunning = true;
+  
+  let animTime = 0;
+  let armCount = 6;
+  let armJoints = 3;
+  let alternateJointDirection = true;
+  let armOffsetFactor = 1;
+  let showJoints = true;
+  let showArms = true;
+  let showShadows = false;
+  let rainbowJoints = false;
+  let rainbowArms = false;
+  let rainbowShadows = false;
+  let trailing = false;
+  let armThickness = 2 / 800;
+  let jointRadius = 3 / 800;
+  let shadowOpacity = 25;
+  let minCanvasSize = Math.min(canvas.width, canvas.height);
+  let reverse = false;
+  
+  function Arm(angle) {
+    this.angle = angle;
+    this.pointArray = [];
+  }
+  Arm.prototype.render = function() {
+    ctx.beginPath();
+    ctx.moveTo(canvas.width / 2, canvas.height / 2);
+    let currLength = (minCanvasSize * 0.42) / (armJoints + 1);
+    let currX = (canvas.width / 2) + (Math.cos(toRad(this.angle + animTime)) * currLength);
+    let currY = (canvas.height / 2) + (Math.sin(toRad(this.angle + animTime)) * currLength);
+    let currSign = alternateJointDirection ? 1 : -1;
+    this.pointArray = [];
+    ctx.lineTo(currX, currY);
+    this.pointArray.push({x: currX, y: currY});
+    for (let i = 1; i <= armJoints; i++) {
+      if (alternateJointDirection) currSign *= -1;
+      currX += Math.cos(toRad((this.angle * armOffsetFactor) + (animTime * i * currSign))) * currLength;
+      currY += Math.sin(toRad((this.angle * armOffsetFactor) + (animTime * i * currSign))) * currLength;
+      ctx.lineTo(currX, currY);
+      this.pointArray.push({x: currX, y: currY});
+    }
+    if (showShadows) {
+      ctx.fillStyle = rainbowShadows ? `hsla(${this.angle + animTime}deg, 100%, 50%, ${shadowOpacity})` : `rgba(255, 255, 255, ${shadowOpacity})`;
+      ctx.fill();
+    }
+    if (showArms) {
+      ctx.strokeStyle = rainbowArms ? `hsl(${this.angle + animTime}deg, 100%, 50%)` : "white";
+      ctx.stroke();
+    }
+    if (showJoints) {
+      ctx.fillStyle = rainbowJoints ? `hsl(${this.angle + animTime}deg, 100%, 50%)` : "white";
+      for (let i = 0; i < this.pointArray.length; i++) ctx.fillCircle(this.pointArray[i].x, this.pointArray[i].y, jointRadius * minCanvasSize);
+    }
+  };
+  let armArray = [];
+  
+  let timeToSwitch = 5000;
+  let lastSwitchTime = 0;
+  
+  function frame() {
+    let timeSinceSwitch = Date.now() - lastSwitchTime;
+    if (timeSinceSwitch >= timeToSwitch) {
+      randomSettings();
+      lastSwitchTime = Date.now();
+      timeSinceSwitch = 0;
+    }
+    
+    if (trailing) {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    animTime = (timeSinceSwitch / timeToSwitch) * 360 * (reverse ? -1 : 1);
+    
+    ctx.lineWidth = armThickness * minCanvasSize;
+    ctx.lineCap = ctx.lineJoin = "round";
+    for (let i = 0; i < armArray.length; i++) {
+      armArray[i].render();
+    }
+    
+    let thickness = 0.017 * minCanvasSize;
+    let timeRatio = (timeSinceSwitch / timeToSwitch) * 1.08;
+    ctx.fillStyle = `hsl(0deg, 0%, ${(timeRatio * 80) + 20}%)`;
+    
+    ctx.fillRect(0, canvas.height - thickness, timeRatio * canvas.width, thickness); // Bottom
+    
+    let len = timeRatio * canvas.width; // Top
+    ctx.fillRect(canvas.width - len, 0, len, thickness);
+    
+    ctx.fillRect(0, 0, thickness, timeRatio * canvas.height); // Left
+    
+    len = timeRatio * canvas.height;
+    ctx.fillRect(canvas.width - thickness, canvas.height - len, thickness, len); // Right
+    
+    if (canvasRunning) requestAnimationFrame(frame);
+  }
+  randomSettings();
+  frame();
+  
+  function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  
+  function randRange(min, max, step) {
+    return randBetween(min, max).toMultipleOf(step);
+  }
+  
+  function randomSettings() {
+    reverse = Math.random() < 0.5;
+    armCount = Math.round(randBetween(1, 20));
+    armJoints = Math.round(Math.random() * Math.random() * 3) + 1;
+    alternateJointDirection = Math.random() < 0.5;
+    armOffsetFactor = randRange(-5, 5, 0.5);
+    do {
+      showJoints = Math.random() < 0.5;
+      showArms = Math.floor(Math.random() * 3) !== 0;;
+      showShadows = Math.random() < 0.5;
+    }
+    while (!showJoints && !showArms && !showShadows);
+    if (showJoints && !showArms && !showShadows) trailing = true;
+    else trailing = Math.random() < 0.5;
+    armThickness = randBetween(1, 10) / 800;
+    jointRadius = randBetween(1, 10) / 800;
+    shadowOpacity = randBetween(0.1, 1);
+    rainbowArms = Math.random() < 0.5;
+    rainbowJoints = Math.random() < 0.5;
+    rainbowShadows = Math.random() < 0.5;
+    
+    clearCanvas();
+    armArray = [];
+    for (let i = 0; i < armCount; i++) {
+      armArray.push(new Arm((i / armCount) * 360));
+    }
+  }
+  
+  window.onresize = () => {
+    canvas.width = window.innerWidth * 2;
+    canvas.height = window.innerHeight * 2;
+    minCanvasSize = Math.min(canvas.width, canvas.height);
+  };
+</script>
+</body>
+</html>
