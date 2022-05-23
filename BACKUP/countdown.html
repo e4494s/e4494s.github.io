@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>body{background-color:black;}</style>
+    <link rel="icon"  href="images/favicon.png" type="image/png"/>
+    <title>Reality Countdown ~ e4494s</title>
+  </head>
+<body>
+<canvas id = "canvas" width = 300 height = 300 style = "background-color: black">
+</canvas>
+<script>
+  var ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth - 20;
+  canvas.height = window.innerHeight - 20;
+  ctx.fillStyle = "white";
+  ctx.textAlign = "center";
+  function frame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.font = "40px Courier";
+    ctx.fillText("Live countdown to the Antimatter Dimensions Reality Update", canvas.width / 2, canvas.height / 4);
+    ctx.font = "150px Courier";
+    ctx.fillText("05:00:00", canvas.width / 2, canvas.height / 2);
+  }
+  setInterval(frame, 50);
+</script>
+</body>
+</html>
