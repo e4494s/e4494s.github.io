@@ -45,6 +45,183 @@
 </span>
 <script src = "scripts/main.js"></script>
 <script>
+  const ctx = canvas.getContext('2d');
+  let menus = document.getElementById('menus');
+  const menu_rect = menus.getBoundingClientRect();
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight - menu_rect.height;
+  
+  let normal_width = 256;
+  let normal_height = 75;
+  let scale = 0.5;
+  let image_width = normal_width * scale;
+  let image_height = normal_height * scale;
+  let fluid_resistance = 0.01;
+  let edge_current = 0.04;
+  let rudder_power = 0.03;
+  let thrust = 0.1;
+  let whirlpool_power = 0.01;
+  let terminal_velocity = 1000;
+  let minimum_velocity = 0.001;
+  let tracing = false;
+  let whirlpool_mode = false;
+  
+  let left_down = false;
+  let up_down = false;
+  let right_down = false;
+  let down_down = false;
+  
+  ctx.fillStyle = 'black';
+  ctx.font = 'Bold 20px Arial';
+  
+  function sprite(x_pos, y_pos) {
+    this.x = x_pos;
+    this.y = y_pos;
+    this.velocity_x = 0;
+    this.velocity_y = 0;
+    this.velocity = 0;
+    this.angle = 0;
+    this.rotation_speed = 0;
+    this.rudder_power = rudder_power;
+    this.thrust = thrust;
+    this.image = new Image();
+    this.image.src = 'images/boat.png';
+  }
+  sprite.prototype.render = function() {
+    image_width = normal_width * scale;
+    image_height = normal_height * scale;
+    this.x += this.velocity_x * scale;
+    this.y += this.velocity_y * scale;
+    this.angle += this.rotation_speed * scale;
+    this.velocity = Math.sqrt((this.velocity_x * this.velocity_x) + (this.velocity_y * this.velocity_y));
+    if (whirlpool_mode) {
+      this.rudder_power = this.rotation_speed * whirlpool_power;
+      this.thrust = Math.max(thrust, this.velocity * whirlpool_power);
+    }
+    else {
+      this.rudder_power = rudder_power;
+      this.thrust = thrust;
+    }
+    if (!whirlpool_mode) {
+      if (up_down) {
+        this.velocity_x += this.thrust * Math.cos(toRad(this.angle));
+        this.velocity_y += this.thrust * Math.sin(toRad(this.angle));
+        if (left_down) this.rotation_speed -= this.rudder_power;
+        if (right_down) this.rotation_speed += this.rudder_power;
+      }
+      if (down_down) {
+        this.velocity_x -= this.thrust * Math.cos(toRad(this.angle));
+        this.velocity_y -= this.thrust * Math.sin(toRad(this.angle));
+        if (left_down) this.rotation_speed += this.rudder_power;
+        if (right_down) this.rotation_speed -= this.rudder_power;
+      }
+    }
+    else {
+      if (up_down) {
+        this.velocity_x += this.thrust * Math.cos(toRad(this.angle));
+        this.velocity_y += this.thrust * Math.sin(toRad(this.angle));
+      }
+      if (left_down) this.rotation_speed -= this.rudder_power;
+      if (right_down) this.rotation_speed += this.rudder_power;
+      if (down_down) {
+        this.velocity_x -= this.thrust * Math.cos(toRad(this.angle));
+        this.velocity_y -= this.thrust * Math.sin(toRad(this.angle));
+      }
+    }
+    
+    this.rotation_speed *= 1 - fluid_resistance;
+    this.velocity_x *= 1 - fluid_resistance;
+    this.velocity_y *= 1 - fluid_resistance;
+    
+    while (this.angle < 0) this.angle += 360;
+    while (this.angle > 360) this.angle -= 360;
+    
+    if (0 <= this.angle && 90 > this.angle) this.toLeft = (this.x + (image_width / 2)) - (((Math.cos(toRad(refAngle(this.angle))) * image_width) + (Math.cos(toRad(refAngle(90 - this.angle))) * image_height)) / 2);
+    if (90 <= this.angle && 180 > this.angle) this.toLeft = (this.x + (image_width / 2)) - (((Math.sin(toRad(refAngle(this.angle))) * image_width) + (Math.cos(toRad(refAngle(this.angle))) * image_height)) / 2);
+    
+    this.toRight = canvas.width - (this.x + image_width);
+    this.toTop = this.y;
+    this.toBottom = canvas.height - (this.y + image_height);
+    
+    if (this.toLeft <= 0) this.velocity_x -= this.toLeft * edge_current;
+    if (this.toRight <= 0) this.velocity_x += this.toRight * edge_current;
+    if (this.toTop <= 0) this.velocity_y -= this.toTop * edge_current;
+    if (this.toBottom <= 0) this.velocity_y += this.toBottom * edge_current;
+    //if (this.toLeft <= 0 || this.toRight <= 0 || this.toTop <= 0 || this.toBottom <= 0) this.rotation_speed -= edge_current;
+    if (this.velocity_x > 0 && this.velocity_x > terminal_velocity) this.velocity_x = terminal_velocity;
+    if (this.velocity_x < 0 && this.velocity_x < -terminal_velocity) this.velocity_x = -terminal_velocity;
+    if (this.velocity_y > 0 && this.velocity_y > terminal_velocity) this.velocity_y = terminal_velocity;
+    if (this.velocity_y < 0 && this.velocity_y < -terminal_velocity) this.velocity_y = -terminal_velocity;
+    if (this.rotation_speed > 0 && this.rotation_speed > terminal_velocity) this.rotation_speed = terminal_velocity;
+    if (this.rotation_speed < 0 && this.rotation_speed < -terminal_velocity) this.rotation_speed = -terminal_velocity;
+    
+    if (this.velocity_x > 0 && this.velocity_x < minimum_velocity) this.velocity_x = 0;
+    if (this.velocity_x < 0 && this.velocity_x > -minimum_velocity) this.velocity_x = 0;
+    if (this.velocity_y > 0 && this.velocity_y < minimum_velocity) this.velocity_y = 0;
+    if (this.velocity_y < 0 && this.velocity_y > -minimum_velocity) this.velocity_y = 0;
+    if (this.rotation_speed > 0 && this.rotation_speed < minimum_velocity) this.rotation_speed = 0;
+    if (this.rotation_speed < 0 && this.rotation_speed > -minimum_velocity) this.rotation_speed = 0;
+    ctx.save();
+    ctx.translate(this.x + (image_width / 2), this.y + (image_height / 2));
+    ctx.rotate(toRad(this.angle));
+    ctx.drawImage(this.image, -image_width / 2, -image_height / 2, image_width, image_height);
+    ctx.restore();
+  }
+  
+  let boat = new sprite((canvas.width / 2) - (image_width / 2), (canvas.height / 2) - (image_height / 2));
+  
+  let whirlpoolcheck = {checked: false};
+  
+  function frame() {
+    if (!tracing) ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (whirlpoolcheck.checked) whirlpool_mode = true;
+    boat.render();
+    /*ctx.fillText(`Boat Angle: ${Math.round(boat.angle)}`, 50, 75);
+    ctx.fillText(`Boat Distance to:   Left: ${Math.round(boat.toLeft)}, Right: ${Math.round(boat.toRight)}, Top: ${Math.round(boat.toTop)}, Bottom: ${Math.round(boat.toBottom)}`, 50, 125);
+    ctx.fillText(`Boat X-Velocity: ${boat.velocity_x.toFixed(2)}`, 50, 175);
+    ctx.fillText(`Boat Y-Velocity: ${boat.velocity_y.toFixed(2)}`, 50, 225);
+    ctx.fillText(`Boat Velocity: ${boat.velocity.toFixed(2)}`, 50, 275);*/
+    //ctx.fillText(`Rotation speed: ${boat.rotation_speed.toFixed(2)}, X-velocity: ${Math.abs(boat.velocity_x.toFixed(2))}, Rudder power: ${boat.rudder_power.toFixed(2)}, Thrust: ${boat.thrust.toFixed(2)}`, 50, 75);
+  }
+  let frame_interval = setInterval(frame, 25);
+  
+  function keyDownHandler(e) {
+    if (e.keyCode == 37 || e.keyCode == 65) left_down = true;
+    if (e.keyCode == 38 || e.keyCode == 87) up_down = true;
+    if (e.keyCode == 39 || e.keyCode == 68) right_down = true;
+    if (e.keyCode == 40 || e.keyCode == 83) down_down = true;
+  }
+  addEventListener('keydown', keyDownHandler);
+  
+  function keyUpHandler(e) {
+    if (e.keyCode == 37 || e.keyCode == 65) left_down = false;
+    if (e.keyCode == 38 || e.keyCode == 87) up_down = false;
+    if (e.keyCode == 39 || e.keyCode == 68) right_down = false;
+    if (e.keyCode == 40 || e.keyCode == 83) down_down = false;
+  }
+  addEventListener('keyup', keyUpHandler);
+  
+  function whirlpool() {
+    boat.rotation_speed++;
+    boat.rotation_speed *= 1.1;
+  }
+  
+  function refAngle(angle) {
+    Math.abs(angle);
+    while (angle > 90) angle -= 90;
+    return angle;
+  }
+  
+  function toRad(degrees) {
+    return degrees * (Math.PI / 180);
+  }
+  
+  function toDeg(radians) {
+    return radians * (180 / Math.PI);
+  }
+</script>
+<!--New version I made to replace the above old version:-->
+<!--<script>
   const ctx = canvas.getContext("2d");
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -194,180 +371,6 @@
   function randSign() {
     return Math.round(Math.random()) == 0 ? 1 : -1;
   }
-</script>
+</script>-->
 </body>
 </html>
-<!--<script>
-  const ctx = canvas.getContext('2d');
-  let menus = document.getElementById('menus');
-  const menu_rect = menus.getBoundingClientRect();
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight - menu_rect.height;
-  
-  let normal_width = 256;
-  let normal_height = 75;
-  let scale = 0.5;
-  let image_width = normal_width * scale;
-  let image_height = normal_height * scale;
-  let fluid_resistance = 0.01;
-  let edge_current = 0.04;
-  let rudder_power = 0.03;
-  let thrust = 0.1;
-  let whirlpool_power = 0.01;
-  let terminal_velocity = 1000;
-  let minimum_velocity = 0.001;
-  let tracing = false;
-  let whirlpool_mode = false;
-  
-  let left_down = false;
-  let up_down = false;
-  let right_down = false;
-  let down_down = false;
-  
-  ctx.fillStyle = 'black';
-  ctx.font = 'Bold 20px Arial';
-  
-  function sprite(x_pos, y_pos) {
-    this.x = x_pos;
-    this.y = y_pos;
-    this.velocity_x = 0;
-    this.velocity_y = 0;
-    this.velocity = 0;
-    this.angle = 0;
-    this.rotation_speed = 0;
-    this.rudder_power = rudder_power;
-    this.thrust = thrust;
-    this.image = new Image();
-    this.image.src = 'images/boat.png';
-  }
-  sprite.prototype.render = function() {
-    image_width = normal_width * scale;
-    image_height = normal_height * scale;
-    this.x += this.velocity_x * scale;
-    this.y += this.velocity_y * scale;
-    this.angle += this.rotation_speed * scale;
-    this.velocity = Math.sqrt((this.velocity_x * this.velocity_x) + (this.velocity_y * this.velocity_y));
-    if (whirlpool_mode) {
-      this.rudder_power = this.rotation_speed * whirlpool_power;
-      this.thrust = Math.max(thrust, this.velocity * whirlpool_power);
-    }
-    else {
-      this.rudder_power = rudder_power;
-      this.thrust = thrust;
-    }
-    if (!whirlpool_mode) {
-      if (up_down) {
-        this.velocity_x += this.thrust * Math.cos(toRad(this.angle));
-        this.velocity_y += this.thrust * Math.sin(toRad(this.angle));
-        if (left_down) this.rotation_speed -= this.rudder_power;
-        if (right_down) this.rotation_speed += this.rudder_power;
-      }
-      if (down_down) {
-        this.velocity_x -= this.thrust * Math.cos(toRad(this.angle));
-        this.velocity_y -= this.thrust * Math.sin(toRad(this.angle));
-        if (left_down) this.rotation_speed += this.rudder_power;
-        if (right_down) this.rotation_speed -= this.rudder_power;
-      }
-    }
-    else {
-      if (up_down) {
-        this.velocity_x += this.thrust * Math.cos(toRad(this.angle));
-        this.velocity_y += this.thrust * Math.sin(toRad(this.angle));
-      }
-      if (left_down) this.rotation_speed -= this.rudder_power;
-      if (right_down) this.rotation_speed += this.rudder_power;
-      if (down_down) {
-        this.velocity_x -= this.thrust * Math.cos(toRad(this.angle));
-        this.velocity_y -= this.thrust * Math.sin(toRad(this.angle));
-      }
-    }
-    
-    this.rotation_speed *= 1 - fluid_resistance;
-    this.velocity_x *= 1 - fluid_resistance;
-    this.velocity_y *= 1 - fluid_resistance;
-    
-    while (this.angle < 0) this.angle += 360;
-    while (this.angle > 360) this.angle -= 360;
-    
-    if (0 <= this.angle && 90 > this.angle) this.toLeft = (this.x + (image_width / 2)) - (((Math.cos(toRad(refAngle(this.angle))) * image_width) + (Math.cos(toRad(refAngle(90 - this.angle))) * image_height)) / 2);
-    if (90 <= this.angle && 180 > this.angle) this.toLeft = (this.x + (image_width / 2)) - (((Math.sin(toRad(refAngle(this.angle))) * image_width) + (Math.cos(toRad(refAngle(this.angle))) * image_height)) / 2);
-    
-    this.toRight = canvas.width - (this.x + image_width);
-    this.toTop = this.y;
-    this.toBottom = canvas.height - (this.y + image_height);
-    
-    if (this.toLeft <= 0) this.velocity_x -= this.toLeft * edge_current;
-    if (this.toRight <= 0) this.velocity_x += this.toRight * edge_current;
-    if (this.toTop <= 0) this.velocity_y -= this.toTop * edge_current;
-    if (this.toBottom <= 0) this.velocity_y += this.toBottom * edge_current;
-    //if (this.toLeft <= 0 || this.toRight <= 0 || this.toTop <= 0 || this.toBottom <= 0) this.rotation_speed -= edge_current;
-    if (this.velocity_x > 0 && this.velocity_x > terminal_velocity) this.velocity_x = terminal_velocity;
-    if (this.velocity_x < 0 && this.velocity_x < -terminal_velocity) this.velocity_x = -terminal_velocity;
-    if (this.velocity_y > 0 && this.velocity_y > terminal_velocity) this.velocity_y = terminal_velocity;
-    if (this.velocity_y < 0 && this.velocity_y < -terminal_velocity) this.velocity_y = -terminal_velocity;
-    if (this.rotation_speed > 0 && this.rotation_speed > terminal_velocity) this.rotation_speed = terminal_velocity;
-    if (this.rotation_speed < 0 && this.rotation_speed < -terminal_velocity) this.rotation_speed = -terminal_velocity;
-    
-    if (this.velocity_x > 0 && this.velocity_x < minimum_velocity) this.velocity_x = 0;
-    if (this.velocity_x < 0 && this.velocity_x > -minimum_velocity) this.velocity_x = 0;
-    if (this.velocity_y > 0 && this.velocity_y < minimum_velocity) this.velocity_y = 0;
-    if (this.velocity_y < 0 && this.velocity_y > -minimum_velocity) this.velocity_y = 0;
-    if (this.rotation_speed > 0 && this.rotation_speed < minimum_velocity) this.rotation_speed = 0;
-    if (this.rotation_speed < 0 && this.rotation_speed > -minimum_velocity) this.rotation_speed = 0;
-    ctx.save();
-    ctx.translate(this.x + (image_width / 2), this.y + (image_height / 2));
-    ctx.rotate(toRad(this.angle));
-    ctx.drawImage(this.image, -image_width / 2, -image_height / 2, image_width, image_height);
-    ctx.restore();
-  }
-  
-  let boat = new sprite((canvas.width / 2) - (image_width / 2), (canvas.height / 2) - (image_height / 2));
-  
-  function frame() {
-    if (!tracing) ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (whirlpoolcheck.checked) whirlpool_mode = true;
-    boat.render();
-    /*ctx.fillText(`Boat Angle: ${Math.round(boat.angle)}`, 50, 75);
-    ctx.fillText(`Boat Distance to:   Left: ${Math.round(boat.toLeft)}, Right: ${Math.round(boat.toRight)}, Top: ${Math.round(boat.toTop)}, Bottom: ${Math.round(boat.toBottom)}`, 50, 125);
-    ctx.fillText(`Boat X-Velocity: ${boat.velocity_x.toFixed(2)}`, 50, 175);
-    ctx.fillText(`Boat Y-Velocity: ${boat.velocity_y.toFixed(2)}`, 50, 225);
-    ctx.fillText(`Boat Velocity: ${boat.velocity.toFixed(2)}`, 50, 275);*/
-    //ctx.fillText(`Rotation speed: ${boat.rotation_speed.toFixed(2)}, X-velocity: ${Math.abs(boat.velocity_x.toFixed(2))}, Rudder power: ${boat.rudder_power.toFixed(2)}, Thrust: ${boat.thrust.toFixed(2)}`, 50, 75);
-  }
-  let frame_interval = setInterval(frame, 25);
-  
-  function keyDownHandler(e) {
-    if (e.keyCode == 37 || e.keyCode == 65) left_down = true;
-    if (e.keyCode == 38 || e.keyCode == 87) up_down = true;
-    if (e.keyCode == 39 || e.keyCode == 68) right_down = true;
-    if (e.keyCode == 40 || e.keyCode == 83) down_down = true;
-  }
-  addEventListener('keydown', keyDownHandler);
-  
-  function keyUpHandler(e) {
-    if (e.keyCode == 37 || e.keyCode == 65) left_down = false;
-    if (e.keyCode == 38 || e.keyCode == 87) up_down = false;
-    if (e.keyCode == 39 || e.keyCode == 68) right_down = false;
-    if (e.keyCode == 40 || e.keyCode == 83) down_down = false;
-  }
-  addEventListener('keyup', keyUpHandler);
-  
-  function whirlpool() {
-    boat.rotation_speed++;
-    boat.rotation_speed *= 1.1;
-  }
-  
-  function refAngle(angle) {
-    Math.abs(angle);
-    while (angle > 90) angle -= 90;
-    return angle;
-  }
-  
-  function toRad(degrees) {
-    return degrees * (Math.PI / 180);
-  }
-  
-  function toDeg(radians) {
-    return radians * (180 / Math.PI);
-  }
-</script>-->
