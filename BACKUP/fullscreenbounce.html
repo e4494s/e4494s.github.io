@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      canvas {
+        position: absolute;
+        left: 0;
+        width: 100%;
+        bottom: 0;
+        cursor: crosshair;
+      }
+    </style>
+    <link rel = 'icon'  href = 'images/favicon.png' type = 'image/png'/>
+    <title>Bounce ~ e4494s</title>
+  </head>
+<body>
+<canvas id = 'canvas'>Your browser does not support the canvas element.</canvas>
+<script>
+  //https://e4494s.neocities.org/fullscreenbounce.html/bounciness/gravity/air_resistance/friction/tracing/wind/width/height/text/string/terminal_velocity/costume/source
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  canvas.style = 'background-color:black';
+  let rect = canvas.getBoundingClientRect();
+  let mouse_down = false;
+  
+  //let URL = window.location.pathname.split('/');
+  /*let bounciness = Number(URL[1]);
+  let gravity = Number(URL[2]);
+  let air_resistance = Number(URL[3]);
+  let friction = Number(URL[4]);
+  let tracing = URL[5];
+  let wind = Number(URL[6]);
+  let width = Number(URL[7]);
+  let height = Number(URL[8]);
+  let text = URL[9];
+  let string = URL[10];
+  let terminal_velocity = Number(URL[11]);
+  let costume = URL[12];
+  let source = URL[13];*/
+  
+  let url = new URLSearchParams(window.location.search);
+  
+  let bounciness = 0.8;
+  let gravity = 0.5;
+  let air_resistance = 0.01;
+  let friction = 0.1;
+  let tracing = false;
+  let wind = 0;
+  let width = 40;
+  let height = 40;
+  let text = false;
+  let string = '';
+  let terminal_velocity = 1000;
+  let source = 'e4494s.neocities.org/images/bounce/sphere.png';
+  
+  let starting_sphere = true;
+  
+  /*bounciness = Number(url.get('bounciness'));
+  gravity = Number(url.get('gravity'));
+  air_resistance = Number(url.get('air_resistance'));
+  friction = Number(url.get('friction'));
+  tracing = (url.get('tracing') == 'true');
+  wind = Number(url.get('wind'));
+  width = Number(url.get('width'));
+  height = Number(url.get('height'));
+  text = (url.get('text') == 'true');
+  string = (url.get('string') == 'true');
+  terminal_velocity = Number(url.get('terminal_velocity'));
+  source = url.get('source');*/
+  
+  function sprite(xPos, yPos) {
+    this.x = xPos;
+    this.y = yPos;
+    this.last_width = width;
+    this.last_height = height;
+    this.lastX = xPos;
+    this.lastY = yPos;
+    this.visible = true;
+    this.velocity_x = 0;
+    this.velocity_y = 0;
+    this.image = new Image();
+    this.image.src = 'https://' + source;
+  }
+  sprite.prototype.render = function() {
+    if (air_resistance <= 1) this.velocity_x *= 1 - (air_resistance / 2);
+    else this.velocity_x = 0;
+    if (gravity == 0) this.velocity_y *= 1 - (air_resistance / 2);
+    if (this.last_width !== width) {
+      this.x += (this.last_width - width) / 2;
+    }
+    if (this.last_height !== height) {
+      this.y += (this.last_height - height) / 2;
+    }
+    this.last_width = width;
+    this.last_height = height;
+    if (text) width = (string.length * (height / 2)) + string.length * (height / 10);
+    this.x += this.velocity_x;
+    this.y += this.velocity_y;
+    if (this.x < 0) { // Bounce off the left side
+      this.velocity_x *= -bounciness;
+      this.x = 0;
+      if (gravity == 0) {
+        if (friction <= 1) this.velocity_y *= 1 - friction;
+        else this.velocity_y = 0;
+      }
+    }
+    if (this.x + width > canvas.width) { // Bounce off the right side
+      this.velocity_x *= -bounciness;
+      this.x = canvas.width - width;
+      if (gravity == 0) {
+        if (friction <= 1) this.velocity_y *= 1 - friction;
+        else this.velocity_y = 0;
+      }
+    }
+    if (this.y < 0) { // Bounce off the top
+      let overrun = this.y;
+      this.velocity_y -= overrun / this.velocity_y * gravity;
+      this.y = 0;
+      this.velocity_y *= -bounciness;
+      if (friction <= 1) this.velocity_x *= 1 - friction;
+      else this.velocity_x = 0;
+    }
+    if (this.y + height > canvas.height) { // Bounce off the bottom
+      let overrun = this.y + height - canvas.height;
+      this.velocity_y -= overrun / this.velocity_y * gravity;
+      this.y = canvas.height - height;
+      this.velocity_y *= -bounciness;
+      if (friction <= 1) this.velocity_x *= 1 - friction;
+      else this.velocity_x = 0;
+    }
+    else this.velocity_y += gravity; // If not on the edges, fall downward
+    this.velocity_x += wind / 5; // Move over according to wind
+    if (this.velocity_x > 0 && this.velocity_x > terminal_velocity) this.velocity_x = terminal_velocity; // Don't exceed terminal velocity
+    if (this.velocity_x < 0 && this.velocity_x < -terminal_velocity) this.velocity_x = -terminal_velocity;
+    if (this.velocity_y > 0 && this.velocity_y > terminal_velocity) this.velocity_y = terminal_velocity;
+    if (this.velocity_y < 0 && this.velocity_y < -terminal_velocity) this.velocity_y = -terminal_velocity;
+    if (Number.isNaN(this.velocity_x)) this.velocity_x = this.lastX; // If a glitch occurs, reset to previous values
+    if (Number.isNaN(this.velocity_y)) this.velocity_y = this.lastY;
+    this.lastX = this.velocity_x;
+    this.lastY = this.velocity_y;
+    if (!text) ctx.drawImage(this.image, this.x, this.y, width, height);
+    else {
+      ctx.fillStyle = 'white';
+      ctx.fillText(string, this.x, this.y + (height - ctx.lineWidth));
+      ctx.strokeStyle = 'black';
+      ctx.strokeText(string, this.x, this.y + (height - ctx.lineWidth));
+    }
+  }
+  
+  let spheres = [];
+  
+  function frame() {
+    if (!tracing) {
+       ctx.clearRect(0, 0, canvas.width, canvas.height);
+       canvas.width = window.innerWidth;
+       canvas.height = window.innerHeight;
+    }
+    ctx.font = `Bold ${height}px Courier`;
+    ctx.lineWidth = '1';
+    let len = spheres.length;
+    for (i = 0; i < len; i++) spheres[i].render();
+    requestAnimationFrame(frame);
+  }
+  //let frame_interval = setInterval(frame, 25);
+  frame();
+  
+  function makeSphere(sphereX, sphereY, speedX, speedY) {
+    let new_sphere = new sprite(sphereX, sphereY);
+    speedX = typeof speedX !== 'undefined' ? speedX : (((Math.random() * 2) - 1) * 7);
+    speedY = typeof speedY !== 'undefined' ? speedY : (((Math.random() * 2) - 1) * 7);
+    new_sphere.velocity_x = speedX;
+    new_sphere.velocity_y = speedY;
+    spheres.push(new_sphere);
+  }
+  
+  function keyDownHandler(e) {
+    if (e.keyCode == 37) { // Left arrow key pressed, propel left
+      for (i = 0; i < spheres.length; i++) {
+        spheres[i].velocity_x -= 10;
+      }
+    }
+    if (e.keyCode == 38) { // Up arrow key pressed, propel up
+      for (i = 0; i < spheres.length; i++) {
+        spheres[i].velocity_y -= 10;
+      }
+    }
+    if (e.keyCode == 39) { // Right arrow key pressed, propel right
+      for (i = 0; i < spheres.length; i++) {
+        spheres[i].velocity_x += 10;
+      }
+    }
+    if (e.keyCode == 40) { // Down arrow key pressed, propel down
+      for (i = 0; i < spheres.length; i++) {
+        spheres[i].velocity_y += 10;
+      }
+    }
+  }
+  addEventListener('keydown', keyDownHandler);
+  
+  function mouseDownHandler(e) {
+    if (e.clientX >= rect.left + (width / 2) && e.clientX <= rect.right - (width / 2) && e.clientY >= rect.top + (height / 2) && e.clientY <= rect.bottom - (height / 2)) {
+      mouse_down = true;
+      makeSphere(e.clientX - ((width / 2) + rect.left), e.clientY - (height / 2) - rect.top);
+    }
+    if (e.detail > 1) e.preventDefault();
+  }
+  addEventListener('mousedown', mouseDownHandler);
+  
+  function mouseUpHandler(e) {
+    if (e.which == 1) mouse_down = false;
+  }
+  addEventListener('mouseup', mouseUpHandler);
+  
+  function mouseMoveHandler(e) {
+    if (mouse_down && e.clientX >= rect.left + (width / 2) && e.clientX <= rect.right - (width / 2) && e.clientY >= rect.top + (height / 2) && e.clientY <= rect.bottom - (height / 2)) makeSphere(e.clientX - ((width / 2) + rect.left), e.clientY - (height / 2) - rect.top);
+    
+  }
+  addEventListener('mousemove', mouseMoveHandler);
+  
+  function getRand(includeNegative) {
+    let rand = (Math.floor(Math.random() * 100)) / 100;
+    if (includeNegative) rand *= Math.round(Math.random()) == 1 ? 1 : -1;
+    return rand;
+  }
+  
+  function makeMiddleSphere(y) {
+    makeSphere((canvas.width / 2) - (width / 2), y);
+  }
+  
+  let r1 = Math.round(Math.random() * 255);
+  let g1 = Math.round(Math.random() * 255);
+  let b1 = Math.round(Math.random() * 255);
+  let r2 = Math.round(Math.random() * 255);
+  let g2 = Math.round(Math.random() * 255);
+  let b2 = Math.round(Math.random() * 255);
+  
+  let r1_ = Math.floor(Math.random() * 2) == 1 ? 1 : -1;
+  let g1_ = Math.floor(Math.random() * 2) == 1 ? 1 : -1;
+  let b1_ = Math.floor(Math.random() * 2) == 1 ? 1 : -1;
+  let r2_ = Math.floor(Math.random() * 2) == 1 ? 1 : -1;
+  let g2_ = Math.floor(Math.random() * 2) == 1 ? 1 : -1;
+  let b2_ = Math.floor(Math.random() * 2) == 1 ? 1 : -1;
+  function upColor() {
+    if (r1 > 255 || r1 < 0) r1_ *= -1;
+    if (g1 > 255 || g1 < 0) g1_ *= -1;
+    if (b1 > 255 || b1 < 0) b1_ *= -1;
+    if (r2 > 255 || r2 < 0) r2_ *= -1;
+    if (g2 > 255 || g2 < 0) g2_ *= -1;
+    if (b2 > 255 || b2 < 0) b2_ *= -1;
+    r1 += r1_;
+    g1 += g1_;
+    b1 += b1_;
+    r2 += r2_;
+    g2 += g2_;
+    b2 += b2_;
+    canvas.style.backgroundImage = `linear-gradient(to right,rgb(${r1},${g1},${b1}),rgb(${r2},${g2},${b2}))`;
+    requestAnimationFrame(upColor);
+  }
+  
+  let cmd = url.get('command').split('|');
+  for (i = 0; i < cmd.length; i++) eval(cmd[i]);
+  if (starting_sphere) makeMiddleSphere(0);
+</script>
+</body>
+</html>
