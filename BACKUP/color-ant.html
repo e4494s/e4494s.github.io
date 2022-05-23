@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <title>Langton's Ant ~ e4494s</title>
+    <style>
+      canvas {
+        border: none;
+        outline: 2px solid black;
+        width: 400px;
+        height: 400px;
+      }
+    </style>
+  </head>
+<body onload = "reset()">
+<h1>Langton's Ant</h1>
+<canvas id = "canvas"></canvas>
+<button onclick = "if (!running) step()">Step</button>
+<button onclick = "reset()">Reset</button>
+<button onclick = "start()" id = "runbtn">Run</button>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 2000;
+  
+  let gridSize = 50;
+  
+  let grid = [];
+  let time = 0;
+  let running = false;
+  
+  let ant = {};
+  ant.x = Math.floor(gridSize / 2);
+  ant.y = Math.floor(gridSize / 2);
+  ant.d = 270;
+  
+  function setGridSize(number) {
+    gridSize = number;
+    reset();
+  }
+  
+  function step() {
+    let vx = Math.trunc(Math.cos(ant.d * Math.PI / 180));//ant.d == 0 ? 1 : ant.d == 90 || ant.d == 270 ? 0 : -1;
+    let vy = Math.trunc(Math.sin(ant.d * Math.PI / 180));//ant.d == 0 || ant.d == 180 ? 0 : ant.d == 90 ? -1 : 1;
+    ant.x = (ant.x + vx + gridSize) % gridSize;
+    ant.y = (ant.y + vy + gridSize) % gridSize;
+    if (grid[ant.x][ant.y].state == 0) {
+      ant.d += 90;
+      grid[ant.x][ant.y].state = 1;
+      grid[ant.x][ant.y].value++;
+    }
+    else {
+      ant.d -= 90;
+      grid[ant.x][ant.y].state = 0;
+      grid[ant.x][ant.y].value++;
+    }
+    let tileSize = canvas.width / gridSize;
+    for (let x = 0; x < gridSize; x++) {
+      for (let y = 0; y < gridSize; y++) {
+        ctx.fillStyle = `hsl(240deg, 100%, ${grid[x][y].value * 5}%)`;
+        if (grid[x][y].state == 0) ctx.fillStyle = "white";
+        ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+      }
+    }
+    ctx.fillStyle = "red";
+    ctx.fillRect(ant.x * tileSize, ant.y * tileSize, tileSize, tileSize);
+    time++;
+    if (running) requestAnimationFrame(step);
+  }
+  
+  function reset() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    time = 0;
+    grid = [];
+    for (let x = 0; x < gridSize; x++) {
+      grid.push([]);
+      for (let y = 0; y < gridSize; y++) grid[grid.length - 1].push({state: 0, value: 0});
+    }
+  }
+  
+  function start() {
+    if (running) {
+      running = false;
+      runbtn.innerHTML = "Run";
+    }
+    else {
+      running = true;
+      runbtn.innerHTML = "Stop";
+      step();
+    }
+  }
+</script>
+</body>
+</html>
