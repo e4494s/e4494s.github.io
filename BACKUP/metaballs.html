@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>Metaballs ~ e4494s</title>
+  </head>
+<body>
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; Metaballs &mdash;&mdash;</h1>
+<p id = "how-it-works">
+  <b><i>How It Works:</i></b> Each metaballs bounces randomly around the canvas; metaballs that are close to each other will "fuse" together in a lava lamp-like way before stretching apart again. Click the canvas to move all the metaballs to your cursor.
+  <br><br>
+  For best results, turn <span class = "setting">Metaball Size</span> down if you have lots of metaballs.
+</p>
+<br>
+<table>
+  <tr>
+    <td>
+      <button id = "start-stop-btn" onclick = "startStop()">Pause</button>
+      <br><br>
+      <canvas id = "canvas"></canvas>
+      <br>
+      <button class = "download-canvas-btn" onclick = "downloadCanvas()">Download Canvas</button>
+    </td>
+    <td>
+      <button onclick = "randomizeMetaballs()">Randomize Metaballs</button>
+      <hr>
+      <div><b><u>Number of Metaballs:</u></b> <span id = "metaball-count-txt">10</span></div>
+      <input type = "range" min = "2" max = "50" step = "1" value = "10" id = "metaball-count-range" oninput = "updateSettings()">
+      <hr>
+      <div><b><u>Metaball Size:</u></b> <span id = "metaball-radius-txt">1000</span></div>
+      <input type = "range" min = "200" max = "1500" step = "100" value = "1000" id = "metaball-radius-range" oninput = "updateSettings()">
+      <hr>
+      <div><b><u>Metaball Velocity:</u></b> <span id = "metaball-velocity-txt">3</span></div>
+      <input type = "range" min = "0.5" max = "10" step = "0.5" value = "3" id = "metaball-velocity-range" oninput = "updateSettings()">
+    </td>
+  </tr>
+</table>
+<br>
+<div id = "fps-body">FPS: <span id = "fps-txt"></span></div>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 100;
+  let canvasRunning = true;
+  let canvasRect = canvas.getBoundingClientRect();
+  let canvasRatio = canvas.width / 300;
+  
+  let metaballCount = 10;
+  let metaballRadius = 1000;
+  let metaballVelocity = 3;
+  let metaballHue = 60;
+  let lastFrameTime = 0;
+  let lastFpsDisplayTime = 1000;
+  
+  let startStopBtn = document.getElementById("start-stop-btn");
+  let trailingCheckbox = document.getElementById("trailing-checkbox");
+  let metaballCountTxt = document.getElementById("metaball-count-txt");
+  let metaballCountRange = document.getElementById("metaball-count-range");
+  let metaballRadiusTxt = document.getElementById("metaball-radius-txt");
+  let metaballRadiusRange = document.getElementById("metaball-radius-range");
+  let metaballVelocityTxt = document.getElementById("metaball-velocity-txt");
+  let metaballVelocityRange = document.getElementById("metaball-velocity-range");
+  let fpsTxt = document.getElementById("fps-txt");
+  
+  function Metaball() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    let a = Math.random() * Math.PI * 2;
+    this.vx = 1 * Math.cos(a);
+    this.vy = 1 * Math.sin(a);
+  }
+  Metaball.prototype.render = function() {
+    this.x += this.vx * metaballVelocity;
+    this.y += this.vy * metaballVelocity;
+    
+    if (this.x >= canvas.width) {
+      this.x = canvas.width;
+      this.vx *= -1;
+    }
+    if (this.x <= 0) {
+      this.x = 0;
+      this.vx *= -1;
+    }
+    if (this.y >= canvas.height) {
+      this.y = canvas.height;
+      this.vy *= -0.8;
+    }
+    if (this.y <= 0) {
+      this.y = 0;
+      this.vy *= -1;
+    }
+  };
+  let metaballArray = [];
+  for (let i = 0; i < metaballCount; i++) metaballArray.push(new Metaball());
+  
+  function colorPx(x, y) {
+    let distToMetaballs = 0;
+    //let minDist = Infinity;
+    //let closestIndex = 0;
+    for (let i = 0; i < metaballArray.length; i++) {
+      let dx = x - metaballArray[i].x;
+      let dy = y - metaballArray[i].y;
+      distToMetaballs += metaballRadius / Math.sqrt((dx * dx) + (dy * dy));//Math.hypot(x - metaballArray[i].x, y - metaballArray[i].y);
+      //let dist = Math.abs(x - metaballArray[i].x) + Math.abs(y - metaballArray[i].y);//Math.hypot(x - metaballArray[i].x, y - metaballArray[i].y);
+      //if (dist <= minDist) {
+        //minDist = dist;
+        //closestIndex = i;
+      //}
+    }
+    //return `hsl(${(closestIndex / metaballArray.length) * 360}deg, 100%, 50%)`;
+    return `hsl(${metaballHue + distToMetaballs.clamp(0, 360)}deg, 100%, 50%)`;
+  }
+  
+  function drawPixels() {
+    for (let x = 0; x < canvas.width; x++) {
+      for (let y = 0; y < canvas.height; y++) {
+        ctx.fillStyle = colorPx(x, y);
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+  }
+  
+  function frame() {
+    if (Date.now() - lastFpsDisplayTime >= 500) {
+      fpsTxt.innerHTML = Math.floor(1000 / (Date.now() - lastFrameTime));
+      lastFpsDisplayTime = Date.now();
+    }
+    lastFrameTime = Date.now();
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    metaballHue += 2;
+    
+    for (let i = 0; i < metaballArray.length; i++) metaballArray[i].render();
+    
+    drawPixels();
+    
+    if (canvasRunning) requestAnimationFrame(frame);
+  }
+  frame();
+  
+  function startStop() {
+    if (canvasRunning) {
+      canvasRunning = false;
+      startStopBtn.innerHTML = "Play";
+      drawPixels();
+    }
+    else {
+      canvasRunning = true;
+      startStopBtn.innerHTML = "Pause";
+      frame();
+    }
+  }
+  
+  function updateSettings() {
+    metaballCount = metaballCountTxt.innerHTML = Number(metaballCountRange.value);
+    metaballRadius = metaballRadiusTxt.innerHTML = Number(metaballRadiusRange.value);
+    metaballVelocity = metaballVelocityTxt.innerHTML = Number(metaballVelocityRange.value);
+    
+    while (metaballArray.length < metaballCount) metaballArray.push(new Metaball());
+    while (metaballArray.length > metaballCount) metaballArray.pop();
+    
+    if (!canvasRunning) drawPixels();
+  }
+  
+  canvas.addEventListener("mousedown", e => {
+    canvasRect = canvas.getBoundingClientRect();
+    for (let i = 0; i < metaballArray.length; i++) {
+      metaballArray[i].x = canvasRatio * (e.clientX - canvasRect.left);
+      metaballArray[i].y = canvasRatio * (e.clientY - canvasRect.top);
+      let a = Math.random() * Math.PI * 2;
+      metaballArray[i].vx = Math.cos(a);
+      metaballArray[i].vy = Math.sin(a);
+    }
+    if (!canvasRunning) drawPixels();
+  });
+  
+  function randomizeMetaballs() {
+    for (let i = 0; i < metaballArray.length; i++) {
+      metaballArray[i].x = Math.random() * canvas.width;
+      metaballArray[i].y = Math.random() * canvas.height;
+      let a = Math.random() * Math.PI * 2;
+      metaballArray[i].vx = Math.cos(a);
+      metaballArray[i].vy = Math.sin(a);
+    }
+    if (!canvasRunning) drawPixels();
+  }
+  
+  function downloadCanvas() {
+    let link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "metaballs.png";
+    link.click();
+  }
+</script>
+</body>
+</html>
