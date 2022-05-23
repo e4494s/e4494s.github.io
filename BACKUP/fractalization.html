@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png"/>
+    <title>Fractalization ~ e4494s</title>
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <style>
+      .download-canvas-btn {
+        font-weight: bold;
+        border-width: 6px;
+        border-color: #ff9500; /* Accent color */
+        border-style: double dashed double dashed;
+        border-radius: 0;
+        background-color: white;
+        border-color: blue;
+        background-color: transparent;
+      }
+      .download-canvas-btn:hover {
+        background-color: #ccccff;
+      }
+      .download-canvas-btn:active {
+        background-color: #9999ff;
+      }
+      
+      html, body, button, input {
+        font-family: monospace;
+      }
+      
+      #canvas {
+        width: 400px;
+        height: 400px;
+        image-rendering: pixelated;
+        background-color: transparent;
+      }
+      
+      button {
+        background: white;
+        border: 3px solid black;
+        border-radius: 0;
+        cursor: pointer;
+      }
+      button:hover:not(.gridcell) {
+        background: lightgray;
+      }
+      button:active:not(.gridcell) {
+        background: gray;
+      }
+      button:focus, input:focus {
+        outline: none;
+      }
+      
+      input[type = text] {
+        border: 3px solid black;
+        border-radius: 0;
+      }
+      
+      .gridcell {
+        width: 20px;
+        height: 20px;
+        border-radius: 0;
+        cursor: pointer;
+        background: white;
+        border: 1px solid black;
+        margin: 1px;
+      }
+      
+      .title {
+        font-weight: bold;
+        text-decoration: underline;
+      }
+      
+      #fractalizebtn {
+        background: linear-gradient(to right, hsl(0, 100%, 65%), white);
+        font-size: 25px;
+        font-weight: bold;
+        border: 6px solid black;
+        border-radius: 15px;
+      }
+      #fractalizebtn:hover {
+        background: linear-gradient(to right, hsl(0, 100%, 50%), white);
+      }
+      #fractalizebtn:active {
+        background: linear-gradient(to right, hsl(0, 100%, 35%), white);
+      }
+      
+      .colorbutton {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        border: 1px solid black;
+        margin: 2px;
+      }
+      
+      #exportbtn {
+        background: hsl(120deg, 100%, 70%);
+      }
+      #exportbtn:hover {
+        background: hsl(120deg, 100%, 35%);
+      }
+      #exportbtn:active {
+        background: hsl(120deg, 100%, 20%);
+      }
+      
+      #importbtn {
+        background: hsl(240deg, 100%, 80%);
+      }
+      #importbtn:hover {
+        background: hsl(240deg, 100%, 65%);
+      }
+      #importbtn:active {
+        background: blue;
+      }
+      
+      #exportinput, #importinput {
+        background: #e0e0e0;
+      }
+      
+      .small {
+        font-size: 9px;
+        font-style: italic;
+      }
+    </style>
+  </head>
+<body>
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; Fractal Generator &mdash;&mdash;</h1>
+<a href = "fractal-help.html"><i>Click here for a tutorial on how to use the generator</i></a>
+<br><br>
+<div class = "title">Draw a design here:</div>
+<table>
+  <tr>
+    <td style = "padding-right: 15px">
+      <div id = "grid"></div>
+    </td>
+    <td>
+      <div class = "title">Cell Color:</div>
+      <input type = "text" value = "black" id = "cellinput" onchange = "updateColors()">
+      <button onclick = "cellinput.value = randHexColor(); updateColors()">Randomize</button>
+      <div id = "cellcolordiv"></div>
+      <br><br>
+      <div class = "title">Background Color:</div>
+      <input type = "text" value = "white" id = "backgroundinput" onchange = "updateColors()">
+      <button onclick = "backgroundinput.value = randHexColor(); updateColors()">Randomize</button>
+      <div id = "backgroundcolordiv"></div>
+      <br><br>
+      <div class = "title">Click Color:</div>
+      <input type = "text" value = "gray" id = "clickinput" onchange = "updateColors()">
+      <button onclick = "clickinput.value = randHexColor(); updateColors()">Randomize</button>
+      <div id = "clickcolordiv"></div>
+      <br><br>
+      <button onclick = "exportGrid()" id = "exportbtn">Export Grid</button>
+      <input type = "text" id = "exportinput">&nbsp;<span class = "small">Copy text here</span>
+      <br><br>
+      <button onclick = "importGrid()" id = "importbtn">Import Grid</button>
+      <input type = "text" id = "importinput">&nbsp;<span class = "small">Paste text here</span>
+    </td>
+  </tr>
+</table>
+<br>
+<div>Grid Size: <span id = "gridtxt">10</span></div>
+<input type = "range" min = "2" max = "20" value = "9" step = "1" id = "gridrange" onchange = "grid_size = Number(this.value); updateGridSize()">
+<br><br>
+<button onclick = "if (confirm('Are you sure you want to clear the grid?')) turnOffCells()">Clear</button>
+<button onclick = "if (confirm('Are you sure you want to fill the grid?')) turnOnCells()">Fill</button>
+<button onclick = "invertCells()">Invert</button>
+<button onclick = "if (confirm('Are you sure you want to randomize the grid?')) randomizeCells()">Randomize</button>
+<br><br>
+<button onclick = "fractalize()" id = "fractalizebtn">Fractalize!</button>
+<br><br>
+<canvas id = "canvas"></canvas>
+<br>
+<button class = "download-canvas-btn" onclick = "downloadCanvas()">Download</button>
+<br>
+<a href = "fractal-gallery.html" target = "_blank">View the gallery</a>
+<script>
+  const ctx = canvas.getContext("2d");
+  
+  let cell_color = "radial-gradient(white, black, black)";
+  let cell_color_name = "black";
+  let background_color = "white";
+  let click_color = "gray";
+  
+  cellcolordiv.appendChild(createColorBar("cellinput.value = color.style.background; updateColors()"));
+  backgroundcolordiv.appendChild(createColorBar("backgroundinput.value = color.style.background; updateColors()"));
+  clickcolordiv.appendChild(createColorBar("clickinput.value = color.style.background; updateColors()"));
+  
+  let grid_size = 9;
+  function updateGridSize() { 
+    grid.innerHTML = "";
+    gridtxt.innerHTML = grid_size;
+    canvas.width = grid_size * grid_size;
+    canvas.height = grid_size * grid_size;
+    //grid.style.width = 26 * grid_size + "px";
+    for (let i = 0; i < grid_size; i++) {
+      for (let j = 0; j < grid_size; j++) {
+        makeGridCell(j, i);
+      }
+      let br = document.createElement("br");
+      grid.appendChild(br);
+    }
+  }
+  updateGridSize();
+  
+  function updateColors() {
+    let last_cell_color = cell_color;
+    let last_click_color = click_color;
+    cell_color_name = cellinput.style.borderColor = cellinput.value;
+    cell_color = `radial-gradient(white, ${cell_color_name}, ${cell_color_name})`;
+    background_color = backgroundinput.style.borderColor = backgroundinput.value;
+    grid.style.background = background_color;
+    click_color = clickinput.style.borderColor = clickinput.value;
+    let cells = document.getElementsByClassName("gridcell");
+    for (let i = 0; i < cells.length; i++) {
+      if (cells[i].isFilled) cells[i].style.background = cell_color;
+    }
+  }
+  updateColors();
+  
+  function makeGridCell(x, y) {
+    let cell = document.createElement("button");
+    cell.className = "gridcell";
+    cell.style.background = "transparent";
+    cell.onclick = () => switchCell(cell);
+    cell.gridX = x;
+    cell.gridY = y;
+    cell.isFilled = false;
+    
+    grid.appendChild(cell);
+  }
+  
+  function switchCell(element) {
+    if (element.isFilled) {
+      element.style.background = click_color;
+      element.isFilled = false;
+    }
+    else if (element.style.background != "transparent") element.style.background = "transparent";
+    else {
+      element.style.background = cell_color;
+      element.isFilled = true;
+    }
+  }
+  function turnOffCells() {
+    let cells = document.getElementsByClassName("gridcell");
+    for (let i = 0; i < cells.length; i++) {
+      cells[i].style.background = "transparent";
+      cells[i].isFilled = false;
+    }
+  }
+  function turnOnCells() {
+    let cells = document.getElementsByClassName("gridcell");
+    for (let i = 0; i < cells.length; i++) {
+      cells[i].style.background = cell_color;
+      cells[i].isFilled = true;
+    }
+  }
+  function invertCells() {
+    let cells = document.getElementsByClassName("gridcell");
+    for (let i = 0; i < cells.length; i++) {
+      if (cells[i].isFilled) {
+        cells[i].style.background = "transparent";
+        cells[i].isFilled = false;
+      }
+      else if (cells[i].style.background == "transparent") {
+        cells[i].style.background = cell_color;
+        cells[i].isFilled = true;
+      }
+    }
+  }
+  function randomizeCells(symmetry) {
+    turnOffCells();
+    let cells = document.getElementsByClassName("gridcell");
+    for (let i = 0; i < cells.length; i++) {
+      if (Math.round(Math.random()) == 0) switchCell(cells[i]);
+    }
+  }
+  function getCell(x, y) {
+    let cells = document.getElementsByClassName("gridcell");
+    for (let i = 0; i < cells.length; i++) {
+      if (cells[i].gridX == x && cells[i].gridY == y) return cells[i];
+    }
+  }
+  
+  function drawGrid(x, y) {
+    let cells = document.getElementsByClassName("gridcell");
+    for (let i = 0; i < cells.length; i++) {
+      ctx.fillStyle = cells[i].isFilled ? cell_color_name : cells[i].style.background == "transparent" ? background_color : cells[i].style.background;
+      ctx.fillRect(cells[i].gridX + x, cells[i].gridY + y, 1, 1);
+    }
+  }
+  
+  function exportGrid() {
+    let save = {};
+    save.gridSize = grid_size;
+    save.cellColorName = cell_color_name;
+    save.backgroundColor = background_color;
+    save.cells = [];
+    let cellArray = document.getElementsByClassName("gridcell");
+    for (let i = 0; i < cellArray.length; i++) {
+      if (cellArray[i].isFilled) save.cells.push("CELL");
+      else save.cells.push(cellArray[i].style.background);
+    }
+    exportinput.value = window.btoa(JSON.stringify(save));
+  }
+  
+  function importGrid() {
+    let save = JSON.parse(window.atob(importinput.value));
+    grid_size = save.gridSize;
+    updateGridSize();
+    cell_color_name = cellinput.value = cellinput.style.borderColor = save.cellColorName;
+    background_color = backgroundinput.value = backgroundinput.style.borderColor = save.backgroundColor;
+    cell_color = `radial-gradient(white, ${cell_color_name}, ${cell_color_name})`;
+    grid.style.background = background_color;
+    let cellArray = document.getElementsByClassName("gridcell");
+    for (let i = 0; i < cellArray.length; i++) {
+      if (save.cells[i] == "CELL") {
+        cellArray[i].style.background = cell_color;
+        cellArray[i].isFilled = true;
+      }
+      else {
+        cellArray[i].style.background = save.cells[i];
+        cellArray[i].isFilled = false;
+      }
+    }
+  }
+  
+  function createColorBar(onclick) {
+    let color_bar = document.createElement("div");
+    for (let i = 0; i < 11; i++) {
+      let color = document.createElement("button");
+      color.className = "colorbutton";
+      color.onclick = () => eval(onclick);
+      let bg;
+      switch (i) {
+        case 0: bg = "red";
+        break;
+        case 1: bg = "orange";
+        break;
+        case 2: bg = "yellow";
+        break;
+        case 3: bg = "green";
+        break;
+        case 4: bg = "blue";
+        break;
+        case 5: bg = "purple";
+        break;
+        case 6: bg = "black";
+        break;
+        case 7: bg = "dimgray";
+        break;
+        case 8: bg = "gray";
+        break;
+        case 9: bg = "lightgray";
+        break;
+        case 10: bg = "white";
+        break;
+      }
+      color.style.background = bg;
+      color_bar.appendChild(color);
+    }
+    return color_bar;
+  }
+  
+  function randHexColor() {
+    return "#" + Math.floor(Math.random() * 16777215).toString(16);
+  }
+  
+  //
+  
+  function fractalize() {
+    ctx.fillStyle = background_color;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    let cells = document.getElementsByClassName("gridcell");
+    for (let i = 0; i < grid_size; i++) {
+      for (let j = 0; j < grid_size; j++) {
+        if (cells[(i * grid_size) + j].isFilled) drawGrid(j * grid_size, i * grid_size);
+      }
+    }
+  }
+  
+  if (window.location.hash != "" && window.location.hash != "#") {
+    importinput.value = window.location.hash.replace("#", "");
+    importGrid();
+    window.location.hash = "";
+  }
+  
+  function downloadCanvas() {
+    let link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "fractal.png";
+    link.click();
+  }
+</script>
+</body>
+</html>
