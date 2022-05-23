@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: monospace;
+    }
+    button {
+      vertical-align: center;
+      cursor: pointer;
+      font-size: 15px;
+      font-family: monospace;
+      color: white;
+      border: 3px solid white;
+      background-color: transparent;
+      padding-top: 5px;
+      padding-bottom: 2px;
+    }
+    button:focus {
+      outline: none;
+    }
+    .strings {
+      border: 3px solid #009600;
+      color: #009600;
+    }
+    button.strings:hover {
+      transition: 0.2s;
+      color: white;
+    }
+    .currencytitle {
+      font-size: 15px;
+    }
+    .currencyamount {
+      font-size: 25px;
+    }
+    .tab {
+      border: 1px solid white;
+      font-size: 20px;
+    }
+    .tab:hover {
+      transition: 0.33s;
+      background-color: #adadad;
+      box-shadow: 0 0px 0px;
+      color: black;
+    }
+  </style>
+    <link rel = "icon" href = "images/favicon.png" type = "image/png"/>
+    <title>Atomacy ~ e4494s</title>
+  </head>
+<body>
+<div>
+  <button class = "tab" onclick = "showUniversalComponents()"><b>Universal Components</b></button>
+  <button class = "tab" onclick = "showHowTo()"><b>How to Play</b></button>
+</div>
+<div>
+<center><span id = "energytitle1ID" class = "currencytitle">You have </span>
+<span id = "energyamountID" class = "currencyamount">10.00</span>
+<span id = "energytitle2ID" class = "currencytitle"> Energy.</span></center>
+</div>
+<div style = "width:50%;margin:auto">
+  <center><span id = "howtotextID"></span></center>
+</div>
+<center><button id = "generateEnergyID" onclick = "generateEnergy()" style = "display: none" class = "energy"></button></center>
+<br><br>
+<div style = "color: #009600">
+<center><span id = "stringstitle1ID" class = "currencytitle"></span>
+<span id = "stringsamountID" class = "currencyamount"></span>
+<span id = "stringstitle2ID" class = "currencytitle"></span></center>
+</div>
+<center><button id = "energyToStringsID" onclick = "energyToStrings()" class = "strings"><b>Convert Energy to Strings</b></button></center>
+<br><br>
+<div style = "color: orange">
+<center><span id = "quarkstitle1ID" class = "currencytitle"></span>
+<span id = "quarksamountID" class = "currencyamount"></span>
+<span id = "quarkstitle2ID" class = "currencytitle"></span></center>
+</div>
+<center><button id = "stringsToQuarksID" onclick = "stringsToQuarks()" style = "border: 3px solid orange;color: orange;display: none" class = "quarks"></button></center>
+
+<script>
+  function send(ID, message) {
+    document.getElementById(ID).innerHTML = message;
+  }
+  function ex(number) {
+    return number.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2");
+  }
+  function hide(ID) {
+    document.getElementById(ID).style.display = "none";
+    document.getElementById(ID).innerHTML = "";
+  }
+  function show(ID) {
+    document.getElementById(ID).style.display = "inline";
+  }
+  
+  function showUniversalComponents() {
+    how_to_visible = false;
+    hide("howtotextID");
+    if (strings_unlocked) {
+      show("generateEnergyID");
+      send("generateEnergyID", "<b>Generate Energy from Strings</b>");
+      show("stringstitle1ID");
+      send("stringstitle1ID", "You have ");
+      show("stringsamountID");
+      send("stringsamountID", stringsD);
+      show("stringstitle2ID");
+      send("stringstitle2ID", " Strings.");
+    }
+    show("energyToStringsID");
+    send("energyToStringsID", "<b>Convert Energy to Strings</b>");
+    if (quarks_unlocked) {
+      send("generateEnergyID", "<b>Generate Energy from Strings and Quarks</b>");
+      show("quarkstitle1ID");
+      send("quarkstitle1ID", "You have ");
+      show("quarksamountID");
+      send("quarksamountID", quarksD);
+      show("quarkstitle2ID");
+      send("quarkstitle2ID", " Quarks.");
+      show("stringsToQuarksID");
+      send("stringsToQuarksID", "<b>Convert Strings to Quarks</b>");
+    }
+  }
+  function showHowTo() {
+    hide("generateEnergyID");
+    hide("stringstitle1ID");
+    hide("stringsamountID");
+    hide("stringstitle2ID");
+    hide("energyToStringsID");
+    hide("quarkstitle1ID");
+    hide("quarksamountID");
+    hide("quarkstitle2ID");
+    hide("stringsToQuarksID");
+    how_to_visible = true;
+    show("howtotextID");
+    send("howtotextID", "Atomacy is an incremental game about forming the foundations of the Universe. You can convert Energy into Strings, which are zero-dimensional waves that make up all matter in existence. You can generate Energy from Strings, which will not affect the amount of Strings you have. Once you reach 1,000 Strings, you unlock Quarks, which cost Strings to create, but provide much more Energy.<br>In the corner, you will see Instants of Time passing. 10 Instants pass per in-game second, and the speed at which they pass increases based on your atoms. Once you reach 1000 Instants, you can reset Universal Components to unlock Time. Time will automatically generate Energy from Universal Components, and Planck Seconds will begin to pass, giving you an increasing Duration Multiplier to Energy generation.<br>Hotkeys: Space to generate Energy, S to convert to Strings, Q to convert to Quarks, P to convert to Protons, N to convert to Neutrons, E to convert to Electrons, A to convert to Atoms.");
+  }
+  
+  var how_to_visible = false;
+  
+  var time_unlocked = false;
+  var time_available = false;
+  var instants = 0;
+  var planck_seconds = 0;
+  var duration_mult = 1;
+  
+  var strings_unlocked = false;
+  var quarks_unlocked = false;
+  var sub_particles_unlocked = false
+  var atoms_unlocked = false;
+  
+  function save(variable) {
+    localStorage.setItem("item", variable);
+  }
+  let energy = localStorage.getItem("item");
+  if (energy === null) {
+    energy = 10;
+    save(energy);
+  }
+  var energyD = 10;
+  var total_energy = 0;
+  var strings = 0;
+  var stringsD = 0;
+  var total_strings = 0;
+  var quarks = 0;
+  var quarksD = 0;
+  var total_quarks = 0;
+  var protons = 0;
+  var protonsD = 0;
+  var total_protons = 0;
+  var neutrons = 0;
+  var neutronsD = 0;
+  var total_neutrons = 0;
+  var atoms = 0;
+  var atomsD = 0;
+  
+  function frame() {
+    if (strings >= 10) {quarks_unlocked = true;}
+    if (energy < 1000) {energyD = energy.toFixed(2);}
+    else {energyD = ex(energy);}
+    if (strings < 1000) {stringsD = strings.toFixed(2);}
+    else {stringsD = ex(strings);}
+    if (quarks < 1000) {quarksD = quarks.toFixed(2);}
+    else {quarksD = ex(quarks);}
+    if (how_to_visible === false) {
+      send("energyToStringsID", "<b>Convert Energy to Strings</b>");
+      send("energytitle1ID", "You have ");
+      send("energytitle2ID", " Energy.");
+      send("energyamountID", energyD);
+      if (strings_unlocked) {
+        show("generateEnergyID");
+        if (quarks_unlocked === false) {
+          send("generateEnergyID", "<b>Generate Energy from Strings</b>");
+          hide("quarkstitle1ID");
+          send("quarksamountID", "Reach 1.00e3 Strings to unlock Quarks");
+          hide("quarkstitle2ID");
+        }
+        send("stringstitle1ID", "You have ");
+        send("stringsamountID", stringsD);
+        send("stringstitle2ID", " Strings.");
+      }
+      else {
+        hide("generateEnergyID");
+        hide("stringsToQuarksID");
+        send("stringstitle1ID", "");
+        send("stringsamountID", "");
+        send("stringstitle2ID", "");
+      }
+      if (quarks_unlocked) {
+        if (sub_particles_unlocked === false) {send("generateEnergyID", "<b>Generate Energy from Strings and Quarks</b>");}
+        show("quarkstitle1ID");
+        send("quarkstitle1ID", "You have ");
+        send("quarksamountID", quarksD);
+        show("quarkstitle2ID");
+        send("quarkstitle2ID", " Quarks.");
+        show("stringsToQuarksID");
+        send("stringsToQuarksID", "<b>Convert Strings to Quarks</b>");
+      }
+      if (time_unlocked) {generateEnergy();generateEnergy();generateEnergy();generateEnergy();}
+    }
+    save(energy);
+  }
+  setInterval(frame, 25);
+  
+  function generateEnergy() {
+    energy += strings / 5;
+    energy += quarks * 15;
+  }
+  
+  function energyToStrings() {
+    if (strings_unlocked === false) {strings_unlocked = true;}
+    total_energy += energy;
+    strings = Math.pow(total_energy, 0.55);
+    energy = 0;
+  }
+  
+  function stringsToQuarks() {
+    if (quarks_unlocked) {
+      total_energy = 0;
+      total_strings += strings;
+      quarks = Math.pow(total_strings, 0.65);
+      strings = 0;
+    }
+  }
+</script>
+</body>
+</html>
