@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <title>Image Bleeding ~ e4494s</title>
+    <style>
+      canvas {
+        width: 300px;
+        height: 300px;
+        border: 1px solid black;
+      }
+      
+      table, tr, td, th {
+        /*border: 1px solid black;*/
+      }
+      
+      #loadingtxt {
+        font-size: 20px;
+        font-weight: bold;
+        font-style: italic;
+        height: 25px;
+      }
+      
+      button {
+        width: 90px;
+        height: 30px;
+        border-radius: 10px;
+      }
+      
+      #downloadlink {
+        border: 3px solid blue;
+        padding: 10px;
+        border-radius: 50%;
+        color: black;
+        text-decoration: none;
+        background-color: skyblue;
+      }
+      
+      #downloadlink:hover {
+        background-color: rgb(128, 128, 255);
+      }
+      
+      #downloadlink:active {
+        background-color: rgb(64, 64, 255);
+      }
+      
+      .noclick {
+        cursor: auto;
+        border-color: gray;
+        color: gray;
+      }
+      .noclick:hover, .noclick:active {
+        background: white;
+      }
+      
+      input[type = radio] {
+        margin: 0;
+      }
+      
+      .tinypic {
+        width: 20px;
+        height: 20px;
+        padding-left: 5px;
+      }
+      
+      .little {
+        font-style: italic;
+        font-size: 9px;
+      }
+      
+      input[type = text] {
+        border: 3px solid black;
+        border-radius: 0;
+      }
+    </style>
+  </head>
+<body onload = "resetCanvas()">
+<h1>Image Bleeding</h1>
+<table>
+  <tr>
+    <td>
+      <p><b><u>Initial Background:</u></b></p>
+      <input type = "radio" name = "bgradio" id = "bg1" onchange = "initial = 1; resetCanvas()" CHECKED>
+      <label for = "bg1">Landscape<img src = "images/background.jpg" class = "tinypic"></label>
+      <br>
+      <input type = "radio" name = "bgradio" id = "bg14" onchange = "initial = 14; resetCanvas()">
+      <label for = "bg14">Earth<img src = "images/earth.png" class = "tinypic"></label>
+      <br>
+      <input type = "radio" name = "bgradio" id = "bg2" onchange = "initial = 2; resetCanvas()">
+      <label for = "bg2">Cookies<img src = "images/cookies.jpg" class = "tinypic"></label>
+      <br>
+      <input type = "radio" name = "bgradio" id = "bg10" onchange = "initial = 10; resetCanvas()">
+      <label for = "bg10">e4494s<img src = "images/favicon.png" class = "tinypic"></label>
+      <br>
+      <input type = "radio" name = "bgradio" id = "bg3" onchange = "initial = 3; resetCanvas()">
+      <label for = "bg3">Rainbow<img src = "images/rainbow.png" class = "tinypic"></label>
+      <br>
+      <input type = "radio" name = "bgradio" id = "bg4" onchange = "initial = 4; resetCanvas()">
+      <label for = "bg4">Watermelon<img src = "images/HDwatermelon.png" class = "tinypic"></label>
+      <br>
+      <input type = "radio" name = "bgradio" id = "bg13" onchange = "initial = 13; resetCanvas()">
+      <label for = "bg13">Hershey<img src = "images/hershey.png" class = "tinypic"></label>
+      <p><i>Random Color Shapes</i></p>
+      <input type = "radio" name = "bgradio" id = "bg5" onchange = "initial = 5; resetCanvas()">
+      <label for = "bg5">Circle</label>
+      <br>
+      <input type = "radio" name = "bgradio" id = "bg6" onchange = "initial = 6; resetCanvas()">
+      <label for = "bg6">Stripe</label>
+      <br>
+      <input type = "radio" name = "bgradio" id = "bg15" onchange = "initial = 15; resetCanvas()">
+      <label for = "bg15">Lines</label>
+      <br>
+      <input type = "radio" name = "bgradio" id = "bg7" onchange = "initial = 7; resetCanvas()">
+      <label for = "bg7">Gradient</label>
+      <br>
+      <input type = "radio" name = "bgradio" id = "bg8" onchange = "initial = 8; resetCanvas()">
+      <label for = "bg8">Four Corners</label>
+      <br>
+      <input type = "radio" name = "bgradio" id = "bg9" onchange = "initial = 9; resetCanvas()">
+      <label for = "bg9">Checkerboard</label>
+      <br>
+      <input type = "radio" name = "bgradio" id = "bg11" onchange = "initial = 11; resetCanvas()">
+      <label for = "bg11">Static</label>
+      <br>
+      <input type = "radio" name = "bgradio" id = "bg12" onchange = "initial = 12; resetCanvas()">
+      <label for = "bg12">Three Armies</label>
+      <br><br>
+      <div><b><u>Import Base64 Image URL:</u></b></div>
+      <input type = "text" id = "png64txt">
+      <button onclick = "initial = 'custom'; resetCanvas()">Load</button>
+      <div class = "little" style = "width: 200px">Because images and servers and origins are confusing I can't figure out how to let you upload your own image to mess with so this is the best you're gonna get, sorry</div>
+    </td>
+    <td style = "width: 200px">
+      <div><b><u>Color Bleed Type:</u></b></div>
+      <input type = "radio" name = "typeradio" id = "type1" onchange = "bleedType = 'spread'" CHECKED>
+      <label for = "type1">Spread pixels</label>
+      <br>
+      <input type = "radio" name = "typeradio" id = "type2" onchange = "bleedType = 'switch'">
+      <label for = "type2">Switch pixels</label>
+      <br><br><br>
+      <div><b><u>Color Bleed Chance:</u></b> <span id = "bleedchancetxt">50</span>%</div>
+      <input type = "range" min = "0.05" max = "1" step = "0.05" value = "0.5" id = "bleedchancerange" oninput = "bleedChance = Number(this.value); bleedchancetxt.innerHTML = Math.trunc(this.value * 100)">
+      <br><br><br>
+      <div><b><u>Canvas Size:</u></b> <span id = "canvassizetxt">200</span>px</div>
+      <input type = "range" min = "25" max = "500" step = "25" value = "200" id = "canvassizerange" oninput = "canvas.width = canvas.height = Number(this.value); resetCanvas(); canvassizetxt.innerHTML = this.value">
+      <div class = "little">Note: the program runs <b>significantly</b> faster on a smaller canvas</div>
+    </td>
+    <td>
+      <canvas id = "canvas"></canvas>
+      <p id = "loadingtxt"></p>
+      <p>Steps: <span id = "stepstxt">0</span></p>
+      <button onclick = "toggleBleed(); this.blur()" id = "startbtn">Run</button>
+      <button onclick = "if (!running) { getPixels(); bleedTick(); this.blur(); }" id = "stepbtn">Step</button>
+      <button onclick = "resetCanvas()" id = "resetbtn">Reset</button>
+      <br><br><br>
+      <a href = "images/background.jpg" id = "downloadlink" download = "image.png">Download</a>
+    </td>
+  </tr>
+</table>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 200;
+  
+  let pixels = [];
+  
+  let steps = 0;
+  let bleedType = "spread";
+  
+  let bleedChance = 0.5;
+  
+  let background = new Image();
+  background.src = "images/background.jpg";
+  
+  downloadlink.href = canvas.toDataURL();
+  
+  let running = false;
+  let initial = 1;
+  
+  function toggleBleed() {
+    running = !running;
+    if (running) {
+      loadingtxt.innerHTML = "Running...";
+      startbtn.innerHTML = "Stop";
+      resetbtn.className = stepbtn.className = "noclick";
+      resetCanvas();
+    }
+    else {
+      loadingtxt.innerHTML = "";
+      startbtn.innerHTML = "Run";
+      resetbtn.className = stepbtn.className = "";
+      downloadlink.href = canvas.toDataURL();
+    }
+    getPixels();
+    bleedTick();
+  }
+  
+  function resetCanvas() {
+    if (!running) {
+      steps = 0;
+      stepstxt.innerHTML = steps;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      switch (initial) {
+        case 1: // Landscape
+          background.src = "images/background.jpg";
+          ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+        break;
+        case 2: // Cookies
+          background.src = "images/cookies.jpg";
+          ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+        break;
+        case 3: // Rainbow
+          background.src = "images/rainbow.png";
+          ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+        break;
+        case 4: // Watermelon
+          background.src = "images/HDwatermelon.png";
+          ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+        break;
+        case 5: // Circle
+          ctx.fillStyle = (new RGB()).print();
+          ctx.fillCircle(canvas.width / 2, canvas.height / 2, canvas.width / 4);
+        break;
+        case 6: // Stripe
+          ctx.fillStyle = (new RGB()).print();
+          ctx.fillRectFromCenter(canvas.width / 2, canvas.height / 2, canvas.width / 2, canvas.height);
+        break;
+        case 7: // Gradient
+          let grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height - (Math.random() * canvas.height * 2));
+          let color = new RGB();
+          grad.addColorStop(0, color.print());
+          color.invert();
+          grad.addColorStop(1 / 3, color.print());
+          color = new RGB();
+          grad.addColorStop(2 / 3, color.print());
+          color.invert();
+          grad.addColorStop(1, color.print());
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        break;
+        case 8: // Four Corners
+          ctx.fillStyle = (new RGB()).print();
+          ctx.fillRect(0, 0, canvas.width / 2, canvas.height / 2);
+          ctx.fillStyle = (new RGB()).print();
+          ctx.fillRect(canvas.width / 2, 0, canvas.width / 2, canvas.height / 2);
+          ctx.fillStyle = (new RGB()).print();
+          ctx.fillRect(0, canvas.height / 2, canvas.width / 2, canvas.height / 2);
+          ctx.fillStyle = (new RGB()).print();
+          ctx.fillRect(canvas.width / 2, canvas.height / 2, canvas.width / 2, canvas.height / 2);
+        break;
+        case 9: // Checkerboard
+          let color1 = (new RGB()).print();
+          let color2 = (new RGB()).print();
+          let lastColor = 1;
+          let tileSize = canvas.width / 10;
+          for (let x = 0; x < canvas.width; x += tileSize) {
+            for (let y = 0; y < canvas.height; y += tileSize) {
+              if (lastColor == 1) {
+                ctx.fillStyle = color2;
+                lastColor = 2;
+              }
+              else {
+                ctx.fillStyle = color1;
+                lastColor = 1;
+              }
+              ctx.fillRect(x, y, tileSize, tileSize);
+            }
+            lastColor = lastColor == 1 ? 2 : 1;
+          }
+        break;
+        case 10: // e4494s
+          background.src = "images/favicon.png";
+          ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+        break;
+        case 11: // Static
+          for (let x = 0; x < canvas.width; x++) {
+            for (let y = 0; y < canvas.height; y++) {
+              ctx.fillStyle = `hsl(0deg, 0%, ${Math.random() * 100}%)`;//(new RGB()).print();
+              ctx.fillRect(x, y, 1, 1);
+            }
+          }
+        break;
+        case 12: // Three Armies
+          let c1 = (new HSL(undefined, 100, 25)).print();
+          let c2 = (new HSL(undefined, 100, 50)).print();
+          let c3 = (new HSL(undefined, 100, 75)).print();
+          for (let x = 0; x < canvas.width; x++) {
+            for (let y = 0; y < canvas.height; y++) {
+              switch (Math.floor(Math.random() * 3)) {
+                case 0: ctx.fillStyle = c1;
+                break;
+                case 1: ctx.fillStyle = c2;
+                break;
+                case 2: ctx.fillStyle = c3;
+                break;
+              }
+              ctx.fillRect(x, y, 1, 1);
+            }
+          }
+        break;
+        case 13: // Hershey
+          background.src = "images/hershey.png";
+          ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+          /*ctx.font = "bold 25px arial";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "top";
+          ctx.fillStyle = "lime";
+          ctx.fillMultiLineText(["hi", "hi", "hi", "hi again"], canvas.width / 2, canvas.height / 2, 25);
+          ctx.strokeStyle = "black";
+          ctx.lineWidth = 1;
+          ctx.strokeMultiLineText(["hi", "hi", "hi", "hi again"], canvas.width / 2, canvas.height / 2, 25);*/
+        break;
+        case 14: // Earth
+          background.src = "images/earth.png";
+          ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+        break;
+        case 15: // Lines
+          for (let i = 0; i < 50; i++) {
+            ctx.lineWidth = randBetween(1, 10);
+            ctx.strokeStyle = (new RGB()).print();
+            ctx.beginPath();
+            switch (Math.floor(Math.random() * 4)) {
+              case 0: ctx.moveTo(0, Math.random() * canvas.height);
+              break;
+              case 1: ctx.moveTo(canvas.width, Math.random() * canvas.height);
+              break;
+              case 2: ctx.moveTo(Math.random() * canvas.width, 0);
+              break;
+              case 3: ctx.moveTo(Math.random() * canvas.width, canvas.height);
+            }
+            switch (Math.floor(Math.random() * 4)) {
+              case 0: ctx.lineTo(0, Math.random() * canvas.height);
+              break;
+              case 1: ctx.lineTo(canvas.width, Math.random() * canvas.height);
+              break;
+              case 2: ctx.lineTo(Math.random() * canvas.width, 0);
+              break;
+              case 3: ctx.lineTo(Math.random() * canvas.width, canvas.height);
+            }
+            ctx.stroke();
+          }
+        break;
+        case "custom":
+          background.src = png64txt.value;
+          ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+        break;
+      }
+    }
+  }
+  
+  function getPixels() {
+    pixels = [];
+    let pxData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    for (let x = 0; x < canvas.width; x++) {
+      pixels.push([]);
+      for (let y = 0; y < canvas.height; y++) {
+        //let px = ctx.getImageData(x, y, 1, 1).data;
+        //pixels[pixels.length - 1].push(`rgba(${px[0]}, ${px[1]}, ${px[2]}, ${px[3]})`);
+        pixels[pixels.length - 1].push(`rgba(${pxData[(x * 4) + (y * canvas.width * 4)]}, ${pxData[(x * 4) + (y * canvas.width * 4) + 1]}, ${pxData[(x * 4) + (y * canvas.width * 4) + 2]}, ${pxData[(x * 4) + (y * canvas.width * 4) + 3]})`);
+      }
+    }
+  }
+  
+  function drawPixels() {
+    for (let x = 0; x < canvas.width; x++) {
+      for (let y = 0; y < canvas.height; y++) {
+        ctx.clearRect(x, y, 1, 1);
+        ctx.fillStyle = pixels[x][y];
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+  }
+  
+  function bleedTick() {
+    let pixelsCopy = pixels;
+    for (let x = 0; x < canvas.width; x++) {
+      for (let y = 0; y < canvas.height; y++) {
+        if (Math.floor(Math.random() * (1 / bleedChance)) == 0) {
+          let seed = Math.floor(Math.random() * 4);
+          if (bleedType == "spread") {
+            switch (seed) {
+              case 0: pixelsCopy[x][(y - 1 + canvas.height) % canvas.height] = pixels[x][y]; // top
+              break;
+              case 1: pixelsCopy[(x + 1) % canvas.width][y] = pixels[x][y]; // right
+              break;
+              case 2: pixelsCopy[x][(y + 1) % canvas.height] = pixels[x][y]; // bottom
+              break;
+              case 3: pixelsCopy[(x - 1 + canvas.width) % canvas.width][y] = pixels[x][y]; // left
+              break;
+            }
+          }
+          else if (bleedType == "switch") {
+            let px = pixels[x][y];
+            switch (seed) {
+              case 0: // top
+                pixelsCopy[x][y] = pixelsCopy[x][(y - 1 + canvas.height) % canvas.height];
+                pixelsCopy[x][(y - 1 + canvas.height) % canvas.height] = px;
+              break;
+              case 1: // right
+                pixelsCopy[x][y] = pixelsCopy[(x + 1) % canvas.width][y];
+                pixelsCopy[(x + 1) % canvas.width][y] = px;
+              break;
+              case 2: // bottom
+                pixelsCopy[x][y] = pixelsCopy[x][(y + 1) % canvas.height];
+                pixelsCopy[x][(y + 1) % canvas.height] = px;
+              break;
+              case 3: // left
+                pixelsCopy[x][y] = pixelsCopy[(x - 1 + canvas.width) % canvas.width][y];
+                pixelsCopy[(x - 1 + canvas.width) % canvas.width][y] = px;
+              break;
+            }
+          }
+        }
+      }
+    }
+    pixels = pixelsCopy;
+    drawPixels();
+    steps++;
+    stepstxt.innerHTML = steps;
+    if (running) requestAnimationFrame(bleedTick);
+  }
+  
+  CanvasRenderingContext2D.prototype.fillMultiLineText = function(textArray, x, y, lineHeight) {
+    let totalHeight = textArray.length * lineHeight;
+    for (let i = 0; i < textArray.length; i++) {
+      this.fillText(textArray[i], x, ((i * lineHeight) - (totalHeight / 2)) + y);
+    }
+  }
+  CanvasRenderingContext2D.prototype.strokeMultiLineText = function(textArray, x, y, lineHeight) {
+    let totalHeight = textArray.length * lineHeight;
+    for (let i = 0; i < textArray.length; i++) {
+      this.strokeText(textArray[i], x, ((i * lineHeight) - (totalHeight / 2)) + y);
+    }
+  }
+</script>
+</body>
+</html>
