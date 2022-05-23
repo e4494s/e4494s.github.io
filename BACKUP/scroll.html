@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png"/>
+    <title>Scrolling Text ~ e4494s</title>
+    <style>
+      html, body {
+        background-color: black;
+        color: white;
+      }
+      
+      html, body, input[type = text], button {
+        font-family: monospace;
+      }
+      
+      input[type = text] {
+        border: 2px solid gray;
+        background-color: white;
+        border-radius: 0;
+        width: 200px;
+      }
+      input[type = text]::placeholder {
+        color: gray;
+        font-style: italic;
+      }
+      
+      button {
+        border: 2px solid white;
+        background-color: black;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      
+      button:hover {
+        background-color: rgb(75 75 75);
+      }
+      
+      button:active {
+        background-color: rgb(120 120 120);
+      }
+      
+      input:focus, button:focus {
+        outline: none;
+      }
+      
+      #scrolltxt {
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+<body>
+<input type = "text" id = "inputtxt" placeholder = "Type something here..." spellcheck = "false" maxlength = "20" value = "e4494s">
+<button onclick = "makeScrollText()">Go!</button>
+<p id = "scrolltxt"></p>
+<script>
+  let text = document.getElementById("inputtxt");
+  let scroll = document.getElementById("scrolltxt");
+  
+  function makeScrollText() {
+    let txt = text.value;
+    let result = "";
+    
+    result += (txt + "<br>").multiply(10);
+    
+    for (let i = 0; i < 10; i++) {
+      for (let j = 0; j < 15; j++) result += txt.spaceOut(j) + "<br>";
+      for (let j = 15; j > 0; j--) result += txt.spaceOut(j) + "<br>";
+    }
+    result += txt + "<br>";
+    
+    /*for (let i = 0; i < 13; i++) result += " ".multiply(txt.length * i) + txt + "<br>";
+    let max_length = txt.spaceOut(15).length;
+    let max_length_txt = " ".multiply(Math.floor(max_length / txt.length) * txt.length);
+    result += max_length_txt;
+    for (let i = 0; i < max_length - max_length_txt.length; i++) result += txt[i];
+    result += "<br>";*/
+    
+    for (let i = 0; i < 10; i++) {
+      let max_length = txt.spaceOut(15).length;
+      for (let j = 0; j < 15; j++) {
+        let j_length = txt.spaceOut(j).length;
+        result += " ".multiply(max_length - j_length) + txt.spaceOut(j) + "<br>";
+      }
+      for (let j = 15; j > 0; j--) {
+        let j_length = txt.spaceOut(j).length;
+        result += " ".multiply(max_length - j_length) + txt.spaceOut(j) + "<br>";
+      }
+    }
+    
+    scroll.innerHTML = result;
+  }
+  
+  
+  
+  String.prototype.multiply = function(n) {
+    let result = "";
+    for (let i = 0; i < n; i++) result += this;
+    return result;
+  }
+  String.prototype.divide = function(n) { // "helloo"
+    let result = [];
+    for (let i = 0; i < this.length; i+= Math.floor(this.length / n)) {
+      result.push("");
+      for (let j = i; j < this.length / n; j++) result[result.length - 1] += this[j];
+    }
+    
+    
+    /*
+    for (let i = 0; i < this.length; i += Math.ceil(this.length / n)) {
+      result.push("");
+      for (let j = Math.ceil(i); j < (this.length / n) + Math.ceil(i); j++) result[result.length - 1] += this[j];
+    }*/
+    return result;
+  }
+  String.prototype.spaceOut = function(n) {
+    let result = "";
+    let space = " ".multiply(n);
+    for (let i = 0; i < this.length; i++) {
+      result += this[i];
+      if (i != this.length - 1) result += space;
+    }
+    return result;
+  }
+</script>
+</body>
+</html>
