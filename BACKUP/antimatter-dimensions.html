@@ -1,0 +1,1076 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png"/>
+    <title>Antimatter Dimensions ~ e4494s</title>
+  </head>
+<body>
+<style>
+body {
+  font-family: monospace;
+}
+.title {font-size: 15px;}
+
+.number {font-size: 25px;}
+
+.smallspace {
+  font-size: 0em;
+}
+
+.break {
+  line-height: 1px;
+}
+
+button {
+  cursor: pointer;
+  font-family: monospace;
+  background-color: #adadad;
+  transition: 0.33s;
+  border-width: 2px;
+  border-color: #000000;
+  border-radius: 5px;
+  color: black;
+  padding: 2px 8px;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 17px;
+}
+
+.dimensionname {
+  display: inline;
+  left: 20px;
+  font-size: 18px;
+}
+
+.dimensionamount {
+  position: absolute;
+  left: 400px;
+  font-size: 18px;
+}
+
+.dimensionbutton {
+  position: absolute;
+  right: 300px;
+}
+
+.maxdimensionbutton {
+  position: absolute;
+  right: 20px;
+}
+
+.shiftboost {
+  padding-top: 5px;
+  padding-bottom: 3px;
+  font-size: 12px;
+  position: absolute;
+  right: 310px;
+}
+
+button:focus{
+  outline: none;
+}
+.tabs {
+  padding-top: 6px;
+  padding-bottom: 1px;
+  background-color: #dedede;
+  font-size: 20px;
+}
+
+.tabs:hover {
+  background-color: #ffffff;
+}
+.howto {
+  font-size: 14px;
+  top: 200px;
+  position: absolute;
+  left: 25%;
+  right: 25%;
+  width: 50%;
+}
+</style>
+<div>
+<center><span class = "title" id = "youhaveID">You have</span>
+<span class = "smallspace" id = "smallspaceID">&nbsp;</span>
+<span class = "number" id = "antimatterID"></span>
+<span class = "smallspace" id = "smallspace2ID">&nbsp;</span>
+<span class = "title" id = "antimatterwordID">antimatter.</span></center>
+</div>
+<div><center>
+<span class = "title" id = "antimatter_per_secondID"></span>
+</center></div>
+<div><center>
+<span class = "title" id = "tickspeed_reductionID"></span>
+</center></div>
+<div><center>
+<button onclick = "tickspeedPurchase()" id = "tickspeedPurchaseID"></button>
+<button onclick = "maxTickspeedPurchase()" id = "maxTickspeedPurchaseID">Buy Max</button>
+</center></div>
+<div><center>
+<p style = "font-size: 4px"></p>
+<span class = "title" id = "tickspeedID"></span>
+</center></div>
+<br>
+<div><center>
+<button class = "tabs" id = "dimensionstabID" onclick = "showDimensions()"></button>
+<button class = "tabs" id = "howtoplaytabID" onclick = "showHowTo()"></button>
+</center></div>
+<br>
+<div id = "dimensions">
+<div>
+<span class = "dimensionname" id = "dim_1_multID"></span>
+<span class = "dimensionamount" id = "dim1ID"></span>
+<button class = "dimensionbutton" onclick = "dim1Purchase()" id = "dim1PurchaseID"></button>
+<button class = "maxdimensionbutton" onclick = "maxDim1Purchase()" id = "maxDim1PurchaseID"></button>
+</div>
+<br><br>
+<div>
+<span class = "dimensionname" id = "dim_2_multID"></span>
+<span class = "dimensionamount" id = "dim2ID"></span>
+<button class = "dimensionbutton" onclick = "dim2Purchase()" id = "dim2PurchaseID"></button>
+<button class = "maxdimensionbutton" onclick = "maxDim2Purchase()" id = "maxDim2PurchaseID"></button>
+</div>
+<br><br>
+<div>
+<span class = "dimensionname" id = "dim_3_multID"></span>
+<span class = "dimensionamount" id = "dim3ID"></span>
+<button class = "dimensionbutton" onclick = "dim3Purchase()" id = "dim3PurchaseID"></button>
+<button class = "maxdimensionbutton" onclick = "maxDim3Purchase()" id = "maxDim3PurchaseID"></button>
+</div>
+<br><br>
+<div>
+<span class = "dimensionname" id = "dim_4_multID"></span>
+<span class = "dimensionamount" id = "dim4ID"></span>
+<button class = "dimensionbutton" onclick = "dim4Purchase()" id = "dim4PurchaseID"></button>
+<button class = "maxdimensionbutton" onclick = "maxDim4Purchase()" id = "maxDim4PurchaseID"></button>
+</div>
+<br><br>
+<div>
+<span class = "dimensionname" id = "dim_5_multID"></span>
+<span class = "dimensionamount" id = "dim5ID"></span>
+<button class = "dimensionbutton" onclick = "dim5Purchase()" id = "dim5PurchaseID"></button>
+<button class = "maxdimensionbutton" onclick = "maxDim5Purchase()" id = "maxDim5PurchaseID"></button>
+</div>
+<br><br>
+<div>
+<span class = "dimensionname" id = "dim_6_multID"></span>
+<span class = "dimensionamount" id = "dim6ID"></span>
+<button class = "dimensionbutton" onclick = "dim6Purchase()" id = "dim6PurchaseID"></button>
+<button class = "maxdimensionbutton" onclick = "maxDim6Purchase()" id = "maxDim6PurchaseID"></button>
+</div>
+<br><br>
+<div>
+<span class = "dimensionname" id = "dim_7_multID"></span>
+<span class = "dimensionamount" id = "dim7ID"></span>
+<button class = "dimensionbutton" onclick = "dim7Purchase()" id = "dim7PurchaseID"></button>
+<button class = "maxdimensionbutton" onclick = "maxDim7Purchase()" id = "maxDim7PurchaseID"></button>
+</div>
+<br><br>
+<div>
+<span class = "dimensionname" id = "dim_8_multID"></span>
+<span class = "dimensionamount" id = "dim8ID"></span>
+<button class = "dimensionbutton" onclick = "dim8Purchase()" id = "dim8PurchaseID"></button>
+<button class = "maxdimensionbutton" onclick = "maxDim8Purchase()" id = "maxDim8PurchaseID"></button>
+</div>
+<br><br>
+<div>
+<span class = "dimensionname" id = "dimensionshiftboostID"></span>
+<button class = "shiftboost" onclick = "dimShiftBoost()" id = "shiftboostbuttonID"></button>
+</div>
+<br><br>
+<div>
+<span class = "dimensionname" id = "galaxyID"></span>
+<button class = "shiftboost" onclick = "galaxy()" id = "galaxybuttonID"></button>
+</div>
+<div>
+<span class = "dimensionname" id = "test"></span>
+</div>
+</div>
+<center><div id = "howtotext" class = "howto"></div></center>
+<script type = "text/javascript" src = "break_infinity.js"></script>
+<script>
+  function send(ID, message) {
+    document.getElementById(ID).innerHTML = message;
+  }
+  
+  function color(ID, color) {
+    document.getElementById(ID).style.backgroundColor = color;
+  }
+  
+  function hide(ID) {
+    document.getElementById(ID).innerHTML = "";
+    document.getElementById(ID).style.display = "none";
+  }
+  
+  function show(ID) {
+    document.getElementById(ID).style.display = "inline";
+  }
+  
+  
+  function showHowTo() {
+    dimensionsvisible = false;
+    hide("dim_1_multID");
+    hide("dim_2_multID");
+    hide("dim_3_multID");
+    hide("dim_4_multID");
+    hide("dim_5_multID");
+    hide("dim_6_multID");
+    hide("dim_7_multID");
+    hide("dim_8_multID");
+    
+    hide("dim1ID");
+    hide("dim2ID");
+    hide("dim3ID");
+    hide("dim4ID");
+    hide("dim5ID");
+    hide("dim6ID");
+    hide("dim7ID");
+    hide("dim8ID");
+    
+    hide("dim1PurchaseID");
+    hide("dim2PurchaseID");
+    hide("dim3PurchaseID");
+    hide("dim4PurchaseID");
+    hide("dim5PurchaseID");
+    hide("dim6PurchaseID");
+    hide("dim7PurchaseID");
+    hide("dim8PurchaseID");
+    
+    hide("maxDim1PurchaseID");
+    hide("maxDim2PurchaseID");
+    hide("maxDim3PurchaseID");
+    hide("maxDim4PurchaseID");
+    hide("maxDim5PurchaseID");
+    hide("maxDim6PurchaseID");
+    hide("maxDim7PurchaseID");
+    hide("maxDim8PurchaseID");
+    
+    hide("dimensionshiftboostID");
+    hide("shiftboostbuttonID");
+    hide("galaxyID");
+    hide("galaxybuttonID");
+    
+    show("howtotext");
+    send("howtotext", "Antimatter Dimensions is an incremental game about huge numbers. The ultimate goal is reaching Infinity (1.80e308), and getting an Infinity Point to spend on various upgrades.<br><br>There are eight Dimensions, and each produces the Dimension below it. The Eighth Dimension produces Seventh Dimensions, the Seventh Dimension produces Sixth Dimensions, and so on. The First Dimension produces antimatter. Because of this, antimatter production is rapid and exponential.<br><br>Each Dimension costs antimatter to create, and once you buy ten of a Dimension, the cost increases and the Dimension becomes twice as powerful, so it is still beneficial to buy lower Dimensions, even if you have trillions of them.<br>The repeatable upgrade at the top of the screen increases the tickspeed. Each upgrade makes all Dimensions 11% faster.<br><br>A Dimension Shift requires ten of the highest Dimension you have, and will reset your Dimensions and antimatter, but you will unlock a new Dimension, and the power of the First Dimension will be doubled. Once you have all eight Dimensions, you can perform a Dimension Boost, which resets your Dimensions and antimatter, and doubles the power of the First Dimension.<br><br>An Antimatter Galaxy is a powerful upgrade that resets your Dimensions, antimatter, and Dimension Shifts/Boosts. However, it will make each tickspeed upgrade 3% more effective. This may seem like a major hindrance rather than a help, but the speed boost will be incredibly beneficial. It is necessary to have one or two Galaxies to reach Infinity in a reasonable amount of time.");
+  }
+  
+  function showDimensions() {
+    dimensionsvisible = true;
+    hide("howtotext");
+    
+    show("dim_1_multID");
+    show("dim_2_multID");
+    show("dim_3_multID");
+    show("dim_4_multID");
+    show("dim_5_multID");
+    show("dim_6_multID");
+    show("dim_7_multID");
+    show("dim_8_multID");
+    
+    show("dim1ID");
+    show("dim2ID");
+    show("dim3ID");
+    show("dim4ID");
+    show("dim5ID");
+    show("dim6ID");
+    show("dim7ID");
+    show("dim8ID");
+    
+    show("dim1PurchaseID");
+    show("dim2PurchaseID");
+    show("dim3PurchaseID");
+    show("dim4PurchaseID");
+    show("dim5PurchaseID");
+    show("dim6PurchaseID");
+    show("dim7PurchaseID");
+    show("dim8PurchaseID");
+    
+    show("maxDim1PurchaseID");
+    show("maxDim2PurchaseID");
+    show("maxDim3PurchaseID");
+    show("maxDim4PurchaseID");
+    show("maxDim5PurchaseID");
+    show("maxDim6PurchaseID");
+    show("maxDim7PurchaseID");
+    show("maxDim8PurchaseID");
+    
+    show("dimensionshiftboostID");
+    show("shiftboostbuttonID");
+    show("galaxyID");
+    show("galaxybuttonID");
+  }
+  
+  var antimatter = 10;
+  var antimatterD = 10;
+  var antimatter_per_second = 0;
+  var antimatter_per_secondD = 0;
+  
+  var dimensionsvisible = true;
+  
+  var tickspeed_reduction = 1.11;
+  var tickspeed = 1;
+  var tickspeed_reductionD = 11;
+  var tickspeedD = 1;
+  var tickspeed_cost = 1000;
+  var tickspeed_cost_increase = 10;
+  var tickspeed_costD = 3;
+  var tickspeed_cost_increaseD = 1;
+  
+  var dim_1 = 0;
+  var dim_2 = 0;
+  var dim_3 = 0;
+  var dim_4 = 0;
+  var dim_5 = 0;
+  var dim_6 = 0;
+  var dim_7 = 0;
+  var dim_8 = 0;
+  var dim_1D = 0;
+  var dim_2D = 0;
+  var dim_3D = 0;
+  var dim_4D = 0;
+  var dim_5D = 0;
+  var dim_6D = 0;
+  var dim_7D = 0;
+  var dim_8D = 0;
+  
+  var dim_1_mult = 1;
+  var dim_2_mult = 1;
+  var dim_3_mult = 1;
+  var dim_4_mult = 1;
+  var dim_5_mult = 1;
+  var dim_6_mult = 1;
+  var dim_7_mult = 1;
+  var dim_8_mult = 1;
+  var dim_1_multD = 1;
+  var dim_2_multD = 1;
+  var dim_3_multD = 1;
+  var dim_4_multD = 1;
+  var dim_5_multD = 1;
+  var dim_6_multD = 1;
+  var dim_7_multD = 1;
+  var dim_8_multD = 1;
+  
+  var dim_1_cost = 10;
+  var dim_2_cost = 100;
+  var dim_3_cost = 10000;
+  var dim_4_cost = 1000000;
+  var dim_5_cost = 1000000000;
+  var dim_6_cost = 10000000000000;
+  var dim_7_cost = 1000000000000000000;
+  var dim_8_cost = 1000000000000000000000000;
+  var dim_1_costD = 1;
+  var dim_2_costD = 2;
+  var dim_3_costD = 4;
+  var dim_4_costD = 6;
+  var dim_5_costD = 9;
+  var dim_6_costD = 13;
+  var dim_7_costD = 18;
+  var dim_8_costD = 24;
+  
+  var max_dim_1_cost = 2;
+  var max_dim_2_cost = 3;
+  var max_dim_3_cost = 5;
+  var max_dim_4_cost = 7;
+  var max_dim_5_cost = 10;
+  var max_dim_6_cost = 14;
+  var max_dim_7_cost = 18;
+  var max_dim_8_cost = 24;
+  var max_dim_1_costD1 = 2;
+  var max_dim_2_costD1 = 3;
+  var max_dim_3_costD1 = 5;
+  var max_dim_4_costD1 = 7;
+  var max_dim_5_costD1 = 10;
+  var max_dim_6_costD1 = 14;
+  var max_dim_7_costD1 = 18;
+  var max_dim_8_costD1 = 24;
+  var max_dim_1_costD2 = 2;
+  var max_dim_2_costD2 = 3;
+  var max_dim_3_costD2 = 5;
+  var max_dim_4_costD2 = 7;
+  var max_dim_5_costD2 = 10;
+  var max_dim_6_costD2 = 14;
+  var max_dim_7_costD2 = 18;
+  var max_dim_8_costD2 = 24;
+  
+  var dim_1_cost_increase = 1000;
+  var dim_2_cost_increase = 10000;
+  var dim_3_cost_increase = 100000;
+  var dim_4_cost_increase = 1000000;
+  var dim_5_cost_increase = 100000000;
+  var dim_6_cost_increase = 10000000000;
+  var dim_7_cost_increase = 1000000000000;
+  var dim_8_cost_increase = 1000000000000000;
+  var dim_1_cost_increaseD = 3;
+  var dim_2_cost_increaseD = 4;
+  var dim_3_cost_increaseD = 5;
+  var dim_4_cost_increaseD = 6;
+  var dim_5_cost_increaseD = 8;
+  var dim_6_cost_increaseD = 10;
+  var dim_7_cost_increaseD = 12;
+  var dim_8_cost_increaseD = 15;
+  
+  var dim_1_clicked = 0;
+  var dim_2_clicked = 0;
+  var dim_3_clicked = 0;
+  var dim_4_clicked = 0;
+  var dim_5_clicked = 0;
+  var dim_6_clicked = 0;
+  var dim_7_clicked = 0;
+  var dim_8_clicked = 0;
+  
+  var highest_dim = 4;
+  var highest_dim_amount = 0;
+  var highest_dim_name = "Fourth";
+  var dim_boosts = 0;
+  var dim_boost_cost = 10;
+  var galaxy_cost = 80;
+  var galaxies = 0;
+  
+  var infinite = false;
+  
+  send("dimensionstabID", "Dimensions");
+  send("howtoplaytabID", "How to Play");
+  
+  function frame() {
+    if (antimatter == Infinity || antimatter === null || antimatterD == Infinity || antimatterD === null || antimatter == NaN || antimatterD == NaN) {infinite = true;}
+    else {infinite = false;}
+    if (infinite === false) {
+      antimatter += ((dim_1 * dim_1_mult) * (tickspeed / 20));
+      antimatter_per_second = Math.floor(((dim_1 * dim_1_mult)) * (tickspeed));
+      dim_1 += ((dim_2 * dim_2_mult) / 10) * (tickspeed / 20);
+      dim_2 += ((dim_3 * dim_3_mult) / 10) * (tickspeed / 20);
+      dim_3 += ((dim_4 * dim_4_mult) / 10) * (tickspeed / 20);
+      dim_4 += ((dim_5 * dim_5_mult) / 10) * (tickspeed / 20);
+      dim_5 += ((dim_6 * dim_6_mult) / 10) * (tickspeed / 20);
+      dim_6 += ((dim_7 * dim_7_mult) / 10) * (tickspeed / 20);
+      dim_7 += ((dim_8 * dim_8_mult) / 10) * (tickspeed / 20);
+    }
+    
+    if (highest_dim == 4) {highest_dim_name = "Fourth";highest_dim_amount = dim_4;}
+    if (highest_dim == 5) {highest_dim_name = "Fifth";highest_dim_amount = dim_5;}
+    if (highest_dim == 6) {highest_dim_name = "Sixth";highest_dim_amount = dim_6;}
+    if (highest_dim == 7) {highest_dim_name = "Seventh";highest_dim_amount = dim_7;}
+    if (highest_dim == 8) {highest_dim_name = "Eighth";highest_dim_amount = dim_8;}
+    
+    max_dim_1_cost = dim_1_cost * (10 - dim_1_clicked);
+    if (dim_1_clicked == 0) {max_dim_1_costD1 = 1;}
+    else {max_dim_1_costD1 = (10 - dim_1_clicked);}
+    if (10 - dim_1_clicked == 10) {max_dim_1_costD2 = dim_1_costD + 1;}
+    else {max_dim_1_costD2 = dim_1_costD;}
+    
+    max_dim_2_cost = dim_2_cost * (10 - dim_2_clicked);
+    if (dim_2_clicked == 0) {max_dim_2_costD1 = 1;}
+    else {max_dim_2_costD1 = (10 - dim_2_clicked);}
+    if (10 - dim_2_clicked == 10) {max_dim_2_costD2 = dim_2_costD + 1;}
+    else {max_dim_2_costD2 = dim_2_costD;}
+    
+    max_dim_3_cost = dim_3_cost * (10 - dim_3_clicked);
+    if (dim_3_clicked == 0) {max_dim_3_costD1 = 1;}
+    else {max_dim_3_costD1 = (10 - dim_3_clicked);}
+    if (10 - dim_3_clicked == 10) {max_dim_3_costD2 = dim_3_costD + 1;}
+    else {max_dim_3_costD2 = dim_3_costD;}
+    
+    max_dim_4_cost = dim_4_cost * (10 - dim_4_clicked);
+    if (dim_4_clicked == 0) {max_dim_4_costD1 = 1;}
+    else {max_dim_4_costD1 = (10 - dim_4_clicked);}
+    if (10 - dim_4_clicked == 10) {max_dim_4_costD2 = dim_4_costD + 1;}
+    else {max_dim_4_costD2 = dim_4_costD;}
+    
+    
+    max_dim_5_cost = dim_5_cost * (10 - dim_5_clicked);
+    if (dim_5_clicked == 0) {max_dim_5_costD1 = 1;}
+    else {max_dim_5_costD1 = (10 - dim_5_clicked);}
+    if (10 - dim_5_clicked == 10) {max_dim_5_costD2 = dim_5_costD + 1;}
+    else {max_dim_5_costD2 = dim_5_costD;}
+    
+    
+    max_dim_6_cost = dim_6_cost * (10 - dim_6_clicked);
+    if (dim_6_clicked == 0) {max_dim_6_costD1 = 1;}
+    else {max_dim_6_costD1 = (10 - dim_6_clicked);}
+    if (10 - dim_6_clicked == 10) {max_dim_6_costD2 = dim_6_costD + 1;}
+    else {max_dim_6_costD2 = dim_6_costD;}
+    
+    
+    max_dim_7_cost = dim_7_cost * (10 - dim_7_clicked);
+    if (dim_7_clicked == 0) {max_dim_7_costD1 = 1;}
+    else {max_dim_7_costD1 = (10 - dim_7_clicked);}
+    if (10 - dim_7_clicked == 10) {max_dim_7_costD2 = dim_7_costD + 1;}
+    else {max_dim_7_costD2 = dim_7_costD;}
+    
+    
+    max_dim_8_cost = dim_8_cost * (10 - dim_8_clicked);
+    if (dim_8_clicked == 0) {max_dim_8_costD1 = 1;}
+    else {max_dim_8_costD1 = (10 - dim_8_clicked);}
+    if (10 - dim_8_clicked == 10) {max_dim_8_costD2 = dim_8_costD + 1;}
+    else {max_dim_8_costD2 = dim_8_costD;}
+    
+    if (infinite === false) {
+      if (antimatter < 1000) {antimatterD = Math.floor(antimatter);}
+      else {antimatterD = antimatter.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2");}
+    }
+    else {antimatterD = "Infinity";}
+    
+    if (dim_1_mult < 1000) {dim_1_multD = Math.floor(dim_1_mult);}
+    else {dim_1_multD = dim_1_mult.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2");}
+    
+    if (dim_2_mult < 1000) {dim_2_multD = Math.floor(dim_2_mult);}
+    else {dim_2_multD = dim_2_mult.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2");}
+    
+    if (dim_3_mult < 1000) {dim_3_multD = Math.floor(dim_3_mult);}
+    else {dim_3_multD = dim_3_mult.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2");}
+    
+    if (dim_4_mult < 1000) {dim_4_multD = Math.floor(dim_4_mult);}
+    else {dim_4_multD = dim_4_mult.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2");}
+    
+    if (dim_5_mult < 1000) {dim_5_multD = Math.floor(dim_5_mult);}
+    else {dim_5_multD = dim_5_mult.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2");}
+    
+    if (dim_6_mult < 1000) {dim_6_multD = Math.floor(dim_6_mult);}
+    else {dim_6_multD = dim_6_mult.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2");}
+    
+    if (dim_7_mult < 1000) {dim_7_multD = Math.floor(dim_7_mult);}
+    else {dim_7_multD = dim_7_mult.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2");}
+    
+    if (dim_8_mult < 1000) {dim_8_multD = Math.floor(dim_8_mult);}
+    else {dim_8_multD = dim_8_mult.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2");}
+    
+    if (antimatter_per_second < 1000) {antimatter_per_secondD = Math.floor(antimatter_per_second);}
+    else {antimatter_per_secondD = antimatter_per_second.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2");}
+    
+    if (tickspeed < 1000) {tickspeedD = tickspeed.toFixed(2);}
+    else {tickspeedD = tickspeed.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2");}
+    
+    if (dim_1 < 1000) {dim_1D = Math.floor(dim_1);}
+    else {dim_1D = dim_1.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2");}
+    if (dim_2 < 1000) {dim_2D = Math.floor(dim_2);}
+    else {dim_2D = dim_2.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2");}
+    if (dim_3 < 1000) {dim_3D = Math.floor(dim_3);}
+    else {dim_3D = dim_3.toExponential(3).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2");}
+    if (dim_4 < 1000) {dim_4D = Math.floor(dim_4);}
+    else {dim_4D = dim_4.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2");}
+    if (dim_5 < 1000) {dim_5D = Math.floor(dim_5);}
+    else {dim_5D = dim_5.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2");}
+    if (dim_6 < 1000) {dim_6D = Math.floor(dim_6);}
+    else {dim_6D = dim_6.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2");}
+    if (dim_7 < 1000) {dim_7D = Math.floor(dim_7);}
+    else {dim_7D = dim_7.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2");}
+    if (dim_8 < 1000) {dim_8D = Math.floor(dim_8);}
+    else {dim_8D = dim_8.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2");}
+    
+    send("antimatterID", antimatterD);
+    send("antimatter_per_secondID", "You are getting " + antimatter_per_secondD + " antimatter per second.");
+    send("tickspeed_reductionID", "Reduce the tick interval by " + tickspeed_reductionD + "%.");
+    send("tickspeedID", "Tickspeed: " + tickspeedD + " / second.");
+    if (tickspeed_costD < 308) {send("tickspeedPurchaseID", "Cost: 1e" + tickspeed_costD);}
+    else {send("tickspeedPurchaseID", "Cost: Infinity");}
+    
+    send("dim_1_multID", "First Dimension x" + dim_1_multD);
+    send("dim1ID",  dim_1D + " (" + dim_1_clicked + ")");
+    if (dim_1_cost < 1000) {send("dim1PurchaseID", "Cost: " + dim_1_cost);}
+    else {send("dim1PurchaseID", "Cost: 1e" + dim_1_costD);}
+    if (max_dim_1_cost < 1000) {send("maxDim1PurchaseID", "Buy until 10, Cost: " + max_dim_1_cost);}
+    else {send("maxDim1PurchaseID", "Buy until 10, Cost: " + max_dim_1_costD1 + "e" + max_dim_1_costD2);}
+    
+    send("dim_2_multID", "Second Dimension x" + dim_2_multD);
+    send("dim2ID",  dim_2D + " (" + dim_2_clicked + ")");
+    if (dim_2_cost < 1000) {send("dim2PurchaseID", "Cost: " + dim_2_cost);}
+    else {send("dim2PurchaseID", "Cost: 1e" + dim_2_costD);}
+    if (max_dim_2_cost < 1000) {send("maxDim2PurchaseID", "Buy until 10, Cost: " + max_dim_2_cost);}
+    else {send("maxDim2PurchaseID", "Buy until 10, Cost: " + max_dim_2_costD1 + "e" + max_dim_2_costD2);}
+    
+    send("dim_3_multID", "Third Dimension x" + dim_3_multD);
+    send("dim3ID",  dim_3D + " (" + dim_3_clicked + ")");
+    if (dim_3_cost < 1000) {send("dim3PurchaseID", "Cost: " + dim_3_cost);}
+    else {send("dim3PurchaseID", "Cost: 1e" + dim_3_costD);}
+    if (max_dim_3_cost < 1000) {send("maxDim3PurchaseID", "Buy until 10, Cost: " + max_dim_3_cost);}
+    else {send("maxDim3PurchaseID", "Buy until 10, Cost: " + max_dim_3_costD1 + "e" + max_dim_3_costD2);}
+    
+    send("dim_4_multID", "Fourth Dimension x" + dim_4_multD);
+    send("dim4ID",  dim_4D + " (" + dim_4_clicked + ")");
+    if (dim_4_cost < 1000) {send("dim4PurchaseID", "Cost: " + dim_4_cost);}
+    else {send("dim4PurchaseID", "Cost: 1e" + dim_4_costD);}
+    if (max_dim_4_cost < 1000) {send("maxDim4PurchaseID", "Buy until 10, Cost: " + max_dim_4_cost);}
+    else {send("maxDim4PurchaseID", "Buy until 10, Cost: " + max_dim_4_costD1 + "e" + max_dim_4_costD2);}
+    
+    
+    
+    if (highest_dim >= 5 && dimensionsvisible) {
+      show("dim_5_multID");
+      show("dim5PurchaseID");
+      show("dim5ID");
+      show("maxDim5PurchaseID");
+      document.getElementById("dim_5_multID").innerHTML = "Fifth Dimension x" + dim_5_multD;
+      if (dim_5_cost < 1000) {document.getElementById("dim5PurchaseID").innerHTML = "Cost: " + dim_5_cost;}
+      else {document.getElementById("dim5PurchaseID").innerHTML = "Cost: 1e" + dim_5_costD;}
+      document.getElementById("dim5ID").innerHTML = dim_5D + " (" + dim_5_clicked + ")";
+      if (max_dim_5_cost < 1000) {document.getElementById("maxDim5PurchaseID").innerHTML = "Buy until 10, Cost: " + max_dim_5_cost;}
+      else {document.getElementById("maxDim5PurchaseID").innerHTML = "Buy until 10, Cost: " + max_dim_5_costD1 + "e" + max_dim_5_costD2;}
+    }
+    else {
+      hide("dim_5_multID");
+      hide("dim5PurchaseID");
+      hide("dim5ID");
+      hide("maxDim5PurchaseID");
+    }
+    
+    if (highest_dim >= 6 && dimensionsvisible) {
+      document.getElementById("dim_6_multID").innerHTML = "Sixth Dimension x" + dim_6_multD;
+      document.getElementById("dim_6_multID").style.display = "inline";
+      if (dim_6_cost < 1000) {document.getElementById("dim6PurchaseID").innerHTML = "Cost: " + dim_6_cost;}
+      else {document.getElementById("dim6PurchaseID").innerHTML = "Cost: 1e" + dim_6_costD;}
+      document.getElementById("dim6PurchaseID").style.display = "inline";
+      document.getElementById("dim6ID").innerHTML = dim_6D + " (" + dim_6_clicked + ")";
+      document.getElementById("dim6ID").style.display = "inline";
+      if (max_dim_6_cost < 1000) {document.getElementById("maxDim6PurchaseID").innerHTML = "Buy until 10, Cost: " + max_dim_6_cost;}
+      else {document.getElementById("maxDim6PurchaseID").innerHTML = "Buy until 10, Cost: " + max_dim_6_costD1 + "e" + max_dim_6_costD2;}
+      document.getElementById("maxDim6PurchaseID").style.display = "inline";
+    }
+    else {
+      document.getElementById("dim_6_multID").innerHTML = "";
+      document.getElementById("dim_6_multID").style.display = "none";
+      document.getElementById("dim6PurchaseID").innerHTML = "";
+      document.getElementById("dim6PurchaseID").style.display = "none";
+      document.getElementById("dim6ID").innerHTML = "";
+      document.getElementById("dim6ID").style.display = "none";
+      document.getElementById("maxDim6PurchaseID").innerHTML = "";
+      document.getElementById("maxDim6PurchaseID").style.display = "none";
+    }
+    
+    if (highest_dim >= 7 && dimensionsvisible) {
+      document.getElementById("dim_7_multID").innerHTML = "Seventh Dimension x" + dim_7_multD;
+      document.getElementById("dim_7_multID").style.display = "inline";
+      if (dim_7_cost < 1000) {document.getElementById("dim7PurchaseID").innerHTML = "Cost: " + dim_7_cost;}
+      else {document.getElementById("dim7PurchaseID").innerHTML = "Cost: 1e" + dim_7_costD;}
+      document.getElementById("dim7PurchaseID").style.display = "inline";
+      document.getElementById("dim7ID").innerHTML = dim_7D + " (" + dim_7_clicked + ")";
+      document.getElementById("dim7ID").style.display = "inline";
+      if (max_dim_7_cost < 1000) {document.getElementById("maxDim7PurchaseID").innerHTML = "Buy until 10, Cost: " + max_dim_7_cost;}
+      else {document.getElementById("maxDim7PurchaseID").innerHTML = "Buy until 10, Cost: " + max_dim_7_costD1 + "e" + max_dim_7_costD2;}
+      document.getElementById("maxDim7PurchaseID").style.display = "inline";
+    }
+    else {
+      document.getElementById("dim_7_multID").innerHTML = "";
+      document.getElementById("dim_7_multID").style.display = "none";
+      document.getElementById("dim7PurchaseID").innerHTML = "";
+      document.getElementById("dim7PurchaseID").style.display = "none";
+      document.getElementById("dim7ID").innerHTML = "";
+      document.getElementById("dim7ID").style.display = "none";
+      document.getElementById("maxDim7PurchaseID").innerHTML = "";
+      document.getElementById("maxDim7PurchaseID").style.display = "none";
+    }
+    
+    if (highest_dim >= 8 && dimensionsvisible) {
+      document.getElementById("dim_8_multID").innerHTML = "Eighth Dimension x" + dim_8_multD;
+      document.getElementById("dim_8_multID").style.display = "inline";
+      if (dim_8_cost < 1000) {document.getElementById("dim8PurchaseID").innerHTML = "Cost: " + dim_8_cost;}
+      else {document.getElementById("dim8PurchaseID").innerHTML = "Cost: 1e" + dim_8_costD;}
+      document.getElementById("dim8PurchaseID").style.display = "inline";
+      document.getElementById("dim8ID").innerHTML = dim_8D + " (" + dim_8_clicked + ")";
+      document.getElementById("dim8ID").style.display = "inline";
+      if (max_dim_8_cost < 1000) {document.getElementById("maxDim8PurchaseID").innerHTML = "Buy until 10, Cost: " + max_dim_8_cost;}
+      else {document.getElementById("maxDim8PurchaseID").innerHTML = "Buy until 10, Cost: " + max_dim_8_costD1 + "e" + max_dim_8_costD2;}
+      document.getElementById("maxDim8PurchaseID").style.display = "inline";
+    }
+    else {
+      document.getElementById("dim_8_multID").innerHTML = "";
+      document.getElementById("dim_8_multID").style.display = "none";
+      document.getElementById("dim8PurchaseID").innerHTML = "";
+      document.getElementById("dim8PurchaseID").style.display = "none";
+      document.getElementById("dim8ID").innerHTML = "";
+      document.getElementById("dim8ID").style.display = "none";
+      document.getElementById("maxDim8PurchaseID").innerHTML = "";
+      document.getElementById("maxDim8PurchaseID").style.display = "none";
+    }
+    
+    
+    if (dim_boosts < 4) {
+      document.getElementById("dimensionshiftboostID").innerHTML = "Dimension Shift (" + dim_boosts + "): Requires 10 " + highest_dim_name + " Dimensions";
+      document.getElementById("shiftboostbuttonID").innerHTML = "Reset the game for a new Dimension";
+    }
+    else {
+      document.getElementById("dimensionshiftboostID").innerHTML = "Dimension Boost (" + dim_boosts + "): Requires " + dim_boost_cost + " " + highest_dim_name + " Dimensions";
+      document.getElementById("shiftboostbuttonID").innerHTML = "Reset the game for a boost";
+    }
+    document.getElementById("galaxyID").innerHTML = "Antimatter Galaxy (" + galaxies + "): Requires " + galaxy_cost + " Eighth Dimensions";
+    document.getElementById("galaxybuttonID").innerHTML = "Lose all your previous progress, but get a tickspeed boost";
+    
+    if (antimatter >= tickspeed_cost) {
+      document.getElementById("tickspeedPurchaseID").style.backgroundColor = "#ffffff";
+      document.getElementById("maxTickspeedPurchaseID").style.backgroundColor = "#ffffff";
+    }
+    else {
+      document.getElementById("tickspeedPurchaseID").style.backgroundColor = "#adadad";
+      document.getElementById("maxTickspeedPurchaseID").style.backgroundColor = "#adadad";
+    }
+    
+    if (antimatter >= dim_1_cost) {document.getElementById("dim1PurchaseID").style.backgroundColor = "#ffffff";}
+    else {document.getElementById("dim1PurchaseID").style.backgroundColor = "#adadad";}
+    if (antimatter >= dim_1_cost * (10 - dim_1_clicked)) {document.getElementById("maxDim1PurchaseID").style.backgroundColor = "#ffffff";}
+    else {document.getElementById("maxDim1PurchaseID").style.backgroundColor = "#adadad";}
+    
+    if (antimatter >= dim_2_cost) {document.getElementById("dim2PurchaseID").style.backgroundColor = "#ffffff";}
+    else {document.getElementById("dim2PurchaseID").style.backgroundColor = "#adadad";}
+    if (antimatter >= dim_2_cost * (10 - dim_2_clicked)) {document.getElementById("maxDim2PurchaseID").style.backgroundColor = "#ffffff";}
+    else {document.getElementById("maxDim2PurchaseID").style.backgroundColor = "#adadad";}
+    
+    if (antimatter >= dim_3_cost) {document.getElementById("dim3PurchaseID").style.backgroundColor = "#ffffff";}
+    else {document.getElementById("dim3PurchaseID").style.backgroundColor = "#adadad";}
+    if (antimatter >= dim_3_cost * (10 - dim_3_clicked)) {document.getElementById("maxDim3PurchaseID").style.backgroundColor = "#ffffff";}
+    else {document.getElementById("maxDim3PurchaseID").style.backgroundColor = "#adadad";}
+    
+    if (antimatter >= dim_4_cost) {document.getElementById("dim4PurchaseID").style.backgroundColor = "#ffffff";}
+    else {document.getElementById("dim4PurchaseID").style.backgroundColor = "#adadad";}
+    if (antimatter >= dim_4_cost * (10 - dim_4_clicked)) {document.getElementById("maxDim4PurchaseID").style.backgroundColor = "#ffffff";}
+    else {document.getElementById("maxDim4PurchaseID").style.backgroundColor = "#adadad";}
+    
+    if (antimatter >= dim_5_cost) {document.getElementById("dim5PurchaseID").style.backgroundColor = "#ffffff";}
+    else {document.getElementById("dim5PurchaseID").style.backgroundColor = "#adadad";}
+    if (antimatter >= dim_5_cost * (10 - dim_5_clicked)) {document.getElementById("maxDim5PurchaseID").style.backgroundColor = "#ffffff";}
+    else {document.getElementById("maxDim5PurchaseID").style.backgroundColor = "#adadad";}
+    
+    if (antimatter >= dim_6_cost) {document.getElementById("dim6PurchaseID").style.backgroundColor = "#ffffff";}
+    else {document.getElementById("dim6PurchaseID").style.backgroundColor = "#adadad";}
+    if (antimatter >= dim_6_cost * (10 - dim_6_clicked)) {document.getElementById("maxDim6PurchaseID").style.backgroundColor = "#ffffff";}
+    else {document.getElementById("maxDim6PurchaseID").style.backgroundColor = "#adadad";}
+    
+    if (antimatter >= dim_7_cost) {document.getElementById("dim7PurchaseID").style.backgroundColor = "#ffffff";}
+    else {document.getElementById("dim7PurchaseID").style.backgroundColor = "#adadad";}
+    if (antimatter >= dim_7_cost * (10 - dim_7_clicked)) {document.getElementById("maxDim7PurchaseID").style.backgroundColor = "#ffffff";}
+    else {document.getElementById("maxDim7PurchaseID").style.backgroundColor = "#adadad";}
+    
+    if (antimatter >= dim_8_cost) {document.getElementById("dim8PurchaseID").style.backgroundColor = "#ffffff";}
+    else {document.getElementById("dim8PurchaseID").style.backgroundColor = "#adadad";}
+    if (antimatter >= dim_8_cost * (10 - dim_8_clicked)) {document.getElementById("maxDim8PurchaseID").style.backgroundColor = "#ffffff";}
+    else {document.getElementById("maxDim8PurchaseID").style.backgroundColor = "#adadad";}
+    
+    if (highest_dim < 8) {
+      if (highest_dim_amount >= 10) {document.getElementById("shiftboostbuttonID").style.backgroundColor = "#ffffff";}
+      else {document.getElementById("shiftboostbuttonID").style.backgroundColor = "#adadad";}
+    }
+    else {
+      if (dim_8 >= dim_boost_cost) {document.getElementById("shiftboostbuttonID").style.backgroundColor = "#ffffff";}
+      else {document.getElementById("shiftboostbuttonID").style.backgroundColor = "#adadad";}
+    }
+    
+    if (dim_8 >= galaxy_cost) {document.getElementById("galaxybuttonID").style.backgroundColor = "#ffffff";}
+    else {document.getElementById("galaxybuttonID").style.backgroundColor = "#adadad";}
+  }
+  setInterval(frame, 50);
+  
+  function increaseAntimatter() {antimatter *= 13;}
+  
+  function tickspeedPurchase() {
+    if (antimatter >= tickspeed_cost) {
+      antimatter -= tickspeed_cost;
+      tickspeed_cost *= tickspeed_cost_increase;
+      tickspeed_costD += tickspeed_cost_increaseD;
+      tickspeed *= tickspeed_reduction;
+    }
+  }
+  
+  function maxTickspeedPurchase() {
+    while (antimatter >= tickspeed_cost) {
+      tickspeedPurchase();
+    }
+  }
+  
+  function dim1Purchase() {
+    if (antimatter >= dim_1_cost) {
+      antimatter -= dim_1_cost;
+      dim_1 += 1;
+      dim_1_clicked += 1;
+    }
+    if (dim_1_clicked == 10) {
+      dim_1_clicked = 0;
+      dim_1_mult *= 2;
+      dim_1_cost *= dim_1_cost_increase;
+      dim_1_costD += dim_1_cost_increaseD;
+    }
+  }
+  
+  function dim2Purchase() {
+    if (antimatter >= dim_2_cost) {
+      antimatter -= dim_2_cost;
+      dim_2 += 1;
+      dim_2_clicked += 1;
+    }
+    if (dim_2_clicked == 10) {
+      dim_2_clicked = 0;
+      dim_2_mult *= 2;
+      dim_2_cost *= dim_2_cost_increase;
+      dim_2_costD += dim_2_cost_increaseD;
+    }
+  }
+  
+  function dim3Purchase() {
+    if (antimatter >= dim_3_cost) {
+      antimatter -= dim_3_cost;
+      dim_3 += 1;
+      dim_3_clicked += 1;
+    }
+    if (dim_3_clicked == 10) {
+      dim_3_clicked = 0;
+      dim_3_mult *= 2;
+      dim_3_cost *= dim_3_cost_increase;
+      dim_3_costD += dim_3_cost_increaseD;
+    }
+  }
+  
+  function dim4Purchase() {
+    if (antimatter >= dim_4_cost) {
+      antimatter -= dim_4_cost;
+      dim_4 += 1;
+      dim_4_clicked += 1;
+    }
+    if (dim_4_clicked == 10) {
+      dim_4_clicked = 0;
+      dim_4_mult *= 2;
+      dim_4_cost *= dim_4_cost_increase;
+      dim_4_costD += dim_4_cost_increaseD;
+    }
+  }
+  
+  function dim5Purchase() {
+    if (antimatter >= dim_5_cost) {
+      antimatter -= dim_5_cost;
+      dim_5 += 1;
+      dim_5_clicked += 1;
+    }
+    if (dim_5_clicked == 10) {
+      dim_5_clicked = 0;
+      dim_5_mult *= 2;
+      dim_5_cost *= dim_5_cost_increase;
+      dim_5_costD += dim_5_cost_increaseD;
+    }
+  }
+  
+  function dim6Purchase() {
+    if (antimatter >= dim_6_cost) {
+      antimatter -= dim_6_cost;
+      dim_6 += 1;
+      dim_6_clicked += 1;
+    }
+    if (dim_6_clicked == 10) {
+      dim_6_clicked = 0;
+      dim_6_mult *= 2;
+      dim_6_cost *= dim_6_cost_increase;
+      dim_6_costD += dim_6_cost_increaseD;
+    }
+  }
+  
+  function dim7Purchase() {
+    if (antimatter >= dim_7_cost) {
+      antimatter -= dim_7_cost;
+      dim_7 += 1;
+      dim_7_clicked += 1;
+    }
+    if (dim_7_clicked == 10) {
+      dim_7_clicked = 0;
+      dim_7_mult *= 2;
+      dim_7_cost *= dim_7_cost_increase;
+      dim_7_costD += dim_7_cost_increaseD;
+    }
+  }
+  
+  function dim8Purchase() {
+    if (antimatter >= dim_8_cost) {
+      antimatter -= dim_8_cost;
+      dim_8 += 1;
+      dim_8_clicked += 1;
+    }
+    if (dim_8_clicked == 10) {
+      dim_8_clicked = 0;
+      dim_8_mult *= 2;
+      dim_8_cost *= dim_8_cost_increase;
+      dim_8_costD += dim_8_cost_increaseD;
+    }
+  }
+  
+  function maxDim1Purchase() {
+    let clicked = (10 - dim_1_clicked);
+    if (antimatter >= max_dim_1_cost) {
+      for (let i = 0; i < clicked; i++) {
+        dim1Purchase();
+      }
+    }
+  }
+  
+  function maxDim2Purchase() {
+    let clicked = (10 - dim_2_clicked);
+    if (antimatter >= max_dim_2_cost) {
+      for (let i = 0; i < clicked; i++) {
+        dim2Purchase();
+      }
+    }
+  }
+  
+  function maxDim3Purchase() {
+    let clicked = (10 - dim_3_clicked);
+    if (antimatter >= max_dim_3_cost) {
+      for (let i = 0; i < clicked; i++) {
+        dim3Purchase();
+      }
+    }
+  }
+  
+  function maxDim4Purchase() {
+    let clicked = (10 - dim_4_clicked);
+    if (antimatter >= max_dim_4_cost) {
+      for (let i = 0; i < clicked; i++) {
+        dim4Purchase();
+      }
+    }
+  }
+  
+  function maxDim5Purchase() {
+    let clicked = (10 - dim_5_clicked);
+    if (antimatter >= max_dim_5_cost) {
+      for (let i = 0; i < clicked; i++) {
+        dim5Purchase();
+      }
+    }
+  }
+  
+  function maxDim6Purchase() {
+    let clicked = (10 - dim_6_clicked);
+    if (antimatter >= max_dim_6_cost) {
+      for (let i = 0; i < clicked; i++) {
+        dim6Purchase();
+      }
+    }
+  }
+  
+  function maxDim7Purchase() {
+    let clicked = (10 - dim_7_clicked);
+    if (antimatter >= max_dim_7_cost) {
+      for (let i = 0; i < clicked; i++) {
+        dim7Purchase();
+      }
+    }
+  }
+  
+  function maxDim8Purchase() {
+    let clicked = (10 - dim_8_clicked);
+    if (antimatter >= max_dim_8_cost) {
+      for (let i = 0; i < clicked; i++) {
+        dim8Purchase();
+      }
+    }
+  }
+  
+  
+  
+  function softReset() {
+    antimatter = 10;
+    dim_1 = 0;
+    dim_2 = 0;
+    dim_3 = 0;
+    dim_4 = 0;
+    dim_5 = 0;
+    dim_6 = 0;
+    dim_7 = 0;
+    dim_8 = 0;
+    dim_1_cost = 10;
+    dim_2_cost = 100;
+    dim_3_cost = 10000;
+    dim_4_cost = 1000000;
+    dim_5_cost = 1000000000;
+    dim_6_cost = 10000000000000;
+    dim_7_cost = 1000000000000000000;
+    dim_8_cost = 1000000000000000000000000;
+    dim_1_costD = 1;
+    dim_2_costD = 2;
+    dim_3_costD = 4;
+    dim_4_costD = 6;
+    dim_5_costD = 9;
+    dim_6_costD = 13;
+    dim_7_costD = 18;
+    dim_8_costD = 24;
+    tickspeed = 1;
+    tickspeedD = 1;
+    tickspeed_cost = 1000;
+    tickspeed_costD = 3;
+    dim_2_mult = 1;
+    dim_3_mult = 1;
+    dim_4_mult = 1;
+    dim_5_mult = 1;
+    dim_6_mult = 1;
+    dim_7_mult = 1;
+    dim_8_mult = 1;
+    dim_1_clicked = 0;
+    dim_2_clicked = 0;
+    dim_3_clicked = 0;
+    dim_4_clicked = 0;
+    dim_5_clicked = 0;
+    dim_6_clicked = 0;
+    dim_7_clicked = 0;
+    dim_8_clicked = 0;
+  }
+  
+  
+  function dimShiftBoost() {
+    if (dim_boosts >= 4) {
+      if (dim_8 >= dim_boost_cost) {
+        softReset();
+        dim_boosts += 1;
+        dim_1_mult = Math.pow(2, dim_boosts);
+        dim_boost_cost += 15;
+      }
+    }
+    if (dim_boosts <= 3) {
+      if (highest_dim_amount >= 10) {
+        softReset();
+        dim_boosts += 1;
+        dim_1_mult = Math.pow(2, dim_boosts);
+        highest_dim += 1;
+      }
+    }
+  }
+  
+  function galaxy() {
+    if (dim_8 >= galaxy_cost) {
+      softReset();
+      dim_1_mult = 1;
+      highest_dim = 4;
+      dim_boosts = 0;
+      tickspeed_reduction += 0.03;
+      tickspeed_reductionD += 3;
+      dim_boost_cost = 20;
+      galaxies += 1;
+      galaxy_cost += 35;
+    }
+  }
+  
+  
+  
+  function keyDownHandler(keyDownEvent) {
+    if (keyDownEvent.keyCode == 84 && infinite === false) {maxTickspeedPurchase();}
+    if (keyDownEvent.keyCode == 67 && infinite === false) {increaseAntimatter();}
+    if (keyDownEvent.keyCode == 48 && infinite === false) {antimatter = 10;}
+    if (keyDownEvent.keyCode == 68 && infinite === false) {dimShiftBoost();}
+    if (keyDownEvent.keyCode == 71 && infinite === false) {galaxy();}
+    if (keyDownEvent.keyCode == 49 && infinite === false) {maxDim1Purchase();}
+    if (keyDownEvent.keyCode == 50 && infinite === false) {maxDim2Purchase();}
+    if (keyDownEvent.keyCode == 51 && infinite === false) {maxDim3Purchase();}
+    if (keyDownEvent.keyCode == 52 && infinite === false) {maxDim4Purchase();}
+    if (keyDownEvent.keyCode == 53 && infinite === false && highest_dim >= 5) {maxDim5Purchase();}
+    if (keyDownEvent.keyCode == 54 && infinite === false && highest_dim >= 6) {maxDim6Purchase();}
+    if (keyDownEvent.keyCode == 55 && infinite === false && highest_dim >= 7) {maxDim7Purchase();}
+    if (keyDownEvent.keyCode == 56 && infinite === false && highest_dim >= 8) {maxDim8Purchase();}
+    if (keyDownEvent.keyCode == 77 && infinite === false) {
+      maxTickspeedPurchase();
+      maxDim1Purchase();
+      maxDim2Purchase();
+      maxDim3Purchase();
+      maxDim4Purchase();
+      if (highest_dim >= 5) {maxDim5Purchase();}
+      if (highest_dim >= 6) {maxDim6Purchase();}
+      if (highest_dim >= 7) {maxDim7Purchase();}
+      if (highest_dim >= 8) {maxDim8Purchase();}
+    }
+  }
+  addEventListener("keydown", keyDownHandler);
+</script>
+</body>
+</html>
