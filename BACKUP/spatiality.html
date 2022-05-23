@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      html, body {
+        user-select: none;
+      }
+      canvas {
+        z-index: 0;
+        position: absolute;
+        left: 0;
+        top: 0;
+        background-color: red;
+      }
+      body{
+        font-size: 15px;
+        font-family: monospace;
+      }
+      button {
+        transition: 0.2s;
+        cursor: pointer;
+        float: left;
+        padding-top: 3px;
+        padding-bottom: 1px;
+        font-size: 15px;
+        font-family: monospace;
+        background-color: transparent;
+        border: 2px solid black;
+      }
+      button:focus {
+        outline: none;
+      }
+      big {
+        font-size: 25px;
+      }
+      .centered {
+        text-align: center;
+      }
+      .shop {
+        position: absolute;
+        right: 5px;
+        top: 5px;
+        width: 25%;
+      }
+      .shoptitle {
+        text-align: center;
+        font-size: 18px;
+        text-decoration: underline;
+        font-weight: bold;
+      }
+      .product {
+        float: left;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 15px;
+      }
+      .productamount {
+        position: absolute;
+        font-size: 25px;
+        right: 70px;
+        font-weight: 900;
+      }
+      .productdesc {
+        float: left;
+        font-size: 13px;
+      }
+      .point {
+        cursor: pointer;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        height: 20px;
+        width: 20px;
+        background-color: black;
+        border-radius: 50%;
+        display: inline-block;
+      }
+      .reset {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+      }
+      .tabmenu button {
+        margin-right: 2px;
+        margin-left: 2px;
+        background-color: #d1d1d1;
+      }
+      .tabmenu button:hover {
+        background-color: #ffffff;
+      }
+      .tabcontent {
+        display: none;
+      }
+    </style>
+    <link rel = 'icon'  href = 'images/point-favicon.png' type = 'image/png'/>
+    <title>Spatiality ~ e4494s</title>
+  </head>
+<body onload = 'openTab(event, "geometrytabID")'>
+<div class = 'centered'>
+<span id = 'pointsID'>You have <big>x</big> points.</span><br>
+<span id = 'pointspersecID'>You are getting x points per second.</span>
+</div>
+<div class = 'tabmenu'>
+<button class = 'tablinks' onclick = 'openTab(event, "geometrytabID")'>Geometry</button>
+<button class = 'tablinks' onclick = 'openTab(event, "howtotabID")'>How To Play</button>
+</div>
+<div id = 'geometrytabID' class = 'tabcontent'>
+<span class = 'point' onclick = 'pointClick()'></span>
+<container class = 'shop'>
+<span id = 'dim2shoptitleID' class = 'shoptitle'>First Dimension</span><br>
+<div>
+<button id = 'lineSegmentPurchaseID' class = 'product' onclick = 'lineSegmentPurchase()'>Line Segment - x points</button>
+<span class = 'productamount' id = 'linesegmentamountID' style = 'top:19px'>1</span>
+<span id = 'line_segmentsID' class = 'productdesc'>Form points into a one-dimensional line that creates points from itself.</span>
+</div>
+<hr style = 'visibility:hidden'>
+<div>
+<button id = 'axisPurchaseID' class = 'product' onclick = 'axisPurchase()'>Axis - x points</button>
+<span class = 'productamount' id = 'axisamountID' style = 'top:75px'>1</span>
+<span id = 'axesID' class = 'productdesc'>Form points into an axis that generates and plots new points.</span>
+</div>
+<hr style = 'visibility:hidden'>
+<div>
+<button id = 'measurementPurchaseID' class = 'product' onclick = 'measurementPurchase()'>Measurement - x points</button>
+<span class = 'productamount' id = 'measurementamountID' style = 'top:131px'>1</span>
+<span id = 'measurementID' class = 'productdesc'>Form points into a measurement that defines the physical world to create and constrain points.</span>
+</div>
+</container>
+</div>
+<div id = 'howtotabID' class = 'tabcontent'>
+<br><br>
+<div style = "width:50%;margin:auto">
+<span>This is a testThis is a testThis is a testThis is a testThis is a testThis is a testThis is a testThis is a testThis is a testThis is a testThis is a testThis is a testThis is a testThis is a testThis is a testThis is a testThis is a test</span>
+</div>
+</div>
+<button onclick = 'clearLocalData()' class = 'reset'><b>RESET THE GAME</b></button>
+<script>
+  function openTab(evt, tabname) {
+    let i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName('tabcontent');
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName('tablinks');
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabname).style.display = "block";
+    evt.currentTarget.className += " active";
+  }
+  
+  function save(variableL, variable) {
+    localStorage.setItem(variableL, Number(variable));
+  }
+  function send(ID,message) {
+    document.getElementById(ID).innerHTML = message;
+  }
+  function ex(number) {
+    return number.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2");
+  }
+  function num() {
+    points = Number(points);
+    line_segments = Number(line_segments);
+    line_segment_price = Number(line_segment_price);
+    axes = Number(axes);
+    axis_price = Number(axis_price);
+    measurements = Number(measurements);
+    measurement_price = Number(measurement_price);
+  }
+  
+  
+  let points = localStorage.getItem('pointsL');
+  if (points === null) {
+    points = 0;
+    save('pointsL', points);
+  }
+  
+  let line_segments = localStorage.getItem('line_segmentsL');
+  if (line_segments === null) {
+    line_segments = 0;
+    save('line_segmentsL', line_segments);
+  }
+  let line_segment_price = localStorage.getItem('line_segment_priceL');
+  if (line_segment_price === null) {
+    line_segment_price = 10;
+    save('line_segment_priceL', line_segment_price);
+  }
+  
+  let axes = localStorage.getItem('axesL');
+  if (axes === null) {
+    axes = 0;
+    save('axesL',axes);
+  }
+  let axis_price = localStorage.getItem('axis_priceL');
+  if (axis_price === null) {
+    axis_price = 100;
+    save('axis_priceL', axis_price);
+  }
+  
+  let measurements = localStorage.getItem('measurementsL');
+  if (measurements === null) {
+    measurements = 0;
+    save('measurementsL', measurements);
+  }
+  let measurement_price = localStorage.getItem('measurement_priceL');
+  if (measurement_price === null) {
+    measurement_price = 1000;
+    save('measurement_priceL', measurement_price);
+  }
+  
+  
+  
+  //Transcend Euclidian Geometry and unlock the Dimension of Time
+  let points_per_sec = 0;
+  
+  function pointClick() {
+    num();
+    points += 1 + (points_per_sec / 4);
+  }
+  function lineSegmentPurchase() {
+    num();
+    if (points >= line_segment_price) {
+      points -= line_segment_price;
+      line_segments += 1;
+      line_segment_price *= 1.05;
+      line_segment_price = Math.round(line_segment_price);
+    }
+  }
+  function axisPurchase() {
+    num();
+    if (points >= axis_price) {
+      points -= axis_price;
+      axes += 1;
+      axis_price *= 1.1;
+      axis_price = Math.round(axis_price);
+    }
+  }
+  function measurementPurchase() {
+    num();
+    if (points >= measurement_price) {
+      points -= measurement_price;
+      measurements += 1;
+      measurement_price *= 1.1;
+      measurement_price = Math.round(measurement_price);
+    }
+  }
+  
+  function frame() {
+    num();
+    points += (line_segments * 0.01) + (axes * 0.1) + measurements;
+    points_per_sec = (line_segments * 0.2) + (axes * 2) + (measurements * 20);
+    
+    if (points < 1000) {send('pointsID', `You have <big>${Math.floor(points)}</big> points.`);}
+    else {send('pointsID', `You have <big>${ex(points)}</big> points.`);}
+    if (points_per_sec < 1000) {send('pointspersecID', `You are getting ${points_per_sec.toFixed(1)} points per second.`);}
+    else {send('pointspersecID', `You are getting ${ex(points_per_sec)} points per second.`);}
+    
+    if (line_segment_price > 1000) {send('lineSegmentPurchaseID', `Line Segment - ${ex(line_segment_price)} points`);}
+    else {send('lineSegmentPurchaseID', `Line Segment - ${line_segment_price} points`);}
+    if (points >= line_segment_price) {document.getElementById('lineSegmentPurchaseID').style.backgroundColor = '#ffffff';}
+    else {document.getElementById('lineSegmentPurchaseID').style.backgroundColor = '#adadad';}
+    send('linesegmentamountID', line_segments);
+    
+    if (axis_price > 1000) {send('axisPurchaseID', `Axis - ${ex(axis_price)} points`);}
+    else {send('axisPurchaseID', `Axis - ${axis_price} points`);}
+    if (points >= axis_price) {document.getElementById('axisPurchaseID').style.backgroundColor = '#ffffff';}
+    else {document.getElementById('axisPurchaseID').style.backgroundColor = '#adadad';}
+    send('axisamountID', axes);
+    
+    if (measurement_price > 1000) {send('measurementPurchaseID', `Measurement - ${ex(measurement_price)} points`);}
+    else {send('measurementPurchaseID', `Measurement - ${measurement_price} points`);}
+    if (points >= measurement_price) {document.getElementById('measurementPurchaseID').style.backgroundColor = '#ffffff';}
+    else {document.getElementById('measurementPurchaseID').style.backgroundColor = '#adadad';}
+    send('measurementamountID', measurements);
+  }
+  let frame_interval = setInterval(frame, 50);
+  
+  function saving() {
+    save('pointsL',points);
+    save('line_segmentsL', line_segments);
+    save('line_segment_priceL', line_segment_price);
+    save('axesL', axes);
+    save('axis_priceL', axis_price);
+    save('measuremensL', measurements);
+    save('measurement_priceL', measurement_price);
+  }
+  let saving_interval = setInterval(saving, 1000);
+  
+  function clearLocalData() {
+    let ok = confirm('Are you sure you want to reset the game?');
+    if (ok) {
+      ok = confirm('Are you COMPLETELY sure you want to reset the game?');
+      if (ok) {
+        clearInterval(saving_interval);
+        localStorage.clear();
+        points = 0;
+        line_segments = 0;
+        line_segment_price = 10;
+        axes = 0;
+        axis_price = 100;
+        measurements = 0;
+        measurement_price = 1000;
+        saving_interval = setInterval(saving, 50);
+      }
+    }
+  }
+</script>
+</body>
+</html>
+<!--
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      html, body {
+        user-select: none;
+      }
+      canvas {
+        z-index: 0;
+        position: absolute;
+      }
+      body{
+        font-size: 15px;
+        font-family: monospace;
+      }
+      button {
+        transition: 0.2s;
+        cursor: pointer;
+        float: left;
+        padding-top: 3px;
+        padding-bottom: 1px;
+        font-size: 15px;
+        font-family: monospace;
+        background-color: transparent;
+        border: 2px solid black;
+      }
+      button:focus {
+        outline: none;
+      }
+      big {
+        font-size: 25px;
+      }
+      .centered {
+        text-align: center;
+      }
+      .shop {
+        position: absolute;
+        right: 5px;
+        top: 5px;
+        width: 25%;
+      }
+      .shoptitle {
+        text-align: center;
+        font-size: 18px;
+        text-decoration: underline;
+        font-weight: bold;
+      }
+      .product {
+        float: left;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 15px;
+      }
+      .productamount {
+        position: absolute;
+        font-size: 25px;
+        right: 70px;
+        font-weight: 900;
+      }
+      .productdesc {
+        float: left;
+        font-size: 13px;
+      }
+      .point {
+        cursor: pointer;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        height: 20px;
+        width: 20px;
+        background-color: black;
+        border-radius: 50%;
+        display: inline-block;
+      }
+      .reset {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+      }
+      .tabmenu button {
+        margin-right: 2px;
+        margin-left: 2px;
+        background-color: #d1d1d1;
+      }
+      .tabmenu button:hover {
+        background-color: #ffffff;
+      }
+      .tabcontent {
+        display: none;
+      }
+    </style>
+    <link rel = 'icon'  href = 'images/point-favicon.png' type = 'image/png'/>
+    <title>Spatiality ~ e4494s</title>
+  </head>
+<body onload = 'openTab(event, "geometrytabID")'>
+<div class = 'centered'>
+<span id = 'pointsID'>You have <big>x</big> points.</span><br>
+<span id = 'pointspersecID'>You are getting x points per second.</span>
+</div>
+<div class = 'tabmenu'>
+<button class = 'tablinks' onclick = 'openTab(event, "geometrytabID")'>Geometry</button>
+<button class = 'tablinks' onclick = 'openTab(event, "howtotabID")'>How To Play</button>
+</div>
+<div id = 'geometrytabID' class = 'tabcontent'>
+<span class = 'point' onclick = 'pointClick()'></span>
+<container class = 'shop'>
+<span id = 'dim2shoptitleID' class = 'shoptitle'>First Dimension</span><br>
+<div>
+<button id = 'lineSegmentPurchaseID' class = 'product' onclick = 'lineSegmentPurchase()'>Line Segment - x points</button>
+<span class = 'productamount' id = 'linesegmentamountID' style = 'top:19px'>1</span>
+<span id = 'line_segmentsID' class = 'productdesc'>Form points into a one-dimensional line that creates points from itself.</span>
+</div>
+<hr style = 'visibility:hidden'>
+<div>
+<button id = 'axisPurchaseID' class = 'product' onclick = 'axisPurchase()'>Axis - x points</button>
+<span class = 'productamount' id = 'axisamountID' style = 'top:75px'>1</span>
+<span id = 'axesID' class = 'productdesc'>Form points into an axis that generates and plots new points.</span>
+</div>
+<hr style = 'visibility:hidden'>
+<div>
+<button id = 'measurementPurchaseID' class = 'product' onclick = 'measurementPurchase()'>Measurement - x points</button>
+<span class = 'productamount' id = 'measurementamountID' style = 'top:131px'>1</span>
+<span id = 'measurementID' class = 'productdesc'>Form points into a measurement that defines the physical world to create and constrain points.</span>
+</div>
+</container>
+</div>
+<div id = 'howtotabID' class = 'tabcontent'>
+<br><br>
+<div style = "width:50%;margin:auto">
+<span>This is a testThis is a testThis is a testThis is a testThis is a testThis is a testThis is a testThis is a testThis is a testThis is a testThis is a testThis is a testThis is a testThis is a testThis is a testThis is a testThis is a test</span>
+</div>
+</div>
+<button onclick = 'clearLocalData()' class = 'reset'><b>RESET THE GAME</b></button>
+<script>
+  function openTab(evt, tabname) {
+    let i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName('tabcontent');
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName('tablinks');
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabname).style.display = "block";
+    evt.currentTarget.className += " active";
+  }
+  
+  function save(variableL, variable) {
+    localStorage.setItem(variableL, Number(variable));
+  }
+  function send(ID,message) {
+    document.getElementById(ID).innerHTML = message;
+  }
+  function ex(number) {
+    return number.toExponential(2).replace(/^(\d*\.\d{0,2})\d*e\+(\d+)$/, "$1e$2");
+  }
+  function num() {
+    points = Number(points);
+    line_segments = Number(line_segments);
+    line_segment_price = Number(line_segment_price);
+    axes = Number(axes);
+    axis_price = Number(axis_price);
+    measurements = Number(measurements);
+    measurement_price = Number(measurement_price);
+  }
+  
+  
+  let points = localStorage.getItem('pointsL');
+  if (points === null) {
+    points = 0;
+    save('pointsL', points);
+  }
+  
+  let line_segments = localStorage.getItem('line_segmentsL');
+  if (line_segments === null) {
+    line_segments = 0;
+    save('line_segmentsL', line_segments);
+  }
+  let line_segment_price = localStorage.getItem('line_segment_priceL');
+  if (line_segment_price === null) {
+    line_segment_price = 10;
+    save('line_segment_priceL', line_segment_price);
+  }
+  
+  let axes = localStorage.getItem('axesL');
+  if (axes === null) {
+    axes = 0;
+    save('axesL',axes);
+  }
+  let axis_price = localStorage.getItem('axis_priceL');
+  if (axis_price === null) {
+    axis_price = 100;
+    save('axis_priceL', axis_price);
+  }
+  
+  let measurements = localStorage.getItem('measurementsL');
+  if (measurements === null) {
+    measurements = 0;
+    save('measurementsL', measurements);
+  }
+  let measurement_price = localStorage.getItem('measurement_priceL');
+  if (measurement_price === null) {
+    measurement_price = 1000;
+    save('measurement_priceL', measurement_price);
+  }
+  
+  
+  
+  //Transcend Euclidian Geometry and unlock the Dimension of Time
+  let points_per_sec = 0;
+  
+  function pointClick() {
+    num();
+    points += 1 + (points_per_sec / 4);
+  }
+  function lineSegmentPurchase() {
+    num();
+    if (points >= line_segment_price) {
+      points -= line_segment_price;
+      line_segments += 1;
+      line_segment_price *= 1.05;
+      line_segment_price = Math.round(line_segment_price);
+    }
+  }
+  function axisPurchase() {
+    num();
+    if (points >= axis_price) {
+      points -= axis_price;
+      axes += 1;
+      axis_price *= 1.1;
+      axis_price = Math.round(axis_price);
+    }
+  }
+  function measurementPurchase() {
+    num();
+    if (points >= measurement_price) {
+      points -= measurement_price;
+      measurements += 1;
+      measurement_price *= 1.1;
+      measurement_price = Math.round(measurement_price);
+    }
+  }
+  
+  function frame() {
+    num();
+    points += (line_segments * 0.01) + (axes * 0.1) + measurements;
+    points_per_sec = (line_segments * 0.2) + (axes * 2) + (measurements * 20);
+    
+    if (points < 1000) {send('pointsID', `You have <big>${Math.floor(points)}</big> points.`);}
+    else {send('pointsID', `You have <big>${ex(points)}</big> points.`);}
+    if (points_per_sec < 1000) {send('pointspersecID', `You are getting ${points_per_sec.toFixed(1)} points per second.`);}
+    else {send('pointspersecID', `You are getting ${ex(points_per_sec)} points per second.`);}
+    
+    if (line_segment_price > 1000) {send('lineSegmentPurchaseID', `Line Segment - ${ex(line_segment_price)} points`);}
+    else {send('lineSegmentPurchaseID', `Line Segment - ${line_segment_price} points`);}
+    if (points >= line_segment_price) {document.getElementById('lineSegmentPurchaseID').style.backgroundColor = '#ffffff';}
+    else {document.getElementById('lineSegmentPurchaseID').style.backgroundColor = '#adadad';}
+    send('linesegmentamountID', line_segments);
+    
+    if (axis_price > 1000) {send('axisPurchaseID', `Axis - ${ex(axis_price)} points`);}
+    else {send('axisPurchaseID', `Axis - ${axis_price} points`);}
+    if (points >= axis_price) {document.getElementById('axisPurchaseID').style.backgroundColor = '#ffffff';}
+    else {document.getElementById('axisPurchaseID').style.backgroundColor = '#adadad';}
+    send('axisamountID', axes);
+    
+    if (measurement_price > 1000) {send('measurementPurchaseID', `Measurement - ${ex(measurement_price)} points`);}
+    else {send('measurementPurchaseID', `Measurement - ${measurement_price} points`);}
+    if (points >= measurement_price) {document.getElementById('measurementPurchaseID').style.backgroundColor = '#ffffff';}
+    else {document.getElementById('measurementPurchaseID').style.backgroundColor = '#adadad';}
+    send('measurementamountID', measurements);
+  }
+  let frame_interval = setInterval(frame, 50);
+  
+  function saving() {
+    save('pointsL',points);
+    save('line_segmentsL', line_segments);
+    save('line_segment_priceL', line_segment_price);
+    save('axesL', axes);
+    save('axis_priceL', axis_price);
+    save('measuremensL', measurements);
+    save('measurement_priceL', measurement_price);
+  }
+  let saving_interval = setInterval(saving, 1000);
+  
+  function clearLocalData() {
+    let ok = confirm('Are you sure you want to reset the game?');
+    if (ok) {
+      ok = confirm('Are you COMPLETELY sure you want to reset the game?');
+      if (ok) {
+        clearInterval(saving_interval);
+        localStorage.clear();
+        points = 0;
+        line_segments = 0;
+        line_segment_price = 10;
+        axes = 0;
+        axis_price = 100;
+        measurements = 0;
+        measurement_price = 1000;
+        saving_interval = setInterval(saving, 50);
+      }
+    }
+  }
+</script>
+</body>
+</html>
+-->
