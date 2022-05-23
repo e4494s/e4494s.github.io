@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>Fractal Tree ~ e4494s</title>
+    <style>
+      #canvas {
+        width: 400px;
+        height: 400px;
+        background-color: transparent;
+      }
+      
+      table, td, th {
+        /*border: 1px solid black;*/
+      }
+      
+      td, th {
+        padding-top: 10px;
+        padding-bottom: 10px;
+      }
+      
+      th {
+        padding-right: 5px;
+        padding-left: 5px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        text-align: center;
+        text-decoration: underline;
+        font-style: italic;
+        font-weight: bold;
+        font-size: 15px;
+        color: #ff9500;
+      }
+      
+      td:not(.rightcol) {
+        width: 230px;
+      }
+      
+      .rightcol {
+        text-align: center;
+        padding-right: 20px;
+      }
+      
+      .desc {
+        font-size: 12px;
+        font-style: italic;
+        padding-right: 20px;
+        padding-left: 0px;
+      }
+    </style>
+  </head>
+<body>
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; Fractal Tree &mdash;&mdash;</h1>
+<table valign = "center">
+  <tr>
+    <th colspan = "2">
+      <div>Tree Settings</div>
+    </th>
+    <th>
+      <div>Tree Modifiers</div>
+    </th>
+    <th colspan = "2">
+      <div>Tree Colors</div>
+    </th>
+  </tr>
+  <tr>
+    <td>
+      <div><b><u>Initial Branch Length:</u></b> <span id = "branchlengthtxt">160</span>px</div>
+      <input type = "range" min = "25" max = "400" step = "5" value = "160" id = "branchlengthrange" oninput = "branchLength = Number(this.value); branchlengthtxt.innerHTML = this.value">
+    </td>
+    <td class = "desc">
+      <div>The starting length of each branch, which gets smaller each iteration</div>
+    </td>
+    <td rowspan = "50" valign = "top" class = "rightcol">
+      <div><b>Further branches are thinner</b></div>
+      <input type = "checkbox" id = "branchwidthratiobox" onchange = "branchWidthRatioBool = this.checked" CHECKED>
+      <br><br><br>
+      <div><b>Draw leaves</b></div>
+      <input type = "checkbox" id = "renderleavesbox" onchange = "renderLeaves = this.checked" CHECKED>
+    </td>
+    <td>
+      <div><b><u>Leaf Hue:</u></b> <span id = "leafhuetxt">240</span>&deg;</div>
+      <div id = "leafhuediv" style = "width: 100px; height: 10px; background: blue; border: 1px solid black"></div>
+      <input type = "range" min = "0" max = "360" step = "15" value = "240" id = "leafhuerange" oninput = "leafHue = leafhuetxt.innerHTML = this.value; leafhuediv.style.background = `hsl(${this.value}deg, 100%, 50%)`">
+      <br><br><br>
+      <div><b><u>Shadow Lightness:</u></b> <span id = "shadowlightnesstxt">0</span>%</div>
+      <div id = "shadowlightnessdiv" style = "width: 100px; height: 10px; background: black; border: 1px solid black"></div>
+      <input type = "range" min = "0" max = "100" step = "5" value = "0" id = "shadowlightnessrange" oninput = "shadowLightness = (this.value / 100) * 255; shadowlightnesstxt.innerHTML = this.value; shadowlightnessdiv.style.background = `rgba(${shadowLightness}, ${shadowLightness}, ${shadowLightness}, ${shadowOpacity})`">
+    </td>
+    <td>
+      <div><b><u>Leaf Opacity:</u></b> <span id = "leafopacitytxt">100</span>%</div>
+      <input type = "range" min = "0.1" max = "1" step = "0.05" value = "1" id = "leafopacityrange" oninput = "leafOpacity = Number(this.value); leafopacitytxt.innerHTML = Math.trunc(this.value * 100)">
+      <br><br><br>
+      <div><b><u>Shadow Opacity:</u></b> <span id = "shadowopacitytxt">100</span>%</div>
+      <input type = "range" min = "0.1" max = "1" step = "0.05" value = "1" id = "shadowopacityrange" oninput = "shadowOpacity = Number(this.value); shadowopacitytxt.innerHTML = Math.trunc(this.value * 100)">
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div><b><u>Minimum Branch Length:</u></b> <span id = "minbranchlengthtxt">10</span>px</div>
+      <input type = "range" min = "10" max = "100" step = "5" value = "10" id = "minbranchlengthrange" oninput = "minBranchLength = Number(this.value); minbranchlengthtxt.innerHTML = this.value">
+    </td>
+    <td class = "desc">
+      <div>Once a branch reaches this minimum length, it will stop branching off into more branches</div>
+    </td>
+    <td rowspan = "50" colspan = "50" valign = "top" style = "text-align: center">
+      <button onclick = "drawFractalTree()">Create Fractal Tree</button>
+      <br><br>
+      <canvas id = "canvas"></canvas>
+      <br>
+      <button class = "download-canvas-btn" onclick = "downloadCanvas()">Download</button>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div><b><u>Branch Width:</u></b> <span id = "treewidthtxt">10</span>px</div>
+      <input type = "range" min = "1" max = "50" step = "1" value = "10" id = "treewidthrange" oninput = "treeWidth = Number(this.value); treewidthtxt.innerHTML = this.value">
+    </td>
+    <td class = "desc">
+      <div>The starting width of each branch, which gets thinner with each iteration</div>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div><b><u>Branch Ratio:</u></b> <span id = "branchratiotxt">80</span>%</div>
+      <input type = "range" min = "0.1" max = "0.8" step = "0.05" value = "0.8" id = "branchratiorange" oninput = "branchRatio = Number(this.value); branchratiotxt.innerHTML = Math.trunc(this.value * 100)">
+    </td>
+    <td class = "desc">
+      <div>Each further branch gets X% shorter and thinner each iteration</div>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div><b><u>Branch Angle:</u></b> <span id = "branchangletxt">15</span>&deg;</div>
+      <input type = "range" min = "0" max = "90" step = "1" value = "15" id = "branchanglerange" oninput = "branchAngle = Number(this.value); branchangletxt.innerHTML = this.value">
+    </td>
+    <td class = "desc">
+      <div>The angle between branches</div>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div><b><u>Branch Curl:</u></b> <span id = "branchcurltxt">10</span>&deg;</div>
+      <input type = "range" min = "0" max = "45" step = "1" value = "10" id = "branchcurlrange" oninput = "branchCurl = Number(this.value); branchcurltxt.innerHTML = this.value">
+    </td>
+    <td class = "desc">
+      <div>Further branches will begin to curl additionally by this angle</div>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div><b><u>Branch Bend:</u></b> <span id = "branchbendtxt">0</span>&deg;</div>
+      <input type = "range" min = "0" max = "30" step = "1" value = "0" id = "branchbendrange" oninput = "branchBend = Number(this.value); branchbendtxt.innerHTML = this.value">
+    </td>
+    <td class = "desc">
+      <div>Branches will bow in the middle by X&deg;</div>
+    </td>
+  </tr>
+  <tr>
+     <td>
+      <div><b><u>Tree Sway:</u></b> <span id = "treeswaytxt">0</span>&deg;</div>
+      <input type = "range" min = "-90" max = "90" step = "1" value = "0" id = "treeswayrange" oninput = "treeSway = Number(this.value); treeswaytxt.innerHTML = this.value">
+    </td>
+    <td class = "desc">
+      <div>The entire tree will sway by X&deg;</div>
+    </td>
+  </tr>
+  <tr>
+     <td>
+      <div><b><u>Leaf Size:</u></b> <span id = "leafsizetxt">15</span>px</div>
+      <input type = "range" min = "5" max = "50" step = "5" value = "15" id = "leafsizerange" oninput = "leafSize = Number(this.value); leafsizetxt.innerHTML = this.value">
+    </td>
+    <td class = "desc">
+      <div>The size of each leaf, which is created at the end of a branch</div>
+    </td>
+  </tr>
+</table>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 1000;
+  
+  let branchColor = "brown";
+  let shadowColor = "black";
+  
+  let branchLength = 160;
+  let minBranchLength = 10;
+  let branchRatio = 0.8;
+  let branchAngle = 15;
+  let branchCurl = 10;
+  let branchBend = 0;  
+  let treeX = canvas.width / 2;
+  let treeY = canvas.height - 50;
+  let treeAngle = 0;
+  let treeWidth = 10;
+  let treeSway = 0;
+  
+  let leafSize = 15;
+  let leafOpacity = 1;
+  let leafHue = 240;
+  let leafGradient = true;
+  let leafGradientLength = 1000;
+  let leafCount = 0;
+  
+  let shadowSize = 15;
+  let shadowLightness = 0;
+  let shadowOpacity = 1;
+  
+  let branchWidthRatioBool = true;
+  let renderLeaves = true;
+  
+  function drawBranch(x, y, length, angle, width) {
+    ctx.lineWidth = Math.max(width, 0.2);
+    ctx.beginPath();
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate((angle * Math.PI) / 180);
+    ctx.moveTo(0, 0);
+    if (angle > 0) ctx.bezierCurveTo(branchBend, -length / 2, branchBend, -length / 2, 0, -length);
+    else ctx.bezierCurveTo(-branchBend, -length / 2, -branchBend, -length / 2, 0, -length);
+    if (length > minBranchLength) ctx.stroke();
+    
+    if (length < minBranchLength) {
+      if (renderLeaves) {
+        leafCount++;
+        if (leafCount > leafGradientLength) leafCount = 0;
+        ctx.globalAlpha = leafOpacity;
+        //ctx.fillStyle = `hsl(${leafHue}deg, 100%, ${(leafCount / leafGradientLength) * 100}%)`;
+        ctx.fillStyle = `hsl(${leafHue}deg, 100%, ${randBetween(15, 85)}%)`;
+        ctx.beginPath();
+        ctx.arc(0, -leafSize, leafSize, 0, Math.PI / 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+      ctx.restore();
+      return;
+    }
+    
+    drawBranch(0, -length, length * branchRatio, Math.max(branchAngle, angle + branchCurl) + treeSway, width * (branchWidthRatioBool ? branchRatio : 1));
+    drawBranch(0, -length, length * branchRatio, Math.min(-branchAngle, angle - branchCurl) + treeSway,  width * (branchWidthRatioBool ? branchRatio : 1));
+    
+    ctx.restore();
+  }
+  
+  function drawFractalTree() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = branchColor;
+    ctx.shadowBlur = shadowSize;
+    ctx.shadowColor = `rgba(${shadowLightness}, ${shadowLightness}, ${shadowLightness}, ${shadowOpacity})`;
+    leafCount = 0;
+    drawBranch(treeX, treeY, branchLength, treeAngle, treeWidth);
+  }
+  drawFractalTree();
+  
+  function downloadCanvas() {
+    let link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "fractal-tree.png";
+    link.click();
+  }
+</script>
+</body>
+</html>
