@@ -1,3 +1,4 @@
+// jshint maxerr:9999
 // Colors
 
 function RGB(r, g, b) {
