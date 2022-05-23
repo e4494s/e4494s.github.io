@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <title>TRBL ~ e4494s</title>
+    <style>
+      canvas {
+        width: 300px;
+        height: 300px;
+        border: none;
+      }
+    </style>
+  </head>
+<body>
+<h1>TRBL</h1>
+<button onclick = "tick()">Tick</button>
+<br><br>
+<canvas id = "canvas"></canvas>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  let gridSize = 100;
+  let tileSize = 300 / gridSize;
+  canvas.width = canvas.height = 300;
+  let emptyDirection = "T";
+  let filledDirection = "R";
+  
+  let cellColor = "black";
+  
+  let gridArray = [];
+  let colorArray = [];
+  for (let y = 0; y < gridSize; y++) {
+    gridArray.push([]);
+    colorArray.push([]);
+    for (let x = 0; x < gridSize; x++) {
+      gridArray[gridArray.length - 1].push(false);
+      colorArray[colorArray.length - 1].push(0);
+    }
+  }
+  
+  function tick() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    emptyDirection = "T";
+    filledDirection = "T";
+    colorArray = [];
+    for (let y = 0; y < gridSize; y++) {
+      colorArray.push([]);
+      for (let x = 0; x < gridSize; x++) {
+        colorArray[colorArray.length - 1].push(0);
+      }
+    }
+    for (let y = 0; y < canvas.height / tileSize; y++) {
+      for (let x = 0; x < canvas.width / tileSize; x++) {
+        if (!gridArray[x][y]) {
+          if (emptyDirection == "T") { // Top
+            gridArray[x][(y - 1 + gridSize) % gridSize] = !gridArray[x][(y - 1 + gridSize) % gridSize];
+            colorArray[x][(y - 1 + gridSize) % gridSize]++;
+            emptyDirection = "R";
+          }
+          else if (emptyDirection == "R") { // Right
+            gridArray[(x + 1) % gridSize][y] = !gridArray[(x + 1) % gridSize][y];
+            colorArray[(x + 1) % gridSize][y]++;
+            emptyDirection = "B";
+          }
+          else if (emptyDirection == "B") { // Bottom
+            gridArray[x][(y + 1) % gridSize] = !gridArray[x][(y + 1) % gridSize];
+            colorArray[x][(y + 1) % gridSize]++;
+            emptyDirection = "L";
+          }
+          else if (emptyDirection == "L") { // Left
+            gridArray[(x - 1 + gridSize) % gridSize][y] = !gridArray[(x - 1 + gridSize) % gridSize][y];
+            colorArray[(x - 1 + gridSize) % gridSize][y]++;
+            emptyDirection = "T";
+          }
+        }
+        //
+        if (gridArray[x][y]) {
+          if (filledDirection == "T") { // Top
+            gridArray[x][(y - 1 + gridSize) % gridSize] = !gridArray[x][(y - 1 + gridSize) % gridSize];
+            colorArray[x][(y - 1 + gridSize) % gridSize]++;
+            filledDirection = "R";
+          }
+          else if (filledDirection == "R") { // Right
+            gridArray[(x + 1) % gridSize][y] = !gridArray[(x + 1) % gridSize][y];
+            colorArray[(x + 1) % gridSize][y]++;
+            filledDirection = "B";
+          }
+          else if (filledDirection == "B") { // Bottom
+            gridArray[x][(y + 1) % gridSize] = !gridArray[x][(y + 1) % gridSize];
+            colorArray[x][(y + 1) % gridSize]++;
+            filledDirection = "L";
+          }
+          else if (filledDirection == "L") { // Left
+            gridArray[(x - 1 + gridSize) % gridSize][y] = !gridArray[(x - 1 + gridSize) % gridSize][y];
+            colorArray[(x - 1 + gridSize) % gridSize][y]++;
+            filledDirection = "T";
+          }
+        }
+      }
+    }
+    for (let y = 0; y < gridSize; y++) {
+      for (let x = 0; x < gridSize; x++) {
+        ctx.fillStyle = `hsl(0deg, 100%, ${colorArray[x][y] * 25}%)`;
+        if (gridArray[x][y]) ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+      }
+    }
+  }
+  for (let y = 0; y < gridSize; y++) {
+    for (let x = 0; x < gridSize; x++) {
+      ctx.fillStyle = cellColor;
+      if (gridArray[x][y]) ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+    }
+  }
+</script>
+</body>
+</html>
