@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = 'icon'  href = 'images/favicon.png' type = 'image/png'/>
+    <title>PRNG ~ e4494s</title>
+    <style>
+      :root {
+        --colorHeight: 10px;
+      }
+      
+      table, th, tr, td {
+        /*border: 1px solid black;*/
+      }
+      
+      .colorbarcontainer {
+        min-height: var(--colorHeight);
+        width: 45vw;
+      }
+      
+      .colorbar {
+        position: relative;
+        top: 0;
+        left: 0;
+        width: 100%;
+        overflow-wrap: break-word;
+        line-height: var(--colorHeight);
+      }
+      
+      .colorbar span {
+        color: transparent;
+        font-size: var(--colorHeight);
+        line-height: var(--colorHeight);
+        font-family: monospace;
+      }
+      
+      #e4494s_static, #Math_static {
+        border: 4px solid red;
+        width: 200px;
+        height: 200px;
+        image-rendering: pixelated;
+      }
+    </style>
+  </head>
+<body>
+<h1>Testing Two Different Psuedorandom Number Generators</h1>
+<button onclick = 'addRandColor()'>Add To Random Color</button>
+<br><br>
+<table>
+  <tr>
+    <th>e4494s.random()</th>
+    <th>Math.random()</th>
+  </tr>
+  
+  <tr>
+    <td>
+      <div class = 'colorbarcontainer'>
+        <div class = 'colorbar'><span id = 'e4494s_red' style = 'background-color: red'></span></div>
+      </div>
+    </td>
+    <td>
+      <div class = 'colorbarcontainer'>
+        <div class = 'colorbar'><span id = 'Math_red' style = 'background-color: red'></span></div>
+      </div>
+    </td>
+  </tr>
+  
+  <tr>
+    <td>
+      <div class = 'colorbarcontainer'>
+        <div class = 'colorbar'><span id = 'e4494s_orange' style = 'background-color: orange'></span></div>
+      </div>
+    </td>
+    <td>
+      <div class = 'colorbarcontainer'>
+        <div class = 'colorbar'><span id = 'Math_orange' style = 'background-color: orange'></span></div>
+      </div>
+    </td>
+  </tr>
+  
+  <tr>
+    <td>
+      <div class = 'colorbarcontainer'>
+        <div class = 'colorbar'><span id = 'e4494s_yellow' style = 'background-color: yellow'></span></div>
+      </div>
+    </td>
+    <td>
+      <div class = 'colorbarcontainer'>
+        <div class = 'colorbar'><span id = 'Math_yellow' style = 'background-color: yellow'></span></div>
+      </div>
+    </td>
+  </tr>
+  
+  <tr>
+    <td>
+      <div class = 'colorbarcontainer'>
+        <div class = 'colorbar'><span id = 'e4494s_green' style = 'background-color: green'></span></div>
+      </div>
+    </td>
+    <td>
+      <div class = 'colorbarcontainer'>
+        <div class = 'colorbar'><span id = 'Math_green' style = 'background-color: green'></span></div>
+      </div>
+    </td>
+  </tr>
+  
+  <tr>
+    <td>
+      <div class = 'colorbarcontainer'>
+        <div class = 'colorbar'><span id = 'e4494s_blue' style = 'background-color: blue'></span></div>
+      </div>
+    </td>
+    <td>
+      <div class = 'colorbarcontainer'>
+        <div class = 'colorbar'><span id = 'Math_blue' style = 'background-color: blue'></span></div>
+      </div>
+    </td>
+  </tr>
+  
+  <tr>
+    <td>
+      <div class = 'colorbarcontainer'>
+        <div class = 'colorbar'><span id = 'e4494s_purple' style = 'background-color: purple'></span></div>
+      </div>
+    </td>
+    <td>
+      <div class = 'colorbarcontainer'>
+        <div class = 'colorbar'><span id = 'Math_purple' style = 'background-color: purple'></span></div>
+      </div>
+    </td>
+  </tr>
+  <tr>
+    <td><b>Deviation: </b><span id = 'e4494s_deviation'></span></td>
+    <td><b>Deviation: </b><span id = 'Math_deviation'></span></td>
+  </tr>
+</table>
+<hr><hr>
+<button onclick = 'makeRandomStatic()'>Make Random Static</button>
+<br><br>
+<table>
+  <tr>
+    <th>e4494s.random()</th>
+    <th>Math.random()</th>
+  </tr>
+  <tr>
+    <td>
+      <canvas id = 'e4494s_static'></canvas>
+    </td>
+    <td>
+      <canvas id = 'Math_static'></canvas>
+    </td>
+  </tr>
+  <tr>
+    <td><b>Density: </b><span id = 'e4494s_density'></span></td>
+    <td><b>Density: </b><span id = 'Math_density'></span></td>
+  </tr>
+</table>
+<script src = 'scripts/e4494s.js'></script>
+<script>
+  const inc = '|';
+  function addRandColor() {
+    switch (Math.floor(e4494s.random() * 6)) {
+      case 0: e4494s_red.innerHTML += inc;
+      break;
+      case 1: e4494s_orange.innerHTML += inc;
+      break;
+      case 2: e4494s_yellow.innerHTML += inc;
+      break;
+      case 3: e4494s_green.innerHTML += inc;
+      break;
+      case 4: e4494s_blue.innerHTML += inc;
+      break;
+      case 5: e4494s_purple.innerHTML += inc;
+      break;
+    }
+    
+    switch (Math.floor(Math.random() * 6)) {
+      case 0: Math_red.innerHTML += inc;
+      break;
+      case 1: Math_orange.innerHTML += inc;
+      break;
+      case 2: Math_yellow.innerHTML += inc;
+      break;
+      case 3: Math_green.innerHTML += inc;
+      break;
+      case 4: Math_blue.innerHTML += inc;
+      break;
+      case 5: Math_purple.innerHTML += inc;
+      break;
+    }
+    
+    e4494s_deviation.innerHTML = deviation([e4494s_red.innerHTML.length, e4494s_orange.innerHTML.length, e4494s_yellow.innerHTML.length, e4494s_green.innerHTML.length, e4494s_blue.innerHTML.length, e4494s_purple.innerHTML.length]).toFixed(2);
+    Math_deviation.innerHTML = deviation([Math_red.innerHTML.length, Math_orange.innerHTML.length, Math_yellow.innerHTML.length, Math_green.innerHTML.length, Math_blue.innerHTML.length, Math_purple.innerHTML.length]).toFixed(2);
+  }
+  
+  //
+  
+  const ectx = e4494s_static.getContext('2d');
+  const Mctx = Math_static.getContext('2d');
+  e4494s_static.width = e4494s_static.height = Math_static.width = Math_static.height = 25;
+  function makeRandomStatic() {
+    ectx.clearRect(0, 0, e4494s_static.width, e4494s_static.height);
+    let b = 0;
+    for (let i = 0; i < e4494s_static.width; i++) {
+      for (let j = 0; j < e4494s_static.height; j++) {
+        if (Math.round(e4494s.random()) == 0) {
+          ectx.fillStyle = 'black';
+          b++;
+        }
+        else ectx.fillStyle = 'white';
+        ectx.fillRect(i, j, 1, 1);
+      }
+    }
+    e4494s_density.innerHTML = ((b / (e4494s_static.width * e4494s_static.height)) * 100).toFixed(2) + '%';
+    
+    Mctx.clearRect(0, 0, Math_static.width, Math_static.height);
+    b = 0;
+    for (let i = 0; i < Math_static.width; i++) {
+      for (let j = 0; j < Math_static.height; j++) {
+        if (Math.round(Math.random()) == 0) {
+          Mctx.fillStyle = 'black';
+          b++;
+        }
+        else Mctx.fillStyle = 'white';
+        Mctx.fillRect(i, j, 1, 1);
+      }
+    }
+    Math_density.innerHTML = ((b / (Math_static.width * Math_static.height)) * 100).toFixed(2) + '%';
+  }
+  
+  function deviation(arr) {
+    let arr_sum = 0;
+    for (let i = 0; i < arr.length; i++) arr_sum += arr[i];
+    let arr_average = arr_sum / arr.length;
+    let arr_variance = 0;
+    for (let i = 0; i < arr.length; i++) arr_variance += Math.abs(arr[i] - arr_average);
+    arr_variance /= arr.length;
+    return Math.sqrt(arr_variance);
+  }
+</script>
+</body>
+</html>
