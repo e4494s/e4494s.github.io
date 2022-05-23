@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <title>Fractal Spirograph ~ e4494s</title>
+    <style>
+      #canvas {
+        width: 400px;
+        height: 400px;
+      }
+    </style>
+  </head>
+<body>
+<h1>Fractal Spirograph</h1>
+<canvas id = "canvas"></canvas>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 2000;
+  
+  let time = 0;
+  let period = 1000;
+  let pointsArray = [];
+  
+  let radiusRatio = 0.4;
+  let speedRatio = -4;
+  
+  let showCircles = true;
+  
+  ctx.lineJoin = ctx.lineCap = "round";
+  
+  function Circle(x, y, radius, speed, parent) {
+    this.x = x;
+    this.y = y;
+    this.radius = radius;
+    this.speed = speed;
+    this.parent = parent;
+    this.child = null;
+  }
+  Circle.prototype.addChild = function() {
+    let childRadius = this.radius * radiusRatio;
+    let childX = this.x + this.radius + childRadius;
+    let childY = this.y;
+    let childSpeed = this === Sun ? this.speed : this.speed * speedRatio;
+    let child = new Circle(childX, childY, childRadius, childSpeed, this);
+    this.child = child;
+    return this.child;
+  };
+  Circle.prototype.render = function() {
+    if (this.parent) {
+      this.x = this.parent.x + ((this.radius + this.parent.radius) * Math.cos(time * this.speed * Math.PI * 2));
+      this.y = this.parent.y + ((this.radius + this.parent.radius) * Math.sin(time * this.speed * Math.PI * 2));
+    }
+    if (showCircles) {
+      ctx.strokeStyle = "gray";
+      ctx.lineWidth = 5;
+      ctx.strokeCircle(this.x, this.y, this.radius);
+    }
+    return this.child;
+  };
+  let Sun = new Circle(canvas.width / 2, canvas.height / 2, 400, 1, null);
+  let i = Sun;
+  for (let j = 0; j < 4; j++) {
+    i = i.addChild();
+  }
+  
+  function frame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    let i = Sun;
+    while (i) {
+      if (!i.child) pointsArray.push({x: i.x, y: i.y});
+      i = i.render();
+    }
+    
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(pointsArray[0].x, pointsArray[0].y);
+    for (let i = 0; i < pointsArray.length; i++) {
+      ctx.lineTo(pointsArray[i].x, pointsArray[i].y);
+    }
+    ctx.stroke();
+    
+    if (pointsArray.length > period + 1) pointsArray.shift();
+    
+    time += 1 / period;
+    while (time >= 1) time = 0;
+    while (time < 0) time++;
+    
+    
+    requestAnimationFrame(frame);
+  }
+  frame();
+</script>
+</body>
+</html>
