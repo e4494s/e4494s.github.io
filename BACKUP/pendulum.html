@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <title>Double Pendulum ~ e4494s</title>
+    <style>
+      canvas {
+        border: none;
+        width: 400px;
+        height: 400px;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      
+      #bottomcanvas {
+        z-index: -1;
+      }
+      
+      #canvasdiv {
+        position: relative;
+      }
+    </style>
+  </head>
+<body>
+<div><b><u>Bob 1 Mass:</u></b> <span id = "bob1masstxt">10</span></div>
+<input type = "range" min = "1" max = "50" step = "1" oninput = "bob1.mass = Number(this.value); bob1masstxt.innerHTML = this.value">
+<br><br>
+<div><b><u>Bob 2 Mass:</u></b> <span id = "bob2masstxt">10</span></div>
+<input type = "range" min = "1" max = "50" step = "1" oninput = "bob2.mass = Number(this.value); bob2masstxt.innerHTML = this.value">
+<br><br>
+<div><b><u>Bob 1 String Length:</u></b> <span id = "bob1stringlengthtxt">150</span></div>
+<input type = "range" min = "25" max = "200" step = "25" oninput = "bob1.stringLength = Number(this.value); bob1stringlengthtxt.innerHTML = this.value">
+<br><br>
+<div><b><u>Bob 2 String Length:</u></b> <span id = "bob2stringlengthtxt">150</span></div>
+<input type = "range" min = "25" max = "200" step = "25" oninput = "bob2.stringLength = Number(this.value); bob2stringlengthtxt.innerHTML = this.value">
+<div id = "canvasdiv">
+  <canvas id = "canvas"></canvas>
+  <canvas id = "bottomcanvas"></canvas>
+</div>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 800;
+  const bctx = bottomcanvas.getContext("2d");
+  bottomcanvas.width = bottomcanvas.height = 800;
+  
+  let pendulumX = canvas.width / 2;
+  let pendulumY = 200;
+  
+  let bob1 = {};
+  bob1.mass = 10;
+  bob1.stringLength = 150;
+  bob1.x = 0;
+  bob1.y = 0;
+  
+  let bob2 = {};
+  bob2.mass = 5;
+  bob2.stringLength = 150;
+  bob2.x = 0;
+  bob2.y = 0;
+  
+  let gravity = 9.8;
+  let timeSpeed = 0.25;
+  
+  let d2Theta1 = 0;
+  let d2Theta2 = 0;
+  let dTheta1 = 0;
+  let dTheta2 = 0;
+  let theta1 = 0;
+  let theta2 = /*randBetween(90, 270)*/120 * (Math.PI / 180);//2.3 * Math.PI / 2;
+  
+  ctx.lineWidth = 5;
+  ctx.fillStyle = "blue";
+  
+  bctx.lineWidth = 1;
+  bctx.lineCap = "round";
+  bctx.lineJoin = "round";
+  bctx.moveTo(bob2.x, bob2.y);
+  bctx.beginPath();
+  
+  function frame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let mu = 1 + (bob1.mass / bob2.mass);
+    d2Theta1 = (gravity * (Math.sin(theta2) * Math.cos(theta1 - theta2) - mu * Math.sin(theta1)) - (bob2.stringLength * dTheta2 * dTheta2 + bob1.stringLength * dTheta1 * dTheta1 * Math.cos(theta1 - theta2)) * Math.sin(theta1 - theta2)) / (bob1.stringLength * (mu - Math.cos(theta1 - theta2) * Math.cos(theta1 - theta2)));
+    d2Theta2 = (mu * gravity * (Math.sin(theta1) * Math.cos(theta1 - theta2) - Math.sin(theta2)) + (mu * bob1.stringLength * dTheta1 * dTheta1 + bob2.stringLength * dTheta2 * dTheta2 * Math.cos(theta1 - theta2)) * Math.sin(theta1 - theta2)) / (bob2.stringLength * (mu - Math.cos(theta1 - theta2) * Math.cos(theta1 - theta2)));
+    dTheta1 += d2Theta1 * timeSpeed;
+    dTheta2 += d2Theta2 * timeSpeed;
+    theta1 += dTheta1 * timeSpeed;
+    theta2 += dTheta2 * timeSpeed;
+    
+    bob1.x = pendulumX + bob1.stringLength * Math.sin(theta1);
+    bob1.y = pendulumY + bob1.stringLength * Math.cos(theta1);
+    bob2.x = pendulumX + bob1.stringLength * Math.sin(theta1) + bob2.stringLength * Math.sin(theta2);
+    bob2.y = pendulumY + bob1.stringLength * Math.cos(theta1) + bob2.stringLength * Math.cos(theta2)
+    
+    ctx.beginPath();
+    ctx.moveTo(pendulumX, pendulumY);
+    ctx.lineTo(bob1.x, bob1.y);
+    ctx.lineTo(bob2.x, bob2.y);
+    ctx.stroke();
+    
+    ctx.fillCircle(bob1.x, bob1.y, bob1.mass);
+    ctx.fillCircle(bob2.x, bob2.y, bob2.mass);
+    
+    bctx.lineTo(bob2.x, bob2.y);
+    bctx.strokeStyle = "white";
+    bctx.lineWidth = 4;
+    bctx.stroke();
+    bctx.strokeStyle = "darkgreen";
+    bctx.lineWidth = 2;
+    bctx.stroke();
+    bctx.beginPath();
+    bctx.moveTo(bob2.x, bob2.y);
+    
+    requestAnimationFrame(frame);
+  }
+  frame();
+</script>
+</body>
+</html>
