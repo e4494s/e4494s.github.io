@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = 'icon'  href = 'images/favicon.png' type = 'image/png'/>
+    <title>e4494s</title>
+  </head>
+<body>
+<style>
+  .break {
+    height: 25px;
+  }
+</style>
+<!--Most HTML tags-->
+Join the <a href = 'https://bit.ly/2RaPIOD' target = '_blank'>rat dance party</a>!
+<p class = 'break'></p>
+The following word is going to be <b>bold</b>.
+<p class = 'break'></p>
+<button onclick = 'clicked()' id = 'clicked_button'>You have clicked me 0 times!</button>
+<p class = 'break'></p>
+<canvas id = 'canvas'>If you're seeing this, then your browser does not support the canvas element.</canvas>
+<!---->
+<script>
+  let clicks = 0;
+  function clicked() {
+    clicks++;
+    document.getElementById('clicked_button').innerHTML = `You have clicked me ${clicks} times!`;
+    if (clicks == 1) document.getElementById('clicked_button').innerHTML = `You have clicked me 1 time!`;
+  }
+  
+  const ctx = document.getElementById('canvas').getContext('2d');
+</script>
+</body>
+</html>
