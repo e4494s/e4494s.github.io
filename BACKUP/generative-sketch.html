@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <title>Generative Sketch ~ e4494s</title>
+    <style>
+      * {
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -khtml-user-select: none;
+        -ms-user-select: none;
+      }
+      
+      #canvas {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: -1;
+        width: 100%;
+        height: 100%;
+        border: none;
+        outline: 3px solid red;
+        /*width: 500px;
+        height: 500px;*/
+      }
+      
+      #menu {
+        position: absolute;
+        left: 20px;
+        top: 20px;
+        min-width: 0;
+        border: 2px solid black;
+        background-color: rgba(200, 200, 200, 0.75);
+        padding: 5px;
+      }
+      
+      .brush-btn {
+        width: 75px;
+        height: 75px;
+        display: inline-block;
+        border: 3px solid black;
+        border-radius: 5px;
+        background-size: 100% 100%;
+        cursor: pointer;
+        background-color: white;
+        margin: 5px;
+      }
+      .brush-btn:hover {
+        background-color: lightgray;
+      }
+      .brush-btn:active {
+        background-color: gray;
+      }
+      
+      #export-btn {
+        background-color: rgb(175, 175, 255);
+        border-radius: 7px;
+      }
+      #export-btn:hover {
+        background-color: rgb(125, 125, 255);
+      }
+      #export-btn:active {
+        background-color: rgb(75, 75, 255);
+      }
+    </style>
+  </head>
+<body>
+<div id = "menu">
+<button onclick = "clearCanvas()">Erase Canvas</button>
+<button onclick = "exportCanvas()" id = "export-btn">Export Canvas</button>
+<br>
+</div>
+<canvas id = "canvas"></canvas>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  let canvasRatio = 3;//1;
+  canvas.width = window.innerWidth * canvasRatio; //500;
+  canvas.height = window.innerHeight * canvasRatio; //500;
+  let canvasRunning = true;
+  let canvasRect = canvas.getBoundingClientRect();
+  
+  let menu = document.getElementById("menu");
+  
+  let brushMode = 1;
+  let autoErase = false;
+  let totalParticles = 0;
+  let animInterval = 0;
+  let animIntervalPeriod = 500;
+  
+  let mouseDown = false;
+  
+  for (let i = 1; i <= 11; i++) {
+    if ((i - 1) % 3 == 0) {
+      let br = document.createElement("br");
+      menu.appendChild(br);
+    }
+    let btn = document.createElement("div");
+    btn.className = "brush-btn";
+    btn.style.backgroundImage = `url("images/generative-sketch/brush${i}.png")`;
+    if (i == 1) btn.style.borderColor = "yellow";
+    btn.onclick = () => {
+      brushMode = i;
+      let brushBtns = document.getElementsByClassName("brush-btn");
+      for (let i = 0; i < brushBtns.length; i++) brushBtns[i].style.borderColor = "black";
+      btn.style.borderColor = "yellow";
+    };
+    menu.appendChild(btn);
+  }
+  
+  /*
+  
+  Ideas:
+  - Random walker particle
+  - Particle with gravity/wind
+  - Particle with angle velocity with angle constantly changing
+  
+  */
+  
+  function Particle1(x, y) { // Vines
+    this.x = x;
+    this.y = y;
+    this.vx = Math.random() * 2 * randSign();
+    this.vy = Math.random() * 2 * randSign();
+    this.angleX = Math.random() * Math.PI * 2;
+    this.angleY = Math.random() * Math.PI * 2;
+    this.vAngleX = Math.random() * 0.25 * randSign();
+    this.vAngleY = Math.random() * 0.25 * randSign();
+    this.size = randBetween(1, 3);
+    this.maxSize = randBetween(3, 9);
+    this.growSpeed = randBetween(0.05, 0.25);
+    this.lightness = 10;
+    this.dead = false;
+  }
+  Particle1.prototype.render = function() {
+    this.x += this.vx + Math.sin(this.angleX);
+    this.y += this.vy + Math.sin(this.angleY);
+    this.size += this.growSpeed;
+    this.angleX += this.vAngleX;
+    this.angleY += this.vAngleY;
+    if (this.lightness < 70) this.lightness += 0.75;
+    if (this.size <= this.maxSize) {
+      ctx.fillStyle = `hsl(120deg, 100%, ${this.lightness}%)`;
+      ctx.fillCircle(this.x, this.y, this.size);
+    }
+    else this.dead = true;
+  };
+  
+  function Particle2(x, y) { // Cubes
+    this.x = x;
+    this.y = y;
+    this.vx = Math.random() * 2 * randSign();
+    this.vy = Math.random() * 2 * randSign();
+    this.size = randBetween(1, 3);
+    this.maxSize = randBetween(20, 30);
+    this.growSpeed = randBetween(0.5, 0.75);
+    this.hue = animInterval * 720;
+    this.dead = false;
+  }
+  Particle2.prototype.render = function() {
+    this.x += this.vx;
+    this.y += this.vy;
+    this.size += this.growSpeed;
+    if (this.size <= this.maxSize) {
+      ctx.fillStyle = `hsl(${this.hue}deg, 70%, 70%)`;
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 1;
+      ctx.fillRectFromCenter(this.x, this.y, this.size, this.size);
+      ctx.strokeRectFromCenter(this.x, this.y, this.size, this.size);
+    }
+    else this.dead = true;
+  };
+  
+  function Particle3(x, y) { // Fireworks
+    this.x = x;
+    this.y = y;
+    let a = Math.random() * Math.PI * 2;
+    let v = Math.random() * 3;
+    this.vx = v * Math.cos(a);
+    this.vy = v * Math.sin(a);
+    this.size = 0;
+    this.ratio = randBetween(0.5, 1);
+    this.maxSize = randBetween(10, 20);
+    this.growSpeed = randBetween(0.4, 0.5);
+    this.angle = Math.random() * Math.PI * 2;
+    this.vAngle = Math.random() * 0.1 * randSign();
+    this.color = Math.random() >= 0.5 ? "red" : "blue";
+    this.angleX = Math.random() * Math.PI * 2;
+    this.angleY = Math.random() * Math.PI * 2;
+    this.vAngleX = Math.random() * 0.25 * randSign();
+    this.vAngleY = Math.random() * 0.25 * randSign();
+    this.dead = false;
+  }
+  Particle3.prototype.render = function() {
+    this.x += this.vx + Math.sin(this.angleX) * 1.5;
+    this.y += this.vy + Math.sin(this.angleY) * 1.5;
+    this.size += this.growSpeed;
+    this.angle += this.vAngle;
+    this.angleX += this.vAngleX;
+    this.angleY += this.vAngleY;
+    if (this.size <= this.maxSize) {
+      ctx.fillStyle = "white";
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 10;
+      ctx.fillPointedStar(this.x, this.y, (this.size / 2) * this.ratio, this.size * this.ratio, 5, this.angle);
+      ctx.shadowBlur = 0;
+    }
+    else this.dead = true;
+  };
+  
+  function Particle4(x, y) {
+    this.x = x;
+    this.y = y;
+    this.vx = Math.random() * randSign();
+    this.vy = Math.random() * randSign();
+    this.angleX = Math.random() * Math.PI * 2;
+    this.angleY = Math.random() * Math.PI * 2;
+    this.vAngleX = Math.random() * 0.25 * randSign();
+    this.vAngleY = Math.random() * 0.25 * randSign();
+    this.angle = Math.random() * Math.PI * 2;
+    this.vAngle = Math.random() * randSign();
+    this.size = 0;
+    this.maxSize = randBetween(10, 30);
+    this.growSpeed = randBetween(0.5, 0.75);
+    this.dead = false;
+  }
+  Particle4.prototype.render = function() {
+    this.x += this.vx + Math.sin(this.angleX);
+    this.y += this.vy + Math.sin(this.angleY);
+    this.size += this.growSpeed;
+    this.angleX += this.vAngleX;
+    this.angleY += this.vAngleY;
+    this.angle += this.vAngle;
+    if (this.size <= this.maxSize) {
+      ctx.globalCompositeOperation = "destination-over";
+      ctx.fillStyle = "white";
+      ctx.shadowColor = "black";
+      ctx.shadowBlur = 5;
+      ctx.fillRotatedRectFromCenter(this.x, this.y, this.size, this.size, this.angle);
+      ctx.globalCompositeOperation = "source-over";
+      ctx.shadowBlur = 0;
+    }
+    else this.dead = true;
+  };
+  
+  function Particle5(x, y) { // Glass
+    this.x = x;
+    this.y = y;
+    this.velocity = Math.random() * 2 * randSign();
+    this.size = randBetween(2, 5);
+    this.thickness = randBetween(1, 7);
+    this.maxSize = randBetween(20, 60);
+    this.growSpeed = randBetween(0.75, 1.5);
+    this.sideways = Math.random() >= 0.5;
+    this.hue = randBetween(180, 300);
+    this.lightness = randBetween(50, 100);
+    this.dead = false;
+  }
+  Particle5.prototype.render = function() {
+    if (this.sideways) this.y += this.velocity;
+    else this.x += this.velocity;
+    this.size += this.growSpeed;
+    this.angleX += this.vAngleX;
+    this.angleY += this.vAngleY;
+    if (this.size <= this.maxSize) {
+      ctx.fillStyle = `hsl(${this.hue}deg, 100%, ${this.lightness}%)`;
+      ctx.strokeStyle = `hsl(${this.hue}deg, 100%, 80%)`;
+      ctx.lineWidth = 2;
+      ctx.shadowColor = "black"
+      ctx.shadowBlur = 5;
+      if (this.sideways) {
+        ctx.fillRectFromCenter(this.x, this.y, this.size, this.thickness);
+        ctx.strokeRectFromCenter(this.x, this.y, this.size, this.thickness);
+      }
+      else {
+        ctx.fillRectFromCenter(this.x, this.y, this.thickness, this.size);
+        ctx.strokeRectFromCenter(this.x, this.y, this.thickness, this.size);
+      }
+      ctx.shadowBlur = 0;
+    }
+    else this.dead = true;
+  };
+  
+  function Particle6(x, y) { // Tendrils
+    this.x = x;
+    this.y = y;
+    this.vx = Math.random() * 2 * randSign();
+    this.vy = Math.random() * 2 * randSign();
+    this.angleX = Math.random() * Math.PI * 2;
+    this.angleY = Math.random() * Math.PI * 2;
+    this.vAngleX = Math.random() * 0.5 * randSign();
+    this.vAngleY = Math.random() * 0.5 * randSign();
+    this.size = randBetween(10, 20);
+    this.minSize = 0;
+    this.shrinkSpeed = randBetween(0.25, 1);
+    this.hue = Math.random() * 360;
+    this.dead = false;
+  }
+  Particle6.prototype.render = function() {
+    this.x += this.vx + (Math.sin(this.angleX) * 2);
+    this.y += this.vy + (Math.sin(this.angleY) * 2);
+    this.size -= this.shrinkSpeed;
+    this.angleX += this.vAngleX;
+    this.angleY += this.vAngleY;
+    if (this.size >= this.minSize) {
+      ctx.fillStyle = `hsl(${this.hue}deg, 100%, 70%)`;
+      ctx.shadowColor = "black";
+      ctx.shadowBlur = 4;
+      ctx.fillCircle(this.x, this.y, this.size);
+      ctx.shadowBlur = 0;
+    }
+    else this.dead = true;
+  };
+  
+  function Particle7(x, y) { // Strings
+    this.x = x;
+    this.y = y;
+    this.vx = Math.random() * 0.5 * randSign();
+    this.vy = Math.random() * 0.5 * randSign();
+    this.size = randBetween(1, 2);
+    this.age = 0;
+    this.maxAge = randBetween(50, 150);
+    this.lightness = Math.random() * 100;
+    this.dead = false;
+  }
+  Particle7.prototype.render = function() {
+    this.age++;
+    this.x += this.vx;
+    this.y += this.vy;
+    this.vx += Math.random() * 0.25 * randSign();
+    this.vy += Math.random() * 0.25 * randSign();
+    if (this.age <= this.maxAge) {
+      ctx.fillStyle = `hsl(0deg, 0%, ${this.lightness}%)`;
+      ctx.shadowColor = "black";
+      ctx.shadowBlur = 3;
+      ctx.fillCircle(this.x, this.y, this.size);
+      ctx.shadowBlur = 0;
+    }
+    else this.dead = true;
+  };
+  
+  function Particle8(x, y) { // Pixels
+    this.size = Math.round(randBetween(2, 6)) * 3;
+    this.x = Math.round(x / this.size) * this.size;
+    this.y = Math.round(y / this.size) * this.size;
+    this.vx = Math.random() * randSign();
+    this.vy = Math.random() * randSign();
+    this.age = 0;
+    this.maxAge = randBetween(25, 75);
+    this.hue = Math.floor(Math.random() * 6) * 60;
+    this.dead = false;
+  }
+  Particle8.prototype.render = function() {
+    this.age++;
+    this.x += this.vx;
+    this.y += this.vy;
+    if (this.age <= this.maxAge) {
+      ctx.fillStyle = `hsl(${this.hue}deg, 100%, 50%)`;
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 2;
+      ctx.fillRectFromCenter(Math.round(this.x / this.size) * this.size, Math.floor(this.y / this.size) * this.size, this.size, this.size);
+      ctx.strokeRectFromCenter(Math.round(this.x / this.size) * this.size, Math.floor(this.y / this.size) * this.size, this.size, this.size);
+    }
+    else this.dead = true;
+  };
+  
+  function Particle9(x, y) { // Coils
+    this.x = x;
+    this.y = y;
+    this.angle = Math.random() * Math.PI * 2;
+    this.vAngle = randBetween(0.05, 0.1);
+    this.velocity = randBetween(1, 3);
+    this.size = randBetween(3, 9);
+    this.minSize = 0;
+    this.shrinkSpeed = randBetween(0.05, 0.25);
+    this.lightness = 100;
+    this.hue = animInterval * 360;
+    this.dead = false;
+  }
+  Particle9.prototype.render = function() {
+    this.x += Math.cos(this.angle) * this.velocity;
+    this.y += Math.sin(this.angle) * this.velocity;
+    this.size -= this.shrinkSpeed;
+    this.angle += this.vAngle * randBetween(0.5, 1.5);
+    if (this.lightness > 50) this.lightness -= 0.75;
+    if (this.size >= this.minSize) {
+      ctx.fillStyle = `hsl(${this.hue}deg, 100%, ${this.lightness}%)`;
+      ctx.shadowColor = "black";
+      ctx.shadowBlur = 5;
+      ctx.fillCircle(this.x, this.y, this.size);
+      ctx.shadowBlur = 0;
+    }
+    else this.dead = true;
+  };
+  
+  function Particle10(x, y) { // Watercolor
+    this.x = x;
+    this.y = y;
+    let a = Math.random() * Math.PI * 2;
+    let v = randBetween(1, 3);
+    this.vx = v * Math.cos(a);
+    this.vy = v * Math.sin(a);
+    this.size = 0;
+    this.maxSize = randBetween(10, 20);
+    this.growSpeed = randBetween(0.75, 1.5);
+    this.hue = animInterval * 720;
+    this.dead = false;
+  }
+  Particle10.prototype.render = function() {
+    this.x += this.vx;
+    this.y += this.vy;
+    this.size += this.growSpeed;
+    if (this.size <= this.maxSize) {
+      ctx.globalCompositeOperation = "darken";
+      ctx.fillStyle = `hsla(${this.hue}deg, 100%, 60%, 0.3)`;
+      ctx.fillCircle(this.x, this.y, this.size);
+      ctx.globalCompositeOperation = "source-over";
+    }
+    else this.dead = true;
+  };
+  
+  function Particle11(x, y) { // Paint splatters
+    this.x = x;
+    this.y = y;
+    let a = Math.random() * Math.PI * 2;
+    let v = randBetween(1, 3);
+    this.vx = v * Math.cos(a);
+    this.vy = v * Math.sin(a);
+    this.accY = randBetween(0.05, 0.15);
+    this.size = randBetween(10, 20);
+    this.minSize = randBetween(3, 9);
+    this.shrinkSpeed = randBetween(0.25, 0.5);
+    this.hue = animInterval * 360;
+    this.lightness = Math.random() * 50;
+    this.dead = false;
+  }
+  Particle11.prototype.render = function() {
+    this.x += this.vx;
+    this.y += this.vy;
+    this.vy += this.accY;
+    this.size -= this.shrinkSpeed;
+    this.lightness += 0.5;
+    if (this.size >= this.minSize) {
+      ctx.globalCompositeOperation = "lighten";
+      ctx.fillStyle = `hsl(${this.hue}deg, 100%, ${this.lightness}%)`;
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 12;
+      ctx.fillCircle(this.x, this.y, this.size);
+      ctx.strokeCircle(this.x, this.y, this.size);
+      ctx.globalCompositeOperation = "source-over";
+    }
+    else this.dead = true;
+  };
+  
+  function Particle12(x, y) { //
+    this.x = x;
+    this.y = y;
+    this.angle = Math.random() * Math.PI * 2;
+    this.vAngle = randBetween(0.02, 0.05) * randSign();//randBetween(0.01, 0.02) * randSign();
+    this.velocity = randBetween(1, 2);//randBetween(0.5, 2) * randSign();
+    this.size = randBetween(10, 20);//randBetween(15, 25);
+    this.maxSize = randBetween(40, 60);
+    this.innerRatio = 0.15//randBetween(0.1, 0.3);
+    this.sizeRatio = 1//randBetween(1.5, 2.5);
+    this.growSpeed = randBetween(0.2, 0.5);
+    this.hue = Math.random() * 360//(animInterval * 360) + randBetween(-60, 60);//randBetween(150, 300);
+    this.outlineColor = "rgba(0, 0, 0, 0.1)";//`hsla(0deg, 0%, ${Math.random() * 100}%, 0.1)`;
+    this.dead = false;
+  }
+  Particle12.prototype.render = function() {
+    /*this.r += this.vr;
+    this.g += this.vg;
+    this.b += this.vb;*/
+    this.size += this.growSpeed;
+    this.angle += Math.random() * this.vAngle;
+    this.size += this.growSpeed;
+    this.x += this.velocity * Math.cos(this.angle);
+    this.y += this.velocity * Math.sin(this.angle);
+    if (this.size <= this.maxSize) {
+      ctx.fillStyle = `hsla(${this.hue}deg, 100%, 60%, 0.05)`;
+      ctx.strokeStyle = this.outlineColor;
+      ctx.lineWidth = 2;
+      ctx.fillRotatedRectFromCenter(this.x, this.y, this.size * this.sizeRatio, this.size * this.innerRatio, toDeg(this.angle));
+      ctx.strokeRotatedRectFromCenter(this.x, this.y, this.size * this.sizeRatio, this.size * this.innerRatio, toDeg(this.angle));
+      //ctx.fillDiamond(this.x, this.y, this.size * this.sizeRatio, this.size * this.innerRatio, this.angle);
+      //ctx.strokeDiamond(this.x, this.y, this.size * this.sizeRatio, this.size * this.innerRatio, this.angle);
+    }
+    else this.dead = true;
+  };
+  
+  let particleArray = [];
+  
+  
+  
+  
+  
+  function frame() {
+    animInterval += 1 / animIntervalPeriod;
+    if (animInterval >= 1) animInterval = 0;
+    /*if (autoErase) {
+      octx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+      octx.globalAlpha = 0.995;
+      octx.drawImage(canvas, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(offscreenCanvas, 0, 0);
+    }*/
+    for (let i = 0; i < particleArray.length; i++) {
+      particleArray[i].render();
+      if (particleArray[i].dead) {
+        particleArray.splice(i, 1);
+        i--;
+      }
+    }
+    
+    //totalParticlesTxt.innerHTML = comma(totalParticles);
+    
+    if (canvasRunning) requestAnimationFrame(frame);
+  }
+  frame();
+  
+  canvas.addEventListener("mousedown", e => {
+    mouseDown = true;
+    canvasRect = canvas.getBoundingClientRect();
+    for (let i = 0; i < 50; i++) {
+      let x = (e.clientX - canvasRect.left) * canvasRatio;
+      let y = (e.clientY - canvasRect.top) * canvasRatio;
+      let newParticle;
+      
+      if (brushMode == 1) newParticle = new Particle1(x, y);
+      else if (brushMode == 2) newParticle = new Particle2(x, y);
+      else if (brushMode == 3) newParticle = new Particle3(x, y);
+      else if (brushMode == 4) newParticle = new Particle4(x, y);
+      else if (brushMode == 5) newParticle = new Particle5(x, y);
+      else if (brushMode == 6) newParticle = new Particle6(x, y);
+      else if (brushMode == 7) newParticle = new Particle7(x, y);
+      else if (brushMode == 8) newParticle = new Particle8(x, y);
+      else if (brushMode == 9) newParticle = new Particle9(x, y);
+      else if (brushMode == 10) newParticle = new Particle10(x, y);
+      else if (brushMode == 11) newParticle = new Particle11(x, y);
+      else if (brushMode == 12) newParticle = new Particle12(x, y);
+      
+      particleArray.push(newParticle);
+      
+      totalParticles++;
+    }
+  });
+  canvas.addEventListener("mouseup", e => {
+    mouseDown = false;
+  });
+  canvas.addEventListener("mousemove", e => {
+    if (mouseDown) {
+      canvasRect = canvas.getBoundingClientRect();
+      for (let i = 0; i < 3; i++) {
+        let x = (e.clientX - canvasRect.left) * canvasRatio;
+        let y = (e.clientY - canvasRect.top) * canvasRatio;
+        let newParticle;
+        
+        if (brushMode == 1) newParticle = new Particle1(x, y);
+        else if (brushMode == 2) newParticle = new Particle2(x, y);
+        else if (brushMode == 3) newParticle = new Particle3(x, y);
+        else if (brushMode == 4) newParticle = new Particle4(x, y);
+        else if (brushMode == 5) newParticle = new Particle5(x, y);
+        else if (brushMode == 6) newParticle = new Particle6(x, y);
+        else if (brushMode == 7) newParticle = new Particle7(x, y);
+        else if (brushMode == 8) newParticle = new Particle8(x, y);
+        else if (brushMode == 9) newParticle = new Particle9(x, y);
+        else if (brushMode == 10) newParticle = new Particle10(x, y);
+        else if (brushMode == 11) newParticle = new Particle11(x, y);
+        else if (brushMode == 12) newParticle = new Particle12(x, y);
+        
+        particleArray.push(newParticle);
+        
+        totalParticles++;
+      }
+    }
+  });
+  
+  function clearCanvas() {
+    particleArray = [];
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  
+  function exportCanvas() {
+    let win = window.open();
+    win.document.write("<title>Canvas</title><img src = '" + canvas.toDataURL() + "'>");// + "'style = 'position: absolute; top: 0; left: 0; height:100%'>");
+  }
+  
+  function startCanvas() {
+    if (canvasRunning) canvasRunning = false;
+    else {
+      canvasRunning = true;
+      frame();
+    }
+  }
+  
+  function updateSettings() {
+    //autoErase = autoEraseCheckbox.checked;
+  }
+  
+  CanvasRenderingContext2D.prototype.strokePointedStar = function(x, y, innerRadius, outerRadius, points, offsetAngle) {
+    this.beginPath();
+    this.moveTo(x + (outerRadius * Math.cos(offsetAngle - Math.PI / 2)), y + (outerRadius * Math.sin(offsetAngle - Math.PI / 2)));
+    for (let i = 0; i < points + 1; i++) {
+      let a = (i * ((Math.PI * 2) / points)) - (Math.PI / 2);
+      let a2 = ((i + 0.5) * ((Math.PI * 2) / points)) - (Math.PI / 2);
+      this.lineTo(x + (outerRadius * Math.cos(a + offsetAngle)), y + (outerRadius * Math.sin(a + offsetAngle)));
+      this.lineTo(x + (innerRadius * Math.cos(a2 + offsetAngle)), y + (innerRadius * Math.sin(a2 + offsetAngle)));
+    }
+    this.stroke();
+  };
+  CanvasRenderingContext2D.prototype.fillPointedStar = function(x, y, innerRadius, outerRadius, points, offsetAngle) {
+    this.beginPath();
+    this.moveTo(x + (outerRadius * Math.cos(offsetAngle - Math.PI / 2)), y + (outerRadius * Math.sin(offsetAngle - Math.PI / 2)));
+    for (let i = 0; i < points + 1; i++) {
+      let a = (i * ((Math.PI * 2) / points)) - (Math.PI / 2);
+      let a2 = ((i + 0.5) * ((Math.PI * 2) / points)) - (Math.PI / 2);
+      this.lineTo(x + (outerRadius * Math.cos(a + offsetAngle)), y + (outerRadius * Math.sin(a + offsetAngle)));
+      this.lineTo(x + (innerRadius * Math.cos(a2 + offsetAngle)), y + (innerRadius * Math.sin(a2 + offsetAngle)));
+    }
+    this.fill();
+  };
+  
+  CanvasRenderingContext2D.prototype.strokePolygon = function(x, y, radius, sides, offsetAngle) {
+    this.beginPath();
+    this.moveTo(x + (radius * Math.cos(offsetAngle - Math.PI / 2)), y + (radius * Math.sin(offsetAngle - Math.PI / 2)));
+    for (let i = 0; i <= sides + 1; i++) {
+      let angle = ((i / sides) * Math.PI * 2) - (Math.PI / 2);
+      this.lineTo(x + (Math.cos(angle + offsetAngle) * radius), y + (Math.sin(angle + offsetAngle) * radius));
+    }
+    this.stroke();
+  };
+  CanvasRenderingContext2D.prototype.fillPolygon = function(x, y, radius, sides, offsetAngle) {
+    this.beginPath();
+    this.moveTo(x + (radius * Math.cos(offsetAngle - Math.PI / 2)), y + (radius * Math.sin(offsetAngle - Math.PI / 2)));
+    for (let i = 0; i <= sides + 1; i++) {
+      let angle = ((i / sides) * Math.PI * 2) - (Math.PI / 2);
+      this.lineTo(x + (Math.cos(angle + offsetAngle) * radius), y + (Math.sin(angle + offsetAngle) * radius));
+    }
+    this.fill();
+  };
+  CanvasRenderingContext2D.prototype.strokeDiamond = function(x, y, width, height, angle) {
+    let w = width / 2;
+    let h = height / 2;
+    this.beginPath();
+    this.moveTo(x + (w * Math.cos(angle)), y + (w * Math.sin(angle)));
+    this.lineTo(x + (h * Math.cos(angle + (Math.PI / 2))), y + (h * Math.sin(angle + (Math.PI / 2))));
+    this.lineTo(x + (w * Math.cos(angle + Math.PI)), y + (w * Math.sin(angle + Math.PI)));
+    this.lineTo(x + (h * Math.cos(angle + (Math.PI * 1.5))), y + (h * Math.sin(angle + (Math.PI * 1.5))));
+    this.lineTo(x + (w * Math.cos(angle)), y + (w * Math.sin(angle)));
+    this.stroke();
+  };
+  CanvasRenderingContext2D.prototype.fillDiamond = function(x, y, width, height, angle) {
+    let w = width / 2;
+    let h = height / 2;
+    this.beginPath();
+    this.moveTo(x + (w * Math.cos(angle)), y + (w * Math.sin(angle)));
+    this.lineTo(x + (h * Math.cos(angle + (Math.PI / 2))), y + (h * Math.sin(angle + (Math.PI / 2))));
+    this.lineTo(x + (w * Math.cos(angle + Math.PI)), y + (w * Math.sin(angle + Math.PI)));
+    this.lineTo(x + (h * Math.cos(angle + (Math.PI * 1.5))), y + (h * Math.sin(angle + (Math.PI * 1.5))));
+    this.lineTo(x + (w * Math.cos(angle)), y + (w * Math.sin(angle)));
+    this.fill();
+  };
+  
+  function comma(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+</script>
+</body>
+</html>
