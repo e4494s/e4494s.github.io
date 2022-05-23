@@ -1,0 +1,120 @@
+
+<!DOCTYPE html>
+<html onclick = 'changeColor()'>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png"/>
+    <title>About Me Page ~ e4494s</title>
+    <style>
+      html, body {
+        background-size: cover;
+      }
+      body {
+        text-shadow: 0px 0px 20px white;
+      }
+      h1 {
+        font-size: 45px;
+        font-style: italic;
+        text-align: center;
+        font-weight: 900;
+        color: black;
+        font-family: monospace;
+      }
+      h3 {
+        font-size: 15px;
+        font-style: italic;
+        text-align: center;
+        font-weight: 900;
+        color: black;
+        font-family: monospace;
+      }
+      table, td {
+        border: 1px solid black;
+        padding: 0px;
+      }
+      th {
+        font-size: 25px;
+        width: 100%;
+        text-decoration: underline;
+      }
+      .leftcolumn {
+        text-align: center;
+        font-weight: 900;
+      }
+      m {
+        background-color: rgba(0, 0, 0, 0.2);
+        font-family: monospace;
+        font-weight: 900;
+      }
+    </style>
+  </head>
+<body>
+<h1>About Me</h1>
+<h3>Click the screen to randomize the background gradient</h3>
+<div style = 'width:100%;height:400px'></div>
+<table>
+  <tr>
+    <th>
+      My Hobbies
+    </th>
+  </tr>
+  <tr>
+    <td class = 'leftcolumn'>
+      Coding
+    </td>
+    <td>
+      I really enjoy programming with HTML, CSS, and JavaScript, and I like making games and other programs in my free time.
+    </td>
+    <td>
+      <img src = 'images/screenshot20200503151020.png'>
+      <br>
+      <p>For example, this is the 20 lines of JavaScript code I wrote that allows the program to generate over one quadrillion unique color gradients.</p>
+      <p>To begin, I created nine variables. <m>r1</m>, <m>g1</m>, <m>b1</m>, <m>r2</m>, <m>g2</m>, and <m>b2</m> all represent rgb color values for the two colors in the gradient; <m>side</m> and <m>corner</m> represent the direction the gradient will face; and <m>direction</m> creates a string of <m>top left</m>, <m>top</m>, <m>top right</m>, or <m>right</m>. When the screen is clicked, the function <m>changeColor()</m> is called. The function randomizes the rgb variables from 0 to 255. <m>Math.round(Math.random())</m> will return either 0 or 1, so by setting <m>side</m> and <m>corner</m> to that randomized value, the next lines determine what <m>direction</m> will be set to. Finally, the program sets the background image of the page to a color gradient, blending the two random colors together, directed towards a random corner or side.</p>
+    </td>
+  </tr>
+  <tr>
+    <td class = 'leftcolumn'>
+      Playing with my dog Hershey
+    </td>
+    <td>
+      I love playing with my puppy Hershey, even when he sometimes barks at people.
+    </td>
+    <td>
+      <img src = 'images/hershey.png'>
+    </td>
+  </tr>
+  <tr>
+    <td class = 'leftcolumn'>
+      Reading
+    </td>
+    <td>
+      I like reading books in my free time.
+    </td>
+    <td>
+      <img src = 'https://elearningindustry.com/wp-content/uploads/2016/05/top-10-books-every-college-student-read-e1464023124869.jpeg' height = '50%'>
+    </td>
+  </tr>
+</table>
+<script>
+  let r1, g1, b1, r2, g2, b2, side, corner, direction;
+  function changeColor() {
+    r1 = Math.random() * 255;
+    g1 = Math.random() * 255;
+    b1 = Math.random() * 255;
+    r2 = Math.random() * 255;
+    g2 = Math.random() * 255;
+    b2 = Math.random() * 255;
+    side = Math.round(Math.random());
+    corner = Math.round(Math.random());
+    if (side == 0 && corner == 0) direction = 'top left';
+    if (side == 1 && corner == 0) direction = 'top';
+    if (side == 0 && corner == 1) direction = 'top right';
+    if (side == 1 && corner == 1) direction = 'right';
+    document.getElementsByTagName('body')[0].style = `background-image:linear-gradient(to ${direction}, rgb(${r1}, ${g1}, ${b1}), rgb(${r2}, ${g2}, ${b2}))`;
+  }
+  function mouseDownHandler(e) {
+    if (e.detail > 1) e.preventDefault();
+  }
+  addEventListener('mousedown', mouseDownHandler);
+</script>
+</body>
+</html>
