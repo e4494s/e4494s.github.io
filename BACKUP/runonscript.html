@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png"/>
+    <title>Runonscript ~ e4494s</title>
+    <style>
+      #scripttxt {
+        padding: 3px;
+        width: 400px;
+        height: 200px;
+        font-family: monospace;
+        overflow-y: scroll;
+        background: black;
+        color: white;
+      }
+    </style>
+  </head>
+<body>
+<div id = "scripttxt"></div>
+<runonscript>Make variable named SCORE. Set SCORE to 0. Make variable named NAME. Set NAME to "Bob". Make variable named FRUITS. Set FRUITS to "orange" and "apple" and "banana" and "pear". Set FRUITS to FRUITS plus "mango".</runonscript>
+<script>
+  document.getElementsByTagName("runonscript")[0].style.display = "none";
+  const script = {};
+  script.text = document.getElementsByTagName("runonscript")[0].innerHTML;
+  script.expressions = script.text.replaceAll(". ", ".").split(".");
+  script.expressions.pop();
+  for (let i = 0; i < script.expressions.length; i++) {
+    
+  }
+</script>
+<script>
+  scripttxt.innerHTML = document.getElementsByTagName("runonscript")[0].innerText;
+</script>
+</body>
+</html>
