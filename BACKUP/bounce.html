@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <style>
+      body {
+        overflow: hidden;
+        background-color: white;
+        color: black;
+        font-family: Verdana, Geneva, sans-serif;
+        font-size: 13px;
+      }
+      button {
+        cursor: pointer;
+        font-family: Verdana, Geneva, sans-serif;
+        background-color: white;
+        transition: 0.2s;
+        -webkit-transition: 0.2s;
+        font-size: 13px;
+        padding-bottom: 2px;
+        border: 2px solid black;
+        border-radius: 5px;
+        width: 160px;
+      }
+      button:focus {
+        outline: none;
+      }
+      button:hover {
+        background-color: #d9d9d9;
+      }
+      .section {
+        float: left;
+        height: 50px;
+        width: 150px;
+        top: 0px;
+      }
+      .menus {
+        padding-bottom: 20px;
+      }
+      canvas {
+        position: absolute;
+        left: 0;
+        width: 100%;
+        bottom: 0;
+        cursor: crosshair;
+      }
+      .container {
+        display: block;
+        position: relative;
+        margin-bottom: 25px;
+        cursor: pointer;
+        font-size: 22px;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+      .container input {
+        position: absolute;
+        right: 5px;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+      }
+      .checkmark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 22px;
+        width: 22px;
+        border-radius: 8px;
+        border: 2px solid #707070;
+        background-color: #bfbfbf;
+      }
+      .container input:checked ~ .checkmark {
+        /*background-color: #8f8f8f;*/
+      }
+      .checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+      }
+      .container input:checked ~ .checkmark:after {
+        display: block;
+      }
+      .container .checkmark:after {
+        left: 6px;
+        top: 2px;
+        width: 6px;
+        height: 12px;
+        border: solid black;
+        border-width: 0 3px 3px 0;
+        -webkit-transform: rotate(45deg);
+        -ms-transform: rotate(45deg);
+        transform: rotate(45deg);
+      }
+      .slider {
+        height: 5px;
+        border-radius: 5px;
+        width: 100px;
+        -webkit-appearance: none;
+        appearance: none;
+        background-color: #adadad;
+      }
+      .slider:focus {
+        outline: none;
+      }
+      .slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 25px;
+        height: 10px;
+        background-color: #707070;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.2s;
+        -webkit-transition: 0.2s;
+      }
+      .slider::-moz-range-thumb {
+        width: 25px;
+        height: 20px;
+        border-radius: 10px;
+        background: #070707;
+        cursor: pointer;
+      }
+      .slider::-webkit-slider-thumb:hover {
+        background-color: black;
+      }
+      .slider::-moz-range-thumb:hover {
+        background-color: black;
+      }
+      #menus {
+        table-layout: fixed;
+        float: left;
+      }
+      td {
+        height: 0;
+        text-align: right;
+        padding-right: 40px;
+      }
+      .brk {
+        font-size: 1px;
+      }
+      .txt {
+        border: 1px solid black;
+        font-family: Verdana, Geneva, sans-serif;
+        width: 60px;
+        padding: 2px;
+      }
+      .txt:focus {
+        outline: none;
+      }
+      input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      input[type=number] {
+        -moz-appearance: textfield;
+      }
+      .uploadbtn {
+        width: 200px;
+        background-color: #4f99e3;
+        color: white;
+      }
+      .uploadbtn:hover {
+        background-color: #0b6cdb;
+      }
+      #howto {
+        text-align: center;
+        width: 100px;
+        padding-right: 5px;
+        padding-left: 5px;
+      }
+      .label {
+        padding-right: 5px;
+      }
+      .costume {
+        border-radius: 5px;
+        background-color: #5e5e5e;
+        height: 30px;
+        border: 6px solid #5e5e5e;
+        cursor: pointer;
+      }
+      table, tr, td {
+        padding-bottom: 1px;
+        padding-top: 1px;
+        /*border: 1px solid black;*/
+      }
+      table {
+        padding-bottom: 15px;
+      }
+    </style>
+    <link rel = 'icon'  href = 'images/favicon.png' type = 'image/png'/>
+    <title>Bounce ~ e4494s</title>
+  </head>
+<body onload = 'load()'>
+<!--<table id = 'menus'>
+  <tr>
+    <td style = 'width:200px'>
+      <p>Click and drag to create spheres.<br>Use the arrow keys to propel the spheres.</p>
+    </td>
+    <td style = 'width:150px'>
+      <b><p id = 'bouncinesstext'>Bounciness: 80%</p></b>
+      <span class = 'slidecontainer' style = 'height:0px;margin:auto'>
+        <span><input type = 'range' min = '0' max = '1.1' value = '0.8' step = '0.1' class = 'slider' id = 'bouncinessrange'></span>
+      </span>
+    </td>
+    <td style = 'width:130px'>
+      <b><p id = 'gravitytext'>Gravity: 50%</p></b>
+      <span class = 'slidecontainer' style = 'height:0px;margin:auto'>
+        <span><input type = 'range' min = '-1' max = '1' value = '0.5' step = '0.1' class = 'slider' id = 'gravityrange'></span>
+      </span>
+    </td>
+    <td style = 'width:130px'>
+      <b><p id = 'frictiontext'>Friction: 10%</p></b>
+      <span class = 'slidecontainer' style = 'height:0px;margin:auto'>
+        <span><input type = 'range' min = '0' max = '1' value = '0.1' step = '0.1' class = 'slider' id = 'frictionrange'></span>
+      </span>
+    </td>
+    <td style = 'width:150px'>
+      <b><p id = 'airresistancetext'>Air Resistance: 1%</p></b>
+      <span class = 'slidecontainer' style = 'height:0px;margin:auto'>
+        <span><input type = 'range' min = '0' max = '1' value = '0.01'  step = '0.01' class = 'slider' id = 'airresistancerange'></span>
+      </span>
+    </td>
+    <td style = 'width:160px'>
+      <b><p id = 'windtext'>Wind: 0%</p></b>
+      <span class = 'slidecontainer' style = 'height:0px;margin:auto'>
+        <span><input type = 'range' min = '-1' max = '1' value = '0' step = '0.1' class = 'slider' id = 'windrange'></span>
+      </span>
+    </td>
+    <td style = 'width:100px'>
+      <b><p id = 'sizetext'>Size: 40px</p></b>
+      <span class = 'slidecontainer' style = 'height:0px;margin:auto'>
+        <span><input type = 'range' min = '1' max = '100' value = '40' step = '1' class = 'slider' id = 'sizerange'></span>
+      </span>
+    </td>
+    <td style = 'width:75px'>
+      <b><p>Tracing</p></b>
+      <label class = 'container'>
+        <input type = 'checkbox' class = 'check' checked = 'checked' id = 'box'>
+        <span class = 'checkmark'></span>
+      </label>
+    </td>
+    <td style = 'width:200px'>
+      <button onclick = 'randomizeSpheres()'>Randomize Spheres</button><p class = 'brk'>&nbsp;</p>
+      <button onclick = 'centerSpheres()'>Center Spheres</button><p class = 'brk'>&nbsp;</p>
+      <button onclick = 'killSpheres()'>Kill Spheres</button><p class = 'brk'>&nbsp;</p>
+      <button onclick = 'randomizeSettings()'>Randomize Settings</button><p class = 'brk'>&nbsp;</p>
+      <button onclick = 'resetSettings()'>Reset Settings</button><p class = 'brk'>&nbsp;</p>
+    </td>
+    <td style = 'width:100px'>
+      <b><p id = 'spherestext' style = 'font-size: 20px;text-align:center'>Spheres: 1</p></b> 
+    </td>
+  </tr>
+  <tr style = 'height:10px'>
+  </tr>
+</table>-->
+<table id = 'menus' cellspacing = '0' cellpadding = '0'>
+  <tr>
+    <td rowspan = '4' id = 'howto'>
+      <b>Click</b> or <b>click and drag</b> to make spheres.
+      <br>Use the <b>arrow keys</b> to propel the spheres.
+    </td>
+    <td class = 'label'>
+      <b>Bounciness:</b>
+    </td>
+    <td>
+      <input type = 'number' class = 'txt' step = 'any' id = 'bouncinesstxt' value = '0.8'>
+    </td>
+    <td class = 'label'>
+      <b>Air Resistance:</b>
+    </td>
+    <td>
+      <input type = 'number' class = 'txt' step = 'any' id = 'airresistancetxt' value = '0.01'>
+    </td>
+    <td class = 'label' rowspan = '2' valign = 'top'>
+      <b>Tracing:</b>
+    </td>
+    <td style = 'padding-right:25px' rowspan = '2' valign = 'top'>
+      <label class = 'container'>
+        <input type = 'checkbox' class = 'check' id = 'box'>
+        <span class = 'checkmark'></span>
+      </label>
+    </td>
+    <td rowspan = '4' style = 'padding-left:40px'>
+      <button onclick = 'randomizeSpheres()' id = 'randomize'>Randomize Spheres</button>
+      <br>
+      <button onclick = 'centerSpheres()' id = 'center'>Center Spheres</button>
+      <br>
+      <button onclick = 'killSpheres()' id = 'kill'>Kill Spheres</button>
+      <br>
+      <button onclick = 'randomizeSettings()'>Randomize Settings</button>
+      <br>
+      <button onclick = 'resetSettings()'>Reset Settings</button>
+    </td>
+    <td rowspan = '3' valign = 'top' style = 'text-align:left;width:250px'>
+      <img class = 'costume' src = 'images/bounce/sphere.png' onclick = 'switchCostume(1)' id = 'sphere' style = 'background-color:black;border:6px solid black'>
+      <img class = 'costume' src = 'images/bounce/crate.png' onclick = 'switchCostume(2)' id = 'crate'>
+      <img class = 'costume' src = 'images/bounce/flame.png' onclick = 'switchCostume(3)' id = 'flame'>
+      <img class = 'costume' src = 'images/bounce/drop.png' onclick = 'switchCostume(4)' id = 'drop'>
+      <img class = 'costume' src = 'images/bounce/pencil.png' onclick = 'switchCostume(5)' id = 'pencil'>
+      <img class = 'costume' src = 'images/bounce/balloon.png' onclick = 'switchCostume(6)' id = 'balloon'>
+      <img class = 'costume' src = 'images/bounce/cursor.png' onclick = 'switchCostume(7)' id = 'cursor'>
+      <img class = 'costume' src = 'images/bounce/pointer.png' onclick = 'switchCostume(8)' id = 'pointer'>
+      <img class = 'costume' src = 'images/bounce/circle.png' onclick = 'switchCostume(9)' id = 'circle'>
+      <img class = 'costume' src = 'images/bounce/triangle.png' onclick = 'switchCostume(10)' id = 'triangle'>
+      <img class = 'costume' src = 'images/bounce/square.png' onclick = 'switchCostume(11)' id = 'square'>
+    </td>
+    <td class = 'label'>
+      <b>Text:</b>
+    </td>
+    <td>
+      <input type = 'text' class = 'txt' id = 'texttxt' style = 'width:100px'>
+    </td>
+    <td rowspan = '4' id = 'spherecount' style = 'text-align:center;font-size:20px;padding-right:0'>
+      <b>Spheres:<br>1</b>
+    </td>
+  </tr>
+  <tr>
+    <td class = 'label'>
+      <b>Gravity:</b>
+    </td>
+    <td>
+      <input type = 'number' class = 'txt' step = 'any' id = 'gravitytxt' value = '0.5'>
+    </td>
+    <td class = 'label'>
+      <b>Wind:</b>
+    </td>
+    <td>
+      <input type = 'number' class = 'txt' step = 'any' id = 'windtxt' value = '0'>
+    </td>
+  </tr>
+  <tr>
+    <td class = 'label'>
+      <b>Friction:</b>
+    </td>
+    <td>
+      <input type = 'number' class = 'txt' step = 'any' id = 'frictiontxt' value = '0.1'>
+    </td>
+    <td class = 'label'>
+      <b>Terminal Velocity:</b>
+    </td>
+    <td>
+      <input type = 'number' class = 'txt' step = 'any' id = 'terminalvelocitytxt' value = '1000'>
+    </td>
+    <td rowspan = '2' colspan = '2' style = 'padding-right:5px;padding-left:5px'>
+      <button onclick = 'apply()' style = 'height:35px;font-size:15px;width:80px'><b>Apply</b></button>
+    </td>
+    <td style = 'text-align:center' colspan = '2'>
+      <button onclick = 'switchCostume(12)' style = 'width:50px'>Set</button>
+    </td>
+  </tr>
+  <tr>
+    <td class = 'label'>
+      <b>Width:</b>
+    </td>
+    <td>
+      <input type = 'number' class = 'txt' step = 'any' id = 'widthtxt' value = '40'>
+    </td>
+    <td class = 'label'>
+      <b>Height:</b>
+    </td>
+    <td>
+      <input type = 'number' class = 'txt' step = 'any' id = 'heighttxt' value = '40'>
+    </td>
+    <td style = 'text-align:center'>
+      <button onclick = 'alignProportions()'>Align Proportions</button>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <b>Image Source:</b>
+    </td>
+    <td>
+      <input type = 'text' class = 'txt' id = 'sourcetxt'>
+    </td>
+    <td>
+      <button onclick = 'updateSource()' style = 'width:100px'><b>Set Source</b></button>
+      <button onclick = 'resetSource()' style = 'width:100px'><b>Reset Source</b></button>
+      <!--<button onclick = 'uploadSource()' class = 'uploadbtn'><b>Upload Your Own Image</b></button>-->
+    </td>
+    <td colspan = '2'>
+      <button onclick = 'permaLink()' style = 'width: 150px'><b>Create Permalink</b></button>
+    </td>
+    <td colspan = '2'>
+      <a id = 'permalinktxt' target = '_blank'></a>
+    </td>
+  </tr>
+</table>
+<canvas id = 'canvas'>Your browser does not support the canvas element.</canvas>
+<script>
+  const ctx = canvas.getContext('2d');
+  let menu_rect = menus.getBoundingClientRect();
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight - menu_rect.height;
+  canvas.style = 'background-color:black';
+  let rect = canvas.getBoundingClientRect();
+  let mouse_down = false;
+  
+  //let sourcetxt = document.getElementById('sourcetxt');
+  let changed_src = false;
+  
+  let type = 1;
+  let name = 'Spheres';
+  
+  let bounciness = 0.8;
+  let gravity = 0.5;
+  let air_resistance = 0.01;
+  let friction = 0.1;
+  let tracing = false;
+  let wind = 0;
+  let width = 40;
+  let height = 40;
+  let ratio = 1;
+  let text = false;
+  let terminal_velocity = 1000;
+  
+  let bounciness_initial = 0.8;
+  let gravity_initial = 0.5;
+  let air_resistance_initial = 0.01;
+  let friction_initial = 0.1;
+  let tracing_initial = false;
+  let wind_initial = 0;
+  let width_initial = 40;
+  let height_initial = 40;
+  let text_initial = false;
+  let terminal_velocity_initial = 1000;
+  
+  function sprite(xPos, yPos) {
+    this.x = xPos;
+    this.y = yPos;
+    this.last_width = width;
+    this.last_height = height;
+    this.lastX = xPos;
+    this.lastY = yPos;
+    this.visible = true;
+    this.velocity_x = 0;
+    this.velocity_y = 0;
+    this.image = new Image();
+    if (changed_src) this.image.src = sourcetxt.value;
+    else {
+      if (type == 1) this.image.src = 'images/bounce/sphere.png';
+      if (type == 2) this.image.src = 'images/bounce/crate.png';
+      if (type == 3) this.image.src = 'images/bounce/flame.png';
+      if (type == 4) this.image.src = 'images/bounce/drop.png';
+      if (type == 5) this.image.src = 'images/bounce/pencil.png';
+      if (type == 6) this.image.src = 'images/bounce/balloon.png';
+      if (type == 7) this.image.src = 'images/bounce/cursor.png';
+      if (type == 8) this.image.src = 'images/bounce/pointer.png';
+      if (type == 9) this.image.src = 'images/bounce/circle.png';
+      if (type == 10) this.image.src = 'images/bounce/triangle.png';
+      if (type == 11) this.image.src = 'images/bounce/square.png';
+    }
+  }
+  sprite.prototype.render = function() {
+    if (air_resistance <= 1) this.velocity_x *= 1 - (air_resistance / 2);
+    else this.velocity_x = 0;
+    if (gravity == 0) this.velocity_y *= 1 - (air_resistance / 2);
+    if (this.last_width !== width) {
+      this.x += (this.last_width - width) / 2;
+    }
+    if (this.last_height !== height) {
+      this.y += (this.last_height - height) / 2;
+    }
+    this.last_width = width;
+    this.last_height = height;
+    if (text) width = (string.length * (height / 2)) + string.length * (height / 10);
+    this.x += this.velocity_x;
+    this.y += this.velocity_y;
+    if (this.x < 0) { // Bounce off the left side
+      this.velocity_x *= -bounciness;
+      this.x = 0;
+      if (gravity == 0) {
+        if (friction <= 1) this.velocity_y *= 1 - friction;
+        else this.velocity_y = 0;
+      }
+    }
+    if (this.x + width > canvas.width) { // Bounce off the right side
+      this.velocity_x *= -bounciness;
+      this.x = canvas.width - width;
+      if (gravity == 0) {
+        if (friction <= 1) this.velocity_y *= 1 - friction;
+        else this.velocity_y = 0;
+      }
+    }
+    if (this.y < 0) { // Bounce off the top
+      let overrun = this.y;
+      this.velocity_y -= overrun / this.velocity_y * gravity;
+      this.y = 0;
+      this.velocity_y *= -bounciness;
+      if (friction <= 1) this.velocity_x *= 1 - friction;
+      else this.velocity_x = 0;
+    }
+    if (this.y + height > canvas.height) { // Bounce off the bottom
+      let overrun = this.y + height - canvas.height;
+      this.velocity_y -= overrun / this.velocity_y * gravity;
+      this.y = canvas.height - height;
+      this.velocity_y *= -bounciness;
+      if (friction <= 1) this.velocity_x *= 1 - friction;
+      else this.velocity_x = 0;
+    }
+    else this.velocity_y += gravity; // If not on the edges, fall downward
+    this.velocity_x += wind / 5; // Move over according to wind
+    if (this.velocity_x > 0 && this.velocity_x > terminal_velocity) this.velocity_x = terminal_velocity; // Don't exceed terminal velocity
+    if (this.velocity_x < 0 && this.velocity_x < -terminal_velocity) this.velocity_x = -terminal_velocity;
+    if (this.velocity_y > 0 && this.velocity_y > terminal_velocity) this.velocity_y = terminal_velocity;
+    if (this.velocity_y < 0 && this.velocity_y < -terminal_velocity) this.velocity_y = -terminal_velocity;
+    if (Number.isNaN(this.velocity_x)) this.velocity_x = this.lastX; // If a glitch occurs, reset to previous values
+    if (Number.isNaN(this.velocity_y)) this.velocity_y = this.lastY;
+    this.lastX = this.velocity_x;
+    this.lastY = this.velocity_y;
+    if (!text) ctx.drawImage(this.image, this.x, this.y, width, height);
+    else {
+      ctx.fillStyle = 'white';
+      ctx.fillText(string, this.x, this.y + (height - ctx.lineWidth));
+      ctx.strokeStyle = 'black';
+      ctx.strokeText(string, this.x, this.y + (height - ctx.lineWidth));
+    }
+  }
+  
+  let spheres = [];
+  
+  function frame() {
+    if (box.checked) tracing = true;
+    else tracing = false;
+    if (tracing === false) {
+       ctx.clearRect(0, 0, canvas.width, canvas.height);
+       canvas.width = window.innerWidth;
+       canvas.height = window.innerHeight - menu_rect.height;
+    }
+    ctx.font = `Bold ${height}px Courier`;
+    ctx.lineWidth = '1';
+    let len = spheres.length;
+    for (i = 0; i < len; i++) spheres[i].render();
+    spherecount.innerHTML = `<b>${name}:<br>${spheres.length}`;
+    requestAnimationFrame(frame);
+  }
+  //let frame_interval = setInterval(frame, 25);
+  frame();
+  
+  function makeSphere(sphereX, sphereY) {
+    let new_sphere = new sprite(sphereX, sphereY);
+    new_sphere.velocity_x = (((Math.random() * 2) - 1) * 7);
+    spheres.push(new_sphere);
+  }
+  
+  function keyDownHandler(e) {
+    if (e.keyCode == 37) { // Left arrow key pressed, propel left
+      for (i = 0; i < spheres.length; i++) {
+        spheres[i].velocity_x -= 10;
+      }
+    }
+    if (e.keyCode == 38) { // Up arrow key pressed, propel up
+      for (i = 0; i < spheres.length; i++) {
+        spheres[i].velocity_y -= 10;
+      }
+    }
+    if (e.keyCode == 39) { // Right arrow key pressed, propel right
+      for (i = 0; i < spheres.length; i++) {
+        spheres[i].velocity_x += 10;
+      }
+    }
+    if (e.keyCode == 40) { // Down arrow key pressed, propel down
+      for (i = 0; i < spheres.length; i++) {
+        spheres[i].velocity_y += 10;
+      }
+    }
+  }
+  addEventListener('keydown', keyDownHandler);
+  
+  function mouseDownHandler(e) {
+    if (e.clientX >= rect.left + (width / 2) && e.clientX <= rect.right - (width / 2) && e.clientY >= rect.top + (height / 2) && e.clientY <= rect.bottom - (height / 2)) {
+      mouse_down = true;
+      makeSphere(e.clientX - ((width / 2) + rect.left), e.clientY - (height / 2) - rect.top);
+    }
+    if (e.detail > 1) e.preventDefault();
+  }
+  addEventListener('mousedown', mouseDownHandler);
+  
+  function mouseUpHandler(e) {
+    if (e.which == 1) mouse_down = false;
+  }
+  addEventListener('mouseup', mouseUpHandler);
+  
+  function mouseMoveHandler(e) {
+    if (mouse_down && e.clientX >= rect.left + (width / 2) && e.clientX <= rect.right - (width / 2) && e.clientY >= rect.top + (height / 2) && e.clientY <= rect.bottom - (height / 2)) makeSphere(e.clientX - ((width / 2) + rect.left), e.clientY - (height / 2) - rect.top);
+    
+  }
+  addEventListener('mousemove', mouseMoveHandler);
+  
+  function killSpheres() {
+    spheres.length = 0;
+  }
+  
+  function randomizeSpheres() {
+    let len = spheres.length;
+    for (i = 0; i < len; i++) {
+      spheres[i].x = Math.random() * (canvas.width - width);
+      spheres[i].y = Math.random() * (canvas.height - height);
+      spheres[i].velocity_x = (((Math.random() * 2) - 1) * 7);
+      spheres[i].velocity_y = (((Math.random() * 2) - 1) * 7);
+    }
+  }
+  
+  function centerSpheres() {
+    let len = spheres.length;
+    for (i = 0; i < len; i++) {
+      spheres[i].x = canvas.width / 2 - (width / 2);
+      spheres[i].y = canvas.height / 2 - (height / 2);
+      spheres[i].velocity_x = (((Math.random() * 2) - 1) * 10);
+      spheres[i].velocity_y = (((Math.random() * 2) - 1) * 5);
+    }
+  }
+  
+  function resetSettings() {
+    bounciness = bouncinesstxt.value = 0.8;
+    gravity = gravitytxt.value = 0.5;
+    friction = frictiontxt.value = 0.1;
+    air_resistance = airresistancetxt.value = 0.01;
+    wind = windtxt.value = 0;
+    terminal_velocity = terminalvelocitytxt.value = 1000;
+    width = height = widthtxt.value = heighttxt.value = 40;
+    box.checked = false;
+    alignProportions();
+  }
+  
+  function randomizeSettings() {
+    bounciness = getRand(false);
+    bouncinesstxt.value = bounciness;
+    gravity = getRand(true);
+    gravitytxt.value = gravity;
+    friction = getRand(false);
+    frictiontxt.value = friction;
+    air_resistance = getRand(false);
+    airresistancetxt.value = air_resistance;
+    wind = getRand(true);
+    windtxt.value = wind;
+    terminal_velocity = Math.round(Math.random() * 1000);
+    width = Math.round(Math.random() * 100);
+    widthtxt.value = width;
+    height = Math.round(Math.random() * 100);
+    heighttxt.value = height;
+    terminalvelocitytxt.value = terminal_velocity;
+  }
+  
+  function getRand(includeNegative) {
+    let rand = (Math.floor(Math.random() * 100)) / 100;
+    if (includeNegative) rand *= Math.round(Math.random()) == 1 ? 1 : -1;
+    return rand;
+  }
+  
+  function updateSource() {
+    changed_src = true;
+    let len = spheres.length;
+    for (i = 0; i < len; i++) spheres[i].image.src = sourcetxt.value;
+  }
+  
+  function resetSource() {
+    changed_src = false;
+    //sourcetxt.value = '';
+    let len = spheres.length;
+    for (i = 0; i < len; i++) spheres[i].image.src = 'images/bounce/sphere.png';
+  }
+  
+  function apply() {
+    bounciness = Number(bouncinesstxt.value);
+    gravity = Number(gravitytxt.value);
+    friction = Number(frictiontxt.value);
+    air_resistance = Number(airresistancetxt.value);
+    wind = Number(windtxt.value);
+    terminal_velocity = Number(terminalvelocitytxt.value);
+    width = Number(widthtxt.value);
+    height = Number(heighttxt.value);
+  }
+  
+  function load() {
+    makeSphere((canvas.width / 2) - (width / 2), 0);
+    resetSettings();
+  }
+  
+  function switchCostume(num) {
+    sphere.style = crate.style = flame.style = drop.style = pencil.style = balloon.style = cursor.style = pointer.style = circle.style = triangle.style = square.style = 'background-color:#5e5e5e;border:6px solid #5e5e5e';
+    text = false;
+    if (num == 1) {
+      type = 1;
+      name = 'Spheres';
+      sphere.style = 'background-color:black;border:6px solid black';
+      let len = spheres.length;
+      for (i = 0; i < len; i++) spheres[i].image.src = 'images/bounce/sphere.png';
+    }
+    if (num == 2) {
+      type = 2;
+      name = 'Crates';
+      crate.style = 'background-color:black;border:6px solid black';
+      let len = spheres.length;
+      for (i = 0; i < len; i++) spheres[i].image.src = 'images/bounce/crate.png';
+    }
+    if (num == 3) {
+      type = 3;
+      name = 'Flames';
+      flame.style = 'background-color:black;border:6px solid black';
+      let len = spheres.length;
+      for (i = 0; i < len; i++) spheres[i].image.src = 'images/bounce/flame.png';
+    }
+    if (num == 4) {
+      type = 4;
+      name = 'Drops';
+      drop.style = 'background-color:black;border:6px solid black';
+      let len = spheres.length;
+      for (i = 0; i < len; i++) spheres[i].image.src = 'images/bounce/drop.png';
+    }
+    if (num == 5) {
+      type = 5;
+      name = 'Pencils';
+      pencil.style = 'background-color:black;border:6px solid black';
+      let len = spheres.length;
+      for (i = 0; i < len; i++) spheres[i].image.src = 'images/bounce/pencil.png';
+    }
+    if (num == 6) {
+      type = 6;
+      name = 'Balloons';
+      balloon.style = 'background-color:black;border:6px solid black';
+      let len = spheres.length;
+      for (i = 0; i < len; i++) spheres[i].image.src = 'images/bounce/balloon.png';
+    }
+    if (num == 7) {
+      type = 7;
+      name = 'Cursors';
+      cursor.style = 'background-color:black;border:6px solid black';
+      let len = spheres.length;
+      for (i = 0; i < len; i++) spheres[i].image.src = 'images/bounce/cursor.png';
+    }
+    if (num == 8) {
+      type = 8;
+      name = 'Pointers';
+      pointer.style = 'background-color:black;border:6px solid black';
+      let len = spheres.length;
+      for (i = 0; i < len; i++) spheres[i].image.src = 'images/bounce/pointer.png';
+    }
+    if (num == 9) {
+      type = 9;
+      name = 'Circles';
+      circle.style = 'background-color:black;border:6px solid black';
+      let len = spheres.length;
+      for (i = 0; i < len; i++) spheres[i].image.src = 'images/bounce/circle.png';
+    }
+    if (num == 10) {
+      type = 10;
+      name = 'Triangles';
+      triangle.style = 'background-color:black;border:6px solid black';
+      let len = spheres.length;
+      for (i = 0; i < len; i++) spheres[i].image.src = 'images/bounce/triangle.png';
+    }
+    if (num == 11) {
+      type = 11;
+      name = 'Squares';
+      square.style = 'background-color:black;border:6px solid black';
+      let len = spheres.length;
+      for (i = 0; i < len; i++) spheres[i].image.src = 'images/bounce/square.png';
+    }
+    if (num == 12) {
+      type = 0;
+      name = 'Texts';
+      text = true;
+      string = texttxt.value;
+    }
+    howto.innerHTML = `<b>Click</b> or <b>click and drag</b> to make ${name.toLowerCase()}.<br>Use the <b>arrow keys</b> to propel the ${name.toLowerCase()}.`;
+    randomize.innerHTML = `Randomize ${name}`;
+    center.innerHTML = `Center ${name}`;
+    kill.innerHTML = `Kill ${name}`;
+    alignProportions();
+  }
+  function alignProportions() {
+    if (type == 1 || type == 2 || type == 5 || type == 9 || type == 11) ratio = 1;
+    if (type == 3) ratio = 0.811;
+    if (type == 4) ratio = 0.686;
+    if (type == 6) ratio = 0.401;
+    if (type == 7) ratio = 0.666;
+    if (type == 8) ratio = 0.761;
+    if (type == 10) ratio = 1.159;
+    width = Math.round(height * ratio);
+    if (width < 1) width = 1;
+    widthtxt.value = width;
+    heighttxt.value = height;
+  }
+  
+  function permaLink() {
+    permalinktxt.href = '';
+    permalinktxt.innerHTML = 'Link';
+    let costume;
+    let tempstring;
+    switch(type) {
+      case 1: costume = 'sphere';
+      break;
+      case 2: costume = 'crate';
+      break;
+      case 3: costume = 'flame';
+      break;
+      case 4: costume = 'drop';
+      break;
+      case 5: costume = 'pencil';
+      break;
+      case 6: costume = 'balloon';
+      break;
+      case 7: costume = 'cursor';
+      break;
+      case 8: costume = 'pointer';
+      break;
+      case 9: costume = 'circle';
+      break;
+      case 10: costume = 'triangle';
+      break;
+      case 11: costume = 'square';
+      break;
+    }
+    costume = `e4494s.neocities.org/images/bounce/${costume}.png`;
+    if (changed_src) costume = sourcetxt.value.replace('https://', '');
+    //permalinktxt.href = `https://e4494s.neocities.org/fullscreenbounce.html?bounciness=${bounciness}&gravity=${gravity}&air_resistance=${air_resistance}&friction=${friction}&tracing=${tracing}&wind=${wind}&width=${width}&height=${height}&terminal_velocity=${terminal_velocity}&source=${costume}&text=${text}&string=${texttxt.value}`;
+    //permalinktxt.href = `https://e4494s.neocities.org/fullscreenbounce.html?command="bounciness=${bounciness};gravity=${gravity};air_resistance=${air_resistance};friction=${friction};tracing=${tracing};wind=${wind};width=${width};height=${height};terminal_velocity=${terminal_velocity};source='${costume}';text=${text};string='${texttxt.value}'"`;
+    permalinktxt.href = `https://e4494s.neocities.org/fullscreenbounce.html?command=bounciness=${bounciness}|gravity=${gravity}|air_resistance=${air_resistance}|friction=${friction}|tracing=${tracing}|wind=${wind}|width=${width}|height=${height}|terminal_velocity=${terminal_velocity}|source='${costume}'|text=${text}`;
+    if (texttxt.value != '') permalinktxt.href += `|string='${texttxt.value}'`;
+  }
+</script>
+</body>
+</html>
