@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "https://e4494s.neocities.org/stylesheets/main.css">
+    <title>Misc Math ~ e4494s</title>
+    <style>
+      .text-box {
+        border: 2px solid black;
+        padding: 3px;
+        width: 400px;
+        height: 100px;
+        border-radius: 0;
+        overflow-y: scroll;
+        word-wrap: break-word;
+      }
+      
+      input[type = text] {
+        border: 2px solid black;
+        padding: 3px;
+        width: 100px;
+        height: 20px;
+        border-radius: 0;
+      }
+      input[type = text] {
+        outline: none;
+      }
+      
+      hr {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        border: 1px solid black;
+        height: 0;
+      }
+      
+      .date {
+        font-weight: bold;
+        font-style: italic;
+        color: #575757;
+      }
+      
+      img {
+        height: 200px;
+      }
+      .latex-img {
+        height: 30px;
+      }
+    </style>
+  </head>
+<body onload = "init()">
+<h1>Random Math Stuff</h1>
+<br>
+<h2>Prime Numbers</h2>
+<div class = "date">3.22.2022</div>
+<br>
+<b>List of prime numbers:</b>
+<div class = "text-box" id = "textbox3"></div>
+<br><br><br>
+<b>Prime Number Checker:</b>
+<input type = "text" id = "input3" oninput = "updateInput3()">
+<br>
+<div id = "output3"></div>
+<hr><hr>
+<h2>"Prinary" Numbers</h2>
+<div class = "date">3.22.2022</div>
+<p>
+Each natural number can be written in binary, as unique sums of powers of 2 (14 = 1110). This translates to 14 = (0&times;2<sup>0</sup>) + (1&times;2<sup>1</sup>) + (1&times;2<sup>2</sup>) + (1&times;2<sup>3</sup>), or just 2<sup>1</sup> + 2<sup>2</sup> + 2<sup>3</sup>.
+<br><br>
+Because each number is <i>uniquely</i> expressed in binary, the set of these powers of two, {1, 2, 3}, uniquely represents 14. If we correspond each power of 2 to a prime number, we can multiply them together to guarantee a unique number gets mapped to each number. We'll say 0 corresponds to the 1st prime number, 1 corresponds to the 2nd, 2 to the 3rd, and so on. So {1, 2, 3} for the number 14 corresponds to (2nd prime)&times;(3rd prime)&times;(4th prime), which is 3&times;5&times;7 which equals 105. It's important to note that "105" is the <i>natural</i> number "105", not the string "1", "0", "5".
+<br><br>
+If we use this rule for every number, we can generate a list of the so-called "prinary" numbers (prime binary) for each number.
+</p>
+<b><i>n</i> written in prinary (starting with n = 0):</b> (OEIS <a href = "http://oeis.org/A019565" target = "_blank">A019565</a>)
+<div class = "text-box" id = "textbox1"></div>
+<br>
+<b><i>Type number to convert to prinary:</i></b>
+<input type = "text" id = "input1" oninput = "updateInput1()">
+<br>
+<div id = "output1"></div>
+<b>Interesting Properties of Prinary Numbers:</b>
+<ul>
+  <li>Prinary numbers are unique. That is, each prinary number maps to one and only one natural number (e.g., 38 = 195 in prinary, so no other number will be 195 in prinary).</li>
+</ul>
+<hr><hr>
+<h2>Higher Dimensional Triangular Numbers</h2>
+<div class = "date">3.22.2022</div>
+<p>
+Triangular numbers are numbers that can be formed into triangles. The <i>n</i>-th triangluar number is the sum of the first <i>n</i> natural numbers. This means:
+<br><br>
+1st Triangular Number = <u>1</u>
+<br>
+2nd Triangular Number = 1 + 2 = <u>3</u>
+<br>
+3rd Triangular Number = 1 + 2 + 3 = <u>6</u>
+<br>
+4th Triangular Number = 1 + 2 + 3 + 4 = <u>10</u>,
+<br>
+and so on.
+<br><br>
+This can be generalized into higher dimensions, such as the tetrahedral numbers, which are the 3D equivalent of the triangular numbers. Similar to the triangular numbers, the <i>n</i>-th tetrahedral number is the sum of the first <i>n</i> TRIANGULAR numbers, instead of the first <i>n</i> natural numbers.
+<br><br>
+This applies to any dimension--the 4D triangular numbers are found by adding the first <i>n</i> 3D triangular numbers, the 65D triangular numbers are found by adding the first <i>n</i> 64D triangular numbers, and so on. This applies backwards as well, the 1D triangular numbers are just the natural numbers 1, 2, 3, etc., and the 0D triangular numbers are just all 1, 1, 1, ...
+</p>
+<b>Slide to change the dimension:</b>
+<input type = "range" min = "0" max = "10" value = "2" step = "1" id = "slider2" oninput = "load2()">
+<br><br>
+<b><span id = "dim2Txt">2</span>-dimensional triangular numbers:</b>
+<div class = "text-box" id = "textbox2"></div>
+<hr><hr>
+<h2>Uniform Modular Covers</h2>
+<div class = "date">3.23.2022</div>
+<p>
+A natural number <i>s</i> is said to be a "uniform modular cover" (UMC) of <i>n</i> if <i>s</i> is coprime with <i>n</i> and less than <i>n</i>. Being a uniform modular cover means that you can continually add <i>s</i> to 0 (mod <i>n</i>) and eventually hit every number within the ring of integers modulo <i>n</i>. A visualization of the number 3 being a uniform modular cover of 10 is shown below:
+</p>
+<img src = "https://e4494s.neocities.org/images/math/uniform-modular-cover.png">
+<p>
+There are 10 positions within mod 10 (0, 1, 2, 3, 4, 5, 6, 7, 8, 9), and starting at any position and continually adding 3 will eventually reach every position, without repeating. This works because 3 is coprime with 10; for example, 4 would not be a UMC of 10, because they share the factor 2. Here is the path of positions that would be reached by continually adding 4 within the modulo group for 10 (meaning we "wrap around" after reaching 10)
+<br><br>
+Start: <b>0</b>
+<br>
++4 = <b>4</b>
+<br>
++4 = <b>8</b>
+<br>
++4 = <b>2</b>
+<br>
++4 = <b>6</b>
+<br>
++4 = <b>0</b>
+<br><br>
+And now we ended back where we started at position 0, so the entire path will repeat forever, but we haven't touched every number. This means 4 is NOT a UMC of 10. The uniform modular covers of 10 are {1, 3, 7, 9}. All of these will reach all 10 position of the integers modulo 10 if continually added from a starting position; all other numbers will not. This is because 1, 3, 7, and 9 are the only numbers less than 10 that are coprime with 10.
+<br><br>
+The quantity of UMC's that each number has ends up being Euler's totient function (count of numbers less than or equal to <i>n</i> that are coprime with <i>n</i>).
+</p>
+<b>Number of uniform modular covers of <i>n</i> (also Euler's totient function):</b> (OEIS <a href = "http://oeis.org/A000010" target = "_blank">A000010</a>)
+<div class = "text-box" id = "textbox4"></div>
+<br>
+<b>Interesting Properties of Uniform Modular Covers:</b>
+<ul>
+  <li>Every number except 0 and 1 has an even number of UMCs</li>
+  <li>Every prime number <i>p</i> has exactly <i>p</i> - 1 UMCs, because every number less than a prime number is coprime with it</li>
+</ul>
+<hr><hr>
+<h2>Perfect Modular Stars</h2>
+<div class = "date">3.23.2022</div>
+<p>
+The idea of a number being a "perfect modular star" is directly related to the idea of uniform modular covers from the previous section. A number <i>n</i> is a perfect modular star if and only if floor((<i>n</i> - 1) / 2) is a uniform modular cover of <i>n</i>. This can be interpreted as: if the closest whole number to half of <i>n</i> (excluding exactly half of <i>n</i>) is coprime with <i>n</i> (rounded down).
+<br><br>
+For example: 10 is a perfect modular star if 4 is coprime with 10 (4 is the closest number to 5 that is not 5, rounded down). For an odd number example, 19 is a perfect modular star if 9 is coprime with 19 (9 is the closest number to 9.5, which is half of 19, rounded down). 10 is NOT a perfect modular star because 4 is not coprime with 10, and 19 IS a perfect modular star because 9 is coprime with 19.
+<br><br>
+The connection to the idea of "stars" can be seen with a star diagram: a path (like the ones taken in the "Uniform Modular Covers" section) is taken around a circle by taking uniform steps, and with lines tracing out the connected positions. The following star diagram shows the 2-path mod 10 (starting at position 0 and adding 2, mod 10):
+</p>
+<img src = "https://e4494s.neocities.org/images/math/star-diagram-1.png">
+<p>
+This demonstrates how 2 is NOT a uniform modular cover of 10, since not every point is touched before it repeats. To contrast a perfect modular star with a non-perfect modular star, two paths are shown: The first is the 3-path mod 10 (adding 3 to a ring of 10), and the second is the 7-path mod 16 (adding 7 to a ring of 16).
+</p>
+<img src = "https://e4494s.neocities.org/images/math/star-diagram-2.png">
+<img src = "https://e4494s.neocities.org/images/math/star-diagram-3.png">
+<p>
+Both of these are uniform modular covers, but only 16 is a perfect modular star because it's step size of 7 is closest to being directly opposite each point. In other words, adding 7 to the mod 16 circle is very close to directly jumping across, whereas adding 3 to the mod 10 circle is more like walking around the edge. The arms are pointier, and the center shape where the lines intersect is smaller. Also, the simplest star shape that everyone is familiar with, the 5-pointed star, is an example of a perfect modular star.
+</p>
+<b>List of numbers that are perfect modular stars:</b> (OEIS <a href = "http://oeis.org/A107750" target = "_blank">A107750</a>)
+<div class = "text-box" id = "textbox5a"></div>
+<br>
+<b>List of numbers that are NOT perfect modular stars:</b> (OEIS <a href = "http://oeis.org/A016825" target = "_blank">A016825</a>)
+<div class = "text-box" id = "textbox5b"></div>
+<b>Interesting Properties of Perfect Modular Stars:</b>
+<ul>
+  <li>Every prime number is a perfect modular star</li>
+  <li>Every number of the form 2<i>p</i> + 2 is a perfect modular star (with <i>p</i> as a prime number, excluding <i>p</i> = 2). For example, 16 can be written as 2(7) + 2, and is therefore a perfect modular star.</li>
+  <li>Every number that is 2 times an odd number will NOT be a perfect modular star--and every other number will be (excluding 2&times;1, as 2 is considered a perfect modular star).</li>
+  <li>Because every NON-perfect modular star can be written as 2 times an odd number, and odd numbers can be written as 2<i>n</i> + 1, every non-perfect modular star can be written as 2(2<i>n</i> + 1), or 4<i>n</i> + 2. This makes it clear that every non-perfect modular star will be congruent to 2 (mod 4). Therefore, a number is a perfect modular star if, and only if, it is NOT congruent to 2 (mod 4).</li>
+</ul>
+<hr><hr>
+<h2>Riffle Periods</h2>
+<div class = "date">3.25.2022</div>
+<p>
+A mathematically perfect riffle of a deck of cards is defined as alternating cards from the top half of the pile and the bottom half of the pile, to create a new shuffled deck. A visualization is shown below.
+</p>
+<img src = "https://e4494s.neocities.org/images/math/riffle-deck.png">
+<p>
+After a certain number of riffles, the deck will return to its original order. In the above example, this will happen after 4 riffle shuffles. This means the so-called "riffle period" for 6 is 4.
+<br><br>
+A standard deck of 52 cards turns out to have a riffle period of merely 8. This means that if you take a deck of cards and perfectly riffle it 8 times, it will end up in the exact same original order. Interestingly, if you increase the size up to 53 cards, it takes a full 52 riffles to have it return to its original order.
+</p>
+<b>Riffle period of a deck of size <i>n</i>:</b> (OEIS <a href = "http://oeis.org/A002326" target = "_blank">A002326</a>)
+<div class = "text-box" id = "textbox6a"></div>
+<br><br>
+<b>Interesting Properties of Riffle Periods:</b>
+<ul>
+  <li>Every odd number and the number after it will have the same riffle period (e.g., 5 has a period of 4, and so does 6).</li>
+</ul>
+<br><br>
+<b>Related Concept: "Unwieldy Deck Numbers"</b>
+<p>
+Unwieldy Deck Numbers are numbers such that their riffle period is one less than themselves. For example, 53 is an Unwieldy Deck Number because it has a riffle period of 52. I call these numbers "Unwieldy Deck Numbers" because as a deck, it is awkward and complicated to manipulate it to its original state with riffles.
+</p>
+<b>Unwieldy Deck Numbers (each number <i>n</i> has a riffle period of <i>n</i> - 1):</b> (seems to be OEIS <a href = "http://oeis.org/A050229" target = "_blank">A050229</a>)
+<div class = "text-box" id = "textbox6b"></div>
+<br><br>
+<b>Related Concept: "Highly Rifflic Numbers"</b>
+<p>
+"Rifflic" definitely isn't a word, but I couldn't come up with any other name for these numbers. Highly Rifflic Numbers are numbers that have a higher riffle period than any number below it. For example, 25 is a Highly Rifflic Number because it has a riffle period of 20, and no number below 25 has a riffle period higher than 20.
+</p>
+<b>Highly Rifflic Numbers (each number <i>n</i> has a higher riffle period than any number less than <i>n</i>):</b> (OEIS <a href = "http://oeis.org/A139099" target = "_blank">A139099</a>)
+<div class = "text-box" id = "textbox6c"></div>
+<script>
+  function init() {
+    getPrimes();
+    getFactorials();
+    
+    load1();
+    load2();
+    load3();
+    load4();
+    load5();
+    load6();
+  }
+  
+  //
+  // Section 6: Riffle Periods
+  //
+  
+  function load6() {
+  	textbox6a.innerHTML = "";
+    textbox6b.innerHTML = "";
+    textbox6c.innerHTML = "";
+    
+    let periods = [];
+    let unwieldy = [];
+    let highlyRifflic = [];
+    
+    let highest = 0;
+    
+    for (let i = 1; i <= 1000; i++) {
+    	let p = rifflePeriod(i);
+    	if (i <= 100) periods.push(p);
+      if (p === i - 1) unwieldy.push(i);
+      if (p > highest) {
+      	highest = p;
+        highlyRifflic.push(i);
+      }
+    }
+    
+    textbox6a.innerHTML = periods.join(", ") + ", and so on...";
+    textbox6b.innerHTML = unwieldy.join(", ") + ", and so on...";
+    textbox6c.innerHTML = highlyRifflic.join(", ") + ", and so on...";
+  }
+  
+  function riffleArray(arr) {
+  	let half = Math.ceil(arr.length / 2);
+  	let top = arr.slice(0, half);
+    let bottom = arr.slice(half, arr.length);
+    
+    let result = [];
+    for (let i = 0; i < top.length; i++) {
+    	result.push(top[i]);
+      if (i < bottom.length) result.push(bottom[i]);
+    }
+    return result;
+  }
+  
+  function rifflePeriod(n) { // Number of perfect riffles for a deck of size n to return to its original order
+  	let originalDeck = [];
+    let deck = [];
+    for (let i = 1; i <= n; i++) {
+    	originalDeck.push(i);
+    	deck.push(i);
+   	}
+    
+    let steps = 1;
+    deck = riffleArray(deck);
+    
+    while (!areArraysEqual(deck, originalDeck)) {
+    	deck = riffleArray(deck);
+      steps++;
+    }
+    
+    return steps;
+  }
+  
+  //
+  // Section 5: Perfect Modular Stars
+  //
+  
+  function load5() {
+  	textbox5a.innerHTML = "";
+    textbox5b.innerHTML = "";
+    let stars = [1, 2];
+    let notStars = [];
+    
+    for (let i = 3; i <= 500; i++) {
+    	//if (isCoprime(i, Math.floor((i - 1) / 2))) stars.push(i); Can be rewritten to:
+      if (i % 4 !== 2) stars.push(i);
+      else notStars.push(i);
+    }
+    
+    textbox5a.innerHTML = stars.join(", ") + ", and so on...";
+    textbox5b.innerHTML = notStars.join(", ") + ", and so on...";
+  }
+  
+  //
+  // Section 4: Uniform Modular Covers
+  //
+  
+  function load4() {
+    textbox4.innerHTML = "";
+    
+    let totients = [];
+    
+    for (let i = 1; i <= 500; i++) {
+      totients.push(eulerTotient(i));
+    }
+    
+    textbox4.innerHTML = totients.join(", ") + ", and so on...";
+  }
+  
+  function eulerTotient(n) {
+  	return Math.round(capitalSigma(1, n, i => GCD(n, i) * Math.cos((2 * Math.PI * i) / n)));
+  }
+  
+  //
+  // Section 3: Prime Numbers
+  //
+  
+  function load3() {
+  	textbox3.innerHTML = primes.join(", ") + ", and so on...";
+  }
+  
+  function updateInput3() {
+    let num = strToNum(input3.value);
+    num = Math.abs(num);
+    num = Math.floor(num);
+    if (num > 100000000) num = 100000000;
+    
+    input3.value = num;
+    let prime = isPrime(num);
+    output3.innerHTML = prime ? (num + " is a prime number.") : (num + " is a composite number.");
+  }
+  
+  //
+  // Section 2: Higher Dimensional Triangular Numbers
+  //
+  
+  function load2() {
+  	textbox2.innerHTML = "";
+    let numbers = [];
+    
+    let dim = Number(slider2.value);
+    dim2Txt.innerHTML = dim;
+    
+    for (let i = 1; i <= 500; i++) {
+    	numbers.push(triangularNumber(dim, i));
+   	}
+    
+    textbox2.innerHTML = numbers.join(", ") + ", and so on...";
+  }
+  
+  function triangularNumber(dim, index) {
+  	return capitalPi(0, dim - 1, i => index + i) / factorials[dim];
+  }
+  
+  //
+  // Section 1: "Prinary" Numbers
+  //
+  
+  function toPrinary(n) {
+    let binary = n.toString(2);
+    let result = 1;
+    
+    for (let i = 0; i <= binary.length; i++) {
+      let j = binary.length - i - 1;
+      if (binary[j] === "1") result *= primes[i];
+    }
+    
+    return result;
+  }
+  
+  function load1() {
+    textbox1.innerHTML = "";
+    
+    let prinary = [];
+    
+    for (let i = 0; i <= 500; i++) {
+      prinary.push(toPrinary(i));
+    }
+    
+    textbox1.innerHTML = prinary.join(", ") + ", and so on...";
+    
+    input1.value = Math.floor(Math.random() * 100);
+    updateInput1();
+  }
+  
+  function updateInput1() {
+    let num = strToNum(input1.value);
+    num = Math.abs(num);
+    num = Math.floor(num);
+    if (num > 10000000) num = 10000000;
+    
+    input1.value = num;
+    output1.innerHTML = toPrinary(num);
+  }
+  
+  //
+  // Misc Functions
+  //
+  
+  function GCD(a,b) {
+    a = Math.abs(a);
+    b = Math.abs(b);
+    if (b > a) {
+    	let temp = a;
+      a = b;
+      b = temp;
+    }
+    while (true) {
+      if (b === 0) return a;
+      a %= b;
+      if (a === 0) return b;
+      b %= a;
+		}
+	}
+  
+  function isCoprime(a, b) {
+  	return GCD(a, b) === 1;
+  }
+  
+  function strToNum(string) {
+    let num = Number(string);
+    if (Number.isNaN(num)) return 0;
+    return num;
+  }
+  
+  function capitalSigma(start, end, sequence) {
+  	let sum = 0;
+    for (let i = start; i <= end; i++) {
+    	sum += sequence(i);
+    }
+    return sum;
+  }
+  
+  function capitalPi(start, end, sequence) {
+  	let product = 1;
+    for (let i = start; i <= end; i++) {
+    	product *= sequence(i);
+    }
+    return product;
+  }
+  
+  let primes = [];
+  let composites = [];
+  
+  function isPrime(n) {
+    if (n === 2) return true;
+    for (let i = 2; i * i <= n; i++) {
+      if (n % i === 0) return false;
+    }
+    return true;
+  }
+  
+  function getPrimes() {
+    primes = [];
+    for (let i = 2; i <= 50000; i++) {
+      if (isPrime(i)) primes.push(i);
+      else composites.push(i);
+    }
+  }
+  
+  let factorials = [];
+  
+  function getFactorials() {
+  	factorials = [1];
+    let curr = 1;
+    for (let i = 1; i <= 200; i++) {
+    	curr *= i;
+      factorials.push(curr);
+    }
+  }
+  
+  function areArraysEqual(a, b) {
+  	if (a.length !== b.length) return false;
+    
+    for (let i = 0; i < a.length; i++) {
+    	if (a[i] !== b[i]) return false;
+    }
+    
+    return true;
+  }
+  
+  //
+  // Testing Stuff
+  //
+  
+  const HALF_PI = Math.PI / 2;
+  const THREE_PI_2 = 3 * HALF_PI;
+  const TWO_PI = Math.PI * 2;
+  
+  function partialSin(x) {
+  	let x2 = x * x;
+  	let x3 = x2 * x;
+    let x5 = x3 * x2;
+    let x7 = x5 * x2;
+  	return x - (x3 / 6) + (x5 / 120) - (x7 / 5040);
+  }
+  
+  function fullSin(x) {
+  	x = ((x % TWO_PI) + TWO_PI) % TWO_PI;
+    
+    if (0 <= x && x < HALF_PI) return partialSin(x);
+    if (HALF_PI <= x && x < Math.PI) return partialSin(Math.PI - x);
+    if (Math.PI <= x && x < THREE_PI_2) return -partialSin(x - Math.PI);
+    return -partialSin(TWO_PI - x);
+  }
+  
+  function testingSines() {
+  	let num = 100_000_000;
+    
+  	let start = Date.now();
+    for (let i = 0; i < num; i++) fullSin(0);
+    let time1 = Date.now() - start;
+    
+    start = Date.now();
+    for (let i = 0; i < num; i++) Math.sin(0);
+    let time2 = Date.now() - start;
+    
+    console.log(`Time for ${num} iterations of sine: fullSin = ${time1}ms, Math.sin = ${time2}ms.`);
+  }
+</script>
+</body>
+</html>
