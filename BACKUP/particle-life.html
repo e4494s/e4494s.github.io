@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <title>Particle Life ~ e4494s</title>
+    <style>
+      canvas {
+        width: 500px;
+        height: 500px;
+        background: black;
+        border: none;
+      }
+    </style>
+  </head>
+<body onload = "init()">
+<h1>Particle Life</h1>
+<button onclick = "init()">Reset</button>
+<br><br>
+<canvas id = "canvas"></canvas>
+<script src = "scripts/main.js" style = "visiblity: visible"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 250;
+  
+  let particleSize = 2;
+  let startingParticles = 500;
+  
+  let radius = 55;
+  let alpha = 120;
+  let beta = -6;
+  let velocity = 1;
+  
+  function Particle() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.color = (new HSL(undefined, 100, 50)).print();
+    this.radius = radius;
+    this.angle = Math.random() * 360;
+    this.alpha = alpha;
+    this.beta = beta;
+    this.velocity = velocity;
+  }
+  Particle.prototype.render = function() {
+    let left = 0;
+    let right = 0;
+    let total = 0;
+    for (let i = 0; i < particleArray.length; i++) {
+      if (i != particleArray.indexOf(this)) {
+        if (circlesTouching(this.x, this.y, this.radius, particleArray[i].x, particleArray[i].y, particleSize)) {
+          total++;
+          let sepAng = Math.atan2(particleArray[i].x - this.x, particleArray[i].y - this.y) * 180 / Math.PI;
+          sepAng = scopeTo180(sepAng);
+          if (scopeTo180(sepAng - this.angle) < 180) right++;
+          else left++;
+        }
+      }
+    }
+    
+    this.angle += this.alpha + (this.beta * total * Math.sign(right - left));
+    
+    this.x += this.velocity * particleSize * 2 * Math.cos(this.angle * Math.PI / 180);
+    this.y += this.velocity * particleSize * 2 * Math.sin(this.angle * Math.PI / 180);
+    
+    if (this.x > canvas.width) this.x = 0;
+    else if (this.x < 0) this.x = canvas.width;
+    if (this.y > canvas.height) this.y = 0;
+    else if (this.y < 0) this.y = canvas.height;
+    
+    ctx.fillStyle = "rgba(0, 255, 0, 0.05)"
+    //ctx.fillCircle(this.x, this.y, this.radius);
+    ctx.fillStyle = this.color;
+    ctx.fillCircle(this.x, this.y, particleSize);
+  };
+  
+  let particleArray = [];
+  
+  function frame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < particleArray.length; i++) particleArray[i].render();
+    
+    requestAnimationFrame(frame);
+  }
+  frame();
+  
+  function init() {
+    particleArray = [];
+    for (let i = 0; i < startingParticles; i++) particleArray.push(new Particle());
+  }
+  
+  function randSign() {
+    return Math.round(Math.random()) == 0 ? 1 : -1;
+  }
+  
+  function circlesTouching(x1, y1, r1, x2, y2, r2) {
+    let dx = x1 - x2
+    let dy = y1 - y2
+    return Math.hypot(dx, dy) <= r1 + r2;
+  }
+  
+  function scopeTo180(a) {
+    while (a > 180) a -= 180;
+    while (a < 0) a += 180;
+    return a;
+  }
+</script>
+</body>
+</html>
