@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = 'icon'  href = 'images/favicon.png' type = 'image/png'/>
+    <title>Profile Picture Generator ~ e4494s</title>
+    <style>
+      body {
+        font-family: monospace;
+      }
+      canvas {
+        /*border: 1px solid red;*/
+      }
+      table, th, tr, td {
+        border: 1px solid black;
+      }
+    </style>
+  </head>
+<body>
+<h1>Random Profile Picture Generator</h1>
+<canvas id = 'canvas' width = '300' height = '300'>If you are seeing this, it means your browser does not support HTML5.</canvas>
+<button onclick = 'generate()'>Generate</button>
+<script>
+  const ctx = canvas.getContext('2d');
+  
+  let mode = 1;
+  
+  let use_basic_colors = true;
+  
+  let size = 10;
+  
+  let line_count = 50;
+  let web_line_count = 100;
+  ctx.lineWidth = 2;
+  
+  function generate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let color1 = randColor(use_basic_colors);
+    let color2 = randColor(use_basic_colors);
+    while (color1 == color2) color1 = randColor(use_basic_colors);
+    if (mode == 1) {
+      for (let j = 0; j < size / 2; j++) {
+        for (let k = 0; k < size; k++) {
+          if (Math.round(Math.random()) == 0) ctx.fillStyle = color1;
+          else ctx.fillStyle = color2;
+          ctx.fillRect(j * (canvas.height / size), k * (canvas.height / size), canvas.height / size, canvas.height / size);
+          ctx.fillRect(((size - 1) - j) * (canvas.height / size), k * (canvas.height / size), canvas.height / size, canvas.height / size);
+        }
+      }
+    }
+    if (mode == 2) {
+      ctx.fillStyle = color1;
+      ctx.strokeStyle = color2;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < line_count; i++) {
+        ctx.beginPath();
+        ctx.moveTo(randCanvasPos(), randCanvasPos());
+        ctx.lineTo(randCanvasPos(), randCanvasPos());
+        ctx.stroke();
+      }
+    }
+    if (mode == 3) {
+      ctx.fillStyle = color1;
+      ctx.strokeStyle = color2;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < web_line_count; i++) {
+        let edge1 = randCanvasEdgePos();
+        let edge2 = randCanvasEdgePos();
+        ctx.beginPath();
+        ctx.moveTo(edge1.x, edge1.y);
+        ctx.lineTo(edge2.x, edge2.y);
+        ctx.stroke();
+      }
+    }
+  }
+  
+  function randColor(basic_colors) {
+    if (basic_colors) {
+      switch(Math.round(Math.random() * 11)) {
+        case 0: return 'red';
+        break;
+        case 1: return 'orange';
+        break;
+        case 2: return 'yellow';
+        break;
+        case 3: return 'green';
+        break;
+        case 4: return 'blue';
+        break;
+        case 5: return 'purple';
+        break;
+        case 6: return 'black';
+        break;
+        case 7: return 'gray';
+        break;
+        case 8: return 'lightgray';
+        break;
+        case 9: return 'white';
+        break;
+        case 10: return 'brown';
+        break;
+      }
+    }
+    else return `rgb(${Math.round(Math.random() * 255)}, ${Math.round(Math.random() * 255)}, ${Math.round(Math.random() * 255)})`;
+  }
+  
+  function randCanvasPos() {
+    return Math.round(Math.random() * canvas.height);
+  }
+  
+  function randCanvasEdgePos() {
+    let side = Math.floor(Math.random() * 4);
+    switch(side) {
+      case 0: return {x: randCanvasPos(), y: 0};
+      break;
+      case 1: return {x: canvas.height, y: randCanvasPos()};
+      break;
+      case 2: return {x: randCanvasPos(), y: canvas.height};
+      break;
+      case 3: return {x: 0, y: randCanvasPos()};
+    }
+  }
+</script>
+</body>
+</html>
