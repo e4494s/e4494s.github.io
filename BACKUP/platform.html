@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <title>Platformer ~ e4494s</title>
+    <style>
+      canvas {
+        border: none;
+        background-color: #84c6e3;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+      }
+    </style>
+  </head>
+<body>
+<canvas id = "canvas"></canvas>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  
+  let gravity = 0.15;
+  
+  const TILE_SIZE = 5;
+  
+  const tile = n => n.toMultipleOf(TILE_SIZE);
+  
+  const Player = {
+    x: canvas.width / 2,
+    y: 0,
+    vx: 0,
+    vy: 0,
+    width: 20,
+    height: 30
+  };
+  Player.render = function() {
+    this.vy += gravity;
+    this.y += this.vy;
+    if (Math.abs(this.vy) >= TILE_SIZE) this.vy = TILE_SIZE * Math.sign(this.vy);
+    
+    ctx.fillRectFromCenter(tile(canvas.width / 2), tile(canvas.height / 2), this.width, this.height);
+  };
+  
+  function init() {
+    
+    frame();
+  }
+  init();
+  
+  function frame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    Player.render();
+    
+    requestAnimationFrame(frame);
+  }
+</script>
+</body>
+</html>
