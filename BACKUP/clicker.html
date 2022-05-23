@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <title>Click Clicker ~ e4494s</title>
+    <style>
+      body {
+        background-image: repeating-linear-gradient(to right, #135e90 0 20px, #1878b4 20px 40px);
+      }
+      
+      #layout-table {
+        width: 100%;
+        height: 100%;
+      }
+      
+      #the-button {
+        cursor: pointer;
+        width: 200px;
+        height: 200px;
+        margin: auto;
+        transition: 0.07s;
+      }
+      #the-button:active {
+        transform: scale(0.9);
+      }
+      
+      #money-display {
+        text-align: center;
+        margin: 10px;
+        font-size: 22px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+<body>
+<table id = "layout-table">
+  <tr>
+    <td>
+      <div id = "money-display">You have 0 clicks.</div>
+      <div id = "the-button" onclick = "buttonClick()"></div>
+    <td>
+  <tr>
+</table>
+<script src = "scripts/main.js"></script>
+<script>
+  let moneyDisplay = document.getElementById("money-display");
+  let theButton = document.getElementById("the-button");
+  function buttonClick() {
+    Game.$ += Game.$PerClick;
+    moneyDisplay.innerHTML = `You have ${Math.floor(Game.$)} ${Game.$Name}${Game.$ == 1 ? "" : "s"}.`;
+  }
+  
+  const Game = {};
+  Game.$ = 0; 
+  Game.$PerClick = 1;
+  Game.$Name = "click";
+  Game.$Sprite = "images/grayball.png";
+  theButton.style.backgroundImage = "url(" + Game.$Sprite + ")";
+  theButton.style.backgroundSize = "100%";
+</script>
+</body>
+</html>
