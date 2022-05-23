@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <title>e4494s</title>
+    <style>
+      .title-big {
+        text-align: center;
+        font-size: 22px;
+        font-weight: bold;
+        margin-top: 5px;
+        margin-bottom: 5px;
+      }
+      .title-small {
+        text-align: center;
+        font-size: 18px;
+      }
+      
+      #layout-table {
+        margin-top: 20px;
+        width: 100%;
+      }
+      
+      table, tr, td {
+        /*border: 1px solid black;*/
+      }
+      
+      #click-button {
+        margin: 0 auto;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background-image: radial-gradient(#a0a0a0, black);
+        cursor: pointer;
+      }
+    </style>
+  </head>
+<body>
+<div class = "title-big">You have <span id = "money-count">0</span> money.</div>
+<div class = "title-small">You are producing <span id = "money-per-sec">0.00</span> money per second.</div>
+<table id = "layout-table">
+  <tr>
+    <td>
+      <div id = "click-button" onclick = "clickButton()"></div>
+    </td>
+  </tr>
+</table>
+<script src = "scripts/main.js"></script>
+<script>
+  const Game = {};
+  Game.money = 0;
+  Game.moneyPerSec = 0;
+  Game.moneyPerClick = 1;
+  
+  Game.clickers = {};
+  Game.clickers.count = 0;
+  Game.clickers.moneyPerSec = 0.1;
+  Game.clickers.cost = 10;
+  Game.clickers.costIncrease = 1.1;
+  Game.clickers.mult = 1;
+  
+  let lastTick;
+  let DOM = {};
+  DOM.moneyCount = document.getElementById("money-count");
+  DOM.moneyPerSec = document.getElementById("money-per-sec");
+  function update() {
+    Game.moneyPerSec = Game.clickers.count * Game.clickers.moneyPerSec * Game.clickers.mult;
+    Game.money += Game.moneyPerSec * ((Date.now() - lastTick) / 1000);
+    
+    DOM.moneyCount.innerHTML = Math.floor(Game.money);
+    DOM.moneyPerSec.innerHTML = Game.moneyPerSec.toFixed(2);
+    lastTick = Date.now();
+    requestAnimationFrame(update);
+  }
+  
+  function clickButton() {
+    Game.money += Game.moneyPerClick;
+  }
+  
+  function init() {
+    lastTick = Date.now();
+    update();
+  }
+  init();
+</script>
+</body>
+</html>
