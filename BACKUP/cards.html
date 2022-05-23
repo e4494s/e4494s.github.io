@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <title>Cards ~ e4494s</title>
+    <style>
+      body {
+        background-color: #039403;
+      }
+      
+      canvas {
+        border: none;
+        position: absolute;
+        z-index: -1;
+        left: 0;
+        top: 0;
+      }
+    </style>
+  </head>
+<body>
+<canvas id = "canvas"></canvas>
+<script src = "scripts/main.js"></script>
+<script>
+  let canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  const DPR = window.devicePixelRatio;
+  canvas.width = window.innerWidth * DPR;
+  canvas.height = window.innerHeight * DPR;
+  canvas.style.width = canvas.style.height = "100%";
+  
+  let cardWidth = 71;
+  let cardHeight = 96;
+  
+  let gravity = 0.5;
+  
+  let cardSheet = new Image();
+  cardSheet.src = "images/card-sheet.png";
+  
+  function Card(id) {
+    this.id = id;
+    this.x = 0;
+    this.y = 0;
+    this.vx = 0;
+    this.vy = 0;
+    this.sx = (this.id % 4) * cardWidth;
+    this.sy = ((this.id % 4) % 13) * cardHeight;
+    this.ratio = 1;
+    this.render = function() {
+      this.x += this.vx;
+      this.y += this.vy;
+      this.vy += gravity;
+      ctx.drawImage(cardSheet, this.sx, this.sy, cardWidth, cardHeight, Math.floor(this.x - (cardWidth * this.ratio * 0.5)), Math.floor(this.y - (cardHeight * this.ratio * 0.5)), cardWidth * this.ratio, cardHeight * this.ratio);
+      if (this.y > canvas.height - (cardHeight * this.ratio * 0.5)) {
+        this.y = canvas.height - (cardHeight * this.ratio * 0.5);
+        this.vy *= -0.85;
+      }
+    };
+  }
+  
+  let cardArray = [];
+  
+  function addCard(id, x, y, ratio) {
+    let nCard = new Card(id);
+    nCard.x = x;
+    nCard.y = y;
+    nCard.vx = randBetween(1, 4) * randSign();
+    nCard.vy = Math.random() * -10;
+    nCard.ratio = ratio;
+    cardArray.push(nCard);
+  }
+  
+  let mouseDown = false;
+  window.addEventListener("mousedown", e => {
+    mouseDown = true;
+    addCard(Math.floor(Math.random() * 52), e.clientX * DPR, e.clientY * DPR, DPR);
+  });
+  window.addEventListener("mouseup", e => {
+    mouseDown = false;
+  });
+  window.addEventListener("mousemove", e => {
+    if (!mouseDown) return;
+    addCard(Math.floor(Math.random() * 52), e.clientX * DPR, e.clientY * DPR, DPR);
+  });
+  
+  function frame() {
+    for (let i = 0; i < cardArray.length; i++) cardArray[i].render();
+    requestAnimationFrame(frame);
+  }
+  frame();
+  
+  Number.prototype.floorToMultipleOf = function(n) {
+    return Math.floor(this / n) * n;
+  };
+</script>
+</body>
+</html>
+
+
+
+
+
+
+<!--<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <title>Deck ~ e4494s</title>
+    <style>
+      .card {
+        width: 40px;
+        height: 56px;
+        border: 3px solid black;
+        border-radius: 8px;
+        display: inline-block;
+        margin: 5px;
+        text-align: center;
+        font-size: 25px;
+        font-weight: bold;
+      }
+      
+      .suit-img {
+        width: 25px;
+        height: 25px;
+      }
+    </style>
+  </head>
+<body>
+<button onclick = "shuffleDeck()" style = "margin-right: 10px;">Shuffle Deck</button>
+<label for = "display-deck-checkbox">Display Deck</label>
+<input type = "checkbox" id = "display-deck-checkbox" oninput = "displayDeck()" CHECKED>
+<div id = "deck-div"></div>
+<script src = "scripts/main.js"></script>
+<script>
+  Array.prototype.shuffle = function() {
+    let result = [];
+    while (this.length) {
+      result.push(this.splice(Math.floor(Math.random() * this.length), 1));
+    }
+    return result.flat(1);
+  }
+  
+  function Card() {
+    this.suit = "Spades";
+    this.value = 1;
+    this.color = "black";
+    this.print = function() {
+      let value;
+      switch (this.value) {
+        case 13: value = "King";
+        break;
+        case 12: value = "Queen";
+        break;
+        case 11: value = "Jack";
+        break;
+        case 1: value = "Ace";
+        break;
+        default: value = this.value;
+      }
+      return `${value} of ${this.suit}`;
+    };
+    this.getValueLetter = function() {
+      let value;
+      switch (this.value) {
+        case 13: value = "K";
+        break;
+        case 12: value = "Q";
+        break;
+        case 11: value = "J";
+        break;
+        case 1: value = "A";
+        break;
+        default: value = this.value;
+      }
+      return value;
+    };
+  }
+  
+  function makeDeck() {
+    let deck = [];
+    let suits = ["Spades", "Diamonds", "Clubs", "Hearts"];
+    for (let s = 0; s < 4; s++) {
+      for (let v = 1; v < 14; v++) {
+        let nCard = new Card();
+        nCard.value = v;
+        nCard.suit = suits[s];
+        nCard.color = s == 0 || s == 2 ? "black" : "red";
+        deck.push(nCard);
+      }
+    }
+    return deck;
+  }
+  
+  function printDeck(deck) {
+    let result = [];
+    for (let i = 0; i < deck.length; i++) result.push(deck[i].print());
+    return result;
+  }
+  
+  
+  
+  let deck = makeDeck();
+  let deckDiv = document.getElementById("deck-div");
+  let showDeck = document.getElementById("display-deck-checkbox");
+  
+  let spadesSVG = "https://discord.com/assets/3fe9fcacdbee990bd0d873135689bd5b.svg";
+  let diamondsSVG = "https://discord.com/assets/61e5eb6df757130920f69f1bc3ec6cdf.svg";
+  let clubsSVG = "https://discord.com/assets/b67a375a6b8f5caeacff463835c44011.svg";
+  let heartsSVG = "https://discord.com/assets/1afd3c799f3e158662a70498e83e2a87.svg";
+  
+  function displayDeck() {
+    while (deckDiv.firstChild) deckDiv.removeChild(deckDiv.firstChild);
+    if (!showDeck.checked) return;
+    for (let i = 0; i < deck.length; i++) {
+      let card = document.createElement("div");
+      card.className = "card";
+      card.style.color = deck[i].color == "red" ? "#BE1931" : "#31373D";
+      card.innerHTML = deck[i].getValueLetter() + "<br>";
+      
+      let suit = document.createElement("img");
+      suit.className = "suit-img";
+      switch (deck[i].suit) {
+        case "Spades": suit.src = spadesSVG;
+        break;
+        case "Diamonds": suit.src = diamondsSVG;
+        break;
+        case "Clubs": suit.src = clubsSVG;
+        break;
+        case "Hearts": suit.src = heartsSVG;
+        break;
+      }
+      card.appendChild(suit);
+      
+      deckDiv.appendChild(card);
+    }
+  }
+  
+  function shuffleDeck() {
+    deck = deck.shuffle();
+    displayDeck();
+  }
+  
+  
+  displayDeck();
+</script>
+</body>
+</html>-->
