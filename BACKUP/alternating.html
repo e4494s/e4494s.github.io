@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <title>Alternating Neighborhood Cellular Automata ~ e4494s</title>
+    <style>
+      canvas {
+        width: 300px;
+        height: 300px;
+      }
+    </style>
+  </head>
+<body>
+<h1>Alternating Neighborhood Cellular Automata</h1>
+<canvas id = "canvas"></canvas>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 1000;
+  
+  let gridSize = 100;
+  let grid = [];
+  for (let x = 0; x < gridSize; x++) {
+    grid.push([]);
+    for (let y = 0; y < gridSize; y++) {
+      grid[grid.length - 1].push(Math.round(Math.random()));
+    }
+  }
+  
+  let running = true;
+  
+  let survive1 = [0, 2, 3, 4];
+  let born1 = [2, 4];
+  
+  let survive2 = [3, 4];
+  let born2 = [2];
+  
+  let neighborhood = 1; // 1: Plus; 2: X
+  
+  let colors = ["white", "black"];
+  
+  function step() {
+    let nextGrid = grid;
+    for (let x = 0; x < gridSize; x++) {
+      for (let y = 0; y < gridSize; y++) {
+        let n = countNeighbors(x, y, neighborhood);
+        if (neighborhood == 1) {
+          if (grid[x][y] == 0) {
+            if (born1.includes(n)) nextGrid[x][y] = 1;
+          }
+          else {
+            if (survive1.includes(n)) nextGrid[x][y] = 1;
+            else nextGrid[x][y] = 0;
+          }
+        }
+        else {
+          if (grid[x][y] == 0) {
+            if (born2.includes(n)) nextGrid[x][y] = 1;
+          }
+          else {
+            if (survive2.includes(n)) nextGrid[x][y] = 1;
+            else nextGrid[x][y] = 0;
+          }
+        }
+      }
+    }
+    if (neighborhood == 1) neighborhood = 2;
+    else neighborhood = 1;
+    grid = nextGrid;
+    drawGrid();
+    if (running) requestAnimationFrame(step);
+  }
+  step();
+  
+  function drawGrid() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let tileSize = canvas.width / gridSize;
+    for (let x = 0; x < gridSize; x++) {
+      for (let y = 0; y < gridSize; y++) {
+        ctx.fillStyle = colors[grid[x][y]];
+        ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+      }
+    }
+  }
+  
+  function randomizeRules() {
+    survive1.length = born1.length = survive2.length = born2.length = 0;
+    for (let i = 0; i < 5; i++) {
+      if (Math.round(Math.random()) == 0) survive1.push(i);
+    }
+    for (let i = 0; i < 5; i++) {
+      if (Math.round(Math.random()) == 0) born1.push(i);
+    }
+    for (let i = 0; i < 5; i++) {
+      if (Math.round(Math.random()) == 0) survive2.push(i);
+    }
+    for (let i = 0; i < 5; i++) {
+      if (Math.round(Math.random()) == 0) born2.push(i);
+    }
+  }
+  
+  function countNeighbors(x, y, neighborhood) {
+    let count = 0;
+    if (neighborhood == 1) {
+      count += grid[x][(y - 1 + gridSize) % gridSize]; // top
+      count += grid[(x + 1) % gridSize][y]; // right
+      count += grid[x][(y + 1) % gridSize]; // bottom
+      count += grid[(x - 1 + gridSize) % gridSize][y]; // left
+    }
+    else {
+      count += grid[(x + 1) % gridSize][(y - 1 + gridSize) % gridSize]; // top right
+      count += grid[(x + 1) % gridSize][(y + 1) % gridSize]; // bottom right
+      count += grid[(x - 1 + gridSize) % gridSize][(y + 1) % gridSize]; // bottom left
+      count += grid[(x - 1 + gridSize) % gridSize][(y - 1 + gridSize) % gridSize]; // top left
+    }
+    return count;
+  }
+</script>
+</body>
+</html>
