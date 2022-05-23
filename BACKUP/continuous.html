@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>Continuous Cellular Automaton ~ e4494s</title>
+    <style>
+      #canvas {
+        width: 300px;
+        height: 300px;
+        background-color: transparent;
+      }
+      
+      input[type = number] {
+        border: 3px solid #ff9500; /* Accent color */
+        border-radius: 0;
+        width: 75px;
+      }
+    </style>
+  </head>
+<body>
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; Continuous Cellular Automaton &mdash;&mdash;</h1>
+<b><u>Additive Rule:</u></b>
+<input type = "number" step = "any" value = "0" id = "additiveruletxt" oninput = "additiveRule = Number(this.value); reset()">
+<button onclick = "additiveruletxt.value = additiveRule = Math.random(); reset()">Randomize</button>
+<button onclick = "additiveruletxt.value = additiveRule = 0; reset()">Reset</button>
+<br><br>
+<b><u>Multiplicative Rule:</u></b>
+<input type = "number" step = "any" value = "1.15" id = "multiplicativeruletxt" oninput = "multiplicativeRule = Number(this.value); reset()">
+<button onclick = "multiplicativeruletxt.value = multiplicativeRule = 1 + Math.random(); reset()">Randomize</button>
+<button onclick = "multiplicativeruletxt.value = multiplicativeRule = 1; reset()">Reset</button>
+<br><br>
+<b><u>Grid Size:</u></b> <span id = "gridsizetxt">100x100</span>
+<br>
+<input type = "range" id = "gridsizerange" value = "100" min = "25" max = "500" step = "25" oninput = "setGridSize(Number(this.value))">
+<br><br>
+<b><u>Rainbow:</u></b>
+<input type = "checkbox" oninput = "rainbowMode = this.checked; reset()">
+<br><br>
+<canvas id = "canvas"></canvas>
+<br>
+<button onclick = "if (!running) step()">Step</button>
+<button onclick = "reset()">Reset</button>
+<button onclick = "start()" id = "runbtn">Run</button>
+<br><br>
+<b><u>Run Until End:</u></b>
+<input type = "checkbox" oninput = "runUntilEnd = this.checked; reset()">
+<br><br>
+<button class = "download-canvas-btn" onclick = "downloadCanvas()">Download</button>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 2000;
+  
+  let gridSize = 100;
+  let row = [];
+  let time = 0;
+  let running = false;
+  let startingRow = 0;
+  
+  let runUntilEnd = false;
+  let rainbowMode = false;
+  
+  let cellColor = "black";
+  
+  let additiveRule = 0;
+  let multiplicativeRule = 1.15;
+  
+  function step() {
+    let nextRow = [];
+    for (let i = 0; i < gridSize; i++) {
+      let average = (row[(i - 1 + gridSize) % gridSize] + row[i] + row[(i + 1) % gridSize]) / 3;
+      average *= multiplicativeRule;
+      average += additiveRule;
+      average -= Math.floor(average);
+      if (average < 0.001) average = 0;
+      if (average > 1 - 0.001) average = 1;
+      nextRow[i] = average;
+    }
+    row = nextRow;
+    drawRow();
+    time++;
+    if (time >= gridSize) {
+      running = false;
+      runbtn.innerHTML = "Run";
+    }
+    if (running) requestAnimationFrame(step);
+  }
+  
+  function reset() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    time = 0;
+    row = [];
+    for (let i = 0; i < gridSize; i++) {
+      if (startingRow == 1) row.push(Math.random());
+      else row.push(0);
+    }
+    if (startingRow == 0) row[Math.round(gridSize / 2)] = 1;
+    drawRow();
+    time++;
+    if (runUntilEnd) {
+      while (time < gridSize) step();
+    }
+  }
+  reset();
+  
+  function start() {
+    if (running) {
+      running = false;
+      runbtn.innerHTML = "Run";
+    }
+    else {
+      if (time >= gridSize) reset();
+      running = true;
+      runbtn.innerHTML = "Stop";
+      step();
+    }
+  }
+  
+  function drawRow() {
+    let tileSize = canvas.width / gridSize;
+    for (let i = 0; i < gridSize; i++) {
+      if (!rainbowMode) {
+        ctx.fillStyle = cellColor;
+        ctx.globalAlpha = row[i];
+      }
+      else {
+        ctx.fillStyle = (new HSL(row[i] * 360, 100, 50)).print();
+        ctx.globalAlpha = 1;
+      }
+      ctx.fillRect(i * tileSize, time * tileSize, tileSize, tileSize);
+    }
+  }
+  
+  function setGridSize(number) {
+    gridSize = number;
+    gridsizetxt.innerHTML = number + "x" + number;
+    reset();
+  }
+  
+  function downloadCanvas() {
+    let link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "continuous.png";
+    link.click();
+  }
+</script>
+</body>
+</html>
