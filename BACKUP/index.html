@@ -282,7 +282,7 @@
 <br>
 <table cellspacing = "0" id = "section-button-div">
   <tr>
-    <td class = "section-title" id = "cell-left-top">Art</td>
+    <td class = "section-title" id = "cell-left-top">Generative Art</td>
     <td class = "section-title">Games</td>
     <td class = "section-title">Math-Related</td>
     <td class = "section-title">Miscellaneous</td>
@@ -294,7 +294,9 @@
   </tr>
   <tr valign = "top">
     <td class = "section-buttons" id = "cell-left-bottom">
-      <button class = "section-btn" onclick = "showSection(1)" id = "section-btn-1">Generative Art</button>
+      <button class = "section-btn" onclick = "showSection(13)" id = "section-btn-13">Static Art</button>
+      <br>
+      <button class = "section-btn" onclick = "showSection(1)" id = "section-btn-1">Dynamic Art</button>
       <br>
       <button class = "section-btn" onclick = "showSection(2)" id = "section-btn-2">Natural Art</button>
     </td>
@@ -323,9 +325,11 @@
 
 <!---->
 
-<div class = "section" id = "section1">
-  <h2>&mdash; Generative Art &mdash;</h2>
+<div class = "section" id = "section13">
+  <h2>&mdash; Static Generative Art &mdash;</h2>
   <div class = "links">
+    <div class = "section-desc">Generative art that produces a still image that doesn't move, and instead is randomized every generation</div>
+    <br><br>
     <a class = "big-link" target = "_blank" href = "what-is-generative-art.html">What is Generative Art?</a> - an interactive article that gives an overview of what exactly generative art is, and explains key concepts behind it <span class = "date-span">(2022)</span>
     <br><br><br>
     <a class = "big-link" target = "_blank" href = "generative-art-gallery.html">Generative Art Gallery</a> - a collection of diverse interactive generative artworks I've created. The page will look different every time you view it, and every time you redraw each piece <span class = "date-span">(2022)</span>
@@ -334,6 +338,37 @@
     <img class = "gallery-link" onclick = "openLink('generative-art-gallery.html')" src = "images/gallery/generative-art-gallery2.png">
     <img class = "gallery-link" onclick = "openLink('generative-art-gallery.html')" src = "images/gallery/generative-art-gallery3.png">
     <img class = "gallery-link" onclick = "openLink('generative-art-gallery.html')" src = "images/gallery/generative-art-gallery4.png">
+    <br><br>
+    <a class = "big-link" target = "_blank" href = "bands.html">Bands</a> - generative designs made up of colorful interlocking bands that make interesting patterns <span class = "date-span">(2021)</span>
+    <br>
+    <img class = "gallery-link" onclick = "openLink('bands.html')" src = "images/gallery/bands.png">
+    <img class = "gallery-link" onclick = "openLink('bands.html')" src = "images/gallery/bands2.png">
+    <img class = "gallery-link" onclick = "openLink('bands.html')" src = "images/gallery/bands3.png">
+    <img class = "gallery-link" onclick = "openLink('bands.html')" src = "images/gallery/bands4.png">
+    <br><br>
+    <a class = "big-link" target = "_blank" href = "tiles.html">Tiles</a> - generate a random colorful grid of up to 16 different types of tiles, with endless combinations <span class = "date-span">(2022)</span>
+    <br>
+    <img class = "gallery-link" onclick = "openLink('tiles.html')" src = "images/gallery/tiles.png">
+    <img class = "gallery-link" onclick = "openLink('tiles.html')" src = "images/gallery/tiles2.png">
+    <img class = "gallery-link" onclick = "openLink('tiles.html')" src = "images/gallery/tiles3.png">
+    <img class = "gallery-link" onclick = "openLink('tiles.html')" src = "images/gallery/tiles4.png">
+    <br><br>
+    <a class = "big-link" target = "_blank" href = "walker.html">Random Walker Shading</a> - a plane is shaded and colored based on the movements of a random walker through thousands of steps, creating colorful and intricate designs resembling galaxies or clouds <span class = "date-span">(2021)</span>
+    <br>
+    <img class = "gallery-link" onclick = "openLink('walker.html')" src = "images/gallery/walker.png">
+    <img class = "gallery-link" onclick = "openLink('walker.html')" src = "images/gallery/walker2.png">
+    <img class = "gallery-link" onclick = "openLink('walker.html')" src = "images/gallery/walker4.png">
+    <img class = "gallery-link" onclick = "openLink('walker.html')" src = "images/gallery/walker3.png">
+    <br><br>
+  </div>
+</div>
+
+<!---->
+
+<div class = "section" id = "section1">
+  <h2>&mdash; Dynamic Generative Art &mdash;</h2>
+  <div class = "links">
+    <div class = "section-desc">Generative art that moves and changes over time, constantly shifting and updating</div>
     <br><br>
     <a class = "big-link" target = "_blank" href = "generative-sketch.html">Generative Art Sketchpad</a> - draw abstract designs using different brushes that each create unique, interesting patterns and shapes <span class = "date-span">(2021)</span>
     <br>
@@ -363,27 +398,6 @@
     <img class = "gallery-link" onclick = "openLink('servo.html')" src = "images/gallery/servo2.png">
     <img class = "gallery-link" onclick = "openLink('servo.html')" src = "images/gallery/servo3.png">
     <br><br>
-    <a class = "big-link" target = "_blank" href = "bands.html">Bands</a> - generative designs made up of colorful interlocking bands that make interesting patterns <span class = "date-span">(2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('bands.html')" src = "images/gallery/bands.png">
-    <img class = "gallery-link" onclick = "openLink('bands.html')" src = "images/gallery/bands2.png">
-    <img class = "gallery-link" onclick = "openLink('bands.html')" src = "images/gallery/bands3.png">
-    <img class = "gallery-link" onclick = "openLink('bands.html')" src = "images/gallery/bands4.png">
-    <br><br>
-    <a class = "big-link" target = "_blank" href = "tiles.html">Tiles</a> - generate a random colorful grid of up to 16 different types of tiles, with endless combinations <span class = "date-span">(2022)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('tiles.html')" src = "images/gallery/tiles.png">
-    <img class = "gallery-link" onclick = "openLink('tiles.html')" src = "images/gallery/tiles2.png">
-    <img class = "gallery-link" onclick = "openLink('tiles.html')" src = "images/gallery/tiles3.png">
-    <img class = "gallery-link" onclick = "openLink('tiles.html')" src = "images/gallery/tiles4.png">
-    <br><br>
-    <a class = "big-link" target = "_blank" href = "walker.html">Random Walker Shading</a> - a plane is shaded and colored based on the movements of a random walker through thousands of steps, creating colorful and intricate designs resembling galaxies or clouds <span class = "date-span">(2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('walker.html')" src = "images/gallery/walker.png">
-    <img class = "gallery-link" onclick = "openLink('walker.html')" src = "images/gallery/walker2.png">
-    <img class = "gallery-link" onclick = "openLink('walker.html')" src = "images/gallery/walker4.png">
-    <img class = "gallery-link" onclick = "openLink('walker.html')" src = "images/gallery/walker3.png">
-    <br><br>
     <a class = "big-link" target = "_blank" href = "art.html">Living Art Gallery</a> - an abstract, moving art gallery <span class = "date-span">(pre-2021)</span>
     <br>
     <img class = "gallery-link" onclick = "openLink('art.html')" src = "images/gallery/art.png">
@@ -402,7 +416,7 @@
 <!---->
 
 <div class = "section" id = "section2">
-  <h2>&mdash; Natural Art &mdash;</h2>
+  <h2>&mdash; Natural Generative Art &mdash;</h2>
   <div class = "links">
     <div class = "section-desc">Generative art that replicates and stylizes natural processes or forces</div>
     <br><br>
@@ -533,6 +547,8 @@
 <div class = "section" id = "section7">
   <h2>&mdash; Cellular Automata &mdash;</h2>
   <div class = "links">
+    <div class = "section-desc">Cellular automata are simulations where cells are arranged in a grid or line and have simple rules applied to them over time, so that each cell changes state as a function of time</div>
+    <br><br>
     <a class = "big-link" target = "_blank" href = "life.html">Conway's Game of Life</a> - a customizable 2D cellular automaton simulation based in simple rules that creates complex results <span class = "date-span">(2021)</span>
     <br>
     <img class = "gallery-link" onclick = "openLink('life.html')" src = "images/gallery/life.png">
@@ -677,14 +693,14 @@
   }
   
   function showSection(n) {
-    for (let i = 1; i <= 12; i++) {
+    for (let i = 1; i <= 13; i++) {
       document.getElementById("section" + i).hidden = true;
       document.getElementById("section-btn-" + i).className = "section-btn";
     }
     document.getElementById("section" + n).hidden = false;
     document.getElementById("section-btn-" + n).className = "section-btn-selected";
   }
-  showSection(1);
+  showSection(13);
   
   function randBetween(min, max) {
     return (Math.random() * (max - min)) + min;
