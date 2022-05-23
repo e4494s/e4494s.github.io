@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>Elementary Cellular Automaton ~ e4494s</title>
+    <style>
+      #canvas {
+        width: 300px;
+        height: 300px;
+        background-color: transparent;
+      }
+      
+      input[type = number] {
+        border: 3px solid #ff9500; /* Accent color */
+        border-radius: 0;
+        width: 75px;
+      }
+    </style>
+  </head>
+<body>
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; Elementary Cellular Automaton &mdash;&mdash;</h1>
+<br><br>
+<b><u>Rule:</u></b> <input id = "ruletxt" value = "110" type = "number" min = "0" max = "255" step = "1" oninput = "setRule(Number(this.value))">
+<button onclick = "setRule(Math.floor(Math.random() * 256))">Randomize</button>
+<br><br>
+<b><u>Starting Row:</u></b>
+<br>
+<input type = "radio" id = "startingrow0radio" name = "startingrow" oninput = "startingRow = 0; reset()">
+<label for = "startingrow0radio">Random cells</label>
+<br>
+<input type = "radio" id = "startingrow1radio" name = "startingrow" oninput = "startingRow = 1; reset()" CHECKED>
+<label for = "startingrow1radio">Single cell</label>
+<br><br>
+<b><u>Grid Size:</u></b> <span id = "gridsizetxt">100x100</span>
+<br>
+<input type = "range" id = "gridsizerange" value = "100" min = "25" max = "500" step = "25" oninput = "setGridSize(Number(this.value))">
+<br><br>
+<canvas id = "canvas"></canvas>
+<br>
+<button onclick = "if (!running) step()">Step</button>
+<button onclick = "reset()">Reset</button>
+<button onclick = "start()" id = "runbtn">Run</button>
+<br><br>
+<button class = "download-canvas-btn" onclick = "downloadCanvas()">Download</button>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 1000;
+  
+  let gridSize = 100;
+  let row = [];
+  let time = 0;
+  let startingRow = 1;
+  let running = false;
+  
+  let rule;
+  
+  function setRule(number) {
+    number = Math.floor(number.clamp(0, 255));
+    rule = number.toString(2);
+    while (rule.length < 8) rule = "0" + rule;
+    ruletxt.value = number;
+    reset();
+  }
+  function setGridSize(number) {
+    gridSize = number;
+    gridsizetxt.innerHTML = number + "x" + number;
+    reset();
+  }
+  setRule(110);
+  
+  function step() {
+    let nextRow = [];
+    for (let i = 0; i < gridSize; i++) {
+      let pattern = row[(i - 1 + gridSize) % gridSize] + row[i] + row[(i + 1) % gridSize];
+      switch (pattern) {
+        case "111": nextRow[i] = rule[0];
+        break;
+        case "110": nextRow[i] = rule[1];
+        break;
+        case "101": nextRow[i] = rule[2];
+        break;
+        case "100": nextRow[i] = rule[3];
+        break;
+        case "011": nextRow[i] = rule[4];
+        break;
+        case "010": nextRow[i] = rule[5];
+        break;
+        case "001": nextRow[i] = rule[6];
+        break;
+        case "000": nextRow[i] = rule[7];
+        break;
+        default: nextRow[i] = "this shouldn't happen";
+      }
+    }
+    row = nextRow;
+    drawRow();
+    time++;
+    if (time >= gridSize) {
+      running = false;
+      runbtn.innerHTML = "Run";
+    }
+    if (running) requestAnimationFrame(step);
+  }
+  
+  function reset() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    time = 0;
+    row = [];
+    for (let i = 0; i < gridSize; i++) {
+      if (startingRow == 0) row.push(String(Math.round(Math.random())));
+      else row.push("0");
+    }
+    if (startingRow == 1) row[row.length - 1] = "1";
+    drawRow();
+    time++;
+  }
+  
+  function start() {
+    if (running) {
+      running = false;
+      runbtn.innerHTML = "Run";
+    }
+    else {
+      running = true;
+      runbtn.innerHTML = "Stop";
+      step();
+    }
+  }
+  
+  function drawRow() {
+    for (let i = 0; i < gridSize; i++) {
+      ctx.fillStyle = "black";
+      let tileSize = canvas.width / gridSize;
+      if (row[i] == "1") ctx.fillRect(i * tileSize, time * tileSize, tileSize, tileSize);
+    }
+  }
+  
+  function downloadCanvas() {
+    let link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "elementary.png";
+    link.click();
+  }
+</script>
+</body>
+</html>
