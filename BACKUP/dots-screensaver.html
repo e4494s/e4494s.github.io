@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <title>Dots Screensaver ~ e4494s</title>
+    <style>
+      #canvas {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        background-color: black;
+      }
+    </style>
+  </head>
+<body>
+<canvas id = "canvas"></canvas>
+<script src = "scripts/main.js"></script>
+<script>
+  let canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth * 2;
+  canvas.height = window.innerHeight * 2;
+  let canvasRunning = true;
+  
+  let animTime = 0;
+  let animTimeSpeed = 2;
+  let ellipseOffsetFactor = 0.3;
+  let ellipseCount = 24;
+  let ellipseWidth = 40;
+  let ellipseHeight = 200;
+  let tracingMode = 0;
+  // 0: No tracing | 1: Trailing | 2: Full tracing
+  let ellipseDotSize = 20;
+  let showPaths = false;
+  let ellipseDotType = 0;
+  // 0: Circles | 1: Squares | 2: Lines
+  let showWireframe = false;
+  let showDots = true;
+  let wireframeThickness = 1;
+  let thicknessRatio = 1;
+  let dotRatio = 1;
+  let rainbowDots = true;
+  let rainbowWireframe = true;
+  let widthRatio = 0.42;
+  let heightRatio = 1;
+  
+  let lastFrameTime = 0;
+  let lastFpsDisplayTime = 1000;
+  
+  function Ellipse(angle) {
+    this.angle = angle;
+    let normalX = Math.cos(toRad(animTime + (this.angle * ellipseOffsetFactor))) * ellipseWidth;
+    let normalY = Math.sin(toRad(animTime + (this.angle * ellipseOffsetFactor))) * ellipseHeight;
+    this.lastDotX = (canvas.width / 2) + (Math.cos(toRad(this.angle)) * normalX) - Math.sin(toRad(this.angle)) * normalY;
+    this.lastDotY = (canvas.height / 2) + (Math.sin(toRad(this.angle)) * normalX) + (Math.cos(toRad(this.angle)) * normalY);
+  }
+  Ellipse.prototype.render = function() {
+    ctx.strokeStyle = rainbowDots ? `hsl(${this.angle + (animTime / 2)}deg, 100%, 50%)` : "white";
+    ctx.lineWidth = ellipseDotSize;
+    ctx.beginPath();
+    ctx.moveTo(this.lastDotX, this.lastDotY);
+    let normalX = Math.cos(toRad(animTime + (this.angle * ellipseOffsetFactor))) * ellipseWidth;
+    let normalY = Math.sin(toRad(animTime + (this.angle * ellipseOffsetFactor))) * ellipseHeight;
+    this.lastDotX = (canvas.width / 2) + (Math.cos(toRad(this.angle)) * normalX) - Math.sin(toRad(this.angle)) * normalY;
+    this.lastDotY = (canvas.height / 2) + (Math.sin(toRad(this.angle)) * normalX) + (Math.cos(toRad(this.angle)) * normalY);
+    ctx.lineTo(this.lastDotX, this.lastDotY);
+    if (showDots) ctx.stroke();
+    
+    if (showPaths) {
+      ctx.strokeStyle = "dimgray";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.ellipse(canvas.width / 2, canvas.height / 2, ellipseWidth, ellipseHeight, toRad(this.angle), 0, 2 * Math.PI);
+      ctx.stroke();
+    }
+  };
+  let ellipseArray = [];
+  
+  let timeToSwitch = 5000;
+  let lastSwitchTime = 0;
+  
+  function frame() {
+    let timeSinceSwitch = Date.now() - lastSwitchTime;
+    if (timeSinceSwitch >= timeToSwitch) {
+      randomSettings();
+      lastSwitchTime = Date.now();
+      timeSinceSwitch = 0;
+    }
+    
+    ellipseWidth = Math.min(canvas.width, canvas.height) * widthRatio;
+    ellipseHeight = ellipseWidth * heightRatio;
+    ellipseDotSize = Math.min(canvas.width, canvas.height) * dotRatio;
+    wireframeThickness = Math.min(canvas.width, canvas.height) * thicknessRatio;
+    
+    if (tracingMode != 0) {
+      ctx.globalAlpha = tracingMode == 1 ? 0.1 : 0;
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.globalAlpha = 1;
+    }
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    animTime += animTimeSpeed;
+    while (animTime >= 720) animTime -= 720;
+    while (animTime <= 0) animTime += 720;
+    
+    if (showWireframe) {
+      ctx.lineWidth = wireframeThickness;
+      ctx.lineCap = "round";
+      for (let i = 0; i < ellipseArray.length; i++) {
+        ctx.strokeStyle = rainbowWireframe ? `hsl(${ellipseArray[i].angle + (animTime / 2)}deg, 100%, 50%)` : "white";
+        ctx.beginPath();
+        ctx.moveTo(ellipseArray[i].lastDotX, ellipseArray[i].lastDotY);
+        ctx.lineTo(ellipseArray[(i + 1) % ellipseArray.length].lastDotX, ellipseArray[(i + 1) % ellipseArray.length].lastDotY);
+        ctx.stroke();
+      }
+    }
+    
+    ctx.lineCap = ellipseDotType == 0 ? "round" : ellipseDotType == 1 ? "square" : "butt";
+    for (let i = 0; i < ellipseArray.length; i++) {
+      ellipseArray[i].render();
+    }
+    
+    let thickness = 0.017 * Math.min(canvas.width, canvas.height);
+    let timeRatio = (timeSinceSwitch / timeToSwitch) * 1.08;
+    ctx.fillStyle = `hsl(0deg, 0%, ${(timeRatio * 80) + 20}%)`;//timeRatio >= 1 ? "white" : "rgb(100, 100, 100)";
+    
+    ctx.fillRect(0, canvas.height - thickness, timeRatio * canvas.width, thickness); // Bottom
+    
+    let len = timeRatio * canvas.width; // Top
+    ctx.fillRect(canvas.width - len, 0, len, thickness);
+    
+    ctx.fillRect(0, 0, thickness, timeRatio * canvas.height); // Left
+    
+    len = timeRatio * canvas.height;
+    ctx.fillRect(canvas.width - thickness, canvas.height - len, thickness, len); // Right
+    
+    if (canvasRunning) requestAnimationFrame(frame);
+  }
+  randomSettings();
+  frame();
+  
+  function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  
+  function randRange(min, max, step) {
+    return randBetween(min, max).toMultipleOf(step);
+  }
+  
+  function randomSettings() {
+    clearCanvas();
+    
+    animTimeSpeed = 1.5 * randSign();
+    ellipseOffsetFactor = randRange(-10, 10, 0.1);
+    ellipseCount = randRange(1, 100, 1);
+    dotRatio = randBetween(5, 60) / 800;
+    ellipseDotSize = dotRatio * Math.min(canvas.width, canvas.height);
+    heightRatio = Math.random() * Math.random();
+    ellipseWidth = Math.min(canvas.width, canvas.height) * widthRatio;
+    ellipseHeight = ellipseWidth * heightRatio;
+    tracingMode = 1//Math.floor(Math.random() * 2);
+    showPaths = false;
+    ellipseDotType = Math.floor(Math.random() * 3);
+    do {
+      showWireframe = Math.random() < 0.5;
+      showDots = Math.random() < 0.5;
+    }
+    while (!showWireframe && !showDots);
+    thicknessRatio = randBetween(1, 20) / 800;
+    wireframeThickness = thicknessRatio * Math.min(canvas.width, canvas.height);
+    rainbowDots = Math.floor(Math.random() * 3) !== 0;
+    rainbowWireframe = Math.floor(Math.random() * 3) !== 0;
+    ellipseArray = [];
+    for (let i = 0; i < ellipseCount; i++) {
+      ellipseArray.push(new Ellipse((i / ellipseCount) * 360));
+    }
+  }
+  
+  window.onresize = () => {
+    canvas.width = window.innerWidth * 2;
+    canvas.height = window.innerHeight * 2;
+    clearCanvas();
+  };
+</script>
+</body>
+</html>
