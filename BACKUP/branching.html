@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <title>Branching ~ e4494s</title>
+    <style>
+      body, button, select {
+        font-size: 11px;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -khtml-user-select: none;
+        -ms-user-select: none;
+      }
+      
+      button {
+        border: 2px solid black;
+      }
+      
+      canvas {
+        position: absolute;
+        border: none;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+      }
+      
+      #floatdiv {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background-color: rgba(255, 255, 255, 0.75);
+        outline: 2px solid black;
+        padding: 10px;
+      }
+      
+      input[type = range] {
+        width: 150px;
+      }
+      
+      select {
+        border: 2px solid black;
+        border-radius: 0;
+        font-family: monospace;
+      }
+      select:focus {
+        outline: none;
+      }
+      
+      #exportbtn {
+        background-color: rgb(175, 175, 255);
+        border-radius: 5px;
+        border: 2px solid blue;
+        font-weight: bold;
+      }
+      #exportbtn:hover {
+        background-color: rgb(100, 100, 255);
+      }
+      #exportbtn:active {
+        background-color: rgb(50, 50, 255);
+      }
+    </style>
+  </head>
+<body onload = "init()">
+<div id = "floatdiv">
+  <table>
+    <tr>
+      <td style = "padding-right: 10px">
+        <div><b><u>Node Size:</u></b> <span id = "nodesizetxt">6</span>px</div>
+        <input type = "range" min = "1" max = "20" step = "1" value = "6"  id = "nodesizerange" oninput = "nodeSize = Number(this.value); nodesizetxt.innerHTML = this.value; choosePreset(0)">
+        <br><br>
+        <div><b><u>Node Velocity:</u></b> <span id = "nodevelocitytxt">4</span>px/s</div>
+        <input type = "range" min = "1" max = "25" step = "1" value = "4" id = "nodevelocityrange" oninput = "nodeVelocity = Number(this.value); nodevelocitytxt.innerHTML = this.value; choosePreset(0)">
+        <br><br>
+        <div><b><u>Node Split Age:</u></b> <span id = "nodesplitagetxt">75</span> ticks</div>
+        <input type = "range" min = "0" max = "500" step = "5" value = "75" id = "nodesplitagerange" oninput = "nodeSplitAge = Number(this.value); nodesplitagetxt.innerHTML = this.value; choosePreset(0)">
+        <br><br>
+        <div><b><u>Node Split Angle:</u></b> <span id = "nodesplitangletxt">30</span>&deg;</div>
+        <input type = "range" min = "0" max = "180" step = "1" value = "30" id = "nodesplitanglerange" oninput = "nodeSplitAngle = Number(this.value); nodesplitangletxt.innerHTML = this.value; choosePreset(0)">
+        <br><br>
+        <div><b><u>Max Node Splits:</u></b> <span id = "maxnodelayerstxt">6</span> layer<span id = "pluraltxt">s</span></div>
+        <input type = "range" min = "1" max = "15" step = "1" value = "6" id = "maxnodelayersrange" oninput = "maxNodeLayers = Number(this.value); maxnodelayerstxt.innerHTML = this.value; choosePreset(0)">
+        <br><br>
+        <div><b><u>Node Drift:</u></b> <span id = "nodedrifttxt">15</span>&deg;</div>
+        <input type = "range" min = "0" max = "180" step = "1" value = "15" id = "nodedriftrange" oninput = "nodeDrift = Number(this.value); nodedrifttxt.innerHTML = this.value; choosePreset(0)">
+        <br><br>
+        <div><b><u>Nodes drift smoothly:</u></b></div>
+        <input type = "checkbox" id = "smoothdriftingbox" oninput = "smoothDrifting = this.checked" CHECKED>
+        <br><br>
+        <div><b><u>Nodes split with same color:</u></b></div>
+        <input type = "checkbox" id = "rainbowsplitsbox" oninput = "rainbowSplits = !this.checked" CHECKED>
+        <br><br>
+        <div><b><u>Textured branches:</u></b></div>
+        <input type = "checkbox" id = "texturedbranchesbox" oninput = "texturedBranches = this.checked">
+      </td>
+      <td style = "padding-left: 10px">
+        <div style = "margin-bottom: 3px"><b><u>Presets:</u></b></div>
+        <select name = "presets" id = "presetselect" oninput = "choosePreset(Number(this.value))">
+          <option value = "0">Custom</option>
+          <option value = "5">Tree</option>
+          <option value = "6">Mini Tree</option>
+          <option value = "3">Geometric Tree</option>
+          <option value = "8">Gnarled Roots</option>
+          <option value = "1">Broom</option>
+          <option value = "2">Plaid</option>
+          <option value = "10">Triangles</option>
+          <option value = "4">Squares</option>
+          <option value = "9">Hexagons</option>
+          <option value = "7">Doodle</option>
+          <option value = "11">Fur</option>
+        </select>
+        <br><br>
+        <button onclick = "randomizeSettings()">Randomize Settings</button>
+        <br><br>
+        <div><b>Nodes: <span id = "nodestxt">1</span></b></div>
+        <button onclick = "nodeArray = []; nodeArray.push(new node())">Spawn Node</button>
+        <br><br>
+        <button onclick = "nodeArray = []">Remove Nodes</button>
+        <br><br>
+        <button onclick = "nodeArray = []; ctx.clearRect(0, 0, canvas.width, canvas.height)">Erase Canvas</button>
+        <br><br>
+        <button onclick = "exportCanvas()" id = "exportbtn">Open canvas in new tab</button>
+      </td>
+    </tr>
+  </table>
+</div>
+<canvas id = "canvas"></canvas>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  
+  ctx.lineCap = ctx.lineJoin = "round";
+  
+  let nodeSize = 6;
+  let nodeSplitAge = 75;
+  let maxNodeLayers = 6;
+  let nodeDrift = 15;
+  let smoothDrifting = true;
+  let nodeVelocity = 4;
+  let nodeSplitAngle = 30;
+  let rainbowSplits = false;
+  let texturedBranches = false;
+  
+  function node(x, y, angle, velocity, color, layer, hue) {
+    this.x = x ?? randBetween(nodeSize, canvas.width - nodeSize);
+    this.y = y ?? randBetween(nodeSize, canvas.height - nodeSize);
+    this.lx = this.x;
+    this.ly = this.y;
+    this.angle = angle ?? Math.random() * 360;
+    this.velocity = velocity ?? nodeVelocity;
+    this.hue = hue ?? Math.random() * 360;
+    this.color = color ?? (new RGB()).print();
+    this.age = 0;
+    this.maxAge = Math.floor(randBetween(nodeSplitAge / 4, nodeSplitAge));
+    this.layer = layer ?? 0;
+    this.size = (nodeSize / maxNodeLayers) * (maxNodeLayers - this.layer);
+  }
+  node.prototype.render = function() {
+    this.x += this.velocity * Math.cos((this.angle * Math.PI) / 180);
+    this.y += this.velocity * Math.sin((this.angle * Math.PI) / 180);
+    if (this.x < -(this.size / 2)) {
+      this.x = canvas.width + (this.size / 2);
+      this.lx = this.x;
+    }
+    if (this.x > canvas.width + (this.size / 2)) {
+      this.x = -(this.size / 2);
+      this.lx = this.x;
+    }
+    if (this.y < -(this.size / 2)) {
+      this.y = canvas.height + (this.size / 2);
+      this.ly = this.y;
+    }
+    if (this.y > canvas.height + (this.size / 2)) {
+      this.y = -(this.size / 2);
+      this.ly = this.y;
+    }
+    let r = smoothDrifting ? Math.random() : 1;
+    this.angle += coin() * r * nodeDrift;
+    
+    if (this.age >= this.maxAge) {
+      if (this.layer + 1 < maxNodeLayers) {
+        let seed = Math.floor(Math.random() * 3);
+        switch (seed) {
+          case 0:
+            nodeArray.push(new node(this.x, this.y, this.angle + (nodeSplitAngle * coin()), this.velocity * 0.9, rainbowSplits ? undefined : this.color, this.layer + (Math.random() * 5 < 1 ? 2 : 1), texturedBranches ? this.hue : undefined));
+          break;
+          case 1:
+            let s1 = randSign0();
+            let s2 = randSign0();
+            while (s2 == s1) s2 = randSign0();
+            nodeArray.push(new node(this.x, this.y, this.angle + (nodeSplitAngle * s1), this.velocity * 0.9, rainbowSplits ? undefined : this.color, this.layer + (Math.random() * 5 < 1 ? 2 : 1), rainbowSplits ? undefined : this.hue));
+            nodeArray.push(new node(this.x, this.y, this.angle + (nodeSplitAngle * s2), this.velocity * 0.9, rainbowSplits ? undefined : this.color, this.layer + (Math.random() * 5 < 1 ? 2 : 1), rainbowSplits ? undefined : this.hue));
+          break;
+          case 2:
+            nodeArray.push(new node(this.x, this.y, this.angle - nodeSplitAngle, this.velocity * 0.9, rainbowSplits ? undefined : this.color, this.layer + (Math.random() * 5 < 1 ? 2 : 1), rainbowSplits ? undefined : this.hue));
+            nodeArray.push(new node(this.x, this.y, this.angle, this.velocity * 0.9, rainbowSplits ? undefined : this.color, this.layer + (Math.random() * 5 < 1 ? 2 : 1), rainbowSplits ? undefined : this.hue));
+            nodeArray.push(new node(this.x, this.y, this.angle + nodeSplitAngle, this.velocity * 0.9, rainbowSplits ? undefined : this.color, this.layer + (Math.random() * 5 < 1 ? 2 : 1), rainbowSplits ? undefined : this.hue));
+          break;
+        }
+      }
+      this.dead = true;
+    }
+    
+    this.age++;
+    ctx.lineWidth = this.size;
+    ctx.strokeStyle = texturedBranches ? `hsl(${this.hue}deg, 100%, ${randBetween(10, 90)}%)` : this.color;
+    ctx.lineBetween(this.x, this.y, this.lx, this.ly);
+    ctx.stroke();
+    this.lx = this.x;
+    this.ly = this.y;
+  };
+  let nodeArray = [];
+  
+  
+  
+  function frame() {
+    for (let i = 0; i < nodeArray.length; i++) {
+      nodeArray[i].render();
+      if (nodeArray[i].dead) {
+        nodeArray.splice(i, 1);
+        i--;
+      }
+    }
+    nodestxt.innerHTML = nodeArray.length;
+    requestAnimationFrame(frame);
+  }
+  
+  function init() {
+    nodeArray = [];
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    nodeArray.push(new node(canvas.width / 2, canvas.height / 2));
+    presetselect.value = "0";
+    frame();
+  }
+  
+  function coin() {
+    return Math.round(Math.random()) == 0 ? 1 : -1;
+  }
+  function randSign0() {
+    let s = Math.round(Math.random() * 3)
+    return s == 0 ? -1 : s == 1 ? 0 : 1;
+  }
+  
+  function choosePreset(preset) {
+    switch (preset) {
+      case 1: // Broom
+        nodeSize = 1;
+        nodeVelocity = 5;
+        nodeSplitAge = 10;
+        nodeSplitAngle = 5;
+        maxNodeLayers = 15;
+        nodeDrift = 0;
+        smoothDrifting = true;
+      break;
+      case 2: // Plaid
+        nodeSize = 6;
+        nodeVelocity = 25;
+        nodeSplitAge = 500;
+        nodeSplitAngle = 90;
+        maxNodeLayers = 6;
+        nodeDrift = 0;
+        smoothDrifting = true;
+      break;
+      case 3: // Geometric Tree
+        nodeSize = 6;
+        nodeVelocity = 15;
+        nodeSplitAge = 5;
+        nodeSplitAngle = 30;
+        maxNodeLayers = 15;
+        nodeDrift = 0;
+        smoothDrifting = true;
+      break;
+      case 4: // Squares
+        nodeSize = 6;
+        nodeVelocity = 25;
+        nodeSplitAge = 200;
+        nodeSplitAngle = 90;
+        maxNodeLayers = 8;
+        nodeDrift = 90;
+        smoothDrifting = false;
+      break;
+      case 5: // Tree
+        nodeSize = 20;
+        nodeVelocity = 9;
+        nodeSplitAge = 10;
+        nodeSplitAngle = 20;
+        maxNodeLayers = 10;
+        nodeDrift = 10;
+        smoothDrifting = true;
+      break;
+      case 6: // Mini Tree
+        nodeSize = 5;
+        nodeVelocity = 5;
+        nodeSplitAge = 5;
+        nodeSplitAngle = 20;
+        maxNodeLayers = 10;
+        nodeDrift = 10;
+        smoothDrifting = true;
+      break;
+      case 7: // Doodle
+        nodeSize = 3;
+        nodeVelocity = 10;
+        nodeSplitAge = 500;
+        nodeSplitAngle = 0;
+        maxNodeLayers = 1;
+        nodeDrift = 180;
+        smoothDrifting = true;
+      break;
+      case 8: // Gnarled Roots
+        nodeSize = 3;
+        nodeVelocity = 7;
+        nodeSplitAge = 10;
+        nodeSplitAngle = 45;
+        maxNodeLayers = 10;
+        nodeDrift = 80;
+        smoothDrifting = true;
+      break;
+      case 9: // Hexagons
+        nodeSize = 6;
+        nodeVelocity = 25;
+        nodeSplitAge = 200;
+        nodeSplitAngle = 60;
+        maxNodeLayers = 8;
+        nodeDrift = 60;
+        smoothDrifting = false;
+      break;
+      case 10: // Triangles
+        nodeSize = 6;
+        nodeVelocity = 25;
+        nodeSplitAge = 200;
+        nodeSplitAngle = 120;
+        maxNodeLayers = 8;
+        nodeDrift = 120;
+        smoothDrifting = false;
+      break;
+      case 11: // Fur
+        nodeSize = 1;
+        nodeVelocity = 15;
+        nodeSplitAge = 10;
+        nodeSplitAngle = 175;
+        maxNodeLayers = 13;
+        nodeDrift = 0;
+        smoothDrifting = true;
+      break;
+    }
+    nodesizetxt.innerHTML = nodesizerange.value = nodeSize;
+    nodevelocitytxt.innerHTML = nodevelocityrange.value = nodeVelocity;
+    nodesplitagetxt.innerHTML = nodesplitagerange.value = nodeSplitAge;
+    nodesplitangletxt.innerHTML = nodesplitanglerange.value = nodeSplitAngle;
+    maxnodelayerstxt.innerHTML = maxnodelayersrange.value = maxNodeLayers;
+    if (maxNodeLayers == 1) pluraltxt.innerHTML = "";
+    else pluraltxt.innerHTML = "s";
+    nodedrifttxt.innerHTML = nodedriftrange.value = nodeDrift;
+    smoothdriftingbox.checked = smoothDrifting;
+    presetselect.value = preset;
+  }
+  
+  function randomizeSettings() {
+    nodeSize = Math.round(randBetween(1, 20));
+    nodeVelocity = Math.round(randBetween(1, 25));
+    nodeSplitAge = (randBetween(0, 500)).toMultipleOf(5);
+    nodeSplitAngle = Math.round(randBetween(0, 180));
+    maxNodeLayers = Math.round(randBetween(1, 15));
+    nodeDrift = Math.round(randBetween(0, 180));
+    
+    nodesizetxt.innerHTML = nodesizerange.value = nodeSize;
+    nodevelocitytxt.innerHTML = nodevelocityrange.value = nodeVelocity;
+    nodesplitagetxt.innerHTML = nodesplitagerange.value = nodeSplitAge;
+    nodesplitangletxt.innerHTML = nodesplitanglerange.value = nodeSplitAngle;
+    maxnodelayerstxt.innerHTML = maxnodelayersrange.value = maxNodeLayers;
+    if (maxNodeLayers == 1) pluraltxt.innerHTML = "";
+    else pluraltxt.innerHTML = "s";
+    nodedrifttxt.innerHTML = nodedriftrange.value = nodeDrift;
+    choosePreset(0);
+  }
+  
+  function exportCanvas() {
+    let win = window.open();
+    win.document.write("<title>Canvas</title><img src = '" + canvas.toDataURL() + "'style = 'position: absolute; top: 0; left: 0; height:100%'>");
+  }
+  
+  function clickHandler(e) {
+    nodeArray = [];
+    nodeArray.push(new node(e.clientX, e.clientY));
+  }
+  canvas.addEventListener("mousedown", clickHandler);
+  
+  CanvasRenderingContext2D.prototype.lineBetween = function(x1, y1, x2, y2) {
+    this.beginPath();
+    this.moveTo(x1, y1);
+    this.lineTo(x2, y2);
+  };
+</script>
+</body>
+</html>
