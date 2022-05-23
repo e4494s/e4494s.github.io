@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>Tiles ~ e4494s</title>
+    <style>
+      .inactive-tile-img, .active-tile-img {
+        width: 30px;
+        height: 30px;
+        display: inline-block;
+        cursor: pointer;
+        margin: 10px;
+        border: 2px solid black;
+      }
+      .inactive-tile-img {
+        opacity: 50%;
+      }
+      
+      .active-tile-img {
+        opacity: 100%;
+      }
+      
+      #palette-presets-div {
+        width: 250px;
+      }
+    </style>
+  </head>
+<body onload = "init()">
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; Tiles &mdash;&mdash;</h1>
+<p id = "how-it-works"><b><i>How It Works:</i></b> A grid filled randomly with the selected tiles will be generated, with random tile orientations and colors.<br><br>Click the tiles under <span class = "setting">Selected Tiles</span> to toggle which tiles will be used.</p>
+<hr>
+<div><b>Tile Presets:</b></div>
+<div id = "presets-div"></div>
+<hr>
+<table>
+  <tr valign = "top">
+    <td rowspan = "2">
+      <button onclick = "drawTiles()">Redraw</button>
+      <br><br>
+      <canvas id = "canvas">If you're seeing this text, your browser does not support the canvas element.</canvas>
+      <br>
+      <button class = "download-canvas-btn" onclick = "downloadCanvas()">Download Canvas</button>
+    </td>
+    <td>
+      <button onclick = "selectAllTiles()">Select All Tiles</button>
+      <br><br>
+      <button onclick = "deselectAllTiles()">Deselect All Tiles</button>
+      <br><br>
+      <button onclick = "selectRandomTiles()">Select Random Tiles</button>
+      <hr>
+      <div><b><u>Selected Tiles:</u></b></div>
+      <div id = "tiles-div"></div>
+    </td>
+    <td>
+      <div><b><u>Grid Size:</u></b> <span id = "grid-size-txt">10&times;10</span></div>
+      <input type = "range" min = "1" max = "20" step = "1" value = "10" id = "grid-size-range" oninput = "updateSettings()">
+      <hr>
+      <div><b><u>Outline Thickness:</u></b> <span id = "line-width-txt">3</span>%</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "3" id = "line-width-range" oninput = "updateSettings()">
+      <br><br>
+      <label for = "white-outline-checkbox"><b><u>White Outline:</u></b></label>
+      <input type = "checkbox" id = "white-outline-checkbox" oninput = "updateSettings()">
+      <hr>
+      <div><b><u>Color Palette:</u></b></div>
+      <div id = "palette-presets-div"></div>
+    </td>
+  </tr>
+</table>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 1000;
+  
+  let presetsDiv = document.getElementById("presets-div");
+  let palettePresetsDiv = document.getElementById("palette-presets-div");
+  let tilesDiv = document.getElementById("tiles-div");
+  let gridSizeTxt = document.getElementById("grid-size-txt");
+  let gridSizeRange = document.getElementById("grid-size-range");
+  let lineWidthTxt = document.getElementById("line-width-txt");
+  let lineWidthRange = document.getElementById("line-width-range");
+  let whiteOutlineCheckbox = document.getElementById("white-outline-checkbox");
+  
+  let lightBlue = "rgb(120, 120, 255)";
+  let lightRed = "rgb(255, 50, 50)";
+  let lightGreen = "rgb(51, 255, 51)";
+  
+  let palette = ["yellow", "pink", "rgb(120, 120, 255)", "rgb(255, 50, 50)", "white"];
+  let palettePresets = [
+    {
+      name: "Default",
+      colors: ["yellow", "pink", lightBlue, lightRed, "white"]
+    },
+    {
+      name: "Warm",
+      colors: ["red", "orange", "yellow", "hsl(0deg, 0%, 10%)"]
+    },
+    {
+      name: "Cool",
+      colors: [lightGreen, "green", lightBlue, "blue", "purple", "white"]
+    },
+    {
+      name: "Grayscale",
+      colors: ["hsl(0deg, 0%, 0%)", "hsl(0deg, 0%, 12.5%)", "hsl(0deg, 0%, 25%)", "hsl(0deg, 0%, 37.5%)", "hsl(0deg, 0%, 50%)", "hsl(0deg, 0%, 62.5%)", "hsl(0deg, 0%, 75%)", "hsl(0deg, 0%, 87.5%)", "hsl(0deg, 0%, 100%)"]
+    },
+    {
+      name: "Black and White",
+      colors: ["black", "white"]
+    },
+    {
+      name: "Rainbow",
+      colors: [lightRed, "orange", "yellow", "green", "blue", "purple"]
+      //colors: ["hsl(0deg, 100%, 60%)", "hsl(30deg, 100%, 50%)", "hsl(60deg, 100%, 50%)", "hsl(90deg, 100%, 40%)", "hsl(120deg, 100%, 30%)", "hsl(150deg, 100%, 30%)", "hsl(180deg, 100%, 30%)", "hsl(210deg, 100%, 40%)", "hsl(240deg, 100%, 60%)", "hsl(270deg, 100%, 50%)", "hsl(300deg, 100%, 60%)", "hsl(330deg, 100%, 50%)"]
+    }
+  ];
+  function shufflePalette() {
+    let result = [];
+    while (palette.length > 0) result.push(palette.splice(Math.floor(Math.random() * palette.length), 1));
+    palette = result.flat(1);
+  }
+  
+  let gridSize = 10;
+  let tileSize = canvas.width / gridSize;
+  let lineWidth = 3;
+  let numTiles = 16;
+  let whiteOutline = false;
+  
+  let selectedTiles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+  let tileNames = ["Full Square", "Half Rectangle", "Diagonal Triangle", "Small Circle", "Full Circle", "Half Circle", "Quarter Circle", "Double Quarter Circle", "Ring", "Double Half Circle", "Stripe", "Small Square", "Diamond", "Cross", "Side Triangle", "Double Side Triangle"];
+  // 1: Filled | 2: Half | 3: Diagonal | 4: Small circle | 5: Full circle | 6: Half circle | 7: Quarter circle | 8: Double quarter circle | 9: Ring
+  // 10: Double half circle | 11: Stripe | 12: Small square | 13: Diamond | 14: Cross | 15: Side triangle | 16: Double side triangle
+  
+  function selectTile(n) {
+    if (!selectedTiles.includes(n)) selectedTiles.push(n);
+    document.getElementById(`tile-img-${n}`).className = "active-tile-img";
+    
+    drawTiles();
+  }
+  function deselectTile(n) {
+    if (selectedTiles.includes(n)) selectedTiles.splice(selectedTiles.indexOf(n), 1);
+    document.getElementById(`tile-img-${n}`).className = "inactive-tile-img";
+    
+    drawTiles();
+  }
+  function toggleTile(n) {
+    let img = document.getElementById(`tile-img-${n}`);
+    if (img.className === "active-tile-img") deselectTile(n);
+    else selectTile(n);
+  }
+  function deselectAllTiles() {
+    selectedTiles = [];
+    updateSettings();
+  }
+  function selectAllTiles() {
+    selectedTiles = [];
+    for (let i = 1; i <= numTiles; i++) selectedTiles.push(i);
+    updateSettings();
+  }
+  function selectRandomTiles() {
+    selectedTiles = [];
+    for (let i = 1; i <= numTiles; i++) {
+      if (Math.random() >= 0.5) selectedTiles.push(i);
+    }
+    updateSettings();
+  }
+  let presets = [
+    {
+      name: "Triangular",
+      tiles: [3, 15, 16]
+    },
+    {
+      name: "Rectangular",
+      tiles: [1, 2, 11, 12]
+    },
+    {
+      name: "Circular",
+      tiles: [6, 7, 8, 10]
+    },
+    {
+      name: "Simplistic",
+      tiles: [1, 4, 12]
+    }
+  ];
+  
+  function loadPreset(n) {
+    selectedTiles = [];
+    for (let i = 0; i < presets[n].tiles.length; i++) {
+      selectedTiles.push(presets[n].tiles[i]);
+    }
+    
+    updateSettings();
+  }
+  function loadPalettePreset(n) {
+    for (let i = 0; i < palettePresets.length; i++) {
+      document.getElementById(`palette-preset-btn-${i}`).style.backgroundColor = "";
+    }
+    document.getElementById(`palette-preset-btn-${n}`).style.backgroundColor = "#ffbf66"; // Medium light accent color
+    
+    palette = [];
+    for (let i = 0; i < palettePresets[n].colors.length; i++) {
+      palette.push(palettePresets[n].colors[i]);
+    }
+    
+    updateSettings();
+  }
+  
+  function drawOneTile(x, y, size) {
+    let n = selectedTiles[Math.floor(Math.random() * selectedTiles.length)]; // Get tile type
+    
+    shufflePalette(); // Get colors
+    let color1 = palette[0];
+    let color2 = palette[1];
+    
+    ctx.fillStyle = color1;
+    ctx.fillRect(x, y, size, size);
+    
+    ctx.fillStyle = color2;
+    ctx.lineWidth = lineWidth * (tileSize / 100);
+    ctx.strokeStyle = whiteOutline ? "white" : "black";
+    ctx.lineCap = ctx.lineJoin = "round";
+    let stroke = lineWidth !== 0;
+    
+    
+    if (n === 2) { // Half
+      if (Math.random() >= 0.5) { // Horizontal
+        ctx.fillRect(x, y, size, size / 2);
+        if (stroke) ctx.strokeRect(x, y, size, size / 2);
+      }
+      else { // Vertical
+        ctx.fillRect(x, y, size / 2, size);
+        if (stroke) ctx.strokeRect(x, y, size / 2, size);
+      }
+    }
+    
+    else if (n === 3) { // Diagonal
+      if (Math.random() >= 0.5) { // Top left
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + size, y);
+        ctx.lineTo(x, y + size);
+        ctx.lineTo(x, y);
+        ctx.fill();
+        if (stroke) ctx.stroke();
+      }
+      else { // Bottom left
+        ctx.beginPath();
+        ctx.moveTo(x, y + size);
+        ctx.lineTo(x + size, y + size);
+        ctx.lineTo(x, y);
+        ctx.lineTo(x, y + size);
+        ctx.fill();
+        if (stroke) ctx.stroke();
+      }
+    }
+    
+    else if (n === 4) { // Small circle
+      ctx.fillCircle(x + (size / 2), y + (size / 2), size / 4);
+      if (stroke) ctx.strokeCircle(x + (size / 2), y + (size / 2), size / 4);
+    }
+    
+    else if (n === 5) { // Full circle
+      ctx.fillCircle(x + (size / 2), y + (size / 2), size / 2);
+      if (stroke) ctx.strokeCircle(x + (size / 2), y + (size / 2), size / 2);
+    }
+    
+    else if (n === 6) { // Half circle
+      let side = Math.floor(Math.random() * 4);
+      if (side === 0) { // Top
+        ctx.beginPath();
+        ctx.arc(x + (size / 2), y, size / 2, 0, Math.PI);
+        ctx.fill();
+        if (stroke) ctx.stroke();
+      }
+      else if (side === 1) { // Right
+        ctx.beginPath();
+        ctx.arc(x + size, y + (size / 2), size / 2, Math.PI / 2, (3 * Math.PI) / 2);
+        ctx.fill();
+        if (stroke) ctx.stroke();
+      }
+      else if (side === 2) { // Bottom
+        ctx.beginPath();
+        ctx.arc(x + (size / 2), y + size, size / 2, 0, Math.PI, true);
+        ctx.fill();
+        if (stroke) ctx.stroke();
+      }
+      else if (side === 3) { // Left
+        ctx.beginPath();
+        ctx.arc(x, y + (size / 2), size / 2, Math.PI / 2, (3 * Math.PI) / 2, true);
+        ctx.fill();
+        if (stroke) ctx.stroke();
+      }
+    }
+    
+    else if (n === 7) { // Quarter circle
+      let side = Math.floor(Math.random() * 4);
+      if (side === 0) { // Top right
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + size, y);
+        ctx.lineTo(x + size, y + size);
+        ctx.arc(x + size, y, size, Math.PI / 2, Math.PI);
+        ctx.fill();
+        if (stroke) {
+          ctx.beginPath();
+          ctx.arc(x + size, y, size, Math.PI / 2, Math.PI);
+          ctx.stroke();
+        }
+      }
+      else if (side === 1) { // Bottom right
+        ctx.beginPath();
+        ctx.moveTo(x, y + size);
+        ctx.lineTo(x + size, y + size);
+        ctx.lineTo(x + size, y);
+        ctx.arc(x + size, y + size, size, (3 * Math.PI) / 2, Math.PI, true);
+        ctx.fill();
+        if (stroke) {
+          ctx.beginPath();
+          ctx.arc(x + size, y + size, size, (3 * Math.PI) / 2, Math.PI, true);
+          ctx.stroke();
+        }
+      }
+      else if (side === 2) { // Bottom left
+        ctx.beginPath();
+        ctx.moveTo(x + size, y + size);
+        ctx.lineTo(x, y + size);
+        ctx.lineTo(x, y);
+        ctx.arc(x, y + size, size, 0, (3 * Math.PI) / 2, true);
+        ctx.fill();
+        if (stroke) {
+          ctx.beginPath();
+          ctx.arc(x, y + size, size, 0, (3 * Math.PI) / 2, true);
+          ctx.stroke();
+        }
+      }
+      else if (side === 3) { // Top left
+        ctx.beginPath();
+        ctx.moveTo(x + size, y);
+        ctx.lineTo(x, y);
+        ctx.lineTo(x, y + size);
+        ctx.arc(x, y, size, 0, Math.PI / 2);
+        ctx.fill();
+        if (stroke) {
+          ctx.beginPath();
+          ctx.arc(x, y, size, 0, Math.PI / 2);
+          ctx.stroke();
+        }
+      }
+    }
+    
+    else if (n === 8) { // Double quarter circle
+      if (Math.random() >= 0.5) { // Top left and bottom right
+        ctx.beginPath(); // Top left
+        ctx.moveTo(x + (size / 2), y);
+        ctx.lineTo(x, y);
+        ctx.lineTo(x, y + (size / 2));
+        ctx.arc(x, y, size / 2, 0, Math.PI / 2);
+        ctx.fill();
+        if (stroke) {
+          ctx.beginPath();
+          ctx.arc(x, y, size / 2, 0, Math.PI / 2);
+          ctx.stroke();
+        }
+        
+        ctx.beginPath(); // Bottom right
+        ctx.moveTo(x + (size / 2), y + size);
+        ctx.lineTo(x + size, y + size);
+        ctx.lineTo(x + size, y + (size / 2));
+        ctx.arc(x + size, y + size, size / 2, (3 * Math.PI) / 2, Math.PI, true);
+        ctx.fill();
+        if (stroke) {
+          ctx.beginPath();
+          ctx.arc(x + size, y + size, size / 2, (3 * Math.PI) / 2, Math.PI, true);
+          ctx.stroke();
+        }
+      }
+      else { // Top right and bottom left
+        ctx.beginPath(); // Top right
+        ctx.moveTo(x + (size / 2), y);
+        ctx.lineTo(x + size, y);
+        ctx.lineTo(x + size, y + (size / 2));
+        ctx.arc(x + size, y, size / 2, Math.PI / 2, Math.PI);
+        ctx.fill();
+        if (stroke) {
+          ctx.beginPath();
+          ctx.arc(x + size, y, size / 2, Math.PI / 2, Math.PI);
+          ctx.stroke();
+        }
+        
+        ctx.beginPath(); // Bottom left
+        ctx.moveTo(x + (size / 2), y + size);
+        ctx.lineTo(x, y + size);
+        ctx.lineTo(x, y + (size / 2));
+        ctx.arc(x, y + size, size / 2, 0, (3 * Math.PI) / 2, true);
+        ctx.fill();
+        if (stroke) {
+          ctx.beginPath();
+          ctx.arc(x, y + size, size / 2, 0, (3 * Math.PI) / 2, true);
+          ctx.stroke();
+        }
+      }
+    }
+    
+    else if (n === 9) { // Ring
+      ctx.fillStyle = color2;
+      ctx.fillCircle(x + (size / 2), y + (size / 2), size / 2);
+      if (stroke) ctx.strokeCircle(x + (size / 2), y + (size / 2), size / 2);
+      ctx.fillStyle = color1;
+      ctx.fillCircle(x + (size / 2), y + (size / 2), size / 4);
+      if (stroke) ctx.strokeCircle(x + (size / 2), y + (size / 2), size / 4);
+      ctx.fillStyle = color2;
+    }
+    
+    else if (n === 10) { // Double half circle
+      if (Math.random() >= 0.5) { // Left and right
+        ctx.beginPath(); // Left
+        ctx.arc(x, y + (size / 2), size / 2, Math.PI / 2, (3 * Math.PI) / 2, true);
+        ctx.fill();
+        if (stroke) ctx.stroke();
+        
+        ctx.beginPath(); // Right
+        ctx.arc(x + size, y + (size / 2), size / 2, Math.PI / 2, (3 * Math.PI) / 2);
+        ctx.fill();
+        if (stroke) ctx.stroke();
+      }
+      else { // Top and bottom
+        ctx.beginPath(); // Top
+        ctx.arc(x + (size / 2), y, size / 2, 0, Math.PI);
+        ctx.fill();
+        if (stroke) ctx.stroke();
+        
+        ctx.beginPath(); // Bottom
+        ctx.arc(x + (size / 2), y + size, size / 2, 0, Math.PI, true);
+        ctx.fill();
+        if (stroke) ctx.stroke();
+      }
+    }
+    
+    else if (n === 11) { // Stripe
+      if (Math.random() >= 0.5) { // Horizontal
+        ctx.fillRect(x, y + (size / 4), size, size / 2);
+        if (stroke) ctx.strokeRect(x, y + (size / 4), size, size / 2);
+      }
+      else { // Vertical
+        ctx.fillRect(x + (size / 4), y, size / 2, size);
+        if (stroke) ctx.strokeRect(x + (size / 4), y, size / 2, size);
+      }
+    }
+    
+    else if (n === 12) { // Small square
+      ctx.fillRect(x + (size / 4), y + (size / 4), size / 2, size / 2);
+      if (stroke) ctx.strokeRect(x + (size / 4), y + (size / 4), size / 2, size / 2);
+    }
+    
+    else if (n === 13) { // Diamond
+      ctx.beginPath();
+      ctx.moveTo(x + (size / 2), y);
+      ctx.lineTo(x + size, y + (size / 2));
+      ctx.lineTo(x + (size / 2), y + size);
+      ctx.lineTo(x, y + (size / 2));
+      ctx.lineTo(x + (size / 2), y);
+      ctx.fill();
+      if (stroke) ctx.stroke();
+    }
+    
+    else if (n === 14) { // Cross
+      ctx.beginPath();
+      ctx.moveTo(x + (size / 4), y);
+      ctx.lineTo(x + (size * 0.75), y);
+      ctx.lineTo(x + (size * 0.75), y + (size / 4));
+      ctx.lineTo(x + size, y + (size / 4));
+      ctx.lineTo(x + size, y + (size * 0.75));
+      ctx.lineTo(x + (size * 0.75), y + (size * 0.75));
+      ctx.lineTo(x + (size * 0.75), y + size);
+      ctx.lineTo(x + (size / 4), y + size);
+      ctx.lineTo(x + (size / 4), y + (size * 0.75));
+      ctx.lineTo(x, y + (size * 0.75));
+      ctx.lineTo(x, y + (size / 4));
+      ctx.lineTo(x + (size / 4), y + (size / 4));
+      ctx.lineTo(x + (size / 4), y);
+      ctx.fill();
+      if (stroke) ctx.stroke();
+    }
+    
+    else if (n === 15) { // Side triangle
+      let side = Math.floor(Math.random() * 4);
+      if (side === 0) { // Top
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + (size / 2), y + (size / 2));
+        ctx.lineTo(x + size, y);
+        ctx.lineTo(x, y);
+        ctx.fill();
+        if (stroke) ctx.stroke();
+      }
+      else if (side === 1) { // Right
+        ctx.beginPath();
+        ctx.moveTo(x + size, y);
+        ctx.lineTo(x + (size / 2), y + (size / 2));
+        ctx.lineTo(x + size, y + size);
+        ctx.lineTo(x + size, y);
+        ctx.fill();
+        if (stroke) ctx.stroke();
+      }
+      else if (side === 2) { // Bottom
+        ctx.beginPath();
+        ctx.moveTo(x, y + size);
+        ctx.lineTo(x + (size / 2), y + (size / 2));
+        ctx.lineTo(x + size, y + size);
+        ctx.lineTo(x, y + size);
+        ctx.fill();
+        if (stroke) ctx.stroke();
+      }
+      else if (side === 3) { // Left
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + (size / 2), y + (size / 2));
+        ctx.lineTo(x, y + size);
+        ctx.lineTo(x, y);
+        ctx.fill();
+        if (stroke) ctx.stroke();
+      }
+    }
+    
+    else if (n === 16) {
+      ctx.beginPath(); // Top
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (size / 2), y + (size / 2));
+      ctx.lineTo(x + size, y);
+      ctx.lineTo(x, y);
+      ctx.fill();
+      if (stroke) ctx.stroke();
+      
+      ctx.beginPath(); // Bottom
+      ctx.moveTo(x, y + size);
+      ctx.lineTo(x + (size / 2), y + (size / 2));
+      ctx.lineTo(x + size, y + size);
+      ctx.lineTo(x, y + size);
+      ctx.fill();
+      if (stroke) ctx.stroke();
+    }
+    
+    if (stroke) ctx.strokeRect(x, y, size, size);
+  }
+  
+  function drawTiles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    tileSize = canvas.width / gridSize;
+    
+    for (let x = 0; x < gridSize; x++) {
+      for (let y = 0; y < gridSize; y++) {
+        drawOneTile(x * tileSize, y * tileSize, tileSize);
+      }
+    }
+  }
+  
+  function updateSettings() {
+    gridSize = Number(gridSizeRange.value);
+    gridSizeTxt.innerHTML = `${gridSize}&times;${gridSize}`;
+    lineWidth = lineWidthTxt.innerHTML = Number(lineWidthRange.value);
+    whiteOutline = whiteOutlineCheckbox.checked;
+    
+    canvas.width = canvas.height = gridSize * Math.round(1000 / gridSize);
+    
+    for (let i = 1; i <= numTiles; i++) {
+      document.getElementById(`tile-img-${i}`).className = selectedTiles.includes(i) ? "active-tile-img" : "inactive-tile-img";
+    }
+    
+    drawTiles();
+  }
+  
+  function downloadCanvas() {
+    let link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "tiles.png";
+    link.click();
+  }
+  
+  function init() {
+    // Generate preset buttons
+    for (let i = 0; i < presets.length; i++) {
+      let btn = document.createElement("button");
+      btn.innerHTML = presets[i].name;
+      btn.className = "preset-btn";
+      btn.onclick = () => loadPreset(i);
+      presetsDiv.appendChild(btn);
+    }
+    
+    // Generate color palette preset buttons
+    for (let i = 0; i < palettePresets.length; i++) {
+      let btn = document.createElement("button");
+      btn.innerHTML = palettePresets[i].name;
+      btn.className = "preset-btn";
+      btn.id = `palette-preset-btn-${i}`;
+      btn.onclick = () => loadPalettePreset(i);
+      palettePresetsDiv.appendChild(btn);
+    }
+    
+    // Generate tile buttons
+    for (let i = 1; i <= numTiles; i++) {
+      let img = document.createElement("img");
+      img.className = "active-tile-img";
+      img.src = `images/tiles/tile-${i}.png`;
+      img.id = `tile-img-${i}`;
+      img.title = tileNames[i - 1];
+      img.onclick = () => toggleTile(i);
+      tilesDiv.appendChild(img);
+      
+      if (i % 4 === 0) {
+        let br = document.createElement("br");
+        tilesDiv.appendChild(br);
+      }
+    }
+    
+    loadPalettePreset(0);
+    selectRandomTiles();
+  }
+</script>
+</body>
+</html>
