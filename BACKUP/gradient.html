@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png"/>
+    <title>Gradient ~ e4494s</title>
+    <style>
+      :root {
+        --grad: linear-gradient(90deg, black, white);
+      }
+      
+      html, body, button, input {
+        font-family: monospace;
+      }
+      
+      table, th, td {
+        /*border: 1px solid black;*/
+        vertical-align: top;
+      }
+      
+      #gradient {
+        width: 400px;
+        height: 400px;
+        background: var(--grad);
+      }
+      
+      button {
+        border: 2px solid black;
+        border-radius: 0;
+        background-color: white;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      button:focus, input:focus {
+        outline: none;
+      }
+      button:hover {
+        background-color: lightgray;
+      }
+      
+      .colorstop {
+        display: block;
+      }
+      .colorstop input[type = text] {
+        border: 5px solid black;
+        border-radius: 0;
+        width: 120px;
+      }
+      .colorstop input + button {
+        color: red;
+        border: 3px solid red;
+        font-weight: bold;
+        border-radius: 5px;
+      }
+      .colorstop input + button:hover {
+        background-color: rgba(255, 0, 0, 0.25);
+      }
+      .colorstop button {
+        border: 2px solid black;
+        background-color: white;
+        border-radius: 15px;
+        cursor: pointer;
+        font-weight: bold;
+        margin-left: 5px;
+        margin-top: 5px;
+      }
+      .colorstop button:hover {
+        background-color: lightgray;
+      }
+      
+      textarea {
+        resize: none;
+        border: 1px solid black;
+        border-radius: 0;
+        width: 200px;
+        height: 50px;
+      }
+    </style>
+  </head>
+<body>
+<h1>Color Gradient Generator</h1>
+<table>
+  <tr>
+    <td>
+      <div id = "gradient"></div>
+    </td>
+    <td style = "padding-right: 10px">
+      <div><b><u>Color Stops:</u></b> <span id = "colorstopstxt">2</span></div>
+      <br>
+      <button onclick = "addColorStop()">Add Color Stop</button>
+      <button onclick = "randomizeColorStops()">Randomize Color Stops</button>
+      <div id = "colorstopbox">
+        <div class = "colorstop">
+          <input type = "text" value = "black" onchange = "updateColorStops()"><button onclick = "removeColorStop(this.parentNode)">X</button><button onclick = "this.parentNode.children[0].value = randColor(); updateColorStops()">Randomize</button>
+        </div>
+        <div class = "colorstop">
+          <input type = "text" value = "white" onchange = "updateColorStops()" style = "border: 5px solid white"><button onclick = "removeColorStop(this.parentNode)">X</button><button onclick = "this.parentNode.children[0].value = randColor(); updateColorStops()">Randomize</button>
+        </div>
+      </div>
+      <br>
+      <div><b><u>Gradient Angle:</u></b> <span id = "angletxt">90</span>&deg;</div>
+      <input type = "range" min = "0" max = "360" value = "90" step = "1" oninput = "angle = this.value; updateColorStops()">
+    </td>
+    <td style = "padding-left: 10px">
+      <label for = "radialbox"><b><u>Radial Gradient:</u></b> </label><input type = "checkbox" id = "radialbox" onchange = "updateColorStops()">
+      <br><br>
+      <div><b><u>Radial Gradient Shape:</u></b></div>
+      <input type = "radio" name = "shape" id = "ellipseradio" onchange = "updateColorStops()" CHECKED>
+      <label for = "ellipseradio">Ellipse</label>
+      <br>
+      <input type = "radio" name = "shape" id = "circleradio" onchange = "updateColorStops()">
+      <label for = "circleradio">Circle</label>
+      <br><br>
+      <div><b><u>Radial Gradient End:</u></b></div>
+      <input type = "radio" name = "end" id = "closest_sideradio" onchange = "updateColorStops()" CHECKED>
+      <label for = "closest_sideradio">Closest Side</label>
+      <br>
+      <input type = "radio" name = "end" id = "closest_cornerradio" onchange = "updateColorStops()">
+      <label for = "closest_cornerradio">Closest Corner</label>
+      <br>
+      <input type = "radio" name = "end" id = "farthest_sideradio" onchange = "updateColorStops()">
+      <label for = "farthest_sideradio">Farthest Side</label>
+      <br>
+      <input type = "radio" name = "end" id = "farthest_cornerradio" onchange = "updateColorStops()">
+      <label for = "farthest_cornerradio">Farthest Corner</label>
+      <br><br>
+      <div><b><u>Radial Gradient Position:</u></b> <span id = "positiontxt">(50, 50)</span></div>
+      <input type = "range" min = "0" max = "100" step = "1" oninput = "gx = this.value; updateColorStops()">
+      <input type = "range" min = "0" max = "100" step = "1" oninput = "gy = this.value; updateColorStops()">
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div><b><u>Gradient Width:</u></b> <span id = "widthtxt">400px</span></div>
+      <input type = "range" min = "10" max = "500" value = "400" step = "5" oninput = "gradient.style.width = this.value + 'px'; updateColorStops()">
+      <br>
+      <div><b><u>Gradient Height:</u></b> <span id = "heighttxt">400px</span></div>
+      <input type = "range" min = "10" max = "500" value = "400" step = "5" oninput = "gradient.style.height = this.value + 'px'; updateColorStops()">
+    </td>
+  </tr>
+</table>
+<br><br>
+<div><b><u>CSS Code Snippet:</u></b></div>
+<textarea id = "cssgradienttxt" spellcheck = "false">background: linear-gradient(90deg,black,white)</textarea>
+<script>
+  let root = document.documentElement.style;
+  let colorstop_class_list = document.getElementsByClassName("colorstop");
+  let angle = 90;
+  let gx = 50;
+  let gy = 50;
+  gradient.style.width = gradient.style.height = "400px";
+  
+  function colorStopsIndexOf(element) {
+    for (let i = 0; i < colorstop_class_list.length; i++) {
+      if (colorstop_class_list[i] == element) return i;
+    }
+  }
+  function addColorStop() {
+    let temp_div = document.createElement("div");
+    temp_div.className = "colorstop";
+    
+    let temp_input = document.createElement("input");
+    temp_input.type = "text";
+    temp_input.value = randBasicColor();
+    temp_input.onchange = () => updateColorStops();
+    temp_input.style.border = `5px solid ${temp_input.value}`;
+    
+    let temp_button1 = document.createElement("button");
+    temp_button1.onclick = () => removeColorStop(temp_div);
+    temp_button1.innerHTML = "X";
+    
+    let temp_button2 = document.createElement("button");
+    temp_button2.onclick = () => {
+      temp_input.value = randColor();
+      updateColorStops();
+    };
+    temp_button2.innerHTML = "Randomize";
+    
+    temp_div.appendChild(temp_input);
+    temp_div.appendChild(temp_button1);
+    temp_div.appendChild(temp_button2);
+    colorstopbox.appendChild(temp_div);
+    updateColorStops();
+  }
+  function removeColorStop(element) {
+    element.parentNode.removeChild(element);
+    updateColorStops();
+  }
+  function updateColorStops() {
+    let grad;
+    if (!radialbox.checked) grad = `linear-gradient(${angle}deg`;
+    else {
+      let grad_end;
+      if (closest_sideradio.checked) grad_end = "closest-side";
+      else if (closest_cornerradio.checked) grad_end = "closest-corner";
+      else if (farthest_sideradio.checked) grad_end = "farthest-side";
+      else if (farthest_cornerradio.checked) grad_end = "farthest-corner";
+      grad = `radial-gradient(${circleradio.checked ? "circle" : "ellipse"} ${grad_end} at ${gx}% ${gy}%`;
+    }
+    for (let i = 0; i < colorstop_class_list.length; i++) {
+      colorstop_class_list[i].children[0].style.border = `5px solid ${colorstop_class_list[i].children[0].value}`;
+      grad += `,${colorstop_class_list[i].children[0].value}`;
+    }
+    grad += ")";
+    if (colorstop_class_list.length == 1) grad = colorstop_class_list[0].children[0].value;
+    root.setProperty("--grad", grad);
+    colorstopstxt.innerHTML = colorstop_class_list.length;
+    angletxt.innerHTML = angle;
+    positiontxt.innerHTML = `(${gx}, ${gy})`;
+    widthtxt.innerHTML = gradient.style.width;
+    heighttxt.innerHTML = gradient.style.height;
+    cssgradienttxt.value = 'background: ' + grad;
+  }
+  function randomizeColorStops() {
+    for (let i = 0; i < colorstop_class_list.length; i++) {
+      colorstop_class_list[i].children[0].value = randColor();
+    }
+    updateColorStops();
+  }
+  
+  function randColor() {
+    return `rgb(${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})`;
+  }
+  
+  function randBasicColor() {
+    switch (Math.floor(Math.random() * 11)) {
+      case 0: return "red";
+      case 1: return "orange";
+      case 2: return "yellow";
+      case 3: return "green";
+      case 4: return "blue";
+      case 5: return "purple";
+      case 6: return "black";
+      case 7: return "dimgray";
+      case 8: return "gray";
+      case 9: return "lightgray";
+      case 10: return "white";
+    }
+  }
+</script>
+</body>
+</html>
+<!--<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png"/>
+    <title>Gradient ~ e4494s</title>
+    <style>
+      body {
+        font-family: Arial;
+      }
+      .header {
+        font-weight: 900;
+        font-size: 25px;
+      }
+      .window {
+        width: 500px;
+        height: 500px;
+        background-image: linear-gradient(to right, white, black);
+      }
+      td {
+        align-content: top;
+      }
+      button {
+        font-weight: 900;
+        cursor: pointer;
+        font-family: Arial;
+        font-size: 20px;
+        background-color: #ffffff;
+        transition: 0.2s;
+        border: 2px solid black;
+        border-radius: 0;
+      }
+      button:focus {
+        outline: none;
+      }
+      .colorcell {
+        width: 150px;
+        text-align: center;
+        display: inline-block;
+        padding-top: 5px;
+        padding-bottom: 5px;
+        background-color: white;
+      }
+      #directiontext {
+        height: 150px;
+      }
+      .directionbutton {
+        display: inline-block;
+        cursor: pointer;
+        height: 26px;
+        width: 26px;
+        background-color: #7a7a7a;
+        transition: 0.25s;
+      }
+      .active, .directionbutton:hover {
+        background-color: black;
+      }
+      button:hover {
+        background-color: #dedede;
+      }
+      #downloadbutton {
+        font-weight: 900;
+        cursor: pointer;
+        font-family: Arial;
+        color: black;
+        text-decoration: none;
+        border: 2px solid black;
+        transition: 0.15s;
+        background-color: rgba(0, 0, 255, 0.4);
+        padding-top: 1px;
+        padding-bottom: 3px;
+        padding-right: 3px;
+        padding-left: 3px;
+        font-size: 15px;
+        border-radius: 10px;
+      }
+      #downloadbutton:hover {
+        background-color: rgba(0, 0, 255, 0.75);
+      }
+    </style>
+  </head>
+<body>
+  <span class = 'header'>Generate Random Color Gradient</span>
+<table>
+  <tr valign = 'center'>
+    <td>
+      <div id = 'randomgradient_canvas' class = 'window'></div>
+    </td>
+    <td valign = 'top'>
+      <span><b><u>Colors:</u></b></span>
+      <br>
+      <span class = 'colorcell' id = 'rgb1'>rgb(255, 255, 255)</span>
+      <span class = 'colorcell' id = 'rgb2' style = 'color:white;background-color:black'>rgb(0, 0, 0)</span>
+      <br>
+      <div>
+        <button style = 'display:inline-block;width:150px' onclick = 'rgb1Randomize()'>Randomize</button>
+        <button style = 'display:inline-block;width:150px' onclick= 'rgb2Randomize()'>Randomize</button>
+      </div>
+      <br><br>
+      <span id = 'directiontext'><b><u>Direction:</u></b> Right</span>
+      <br>
+      <div id = 'buttonmenu'>
+        <div id = 'button1' class = 'directionbutton' onclick = 'changeDirection("Top left")'></div>
+        <div id = 'button2' class = 'directionbutton' onclick = 'changeDirection("Top")'></div>
+        <div id = 'button3' class = 'directionbutton' onclick = 'changeDirection("Top right")'></div>
+        <br>
+        <div id = 'button4' class = 'directionbutton' onclick = 'changeDirection("Left")'></div>
+        <div id = 'button5' class = 'directionbutton' onclick = 'changeToRadial()'></div>
+        <div id = 'button6' class = 'directionbutton active' onclick = 'changeDirection("Right")'></div>
+        <br>
+        <div id = 'button7' class = 'directionbutton' onclick = 'changeDirection("Bottom left")'></div>
+        <div id = 'button8' class = 'directionbutton' onclick = 'changeDirection("Bottom")'></div>
+        <div id = 'button9' class = 'directionbutton' onclick = 'changeDirection("Bottom right")'></div>
+      </div>
+      <br><br>
+      <span id = 'angletext'><b><u>Angle:</u></b> 45&#176;</span>
+      <br>
+      <input type = 'range' id = 'angleRange' min = '0' max = '360' step = '1'  value = '45' oninput = 'changeToAngle()'>
+      <br>
+      <br><br><br>
+      <button onclick = 'rgb1Randomize();rgb2Randomize()'>Randomize Colors</button>
+      <button onclick = 'randomizeAll()'>Randomize All</button>
+    </td>
+</table>
+<script>
+  let r1 = 255;
+  let g1 = 255;
+  let b1 = 255;
+  let r2 = 0;
+  let g2 = 0;
+  let b2 = 0;
+  let direction = 'right';
+  let type = 1;
+  let header = document.getElementById('buttonmenu');
+  let btns = header.getElementsByClassName('directionbutton');
+  for (let i = 0; i < btns.length; i++) {
+    btns[i].addEventListener('click', function() {
+      let current = document.getElementsByClassName('active');
+      current[0].className = current[0].className.replace(' active', '');
+      this.className += ' active';
+    });
+  }
+  function rgb1Randomize() {
+    r1 = Math.floor(Math.random() * 255);
+    g1 = Math.floor(Math.random() * 255);
+    b1 = Math.floor(Math.random() * 255);
+    if (type == 2) document.getElementById('randomgradient_canvas').style = `background-image:linear-gradient(${angleRange.value}deg, rgb(${r1}, ${g1}, ${b1}), rgb(${r2}, ${g2}, ${b2}))`;
+    if (type == 1) document.getElementById('randomgradient_canvas').style = `background-image:linear-gradient(to ${direction}, rgb(${r1}, ${g1}, ${b1}), rgb(${r2}, ${g2}, ${b2}))`;
+    if (type == 0) document.getElementById('randomgradient_canvas').style = `background-image:radial-gradient(rgb(${r1}, ${g1}, ${b1}), rgb(${r2}, ${g2}, ${b2}))`;
+    document.getElementById('rgb1').innerHTML = `rgb(${r1}, ${g1}, ${b1})`;
+    document.getElementById('rgb1').style = `background-color:rgb(${r1}, ${g1}, ${b1})`;
+    if (brightness(r1, g1, b1) > 130) document.getElementById('rgb1').style.color = 'black';
+    else document.getElementById('rgb1').style.color = 'white';
+  }
+  function rgb2Randomize() {
+    r2 = Math.floor(Math.random() * 255);
+    g2 = Math.floor(Math.random() * 255);
+    b2 = Math.floor(Math.random() * 255);
+    if (type == 2) document.getElementById('randomgradient_canvas').style = `background-image:linear-gradient(${angleRange.value}deg, rgb(${r1}, ${g1}, ${b1}), rgb(${r2}, ${g2}, ${b2}))`;
+    if (type == 1) document.getElementById('randomgradient_canvas').style = `background-image:linear-gradient(to ${direction}, rgb(${r1}, ${g1}, ${b1}), rgb(${r2}, ${g2}, ${b2}))`;
+    if (type == 0) document.getElementById('randomgradient_canvas').style = `background-image:radial-gradient(rgb(${r1}, ${g1}, ${b1}), rgb(${r2}, ${g2}, ${b2}))`;
+    document.getElementById('rgb2').innerHTML = `rgb(${r2}, ${g2}, ${b2})`;
+    document.getElementById('rgb2').style = `background-color:rgb(${r2}, ${g2}, ${b2})`;
+    if (brightness(r2, g2, b2) > 130) document.getElementById('rgb2').style.color = 'black';
+    else document.getElementById('rgb2').style.color = 'white';
+  }
+  function changeDirection(new_direction) {
+    direction = new_direction;
+    type = 1;
+    document.getElementById('directiontext').innerHTML = `<b><u>Direction:</u></b> ${direction}`;
+    document.getElementById('randomgradient_canvas').style = `background-image:linear-gradient(to ${direction}, rgb(${r1}, ${g1}, ${b1}), rgb(${r2}, ${g2}, ${b2}))`;
+  }
+  function changeToRadial() {
+    type = 0;
+    document.getElementById('directiontext').innerHTML = `<b><u>Direction:</u></b> Radial`;
+    document.getElementById('randomgradient_canvas').style = `background-image:radial-gradient(rgb(${r1}, ${g1}, ${b1}), rgb(${r2}, ${g2}, ${b2}))`;
+  }
+  function randomizeAll() {
+    rgb1Randomize();
+    rgb2Randomize();
+    for (let i = 0; i < 9; i++) document.getElementsByClassName('directionbutton')[i].className = document.getElementsByClassName('directionbutton')[i].className.replace(' active', '');
+    let rand = Math.round(Math.random() * 8);
+    if (rand == 0) {changeDirection('Top left');document.getElementById('button1').className += ' active';}
+    if (rand == 1) {changeDirection('Top');document.getElementById('button2').className += ' active';}
+    if (rand == 2) {changeDirection('Top right');document.getElementById('button3').className += ' active';}
+    if (rand == 3) {changeDirection('Left');document.getElementById('button4').className += ' active';}
+    if (rand == 4) {changeToRadial();document.getElementById('button5').className += ' active';}
+    if (rand == 5) {changeDirection('Right');document.getElementById('button6').className += ' active';}
+    if (rand == 6) {changeDirection('Bottom left');document.getElementById('button7').className += ' active';}
+    if (rand == 7) {changeDirection('Bottom');document.getElementById('button8').className += ' active';}
+    if (rand == 8) {changeDirection('Bottom right');document.getElementById('button9').className += ' active';}
+  }
+  function mouseDownHandler(e) {
+    if (e.detail > 1) e.preventDefault();
+  } addEventListener('mousedown', mouseDownHandler);
+  function keyDownHandler(e) {
+    if (e.keyCode == 13 || e.keyCode == 32) e.preventDefault();
+  } addEventListener('keydown', keyDownHandler);
+  function brightness(num1, num2, num3) {
+    return Math.sqrt((num1 * num1 * 0.241) + (num2 * num2 * 0.691) + (num3 * num3 * 0.068));
+  }
+  
+  function changeToAngle() {
+    type = 2;
+    angletext.innerHTML = `<b><u>Angle:</u></b> ${angleRange.value}`;
+    document.getElementById('randomgradient_canvas').style = `background-image:linear-gradient(${angleRange.value}deg, rgb(${r1}, ${g1}, ${b1}), rgb(${r2}, ${g2}, ${b2}))`;
+  }
+</script>
+</body>
+</html>-->
