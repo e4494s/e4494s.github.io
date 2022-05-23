@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = 'icon'  href = 'images/favicon.png' type = 'image/png'/>
+    <title>Nodes ~ e4494s</title>
+    <style>
+      canvas {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        background-color: black;
+      }
+    </style>
+  </head>
+<body>
+<canvas id = 'canvas'></canvas>
+<script>
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  
+  let collision = 'No collision detected.';
+  let detected_collision = false;
+  let radius = 25;
+  let bounciness = 0.4;
+  let gravity = 0.5;
+  let air_resistance = 0.005;
+  let friction = 0.1;
+  let terminal_velocity = 1000;
+  let nodes = [];
+  let len = 0;
+  
+  function node(xPos, yPos) {
+    this.x = xPos;
+    this.y = yPos;
+    this.velocity_x = 0;
+    this.velocity_y = 0;
+    this.visible = true;
+    this.image = new Image();
+    this.image.src = 'images/nodes/white.png';
+  }
+  node.prototype.render = function() {
+    this.velocity_x *= 1 - air_resistance;
+    this.velocity_y *= 1 - air_resistance;
+    this.x += this.velocity_x;
+    this.y += this.velocity_y;
+    if (this.x < 0) { // Bounce off the left side
+      this.velocity_x *= -bounciness;
+      this.x = 0;
+      if (gravity == 0) this.velocity_y *= 1 - friction;
+    }
+    if (this.x + radius > canvas.width) { // Bounce off the right side
+      this.velocity_x *= -bounciness;
+      this.x = canvas.width - radius;
+      if (gravity == 0) this.velocity_y *= 1 - friction;
+    }
+    if (this.y < 0) { // Bounce off the top
+      this.y = 0;
+      this.velocity_y *= -bounciness;
+      this.velocity_x *= 1 - friction;
+    }
+    if (this.y + radius > canvas.height) { // Bounce off the bottom
+      this.y = canvas.height - radius;
+      this.velocity_y *= -bounciness;
+      this.velocity_x *= 1 - friction;
+    }
+    else this.velocity_y += gravity;
+    len = nodes.length;
+    /*for (i = 0; i < len; i++) {
+      if (this.index != i) {
+        //if (Math.sqrt((this.x - nodes[i].x) * (this.x - nodes[i].x) * (this.y - nodes[i].y) * (this.y - nodes[i].y)) > radius * 2) {
+        if (Math.sqrt(Math.abs((nodes[i].x - this.x) * (nodes[i].x - this.x) * (nodes[i].y - this.y) * (nodes[i].y - this.y))) > radius * 2) {
+          collision = (`Collision detected between node ${this.index + 1} and node ${i + 1}.`);
+          detected_collision = true;
+        }
+      }
+    }*/
+    if (this.velocity_x > 0 && this.velocity_x > terminal_velocity) this.velocity_x = terminal_velocity;
+    if (this.velocity_x < 0 && this.velocity_x < -terminal_velocity) this.velocity_x = -terminal_velocity;
+    if (this.velocity_y > 0 && this.velocity_y > terminal_velocity) this.velocity_y = terminal_velocity;
+    if (this.velocity_y < 0 && this.velocity_y < -terminal_velocity) this.velocity_y = -terminal_velocity;
+    if (this.visible) ctx.drawImage(this.image, this.x, this.y, radius, radius);
+  }
+  
+  function frame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    len = nodes.length;
+    for (i = 0; i < len; i++) nodes[i].render();
+    if (!detected_collision) collision = 'No collision detected.';
+    ctx.fillStyle = 'white';
+    ctx.fillText(collision, 100, 100);
+    ctx.fillText(`Nodes: ${nodes.length}`, 100, 125);
+  }
+  let frame_interval = setInterval(frame, 25);
+  
+  function makeNode(nodeX, nodeY) {
+    let new_node = new node(nodeX, nodeY);
+    new_node.velocity_x = (((Math.random() * 2) - 1) * 7);
+    nodes.push(new_node);
+    new_node.index = (nodes.length - 1);
+  }
+  makeNode(50, 50);
+  
+  function mouseDownHandler(e) {
+    makeNode(e.clientX - (radius / 2), e.clientY - (radius / 2));
+  }
+  addEventListener('mousedown', mouseDownHandler);
+  
+  function keyDownHandler(e) {
+    len = nodes.length;
+    if (e.keyCode == 37) { // Left arrow key pressed, propel left
+      for (i = 0; i < len; i++) {
+        nodes[i].velocity_x -= 10;
+      }
+    }
+    if (e.keyCode == 38) { // Up arrow key pressed, propel up
+      for (i = 0; i < len; i++) {
+        nodes[i].velocity_y -= 10;
+      }
+    }
+    if (e.keyCode == 39) { // Right arrow key pressed, propel right
+      for (i = 0; i < len; i++) {
+        nodes[i].velocity_x += 10;
+      }
+    }
+    if (e.keyCode == 40) { // Down arrow key pressed, propel down
+      for (i = 0; i < len; i++) {
+        nodes[i].velocity_y += 10;
+      }
+    }
+  }
+  addEventListener('keydown', keyDownHandler);
+</script>
+</body>
+</html>
