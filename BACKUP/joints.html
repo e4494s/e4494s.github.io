@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png"/>
+    <title>Joints ~ e4494s</title>
+    <style>
+      #canvas {
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+    </style>
+  </head>
+<body>
+<canvas id = "canvas"></canvas>
+<script>
+  "use strict";
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  
+  let skin_color = 'tan';
+  let hair_color = 'saddlebrown';
+  let eye_color = 'blue';
+  
+  const body = {
+    x: 100,
+    y: 100,
+    ratio: 1,
+    angle: 0,
+    
+    head: {
+      x: 0,
+      y: 0,
+      angle: 0,
+      width: 150,
+      height: 200,
+      ratio: 1,
+      color: skin_color,
+      img: new Image(),
+      
+      hair: {
+        x: -10,
+        y: -10,
+        angle: 0,
+        width: 170,
+        height: 50,
+        color: hair_color,
+        img: new Image(),
+      },
+      
+      ear_left: {
+        x: -20,
+        y: 50,
+        angle: 0,
+        width: 20,
+        height: 50,
+        color: skin_color,
+        img: new Image(),
+      },
+      
+      ear_right: {
+        x: 150,
+        y: 50,
+        angle: 0,
+        width: 20,
+        height: 50,
+        color: skin_color,
+        img: new Image(),
+      },
+      
+      eye_left: {
+        x: 30,
+        y: 60,
+        angle: 0,
+        width: 30,
+        height: 30,
+        color: 'white',
+        img: new Image(),
+      },
+      
+      pupil_left: {
+        x: 37,
+        y: 67,
+        angle: 0,
+        width: 16,
+        height: 16,
+        color: eye_color,
+        img: new Image(),
+      },
+      
+      eyelid_top_left: {
+        x: 25,
+        y: 60,
+        angle: 0,
+        width: 40,
+        height: 5,
+        color: '#ebc99d',
+        img: new Image(),
+      },
+      
+      eyelid_bottom_left: {
+        x: 25,
+        y: 85,
+        angle: 0,
+        width: 40,
+        height: 5,
+        color: '#ebc99d',
+        img: new Image(),
+      },
+      
+      eyebrow_left: {
+        x: 20,
+        y: 54,
+        angle: 0,
+        width: 50,
+        height: 8,
+        color: hair_color,
+        img: new Image(),
+      },
+      
+      eye_right: {
+        x: 90,
+        y: 60,
+        angle: 0,
+        width: 30,
+        height: 30,
+        color: 'white',
+        img: new Image(),
+      },
+      
+      pupil_right: {
+        x: 97,
+        y: 67,
+        angle: 0,
+        width: 16,
+        height: 16,
+        color: eye_color,
+        img: new Image(),
+      },
+      
+      eyelid_top_right: {
+        x: 85,
+        y: 60,
+        angle: 0,
+        width: 40,
+        height: 5,
+        color: '#ebc99d',
+        img: new Image(),
+      },
+      
+      eyelid_bottom_right: {
+        x: 85,
+        y: 85,
+        angle: 0,
+        width: 40,
+        height: 5,
+        color: '#ebc99d',
+        img: new Image(),
+      },
+      
+      eyebrow_right: {
+        x: 80,
+        y: 54,
+        angle: 0,
+        width: 50,
+        height: 8,
+        color: hair_color,
+        img: new Image(),
+      },
+      
+      nose: {
+        x: 60,
+        y: 95,
+        angle: 0,
+        width: 30,
+        height: 40,
+        color: '#ebc99d',
+        img: new Image(),
+      },
+      
+      lip_top: {
+        x: 40,
+        y: 150,
+        angle: 0,
+        width: 70,
+        height: 14,
+        color: 'darkred',
+        img: new Image(),
+      },
+      
+      teeth_top: {
+        x: 45,
+        y: 155,
+        angle: 0,
+        width: 60,
+        height: 10,
+        color: 'white',
+        img: new Image(),
+      },
+      
+      teeth_bottom: {
+        x: 0,
+        y: 0,
+        angle: 0,
+        width: 50,
+        height: 50,
+        color: 'white',
+        img: new Image(),
+      },
+      
+      lip_bottom: {
+        x: 0,
+        y: 0,
+        angle: 0,
+        width: 50,
+        height: 50,
+        color: 'darkred',
+        img: new Image()
+      }
+    }
+  };
+  
+  /*body.head.hair.img.src
+  body.head.ear_left.img.src
+  body.head.ear_right.img.src
+  body.head.eye_left.img.src
+  body.head.pupil_left.img.src
+  body.head.eyelid_top_left.img.src
+  body.head.eyelid_bottom_left.img.src
+  body.head.eyebrow_left.img.src
+  body.head.eye_right.img.src
+  body.head.pupil_right.img.src
+  body.head.eyelid_top_right.img.src
+  body.head.eyelid_bottom_right.img.src
+  body.head.eyebrow_right.img.src
+  body.head.nose.img.src
+  body.head.teeth_bottom.img.src
+  body.head.teeth_top.img.src
+  body.head.lip_bottom.img.src
+  body.head.lip_top.img.src*/
+  
+  body.render = function() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.fillStyle = body.head.color;
+    ctx.fillRect((body.head.x + body.x) * body.ratio * body.head.ratio, (body.head.y + body.y) * body.ratio * body.head.ratio, body.head.width * body.ratio * body.head.ratio, body.head.height * body.ratio * body.head.ratio);
+    
+    drawHeadBodyPart(body.head.hair);
+    drawHeadBodyPart(body.head.ear_left);
+    drawHeadBodyPart(body.head.ear_right);
+    drawHeadBodyPart(body.head.eye_left);
+    drawHeadBodyPart(body.head.pupil_left);
+    drawHeadBodyPart(body.head.eyelid_top_left);
+    drawHeadBodyPart(body.head.eyelid_bottom_left);
+    drawHeadBodyPart(body.head.eyebrow_left);
+    drawHeadBodyPart(body.head.eye_right);
+    drawHeadBodyPart(body.head.pupil_right);
+    drawHeadBodyPart(body.head.eyelid_top_right);
+    drawHeadBodyPart(body.head.eyelid_bottom_right);
+    drawHeadBodyPart(body.head.eyebrow_right);
+    drawHeadBodyPart(body.head.nose);
+    drawHeadBodyPart(body.head.lip_bottom);
+    drawHeadBodyPart(body.head.lip_top);
+    drawHeadBodyPart(body.head.teeth_bottom);
+    drawHeadBodyPart(body.head.teeth_top);
+    
+    requestAnimationFrame(body.render);
+  };
+  body.render();
+  
+  function drawHeadBodyPart(part) {
+    ctx.fillStyle = part.color;
+    ctx.fillRect((part.x + body.x + body.head.x) * body.ratio * body.head.ratio, (part.y + body.y + body.head.y) * body.ratio * body.head.ratio, part.width * body.ratio * body.head.ratio, part.height * body.ratio * body.head.ratio);
+    //ctx.drawImage(part.img, part.x + body.x + body.head.x, part.y + body.y + body.head.y, part.width * body.ratio * body.head.ratio, part.height * body.ratio * body.head.ratio);
+  }
+  
+  
+  /*body.head.hair
+    body.head.ear_left
+    body.head.ear_right
+    body.head.eye_left
+    body.head.pupil_left
+    body.head.eyelid_top_left
+    body.head.eyelid_bottom_left
+    body.head.eyebrow_left
+    body.head.eye_right
+    body.head.pupil_right
+    body.head.eyelid_top_right
+    body.head.eyelid_bottom_right
+    body.head.eyebrow_right
+    body.head.nose
+    body.head.teeth_bottom
+    body.head.teeth_top
+    body.head.lip_bottom
+    body.head.lip_top*/
+  
+  
+</script>
+</body>
+</html>
