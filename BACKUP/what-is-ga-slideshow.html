@@ -1,0 +1,2276 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <script src = "scripts/main.js"></script>
+    <title>What is Generative Art? ~ e4494s</title>
+    <style>
+      body {
+        margin: 0;
+      }
+      
+      #banner {
+        background-image: url("images/what-is-ga/banner-dark.png");
+        background-size: cover;
+        width: 100%;
+        height: 100vh;
+        text-align: center;
+      }
+      #banner-overlay {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100vh;
+        background-image: linear-gradient(to bottom, transparent, transparent, white);
+      }
+      #banner-title {
+        position: relative;
+        top: 40%;
+        font-size: 50px;
+        color: white;
+        text-shadow: 0 0 12px black, 0 0 12px black, 0 0 12px black, 0 0 12px black, 0 0 12px black;
+        font-weight: bold;
+      }
+      
+      #everything {
+        width: 100%;
+        font-family: serif;
+      }
+      
+      .big-txt {
+        font-size: 20px;
+        padding: 10px;
+        color: #8500ad;
+        font-family: serif;
+        font-weight: bold;
+        font-style: italic;
+        border-left: 3px solid #8500ad;
+        margin-left: 15px;
+      }
+      
+      .small-img {
+        width: 150px;
+        height: 150px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .smaller-img {
+        width: 100px;
+        height: 100px;
+        display: inline-block;
+        margin: 5px;
+      }
+      .smaller-img-group {
+        text-align: center;
+      }
+      
+      .canvas-group {
+        text-align: center;
+      }
+      .multiple-canvas-group {
+        text-align: center;
+      }
+      .canvas-div {
+        display: inline-block;
+        text-align: center;
+        margin-top: 20px;
+      }
+      
+      .small-canvas {
+        width: 250px;
+        height: 250px;
+        border: 2px solid #8500ad;
+        border-radius: 10px;
+      }
+      .smaller-canvas {
+        width: 200px;
+        height: 200px;
+        border: 2px solid #8500ad;
+        border-radius: 10px;
+        margin-left: 10px;
+        margin-right: 10px;
+      }
+      
+      .canvas-desc {
+        font-style: italic;
+        color: #8500ad;
+        width: 220px;
+        font-size: 12px;
+        text-align: center;
+      }
+      
+      button {
+        font-family: serif;
+        font-weight: bold;
+        border: 2px solid #8500ad;
+        color: #8500ad;
+        border-radius: 10px;
+        background-color: white;
+      }
+      button:hover {
+        background-color: #e180ff;
+      }
+      button:active {
+        background-color: #cf33ff;
+      }
+      .canvas-btn {
+        margin-bottom: 5px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      
+      .subtitle {
+        color: #008a17;
+        font-size: 25px;
+        font-weight: bold;
+        text-align: center;
+        border-top: 2px double #008a17;
+        border-bottom: 2px double #008a17;
+        padding: 3px;
+        margin-top: 25px;
+        margin-left: 25px;
+        margin-right: 25px;
+      }
+      
+      .green-txt {
+        color: #008a17;
+      }
+      
+      .roman-numeral {
+        font-size: 18px;
+        color: black;
+      }
+      
+      .examples-div {
+        font-size: 20px;
+        color: #008a17;
+        text-align: center;
+        font-style: italic;
+        margin-top: 15px;
+        margin-bottom: 5px;
+        font-weight: bold;
+        display: block;
+      }
+      
+      .slide {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .slide-content {
+        width: 100%;
+        max-height: 100%;
+      }
+    </style>
+  </head>
+<body>
+
+<div class = "slide"><div class = "slide-content">
+  <div id = "banner">
+    <span id = "banner-title">What is Generative Art?</span>
+  </div>
+  <div id = "banner-overlay"></div>
+</div></div>
+
+<div class = "slide"><div class = "slide-content">
+  <div class = "subtitle">
+    <span class = "roman-numeral">I.</span> Randomness
+  </div>
+  <div class = "subtitle">
+    <span class = "roman-numeral">II.</span> Recursion
+  </div>
+  <div class = "subtitle">
+    <span class = "roman-numeral">III.</span> Repetition
+  </div>
+  <div class = "subtitle">
+    <span class = "roman-numeral">IV.</span> Realism
+  </div>
+</div></div>
+
+<div class = "slide"><div class = "slide-content">
+  <div class = "subtitle">
+    <span class = "roman-numeral">I.</span> Randomness
+  </div>
+  <br><br>
+  <div class = "big-txt">
+    "Creativity is the ability to introduce order into the randomness of nature."
+    <br>
+    <i>&ndash; Eric Hoffer</i>
+  </div>
+  <br><br>
+  <img class = "small-img" src = "images/what-is-ga/walker1.png">
+</div></div>
+
+<div class = "slide"><div class = "slide-content">
+  <div class = "canvas-group">
+    <div class = "canvas-div">
+      <button class = "canvas-btn" onclick = "draw1()">Redraw</button>
+      <canvas id = "canvas1" class = "small-canvas"></canvas>
+    </div>
+  </div>
+</div></div>
+
+
+<div class = "slide"><div class = "slide-content">
+  <div class = "multiple-canvas-group">
+    <div class = "canvas-div">
+      <p class = "canvas-desc">The walker's color varies randomly per step.</p>
+      <button class = "canvas-btn" onclick = "draw2()">Redraw</button>
+      <canvas id = "canvas2" class = "smaller-canvas"></canvas>
+    </div>
+    <div class = "canvas-div">
+      <p class = "canvas-desc">The walker only has a 25% chance of randomizing its direction each step, and is drawn at a lower opacity.</p>
+      <button class = "canvas-btn" onclick = "draw3()">Redraw</button>
+      <canvas id = "canvas3" class = "smaller-canvas"></canvas>
+    </div>
+    <div class = "canvas-div">
+      <p class = "canvas-desc">The walker gets a random hue every regeneration, and its brightness varies randomly per step.</p>
+      <button class = "canvas-btn" onclick = "draw4()">Redraw</button>
+      <canvas id = "canvas4" class = "smaller-canvas"></canvas>
+    </div>
+    <div class = "canvas-div">
+      <p class = "canvas-desc">The walker only moves diagonally, and is drawn at a lower opacity over a black background.</p>
+      <button class = "canvas-btn" onclick = "draw5()">Redraw</button>
+      <canvas id = "canvas5" class = "smaller-canvas"></canvas>
+    </div>
+  </div>
+</div></div>
+
+<div class = "slide"><div class = "slide-content">
+  <div class = "examples-div">Advanced Examples of Randomness:</div>
+  <div class = "multiple-canvas-group">
+    <div class = "canvas-div">
+      <button class = "canvas-btn" onclick = "draw10()">Redraw</button>
+      <canvas id = "canvas10" class = "small-canvas"></canvas>
+    </div>
+    <div class = "canvas-div">
+      <button class = "canvas-btn" onclick = "draw27()">Redraw</button>
+      <canvas id = "canvas27" class = "small-canvas"></canvas>
+    </div>
+    <div class = "canvas-div">
+      <button class = "canvas-btn" onclick = "draw31()">Redraw</button>
+      <canvas id = "canvas31" class = "small-canvas"></canvas>
+    </div>
+  </div>
+</div></div>
+
+<div class = "slide"><div class = "slide-content">
+  <div class = "subtitle">
+    <span class = "roman-numeral">II.</span> Recursion
+  </div>
+  <br><br>
+  <div class = "big-txt">
+    "To understand recursion, one must first understand recursion."
+    <br>
+    <i>&ndash; Unknown</i>
+  </div>
+  <br><br>
+  <div class = "smaller-img-group">
+    <img class = "smaller-img" src = "images/what-is-ga/recursion_1.png">
+    <img class = "smaller-img" src = "images/what-is-ga/recursion_2.png">
+    <img class = "smaller-img" src = "images/what-is-ga/recursion_3.png">
+    <img class = "smaller-img" src = "images/what-is-ga/recursion_4.png">
+    <img class = "smaller-img" src = "images/what-is-ga/recursion_5.png">
+  </div>
+</div></div>
+
+<div class = "slide"><div class = "slide-content">
+  <img class = "small-img" src = "images/what-is-ga/fractaltree1.png">
+  <br><br>
+  <div class = "canvas-group">
+    <div class = "canvas-div">
+      <button class = "canvas-btn" id = "draw-btn-6" onclick = "draw6()">Reset</button>
+      <canvas id = "canvas6" class = "small-canvas"></canvas>
+    </div>
+  </div>
+</div></div>
+
+<div class = "slide"><div class = "slide-content">
+  <div class = "multiple-canvas-group">
+    <div class = "canvas-div">
+      <p class = "canvas-desc">The tree has a random hue each generation, and the lines get progressively thinner and darker every layer.</p>
+      <button class = "canvas-btn" id = "draw-btn-7" onclick = "draw7()">Reset</button>
+      <canvas id = "canvas7" class = "smaller-canvas"></canvas>
+    </div>
+    <div class = "canvas-div">
+      <p class = "canvas-desc">After each split, the new left branch's hue gets lower and the new right branch's hue gets higher.</p>
+      <button class = "canvas-btn" id = "draw-btn-8" onclick = "draw8()">Reset</button>
+      <canvas id = "canvas8" class = "smaller-canvas"></canvas>
+    </div>
+    <div class = "canvas-div">
+      <p class = "canvas-desc">The angle between new branches is randomized every reset. <b>Current branch angle:</b> <span id = "angle-offset-9-txt"></span>&deg;.</p>
+      <button class = "canvas-btn" id = "draw-btn-9" onclick = "draw9()">Reset</button>
+      <canvas id = "canvas9" class = "smaller-canvas"></canvas>
+    </div>
+  </div>
+</div></div>
+
+<div class = "slide"><div class = "slide-content">
+  <div class = "examples-div">Advanced Examples of Recursion:</div>
+  <div class = "multiple-canvas-group">
+    <div class = "canvas-div">
+      <button class = "canvas-btn" onclick = "draw82()">Redraw</button>
+      <canvas id = "canvas82" class = "small-canvas"></canvas>
+    </div>
+    <div class = "canvas-div">
+      <button class = "canvas-btn" id = "draw-btn-33" onclick = "draw33()">Next Layer</button>
+      <canvas id = "canvas33" class = "small-canvas"></canvas>
+    </div>
+    <div class = "canvas-div">
+      <button class = "canvas-btn" id = "draw-btn-62" onclick = "draw62()">Next Layer</button>
+      <canvas id = "canvas62" class = "small-canvas"></canvas>
+    </div>
+  </div>
+</div></div>
+
+<div class = "slide"><div class = "slide-content">
+  <div class = "subtitle">
+    <span class = "roman-numeral">III.</span> Repetition
+  </div>
+  <br><br>
+  <div class = "big-txt">
+    "A creation is never merely repetition."
+    <br>
+    <i>&ndash; Bruce Lee, <span style = "font-size: 15px">clearly having never heard of generative art</span></i>
+  </div>
+  <br><br>
+  <img class = "small-img" src = "images/what-is-ga/repetition1.png">
+</div></div>
+
+<div class = "slide"><div class = "slide-content">
+  <div class = "canvas-group">
+    <div class = "canvas-div">
+      <button class = "canvas-btn" onclick = "draw11()">Redraw</button>
+      <canvas id = "canvas11" class = "small-canvas"></canvas>
+    </div>
+  </div>
+</div></div>
+
+<div class = "slide"><div class = "slide-content">
+  <div class = "multiple-canvas-group">
+    <div class = "canvas-div">
+      <p class = "canvas-desc">Multiple concentric circles are drawn in each spot, at increasing or decreasing brightness.</p>
+      <button class = "canvas-btn" onclick = "draw12()">Redraw</button>
+      <canvas id = "canvas12" class = "smaller-canvas"></canvas>
+    </div>
+    <div class = "canvas-div">
+      <p class = "canvas-desc">Expressive smiley faces are drawn on top of each circle.</p>
+      <button class = "canvas-btn" onclick = "draw13()">Redraw</button>
+      <canvas id = "canvas13" class = "smaller-canvas"></canvas>
+    </div>
+    <div class = "canvas-div">
+      <p class = "canvas-desc">Each circle is drawn 50% larger than the original size, along with being drawn at a lower opacity with an outline.</p>
+      <button class = "canvas-btn" onclick = "draw14()">Redraw</button>
+      <canvas id = "canvas14" class = "smaller-canvas"></canvas>
+    </div>
+  </div>
+</div></div>
+
+<div class = "slide"><div class = "slide-content">
+  <div class = "examples-div">Advanced Examples of Repetition:</div>
+  <div class = "multiple-canvas-group">
+    <div class = "canvas-div">
+      <button class = "canvas-btn" onclick = "draw53()">Redraw</button>
+      <canvas id = "canvas53" class = "small-canvas"></canvas>
+    </div>
+    <div class = "canvas-div">
+      <button class = "canvas-btn" onclick = "draw42()">Redraw</button>
+      <canvas id = "canvas42" class = "small-canvas"></canvas>
+    </div>
+    <div class = "canvas-div">
+      <button class = "canvas-btn" onclick = "draw22()">Redraw</button>
+      <canvas id = "canvas22" class = "small-canvas"></canvas>
+    </div>
+  </div>
+</div></div>
+
+<div class = "slide"><div class = "slide-content">
+  <div class = "subtitle">
+    <span class = "roman-numeral">IV.</span> Realism
+  </div>
+  <br><br>
+  <div class = "big-txt">
+    "Reality is merely an illusion, albeit a very persistent one."
+    <br>
+    <i>&ndash; Albert Einstein, <span style = "font-size: 15px">allegedly</span></i>
+  </div>
+  <br><br>
+  <img class = "small-img" src = "images/what-is-ga/phyllotaxis_1.png">
+</div></div>
+
+<div class = "slide"><div class = "slide-content">
+  <div class = "canvas-group">
+    <div class = "canvas-div">
+      <button class = "canvas-btn" onclick = "draw15()">Redraw</button>
+      <canvas id = "canvas15" class = "small-canvas"></canvas>
+    </div>
+  </div>
+</div></div>
+
+<div class = "slide"><div class = "slide-content">
+  <div class = "multiple-canvas-group">
+    <div class = "canvas-div">
+      <p class = "canvas-desc">The seeds are drawn larger so they overlap underneath each other, and are given a random hue every regeneration.</p>
+      <button class = "canvas-btn" onclick = "draw16()">Redraw</button>
+      <canvas id = "canvas16" class = "smaller-canvas"></canvas>
+    </div>
+    <div class = "canvas-div">
+      <p class = "canvas-desc">Seeds are drawn larger and darker the further from the center they are.</p>
+      <button class = "canvas-btn" onclick = "draw17()">Redraw</button>
+      <canvas id = "canvas17" class = "smaller-canvas"></canvas>
+    </div>
+    <div class = "canvas-div">
+      <p class = "canvas-desc">The seeds are drawn as overlapping yellow triangles instead of circles, which more closely resembles the actual sunflower seed pattern.</p>
+      <button class = "canvas-btn" onclick = "draw18()">Redraw</button>
+      <canvas id = "canvas18" class = "smaller-canvas"></canvas>
+    </div>
+  </div>
+</div></div>
+
+<div class = "slide"><div class = "slide-content">
+  <div class = "examples-div">Advanced Examples of Realism:</div>
+  <div class = "multiple-canvas-group">
+    <div class = "canvas-div">
+      <button class = "canvas-btn" onclick = "draw19()">Redraw</button>
+      <canvas id = "canvas19" class = "small-canvas"></canvas>
+    </div>
+    <div class = "canvas-div">
+      <button class = "canvas-btn" onclick = "draw20()">Redraw</button>
+      <canvas id = "canvas20" class = "small-canvas"></canvas>
+    </div>
+    <div class = "canvas-div">
+      <button class = "canvas-btn" onclick = "draw21()">Redraw</button>
+      <canvas id = "canvas21" class = "small-canvas"></canvas>
+    </div>
+  </div>
+</div></div>
+
+<div class = "slide"><div class = "slide-content">
+  <div class = "big-txt">
+    "[Generative art] becomes a collaboration between the computer and the artist. Some aspects of the artwork are controlled by the coder, but not all of them. The artist controls both the randomness and the order in the art."
+    <br>
+    <i>&ndash; Ali Spittel</i>
+  </div>
+</div></div>
+
+<!-- JavaScript -->
+<script>
+  let slides = document.getElementsByClassName("slide");
+  
+  let currSlide = 0;
+  
+  function goToSlide(n) {
+    slides = document.getElementsByClassName("slide");
+    for (let i = 0; i < slides.length; i++) slides[i].style.display = "none";
+    slides[n].style.display = "flex";
+  }
+  goToSlide(currSlide);
+  
+  window.addEventListener("keydown", e => {
+    if (e.code === "ArrowLeft" || e.code === "ArrowRight") e.preventDefault();
+    if (e.code === "ArrowLeft") {
+      currSlide--;
+      if (currSlide < 0) currSlide = 0;
+    }
+    else if (e.code === "ArrowRight") {
+      currSlide++;
+      if (currSlide > slides.length - 1) currSlide = slides.length - 1;
+    }
+    
+    goToSlide(currSlide);
+  });
+</script>
+
+<!---->
+
+<script>
+  const ctx21 = canvas21.getContext("2d");
+  canvas21.width = canvas21.height = 200;
+  
+  CanvasRenderingContext2D.prototype.drawFish = function(x, y, width, height, angle, fillStyle, facingRight) {
+    if (!facingRight) {
+      this.save();
+      this.translate(x, y);
+      this.rotate((angle * Math.PI) / 180);
+      this.beginPath();
+      this.moveTo(width / 2, 0);
+      this.quadraticCurveTo(randBetween(-width * 0.25, width * 0.25), randBetween(-height, -height * 0.75), -width / 2, 0);
+      this.quadraticCurveTo(randBetween(-width * 0.25, width * 0.25), randBetween(height, height * 0.75), width / 2, 0);
+      
+      let tailX = randBetween(30, 50);
+      let tailY = randBetween(-20, -10);
+      this.quadraticCurveTo((width / 2) + (tailX / 2) + randBetween(-5, 5), tailY + randBetween(-5, 5), (width / 2) + tailX, tailY);
+      tailX = randBetween(30, 50);
+      tailY = randBetween(10, 20);
+      this.quadraticCurveTo((width / 2) + tailX + randBetween(-5, 5), randBetween(-5, 5), (width / 2) + tailX, tailY);
+      this.quadraticCurveTo((width / 2) + (tailX / 2) + randBetween(-5, 5), tailY + randBetween(-5, 5), width / 2, 0);
+      this.fillStyle = fillStyle;
+      this.strokeStyle = "black";
+      this.lineWidth = 3;
+      this.fill();
+      this.stroke();
+      
+      let eyeX = (-width / 2) + randBetween(25, 40);
+      let eyeY =  randBetween(-10, 0);
+      let eyeR = (randBetween(135, 225) * Math.PI) / 180;
+      if (Math.floor(Math.random() * 10) == 0) eyeR = (randBetween(-60, 60) * Math.PI) / 180;    
+      let eyeSize = Math.floor(randBetween(7, 9)) * randBetween(0.85, 1.15);
+      let pupilSize = Math.floor(randBetween(eyeSize - 3, eyeSize - 1));
+      this.fillStyle = "white";
+      this.fillCircle(eyeX, eyeY, eyeSize);
+      this.lineWidth = 2;
+      this.strokeCircle(eyeX, eyeY, eyeSize);
+      this.fillStyle = "black";
+      this.fillCircle(eyeX + ((eyeSize - pupilSize) * Math.cos(eyeR)), eyeY + ((eyeSize - pupilSize) * Math.sin(eyeR)), pupilSize);
+      
+      this.restore();
+    }
+    
+    //
+    
+    else {
+      this.save();
+      this.translate(x, y);
+      this.rotate((angle * Math.PI) / 180);
+      this.beginPath();
+      this.moveTo(-width / 2, 0);
+      this.quadraticCurveTo(randBetween(-width * 0.25, width * 0.25), randBetween(-height, -height * 0.75), width / 2, 0);
+      this.quadraticCurveTo(randBetween(-width * 0.25, width * 0.25), randBetween(height, height * 0.75), -width / 2, 0);
+      
+      let tailX = randBetween(-50, -30);
+      let tailY = randBetween(-20, -10);
+      this.quadraticCurveTo((-width / 2) + (tailX / 2) + randBetween(-5, 5), tailY + randBetween(-5, 5), (-width / 2) + tailX, tailY);
+      tailX = randBetween(-50, -30);
+      tailY = randBetween(10, 20);
+      this.quadraticCurveTo((-width / 2) + tailX + randBetween(-5, 5), randBetween(-5, 5), (-width / 2) + tailX, tailY);
+      this.quadraticCurveTo((-width / 2) + (tailX / 2) + randBetween(-5, 5), tailY + randBetween(-5, 5), -width / 2, 0);
+      this.fillStyle = fillStyle;
+      this.strokeStyle = "black";
+      this.lineWidth = 3;
+      this.fill();
+      this.stroke();
+      
+      let eyeX = (width / 2) + randBetween(-40, -25);
+      let eyeY =  randBetween(-10, 0);
+      let eyeR = (randBetween(-45, 45) * Math.PI) / 180;
+      if (Math.floor(Math.random() * 10) == 0) eyeR = (randBetween(120, 240) * Math.PI) / 180;    
+      let eyeSize = Math.floor(randBetween(7, 9)) * randBetween(0.85, 1.15);
+      let pupilSize = Math.max(Math.floor(randBetween(eyeSize - 3, eyeSize - 1)), 4);
+      this.fillStyle = "white";
+      this.fillCircle(eyeX, eyeY, eyeSize);
+      this.lineWidth = 2;
+      this.strokeCircle(eyeX, eyeY, eyeSize);
+      this.fillStyle = "black";
+      this.fillCircle(eyeX + ((eyeSize - pupilSize) * Math.cos(eyeR)), eyeY + ((eyeSize - pupilSize) * Math.sin(eyeR)), pupilSize);
+      
+      this.restore();
+    }
+  };
+  
+  function draw21() {
+    ctx21.lineJoin = ctx21.lineCap = "round";
+    
+    let water = ctx21.createLinearGradient(Math.random() < 0.5 ? 0 : 200, 0, Math.random() * 200, 200);
+    let ripples = randBetween(10, 20);
+    for (let i = 0; i < ripples; i++) {
+      water.addColorStop(i / ripples, `hsl(${randBetween(230, 250)}deg, 100%, ${randBetween(30, 70)}%)`);
+    }
+    ctx21.fillStyle = water;
+    ctx21.fillRect(0, 0, 200, 200);
+    
+    let gravelTilt = randBetween(-25, 25);
+    let gravel = ctx21.createLinearGradient(100 + gravelTilt, 0, 100 - gravelTilt, 200);
+    let gravelBands = randBetween(40, 80);
+    for (let i = 0; i < gravelBands; i++) {
+      gravel.addColorStop(i / gravelBands, `hsl(0deg, 0%, ${randBetween(35, 55)}%)`);
+    }
+    let gravelHeight = randBetween(30, 70);
+    ctx21.beginPath();
+    ctx21.moveTo(200, 200 - gravelHeight);
+    ctx21.lineTo(200, 200);
+    ctx21.lineTo(0, 200);
+    ctx21.lineTo(0, 200 - gravelHeight);
+    ctx21.quadraticCurveTo(randBetween(50, 150), randBetween(200 - (gravelHeight * 2), 200), 200, randBetween(200 - (gravelHeight * 2), 200));
+    ctx21.fillStyle = gravel;
+    ctx21.fill();
+    
+    let scaleHue = Math.random() * 360;
+    let scales = Math.floor(randBetween(10, 30));
+    let scaleGradient = ctx21.createLinearGradient(-100, 0, 100, 0);
+    for (let i = 0; i < scales; i++) {
+      scaleGradient.addColorStop(i / scales, `hsl(${randBetween(scaleHue - 15, scaleHue + 15)}deg, ${randBetween(75, 100)}%, ${Math.random() < 0.5 ? randBetween(55, 75) : randBetween(25, 45)}%)`);
+    }
+    
+    let right = Math.random() < 0.5;
+    let sizeScale = randBetween(randBetween(0.5, 0.9), 1);
+    
+    if (!right) {
+      ctx21.drawFish(
+        randBetween(65, 85), // x
+        randBetween(70, 130), // y
+        randBetween(100, 120) * sizeScale, // width
+        randBetween(50, 70) * sizeScale, // height
+        randBetween(-25, 25), // angle
+        scaleGradient, // fillStyle
+        false // facingRight
+      );
+    }
+    
+    else {
+      ctx21.drawFish(
+        randBetween(115, 135), // x
+        randBetween(70, 130), // y
+        randBetween(100, 120) * sizeScale, // width
+        randBetween(50, 70) * sizeScale, // height
+        randBetween(-25, 25), // angle
+        scaleGradient, // fillStyle
+        true // facingRight
+      );
+    }
+    
+    let bubbles = randBetween(7, 12);
+    ctx21.strokeStyle = "white";
+    for (let i = 0; i < bubbles; i++) {
+      ctx21.globalAlpha = randBetween(0.25, 0.5);
+      ctx21.lineWidth = randBetween(1, 3);
+      ctx21.strokeCircle(Math.random() * 200, Math.random() * 200, randBetween(5, 25));
+    }
+    ctx21.globalAlpha = 1;
+  }
+  draw21();
+</script>
+<script>
+  const ctx20 = canvas20.getContext("2d");
+  canvas20.width = canvas20.height = 500;
+  
+  function draw20() {
+    ctx20.fillStyle = "black";
+    ctx20.fillRect(0, 0, canvas20.width, canvas20.height);
+    
+    let stars = Math.floor(randBetween(200, 400));
+    for (let i = 0; i < stars; i++) {
+      ctx20.shadowBlur = randBetween(3, 6);
+      ctx20.fillStyle = ctx20.shadowColor = `hsl(${randBetween(180, 240)}deg, ${randBetween(50, 100)}%, 75%)`;
+      ctx20.fillCircle(Math.random() * canvas20.width, Math.random() * canvas20.height, Math.random() * 2.5);
+    }
+    
+    let bigStars = Math.floor(randBetween(Math.random() < 0.5 ? 0 : 1, 4));
+    ctx20.shadowBlur = 15;
+    for (let i = 0; i < bigStars; i++) {
+      ctx20.fillStyle = ctx20.shadowColor = `hsl(${Math.random() * 360}deg, ${randBetween(50, 100)}%, 85%)`;
+      let starX = Math.random() * canvas20.width;
+      let starY = Math.random() * canvas20.height;
+      let starSize = randBetween(3, 6);
+      let starBrightness = Math.floor(randBetween(6, 10));
+      for (let j = 0; j < starBrightness; j++) ctx20.fillCircle(starX, starY, starSize);
+    }
+    
+    let lightPaths = Math.floor(randBetween(Math.random() < 0.5 ? 0 : 1, 5));
+    for (let i = 0; i < lightPaths; i++) {
+      let lineCX1, lineCY1, lineCX2, lineCY2, lineX1, lineY1, lineX2, lineY2;
+      if (Math.random() < 0.5) { // Left to right
+        lineX1 = -25;
+        lineY1 = randBetween(-25, canvas20.height + 25);
+        lineX2 = canvas20.width + 25;
+        lineY2 = randBetween(-25, canvas20.height + 25);
+        
+        lineCX1 = randBetween(-50, canvas20.width + 50);
+        lineCY1 = randBetween(-50, 50);
+        lineCX2 = randBetween(-50, canvas20.width + 50);
+        lineCY2 = canvas20.height + randBetween(-50, 50);
+      }
+      else { // Top to bottom
+        lineX1 = randBetween(-25, canvas20.width + 25);
+        lineY1 = -25;
+        lineX2 = randBetween(-25, canvas20.height + 25);
+        lineY2 = canvas20.height + 25;
+        
+        lineCX1 = randBetween(-50, 50);
+        lineCY1 = randBetween(-50, canvas20.height + 50);
+        lineCX2 = randBetween(-50, 50);
+        lineCY2 = randBetween(-50, canvas20.height + 50);
+      }
+      ctx20.strokeStyle = "white";
+      ctx20.lineWidth = randBetween(40, 60);
+      ctx20.shadowBlur = ctx20.lineWidth * randBetween(1.5, 2.5);
+      ctx20.shadowColor = `hsla(${Math.random() * 360}deg, ${randBetween(50, 100)}%, ${randBetween(60, 85)}%, ${randBetween(0.5, 0.75)})`;
+      ctx20.shadowOffsetY = canvas20.height * 2;
+      ctx20.beginPath();
+      ctx20.moveTo(lineX1, lineY1 - ctx20.shadowOffsetY);
+      ctx20.bezierCurveTo(lineCX1, lineCY1 - ctx20.shadowOffsetY, lineCX2, lineCY2 - ctx20.shadowOffsetY, lineX2, lineY2 - ctx20.shadowOffsetY);
+      ctx20.stroke();
+    }
+  }
+  draw20();
+</script>
+<script>
+  const ctx19 = canvas19.getContext("2d");
+  canvas19.width = canvas19.height = 1000;
+  
+  function draw19() {
+    ctx19.fillStyle = "white";
+    ctx19.fillRect(0, 0, canvas19.width, canvas19.height);
+    
+    let heightRatio = randBetween(0.1, 0.3); // How high the tallest mountains can start
+    let numLayers = Math.round(randBetween(5, 15)); // Number of mountains
+    let fog = randBetween(0.6, 1); // Brightness contrast between closest and furthest mountains
+    let invFog = 1 - fog;
+    
+    for (let i = 0; i < numLayers; i++) {
+      let steepness = randBetween(3, 8); // How much the random walker tracing the mountain moves each time
+      let ratio = (i + randBetween(-0.5, 0.5)) / numLayers;
+      let invRatio = 1 - ratio;
+      ctx19.fillStyle = `hsl(0deg, 0%, ${(invRatio * 100 * fog) + (50 * invFog)}%)`; // Color it based on what mountain we're on
+      let currY = (canvas19.height * heightRatio) + ratio * canvas19.height * (1 - heightRatio);
+      ctx19.beginPath();
+      ctx19.moveTo(0, currY);
+      for (let j = 0; j <= canvas19.width; j += 2) { // Move the random walker along the x-axis
+        currY += steepness * Math.random() * randSign(); // Move the random walker up or down the y-axis randomly
+        ctx19.lineTo(j, currY);
+      }
+      ctx19.lineTo(canvas19.width, canvas19.height); // Close up the path
+      ctx19.lineTo(0, canvas19.height);
+      ctx19.lineTo(0, ratio * canvas19.height);
+      ctx19.fill();
+    }
+  }
+  draw19();
+</script>
+<script>
+  const ctx18 = canvas18.getContext("2d");
+  canvas18.width = canvas18.height = 1000;
+  
+  let goldenAngle18 = Math.PI * (3 - Math.sqrt(5));
+  
+  function drawTriangle18(x, y, sideLength, angle) { // x and y are the tip of the triangle
+    let cx = x;
+    let cy = y;
+    let ca = angle;
+    
+    ctx18.beginPath();
+    ctx18.moveTo(x, y);
+    
+    ca += toRad(60);
+    cx += sideLength * Math.cos(ca);
+    cy += sideLength * Math.sin(ca);
+    ctx18.lineTo(cx, cy);
+    
+    ca -= toRad(120);
+    cx += sideLength * Math.cos(ca);
+    cy += sideLength * Math.sin(ca);
+    ctx18.lineTo(cx, cy);
+    
+    ca -= toRad(120);
+    cx += sideLength * Math.cos(ca);
+    cy += sideLength * Math.sin(ca);
+    ctx18.lineTo(cx, cy);
+  }
+  
+  function draw18() {
+    ctx18.fillStyle = "black";
+    ctx18.fillRect(0, 0, canvas18.width, canvas18.height);
+    
+    for (let i = 0; i < 2000; i++) {
+      let a = i * goldenAngle18;
+      let r = (Math.sqrt(i) * 10) - 30;
+      
+      ctx18.fillStyle = `hsl(60deg, 100%, ${randBetween(20, 50)}%)`;
+      ctx18.lineWidth = 2;
+      
+      drawTriangle18((canvas18.width / 2) + (r * Math.cos(a)), (canvas18.height / 2) + (r * Math.sin(a)), 30, a);
+      ctx18.fill();
+      ctx18.stroke();
+    }
+  }
+  draw18();
+</script>
+<script>
+  const ctx17 = canvas17.getContext("2d");
+  canvas17.width = canvas17.height = 1000;
+  
+  let goldenAngle17 = Math.PI * (3 - Math.sqrt(5));
+  
+  function draw17() {
+    ctx17.fillStyle = "black";
+    ctx17.fillRect(0, 0, canvas17.width, canvas17.height);
+    
+    ctx17.lineWidth = 2;
+    ctx17.strokeStyle = "black";
+    
+    for (let i = 1200; i >= 0; i--) {
+      let a = i * goldenAngle17;
+      let r = Math.sqrt(i) * 10;
+      
+      let radius = 12 * (1 + (i * 0.005));
+      
+      ctx17.fillStyle = `hsl(${120 + randBetween(-45, 45)}deg, ${randBetween(75, 100)}%, ${(1 - (i / 1200)) * 60}%)`;
+      
+      let x = (canvas17.width / 2) + (r * Math.cos(a));
+      let y = (canvas17.height / 2) + (r * Math.sin(a));
+      
+      ctx17.fillCircle(x, y, radius);
+      ctx17.strokeCircle(x, y, radius);
+    }
+  }
+  draw17();
+</script>
+<script>
+  const ctx16 = canvas16.getContext("2d");
+  canvas16.width = canvas16.height = 1000;
+  
+  let goldenAngle16 = Math.PI * (3 - Math.sqrt(5));
+  
+  function draw16() {
+    ctx16.fillStyle = "black";
+    ctx16.fillRect(0, 0, canvas16.width, canvas16.height);
+    ctx16.strokeStyle = "black";
+    ctx16.lineWidth = 2;
+    
+    let hue = Math.random() * 360;
+    
+    for (let i = 2000; i >= 0; i--) {
+      let a = i * goldenAngle16;
+      let r = Math.sqrt(i) * 10;
+      
+      ctx16.fillStyle = `hsl(${hue + randBetween(-30, 30)}deg, ${randBetween(75, 100)}%, ${randBetween(30, 50)}%)`;
+      
+      ctx16.fillCircle((canvas16.width / 2) + (r * Math.cos(a)), (canvas16.height / 2) + (r * Math.sin(a)), 12);
+      ctx16.strokeCircle((canvas16.width / 2) + (r * Math.cos(a)), (canvas16.height / 2) + (r * Math.sin(a)), 12);
+    }
+  }
+  draw16();
+</script>
+<script>
+  const ctx15 = canvas15.getContext("2d");
+  canvas15.width = canvas15.height = 1000;
+  
+  let goldenAngle15 = Math.PI * (3 - Math.sqrt(5));
+  
+  function draw15() {
+    ctx15.fillStyle = "black";
+    ctx15.fillRect(0, 0, canvas15.width, canvas15.height);
+    
+    for (let i = 0; i < 2000; i++) {
+      let a = i * goldenAngle15;
+      let r = Math.sqrt(i) * 10;
+      
+      ctx15.fillStyle = `hsl(120deg, ${randBetween(75, 100)}%, ${randBetween(30, 50)}%)`;
+      
+      ctx15.fillCircle((canvas15.width / 2) + (r * Math.cos(a)), (canvas15.height / 2) + (r * Math.sin(a)), 7);
+    }
+  }
+  draw15();
+</script>
+<script>
+  const ctx14 = canvas14.getContext("2d");
+  canvas14.width = canvas14.height = 500;
+  
+  const ratio14 = Math.sqrt(3) / 2;
+  
+  function drawCircle14(x, y, radius) {
+    ctx14.fillStyle = `hsla(${Math.random() * 360}deg, ${randBetween(50, 100)}%, ${randBetween(40, 60)}%, 0.75)`;
+    ctx14.strokeStyle = "black";
+    ctx14.fillCircle(x, y, radius);
+    ctx14.strokeCircle(x, y, radius);
+  }
+  
+  function draw14() {
+    ctx14.fillStyle = "white";
+    ctx14.fillRect(0, 0, canvas14.width, canvas14.height);
+    
+    let gridSize = 8;
+    let tileSize = canvas14.width / gridSize;
+    
+    for (let x = 0; x < gridSize + 1; x++) {
+      for (let y = 0; y < gridSize + 2; y++) {
+        let _x = y % 2 === 0 ? x : x - 0.5;
+        _x += 0.5;
+        _y = y * ratio14;
+        _y += 0.5;
+        drawCircle14(_x * tileSize, _y * tileSize, tileSize * 0.75);
+      }
+    }
+  }
+  draw14();
+</script>
+<script>
+  const ctx13 = canvas13.getContext("2d");
+  canvas13.width = canvas13.height = 1000;
+  
+  const ratio13 = Math.sqrt(3) / 2;
+  
+  function drawCircle13(x, y, radius) {
+    ctx13.fillStyle = `hsl(${Math.random() * 360}deg, ${randBetween(50, 100)}%, ${randBetween(40, 60)}%)`;
+    ctx13.fillCircle(x, y, radius);
+    
+    let eyeRadius = radius * 0.2;
+    ctx13.fillStyle = "white";
+    let eyeL = {x: x - (radius * randBetween(0.3, 0.5)), y: y - (radius * randBetween(0.1, 0.3))};
+    let eyeR = {x: x + (radius * randBetween(0.3, 0.5)), y: y - (radius * randBetween(0.1, 0.3))};
+    ctx13.fillCircle(eyeL.x, eyeL.y, eyeRadius);
+    ctx13.fillCircle(eyeR.x, eyeR.y, eyeRadius);
+    
+    let lookAngle = Math.random() * Math.PI * 2;
+    let pupilRadius = eyeRadius * 0.65;
+    ctx13.fillStyle = "black";
+    ctx13.fillCircle(eyeL.x + ((eyeRadius - pupilRadius) * Math.cos(lookAngle)), eyeL.y + ((eyeRadius - pupilRadius) * Math.sin(lookAngle)), pupilRadius);
+    ctx13.fillCircle(eyeR.x + ((eyeRadius - pupilRadius) * Math.cos(lookAngle)), eyeR.y + ((eyeRadius - pupilRadius) * Math.sin(lookAngle)), pupilRadius);
+    
+    ctx13.lineWidth = radius / 10;
+    ctx13.lineCap = ctx13.lineJoin = "round";
+    ctx13.beginPath();
+    ctx13.ellipse(
+      x + (radius * randBetween(-0.1, 0.1)), // x
+      y + (radius * randBetween(0.1, 0.3)), // y
+      radius * randBetween(0.5, 0.7), // radiusX
+      radius * randBetween(0.3, 0.5), // radiusY
+      toRad(randBetween(-5, 5)), // rotation
+      randBetween(0.3, 0.7), // startAngle
+      Math.PI - randBetween(0.3, 0.7) // endAngle
+    );
+    ctx13.stroke();
+  }
+  
+  function draw13() {
+    ctx13.fillStyle = "white";
+    ctx13.fillRect(0, 0, canvas13.width, canvas13.height);
+    
+    let gridSize = 8;
+    let tileSize = canvas13.width / gridSize;
+    
+    for (let x = 0; x < gridSize + 1; x++) {
+      for (let y = 0; y < gridSize + 2; y++) {
+        let _x = y % 2 === 0 ? x : x - 0.5;
+        _x += 0.5;
+        _y = y * ratio13;
+        _y += 0.5;
+        drawCircle13(_x * tileSize, _y * tileSize, tileSize / 2);
+      }
+    }
+  }
+  draw13();
+</script>
+<script>
+  const ctx12 = canvas12.getContext("2d");
+  canvas12.width = canvas12.height = 500;
+  
+  const ratio12 = Math.sqrt(3) / 2;
+  
+  function drawCircle12(x, y, radius) {
+    let numCircles = Math.round(randBetween(4, 8));
+    let hue = Math.random() * 360;
+    let invert = Math.random() < 0.5;
+    for (let i = numCircles; i > 0; i--) {
+      let ratio = i / numCircles;
+      let cRatio = invert ? 1 - ratio : ratio;
+      ctx12.fillStyle = `hsl(${hue + randBetween(-20, 20)}deg, 100%, ${(cRatio * 70) + 15}%)`;
+      ctx12.fillCircle(x, y, ratio * radius);
+      
+      ctx12.strokeStyle = `hsl(${hue}deg, 100%, 20%)`;
+      //ctx12.strokeCircle(x, y, ratio * radius);
+    }
+  }
+  
+  function draw12() {
+    ctx12.fillStyle = "white";
+    ctx12.fillRect(0, 0, canvas12.width, canvas12.height);
+    
+    let gridSize = 8;
+    let tileSize = canvas12.width / gridSize;
+    
+    for (let x = 0; x < gridSize + 1; x++) {
+      for (let y = 0; y < gridSize + 2; y++) {
+        let _x = y % 2 === 0 ? x : x - 0.5;
+        _x += 0.5;
+        _y = y * ratio12;
+        _y += 0.5;
+        drawCircle12(_x * tileSize, _y * tileSize, tileSize / 2);
+      }
+    }
+  }
+  draw12();
+</script>
+<script>
+  const ctx11 = canvas11.getContext("2d");
+  canvas11.width = canvas11.height = 500;
+  
+  const ratio11 = Math.sqrt(3) / 2;
+  
+  function drawCircle11(x, y, radius) {
+    ctx11.fillStyle = `hsl(${Math.random() * 360}deg, ${randBetween(50, 100)}%, ${randBetween(40, 60)}%)`;
+    ctx11.fillCircle(x, y, radius);
+  }
+  
+  function draw11() {
+    ctx11.fillStyle = "white";
+    ctx11.fillRect(0, 0, canvas11.width, canvas11.height);
+    
+    let gridSize = 8;
+    let tileSize = canvas11.width / gridSize;
+    
+    for (let x = 0; x < gridSize + 1; x++) {
+      for (let y = 0; y < gridSize + 2; y++) {
+        let _x = y % 2 === 0 ? x : x - 0.5;
+        _x += 0.5;
+        _y = y * ratio11;
+        _y += 0.5;
+        drawCircle11(_x * tileSize, _y * tileSize, tileSize / 2);
+      }
+    }
+  }
+  draw11();
+</script>
+<script>
+  const ctx62 = canvas62.getContext("2d");
+  canvas62.width = canvas62.height = 1000;
+  
+  let maxLayers62 = 18;
+  
+  let drawBtn62 = document.getElementById("draw-btn-62");
+  
+  let DragonCurve = {
+    x: 370,
+    y: 700,
+    directions: "R",
+    stepSize: 800,
+    iterations: 2
+  };
+  DragonCurve.iterate = function() {
+    this.iterations++;
+    if (this.iterations > maxLayers62) {
+      this.reset();
+      drawBtn62.innerHTML = "Next Layer";
+      return;
+    }
+    if (this.iterations === maxLayers62) drawBtn62.innerHTML = "Reset";
+    else drawBtn62.innerHTML = "Next Layer";
+    let reverse = this.directions.split("").reverse().join("");
+    reverse = reverse.replace(/R/g, "l");
+    reverse = reverse.replace(/L/g, "R");
+    reverse = reverse.replace(/l/g, "L");
+    this.directions += "R" + reverse;
+  };
+  DragonCurve.reset = function() {
+    this.iterations = 2;
+    this.directions = "R";
+    this.draw();
+  };
+  DragonCurve.draw = function() {
+    ctx62.fillStyle = "black";
+    ctx62.fillRect(0, 0, canvas62.width, canvas62.height);
+    let a = this.iterations * (-Math.PI / 4);
+    let x = this.x + (this.stepSize * Math.pow(Math.SQRT1_2, this.iterations)) * Math.cos(a);
+    let y = this.y + (this.stepSize * Math.pow(Math.SQRT1_2, this.iterations)) * Math.sin(a);
+    let s = this.stepSize * Math.pow(Math.SQRT1_2, this.iterations);
+    ctx62.lineJoin = ctx62.lineCap = "round";
+    ctx62.strokeStyle = "yellow";
+    ctx62.beginPath();
+    ctx62.moveTo(this.x, this.y);
+    ctx62.lineTo(x, y);
+    for (let i = 0; i < this.directions.length; i++) {
+      let oldX = x;
+      let oldY = y;
+      a += this.directions.charAt(i) === "R" ? Math.PI / 2 : -Math.PI / 2;
+      x += s * Math.cos(a);
+      y += s * Math.sin(a);
+      ctx62.lineTo(x, y);
+    }
+    ctx62.stroke();
+  };
+  function draw62() {
+    DragonCurve.iterate();
+    DragonCurve.draw();
+  }
+  DragonCurve.reset();
+  for (let i = 0; i < maxLayers62 - 2; i++) DragonCurve.iterate();
+  DragonCurve.draw()
+</script>
+<script>
+  const ctx33 = canvas33.getContext("2d");
+  canvas33.width = canvas33.height = 2000;
+  
+  let currLevel33 = 0;
+  let maxLevel33 = 7;
+  let hueVariation33 = 0.05;
+  let outline33 = true;
+  let fill33 = true;
+  let lineWidth33 = 2;
+  let reverseContrast33 = false;
+  
+  let drawBtn33 = document.getElementById("draw-btn-33");
+  
+  function Triangle33(a, b, c, hue) {
+    this.a = a;
+    this.b = b;
+    this.c = c;
+    this.hue = hue;
+    this.draw();
+  }
+  Triangle33.prototype.draw = function() {
+    let color = `hsl(${this.hue}deg, 100%, 50%)`;
+    let noColor = reverseContrast33 ? "white" : "black";
+    ctx33.fillStyle = fill33 ? color : noColor;
+    ctx33.strokeStyle = outline33 ? color : noColor;
+    ctx33.lineWidth = lineWidth33;
+    ctx33.beginPath();
+    ctx33.moveTo(this.a.x, this.a.y);
+    ctx33.lineTo(this.b.x, this.b.y);
+    ctx33.lineTo(this.c.x, this.c.y);
+    ctx33.lineTo(this.a.x, this.a.y);
+    if (fill33) ctx33.fill();
+    ctx33.stroke();
+  };
+  Triangle33.prototype.split = function() {
+    triangle33Array.splice(triangle33Array.indexOf(this), 1);
+    let m = {x: (this.a.x + this.b.x + this.c.x) / 3, y: (this.a.y + this.b.y + this.c.y) / 3};
+    triangle33Array.push(new Triangle33(this.a, this.b, m, this.randHue()));
+    triangle33Array.push(new Triangle33(this.b, this.c, m, this.randHue()));
+    triangle33Array.push(new Triangle33(this.c, this.a, m, this.randHue()));
+  };
+  Triangle33.prototype.randHue = function() {
+    let hue = this.hue + randBetween(-180 * hueVariation33, 180 * hueVariation33);
+    return (hue + 360) % 360;
+  }
+  let triangle33Array = [];
+  
+  function reset33() {
+    ctx33.fillStyle = reverseContrast33 ? "black" : "white";
+    ctx33.fillRect(0, 0, canvas33.width, canvas33.height);
+    triangle33Array = [];
+    let a = {x: 0, y: 0};
+    let b = {x: canvas33.width, y: 0};
+    let c = {x: canvas33.width, y: canvas33.height};
+    let d = {x: 0, y: canvas33.height};
+    let m = {x: canvas33.width * randBetween(0.1, 0.9), y: canvas33.height * randBetween(0.1, 0.9)};
+    triangle33Array.push(new Triangle33(a, b, m, Math.random() * 360));
+    triangle33Array.push(new Triangle33(b, c, m, Math.random() * 360));
+    triangle33Array.push(new Triangle33(c, d, m, Math.random() * 360));
+    triangle33Array.push(new Triangle33(a, d, m, Math.random() * 360));
+  }
+  
+  function splitTriangles33() {
+    ctx33.fillStyle = reverseContrast33 ? "black" : "white";
+    ctx33.fillRect(0, 0, canvas33.width, canvas33.height);
+    let copy = [];
+    for (let i = 0; i < triangle33Array.length; i++) copy.push(triangle33Array[i]);
+    for (let i = 0; i < copy.length; i++) copy[i].split();
+  }
+  
+  function redrawTriangles33() {
+    ctx33.fillStyle = reverseContrast33 ? "black" : "white";
+    ctx33.fillRect(0, 0, canvas33.width, canvas33.height);
+    for (let i = 0; i < triangle33Array.length; i++) triangle33Array[i].draw();
+  }
+  
+  function draw33() {
+    currLevel33++;
+    
+    if (currLevel33 === maxLevel33) drawBtn33.innerHTML = "Reset";
+    else drawBtn33.innerHTML = "Next Layer";
+    if (currLevel33 > maxLevel33) {
+      currLevel33 = 1;
+      reset33();
+    }
+    if (currLevel33 !== 1) splitTriangles33();
+  }
+  reset33();
+  draw33();
+  for (let i = 0; i < maxLevel33 - 1; i++) draw33();
+</script>
+<script>
+  const ctx31 = canvas31.getContext("2d");
+  canvas31.width = canvas31.height = 1000;
+  
+  let gridSize31 = 100;
+  let tileSize31 = canvas31.width / gridSize31;
+  let grid31 = [];
+  let hueStep31 = 1;
+  let numFixed31 = 0;
+  let stepsPerFrame31 = 10;
+  
+  function reset31() {
+    tileSize31 = canvas31.width / gridSize31;
+    grid31 = [];
+    for (let x = 0; x < gridSize31; x++) {
+      let row = [];
+      for (let y = 0; y < gridSize31; y++) {
+        row.push({hue: Math.random() * 360, fixed: false, brightness: 50});
+      }
+      grid31.push(row);
+    }
+    for (let i = 0; i < numFixed31; i++) {
+      grid31[Math.floor(Math.random() * gridSize31)][Math.floor(Math.random() * gridSize31)].fixed = true;
+    }
+    
+    drawGrid31();
+  }
+  
+  function getNeighbors31(x, y) {
+    let M = grid31[x][y].hue;
+    let T = grid31[x][(y - 1 + gridSize31) % gridSize31].hue;
+    let TR = grid31[(x + 1) % gridSize31][(y - 1 + gridSize31) % gridSize31].hue;
+    let R = grid31[(x + 1) % gridSize31][y].hue;
+    let BR = grid31[(x + 1) % gridSize31][(y + 1) % gridSize31].hue;
+    let B = grid31[x][(y + 1) % gridSize31].hue;
+    let BL = grid31[(x - 1 + gridSize31) % gridSize31][(y + 1) % gridSize31].hue;
+    let L = grid31[(x - 1 + gridSize31) % gridSize31][y].hue;
+    let TL = grid31[(x - 1 + gridSize31) % gridSize31][(y - 1 + gridSize31) % gridSize31].hue;
+    return [M, T, TR, R, BR, B, BL, L, TL];
+  }
+  
+  function averageGrid31() {
+    let nextGrid = [];
+    for (let x = 0; x < gridSize31; x++) {
+      let row = [];
+      for (let y = 0; y < gridSize31; y++) {
+        row.push({hue: 0, fixed: false, brightness: 50});
+      }
+      nextGrid.push(row);
+    }
+    
+    for (let x = 0; x < gridSize31; x++) {
+      for (let y = 0; y < gridSize31; y++) {
+        if (!grid31[x][y].fixed) {
+          let neighbors = getNeighbors31(x, y);
+          let _x = 0;
+          let _y = 0;
+          for (let i = 0; i < neighbors.length; i++) {
+            let d = 1//Math.random() * 5;
+            _x += d * Math.cos(toRad(neighbors[i]));
+            _y += d * Math.sin(toRad(neighbors[i]));
+          }
+          let a = Math.atan2(_y, _x);
+          nextGrid[x][y].hue = toDeg(a);
+          //let dist = Math.sqrt((_x * _x) + (_y * _y));
+          //nextGrid[x][y].brightness = 1000 / (dist * dist);
+        }
+        else {
+          nextGrid[x][y].hue = (grid31[x][y].hue + hueStep31) % 360;
+        }
+        nextGrid[x][y].fixed = grid31[x][y].fixed;
+      }
+    }
+    
+    grid31 = nextGrid;
+  }
+  function drawGrid31() {
+    for (let x = 0; x < gridSize31; x++) {
+      for (let y = 0; y < gridSize31; y++) {
+         ctx31.fillStyle = `hsl(${grid31[x][y].hue}deg, 100%, ${grid31[x][y].brightness}%)`;
+         ctx31.fillRect(x * tileSize31, y * tileSize31, tileSize31, tileSize31);
+         if (grid31[x][y].fixed) {
+           ctx31.fillStyle = "black";
+           ctx31.fillCircle((x + 0.5) * tileSize31, (y + 0.5) * tileSize31, tileSize31 / 4);
+         }
+      }
+    }
+  }
+  
+  function draw31() {
+    ctx31.clearRect(0, 0, canvas31.width, canvas31.height);
+    
+    reset31();
+    
+    for (let j = 0; j < stepsPerFrame31; j++) averageGrid31();
+    
+    drawGrid31();
+  }
+  draw31();
+</script>
+<script>
+  const ctx27 = canvas27.getContext("2d");
+  canvas27.width = canvas27.height = 1000;
+  
+  let grid27 = [];
+  let gridSize27 = 200;
+  let tileSize27 = canvas27.width / gridSize27;
+  let stepsPerFrame27 = 5000000;
+  let turnChance27 = 0.05;
+  let hueStep27 = 0.05;
+  let stickiness27 = 1;
+  let drawMode27 = 1;
+  let numPixels27 = 0;
+  let spawnMode27 = 1;
+  
+  let Walker27 = {};
+  Walker27.newPos = function() {
+    if (spawnMode27 === 1) {
+      let side = Math.floor(Math.random() * 4);
+      if (side === 0) { // Left
+        this.x = 0;
+        this.y = Math.floor(Math.random() * gridSize27);
+        this.dir = 1;
+      }
+      else if (side === 1) { // Top
+        this.x = Math.floor(Math.random() * gridSize27);
+        this.y = 0;
+        this.dir = 2;
+      }
+      else if (side === 2) { // Right
+        this.x = gridSize27 - 1;
+        this.y = Math.floor(Math.random() * gridSize27);
+        this.dir = 3;
+      }
+      else { // Bottom
+        this.x = Math.floor(Math.random() * gridSize27);
+        this.y = gridSize27 - 1;
+        this.dir = 0;
+      }
+    }
+    else if (spawnMode27 === 2) {
+      this.x = Math.floor(Math.random() * gridSize27);
+      this.y = 0;
+      this.dir = 2;
+    }
+    if (grid27[this.x][this.y]) this.running = false;
+  };
+  Walker27.walk = function() {
+    if (!this.running) return;
+    if (Math.random() < turnChance27) this.dir = Math.floor(Math.random() * 4);
+    if (this.dir === 0) this.y--; // Up
+    else if (this.dir === 1) this.x++; // Right
+    else if (this.dir === 2) this.y++; // Down
+    else this.x--; // Left
+    this.x = (this.x + gridSize27) % gridSize27;
+    if (spawnMode27 === 2) {
+      if (this.y < 0) this.y = 0;
+    }
+    this.y = (this.y + gridSize27) % gridSize27;
+    
+    let middle = grid27[this.x][this.y];
+    let top = grid27[this.x][(this.y - 1 + gridSize27) % gridSize27];
+    if (spawnMode27 === 2) {
+      if (this.y === 0) top = false;
+    }
+    let right = grid27[(this.x + 1) % gridSize27][this.y];
+    let bottom = grid27[this.x][(this.y + 1) % gridSize27];
+    let left = grid27[(this.x - 1 + gridSize27) % gridSize27][this.y];
+    
+    if ((middle || top || right || bottom || left) && Math.random() < stickiness27) {
+      if (!middle) {
+        grid27[this.x][this.y] = true;
+        ctx27.fillStyle = `hsl(${this.hue}deg, 100%, 50%)`;
+        if (drawMode27 === 1) ctx27.fillRect(this.x * tileSize27, this.y * tileSize27, tileSize27, tileSize27);
+        else if (drawMode27 === 2) {
+          ctx27.globalAlpha = 0.1;
+          ctx27.fillCircle(this.x * tileSize27, this.y * tileSize27, tileSize27 * 3);
+          ctx27.globalAlpha = 1;
+        }
+        this.hue += hueStep27;
+        numPixels27++;
+      }
+      this.newPos();
+    }
+  };
+  function reset27() {
+    ctx27.fillStyle = "black";
+    ctx27.fillRect(0, 0, canvas27.width, canvas27.height);
+    
+    tileSize27 = canvas27.width / gridSize27;
+    grid27 = [];
+    for (let x = 0; x < gridSize27; x++) {
+      let row = [];
+      for (let y = 0; y < gridSize27; y++) {
+        row.push(false);
+      }
+      grid27.push(row);
+    }
+    
+    numPixels27 = 0;
+    Walker27.hue = Math.random() * 360;
+    ctx27.fillStyle = `hsl(${Walker27.hue}deg, 100%, 50%)`;
+    
+    let _x = 0;
+    let _y = 0;
+    if (spawnMode27 === 1) {
+      _x = Math.floor(gridSize27 / 2);
+      _y = Math.floor(gridSize27 / 2);
+      grid27[_x][_y] = true;
+      ctx27.fillRect(_x * tileSize27, _y * tileSize27, tileSize27, tileSize27);
+      numPixels27++;
+    }
+    else if (spawnMode27 === 2) {
+      for (let x = 0; x < gridSize27; x++) {
+        grid27[x][gridSize27 - 1] = true;
+        Walker27.hue += hueStep27;
+        ctx27.fillStyle = `hsl(${Walker27.hue}deg, 100%, 50%)`;
+        ctx27.fillRect(x * tileSize27, (gridSize27 - 1) * tileSize27, tileSize27, tileSize27);
+        numPixels27++;
+      }
+    }
+    
+    Walker27.running = true;
+    Walker27.newPos();
+  }
+  reset27();
+  
+  function draw27() {
+    reset27();
+    for (let i = 0; i < stepsPerFrame27; i++) Walker27.walk();
+  }
+  draw27();
+</script>
+<script>
+  const ctx10 = canvas10.getContext("2d");
+  canvas10.width = canvas10.height = 1000;
+  
+  let pixelIntensity10 = 6;
+  let pixelHue10 = 0;
+  let pixelMode10 = 1; // 0: Single color | 1: Rainbow | 2: Black or white
+  let grayscalePixels10 = false;
+  let inversePixels10 = true;
+  let gridSize10 = 250;
+  let tileSize10 = canvas10.width / gridSize10;
+  
+  let pixelArray10 = [];
+  for (let x = 0; x < gridSize10; x++) {
+    let row = [];
+    for (let y = 0; y < gridSize10; y++) {
+      row.push(0);
+    }
+    pixelArray10.push(row);
+  }
+  
+  
+  
+  let Walker10 = {
+    x: Math.floor(gridSize10 / 2),
+    y: Math.floor(gridSize10 / 2),
+    iterations: 0,
+    iterationsPerStep: 100000,
+    direction: Math.floor(Math.random() * 8),
+    turnChance: 1
+  };
+  
+  Walker10.walk = function() {
+    for (let i = 0; i < this.iterationsPerStep; i++) {
+      this.iterations++;
+      if (Math.random() <= this.turnChance) this.direction = Math.floor(Math.random() * 8);
+      if (this.direction == 0) this.y = ((this.y - 1) + gridSize10) % gridSize10;
+      else if (this.direction == 1) {
+        this.x = (this.x + 1) % gridSize10;
+        this.y = ((this.y - 1) + gridSize10) % gridSize10;
+      }
+      else if (this.direction == 2) this.x = (this.x + 1) % gridSize10;
+      else if (this.direction == 3) {
+        this.x = (this.x + 1) % gridSize10;
+        this.y = (this.y + 1) % gridSize10;
+      }
+      else if (this.direction == 4) this.y = (this.y + 1) % gridSize10;
+      else if (this.direction == 5) {
+        this.x = ((this.x - 1) + gridSize10) % gridSize10;
+        this.y = (this.y + 1) % gridSize10;
+      }
+      else if (this.direction == 6) this.x = ((this.x - 1) + gridSize10) % gridSize10;
+      else {
+        this.x = ((this.x - 1) + gridSize10) % gridSize10;
+        this.y = ((this.y - 1) + gridSize10) % gridSize10;
+      }
+      pixelArray10[this.x][this.y]++;
+    }
+    drawPixels10();
+  };
+  
+  function drawPixels10() {
+    ctx10.clearRect(0, 0, canvas10.width, canvas10.height);
+    let highestWeight = 0;
+    for (let x = 0; x < gridSize10; x++) {
+      for (let y = 0; y < gridSize10; y++) {
+        if (pixelArray10[x][y] > highestWeight) highestWeight = pixelArray10[x][y];
+      }
+    }
+    for (let x = 0; x < gridSize10; x++) {
+      for (let y = 0; y < gridSize10; y++) {
+        let brightness;
+        if (inversePixels10) brightness = ((pixelArray10[x][y] / highestWeight) * 100 * pixelIntensity10);
+        else brightness = 100 - ((pixelArray10[x][y] / highestWeight) * 100 * pixelIntensity10);
+        if (pixelMode10 == 0) { // Single color
+          ctx10.fillStyle = `hsl(${pixelHue10}deg, ${grayscalePixels10 ? 0 : 100}%, ${brightness}%)`;
+        }
+        else if (pixelMode10 == 1) { // Rainbow colors
+          ctx10.fillStyle = `hsl(${pixelHue10 + ((x / gridSize10) * 360)}deg, ${grayscalePixels10 ? 0 : 100}%, ${brightness}%)`;
+        }
+        else { // Black or white
+          ctx10.fillStyle = brightness >= 50 ? "white" : "black";
+        }
+        ctx10.fillRect(x * tileSize10, y * tileSize10, tileSize10, tileSize10);
+      }
+    }
+  }
+  
+  function draw10() {
+    ctx10.clearRect(0, 0, canvas10.width, canvas10.height);
+    
+    pixelHue10 = Math.random() * 360;
+    
+    pixelArray10 = [];
+    for (let x = 0; x < gridSize10; x++) {
+      let row = [];
+      for (let y = 0; y < gridSize10; y++) {
+        row.push(0);
+      }
+      pixelArray10.push(row);
+    }
+    Walker10.x = Math.floor(gridSize10 / 2);
+    Walker10.y = Math.floor(gridSize10 / 2);
+    Walker10.iterations = 0;
+    Walker10.walk();
+  }
+  draw10();
+</script>
+<script>
+  const ctx82 = canvas82.getContext("2d");
+  canvas82.width = canvas82.height = 1500;
+  
+  let Tree82 = {
+    startX: 0.5,
+    startY: 0.9,
+    startLength: 250,
+    startAngle: 270,
+    startWidth: 15,
+    minWidth: 0.5,
+    maxSplits: 8,
+    minSplits: 2,
+    maxLayers: 7,
+    startHue: 0,
+    startBend: 0.5,
+    startLerp: 0.5,
+    currentTotalBranches: 0,
+    stopped: false,
+    leafChance: 0.5,
+    minRandLengthRatio: 0.5,
+    minRandWidthRatio: 0.5,
+    randOffsetAngle: 45,
+    randOffsetHue: 30,
+    randBend: 0.5
+  };
+  Tree82.draw = function() {
+    ctx82.globalAlpha = 1;
+    ctx82.fillStyle = "black";
+    ctx82.fillRect(0, 0, canvas82.width, canvas82.height);
+    ctx82.lineCap = ctx82.lineJoin = "round";
+    ctx82.globalAlpha = 0.5;
+    this.startHue = Math.random() * 360;
+    this.startBend = randBetween(-this.randBend / 2, this.randBend / 2);
+    this.startLerp = Math.random();
+    this.currentTotalBranches = 0;
+    this.stopped = false;
+    this.drawBranch(this.startX * canvas82.width, this.startY * canvas82.height, this.startLength, this.startBend, this.startLerp, this.startWidth, this.startAngle, this.startHue, 1);
+  };
+  Tree82.drawBranch = function(x, y, length, bend, lerp, width, angle, hue, currLayer) {
+    if (currLayer > this.maxLayers || this.stopped) return;
+    this.currentTotalBranches++;
+    if (this.currentTotalBranches >= 100000) {
+      this.stopped = true;
+      return;
+    }
+    let endX = x + (length * Math.cos(toRad(angle)));
+    let endY = y + (length * Math.sin(toRad(angle)));
+    let dx = endX - x;
+    let dy = endY - y;
+    let midpointX = ((1 - lerp) * x) + (lerp * endX);
+    let midpointY = ((1 - lerp) * y) + (lerp * endY);
+    let normal = toRad(angle + 90);
+    let controlX = midpointX + (length * bend * Math.cos(normal));
+    let controlY = midpointY + (length * bend * Math.sin(normal));
+    ctx82.lineWidth = Math.max(width, this.minWidth);
+    ctx82.strokeStyle = `hsl(${hue}deg, 100%, 30%)`;
+    ctx82.beginPath();
+    ctx82.moveTo(x, y);
+    ctx82.quadraticCurveTo(controlX, controlY, endX, endY);
+    ctx82.stroke();
+    let splits = Math.round(randBetween(this.minSplits, this.maxSplits));
+    if (currLayer === this.maxLayers || splits === 0) {
+      if (Math.random() > this.leafChance) return;
+      let lengthRatio = randBetween(this.minRandLengthRatio, 0.9);
+      let offsetAngle = randBetween(-this.randOffsetAngle, this.randOffsetAngle);
+      let offsetHue = randBetween(-this.randOffsetHue, this.randOffsetHue);
+      let bend = randBetween(0.25, 0.5);
+      let lerp = Math.random();
+      this.drawLeaf(endX, endY, length * lengthRatio, bend, lerp, angle + offsetAngle, hue + offsetHue);
+      return;
+    }
+    for (let i = 0; i < splits; i++) {
+      let lengthRatio = randBetween(this.minRandLengthRatio, 0.9);
+      let widthRatio = randBetween(this.minRandWidthRatio, 0.9);
+      let offsetAngle = randBetween(-this.randOffsetAngle, this.randOffsetAngle);
+      let offsetHue = randBetween(-this.randOffsetHue, this.randOffsetHue);
+      let bend = randBetween(-this.randBend, this.randBend);
+      let lerp = Math.random();
+      this.drawBranch(endX, endY, length * lengthRatio, bend, lerp, width * widthRatio, angle + offsetAngle, hue + offsetHue, currLayer + 1);
+    }
+  };
+  Tree82.drawLeaf = function(x, y, length, bend, lerp, angle, hue) {
+    this.currentTotalBranches++;
+    ctx82.fillStyle = `hsl(${hue}deg, 100%, 70%)`;
+    let endX = x + (length * Math.cos(toRad(angle)));
+    let endY = y + (length * Math.sin(toRad(angle)));
+    let dx = endX - x;
+    let dy = endY - y;
+    let normal = toRad(angle + 90);
+    let midpointX1 = ((1 - lerp) * x) + (lerp * endX);
+    let midpointY1 = ((1 - lerp) * y) + (lerp * endY);
+    let controlX1 = midpointX1 + (length * -bend * Math.cos(normal));
+    let controlY1 = midpointY1 + (length * -bend * Math.sin(normal));
+    let midpointX2 = ((1 - lerp) * x) + (lerp * endX);
+    let midpointY2 = ((1 - lerp) * y) + (lerp * endY);
+    let controlX2 = midpointX2 + (length * bend * Math.cos(normal));
+    let controlY2 = midpointY2 + (length * bend * Math.sin(normal));
+    ctx82.beginPath();
+    ctx82.moveTo(x, y);
+    ctx82.quadraticCurveTo(controlX1, controlY1, endX, endY);
+    ctx82.quadraticCurveTo(controlX2, controlY2, x, y);
+    ctx82.fill();
+  };
+  
+  function draw82() {
+    Tree82.draw();
+  }
+  draw82();
+</script>
+<script>
+  const ctx22 = canvas22.getContext("2d");
+  canvas22.width = canvas22.height = 2000;
+  
+  let maxCircles22 = 2000;
+  let canvas22Filled = false;
+  let minCircle22Size = 10;
+  let maxCircle22Size = 200;
+  let outline22 = true;
+  let fill22 = true;
+  let circle22SizeRatio = 1.2;
+  let reverseContrast22 = false;
+  let yellowMode22 = false;
+  let opacity22 = 1;
+  
+  function Circle22() {
+    let x = Math.random() * canvas22.width;
+    let y = Math.random() * canvas22.height;
+    let tries = 0;
+    while (!validatePoint22(x, y)) {
+      if (tries > 1000) {
+        canvas22Filled = true;
+        return;
+      }
+      x = Math.random() * canvas22.width;
+      y = Math.random() * canvas22.height;
+      tries++;
+    }
+    this.x = x;
+    this.y = y;
+    this.radius = 0;
+    this.grow();
+  }
+  Circle22.prototype.grow = function() {
+    let smallestDist = Infinity;
+    for (let i = 0; i < circle22Array.length; i++) {
+      if (i != circle22Array.indexOf(this)) {
+        let dx = this.x - circle22Array[i].x;
+        let dy = this.y - circle22Array[i].y;
+        let distSq = (dx * dx) + (dy * dy);
+        let dist = Math.sqrt(distSq) - circle22Array[i].radius;
+        if (dist <= smallestDist) smallestDist = dist;
+      }
+    }
+    let distToTop = this.y;
+    if (distToTop <= smallestDist) smallestDist = distToTop;
+    let distToRight = canvas22.width - this.x;
+    if (distToRight <= smallestDist) smallestDist = distToRight;
+    let distToBottom = canvas22.height - this.y;
+    if (distToBottom <= smallestDist) smallestDist = distToBottom;
+    let distToLeft = this.x;
+    if (distToLeft <= smallestDist) smallestDist = distToLeft;
+    this.radius = Math.min(smallestDist, maxCircle22Size);
+    drawFace22(this.x, this.y, this.radius * circle22SizeRatio);
+  };
+  
+  function drawFace22(x, y, radius) {
+    ctx22.fillStyle = `hsl(${Math.random() * 360}deg, ${randBetween(80, 100)}%, ${randBetween(40, 60)}%)`;
+    if (yellowMode22) ctx22.fillStyle = reverseContrast22 ? "blue" : "yellow";
+    ctx22.strokeStyle = reverseContrast22 ? "white" : "black";
+    ctx22.lineWidth = Math.min(radius / 5, 5);//5;
+    ctx22.beginPath();
+    ctx22.arc(x, y, radius, 0, Math.PI * 2);
+    if (fill22) ctx22.fill();
+    if (outline22) ctx22.stroke();
+    
+    ctx22.fillStyle = reverseContrast22 ? "white" : "black";
+    ctx22.fillCircle(x - (radius * randBetween(0.3, 0.5)), y - (radius * randBetween(0.1, 0.3)), radius * 0.1);
+    ctx22.fillCircle(x + (radius * randBetween(0.3, 0.5)), y - (radius * randBetween(0.1, 0.3)), radius * 0.1);
+    
+    ctx22.lineWidth = radius / 12;
+    ctx22.lineCap = ctx22.lineJoin = "round";
+    ctx22.beginPath();
+    ctx22.ellipse(
+      x + (radius * randBetween(-0.1, 0.1)), // x
+      y + (radius * randBetween(0.1, 0.3)), // y
+      radius * randBetween(0.5, 0.7), // radiusX
+      radius * randBetween(0.3, 0.5), // radiusY
+      toRad(randBetween(-5, 5)), // rotation
+      randBetween(0.3, 0.7), // startAngle
+      Math.PI - randBetween(0.3, 0.7) // endAngle
+    );
+    ctx22.stroke();
+  }
+  let circle22Array = [];
+  
+  function validatePoint22(x, y) {
+    for (let i = 0; i < circle22Array.length; i++) {
+      let dx = circle22Array[i].x - x;
+      let dy = circle22Array[i].y - y;
+      let distSq = (dx * dx) + (dy * dy);
+      let r = circle22Array[i].radius + minCircle22Size;
+      if (distSq <= r * r) return false; // Too close to a circle
+    }
+    if (x < minCircle22Size || x > canvas22.width - minCircle22Size) return false; // Too close to left/right
+    if (y < minCircle22Size || y > canvas22.height - minCircle22Size) return false; // Too close to top/bottom
+    return true;
+  }
+  
+  function draw22() {
+    ctx22.globalAlpha = 1;
+    ctx22.fillStyle = reverseContrast22 ? "black" : "white";
+    ctx22.fillRect(0, 0, canvas22.width, canvas22.height);
+    ctx22.globalAlpha = opacity22;
+    canvas22Filled = false;
+    circle22Array = [];
+    while (circle22Array.length < maxCircles22 && !canvas22Filled) circle22Array.push(new Circle22());
+  }
+  draw22();
+</script>
+<script>
+  const ctx42 = canvas42.getContext("2d");
+  canvas42.width = canvas42.height = 1000;
+  
+  let maxCircle42Radius = 2000;
+  let stepsPerFrame42 = 25;
+  let hue42 = 0;
+  let maxCircles42 = 1000;
+  let hueVariation42 = 0.1;
+  let brightness42 = 50;
+  let brightnessVariation42 = 0.2;
+  let opacity42 = 0.4;
+  let circle42SizeRatio = 1;
+  let outline42 = true;
+  let fill42 = true;
+  
+  function Circle42() {
+    if (circle42Array.length >= maxCircles42) return;
+    
+    this.x = Math.random() * canvas42.width;
+    this.y = Math.random() * canvas42.height;
+    
+    let minDist = Infinity;
+    for (let i = 0; i < circle42Array.length; i++) {
+      let dx = circle42Array[i].x - this.x;
+      let dy = circle42Array[i].y - this.y;
+      let dist = Math.abs(Math.sqrt((dx * dx) + (dy * dy)) - circle42Array[i].radius);
+      if (dist < minDist) minDist = dist;
+    }
+    if (minDist > maxCircle42Radius) minDist = maxCircle42Radius;
+    if (circle42Array.length === 0) minDist = 2000;
+    
+    this.radius = minDist;
+    
+    circle42Array.push(this);
+    
+    this.draw();
+  }
+  Circle42.prototype.draw = function() {
+    let h = hue42 + randBetween(-180 * hueVariation42, 180 * hueVariation42);
+    let s = randBetween(50, 100);
+    let l = 0;
+    if (Math.random() >= 0.5) l = brightness42 * (1 - (Math.random() * brightnessVariation42));
+    else l = ((100 - brightness42) * Math.random() * brightnessVariation42) + brightness42;
+    
+    ctx42.fillStyle = `hsla(${h}deg, ${s}%, ${l}%, ${opacity42})`;
+    ctx42.strokeStyle = "black";
+    ctx42.lineWidth = 1;
+    
+    ctx42.beginPath();
+    ctx42.arc(this.x, this.y, this.radius * circle42SizeRatio, 0, Math.PI * 2);
+    if (fill42) ctx42.fill();
+    if (outline42) ctx42.stroke();
+  };
+  let circle42Array = [];
+  
+  function draw42() {
+    ctx42.fillStyle = "white";
+    ctx42.fillRect(0, 0, canvas42.width, canvas42.height);
+    
+    hue42 = Math.random() * 360;
+    hueVariation42 = Math.random() < 0.7 ? randBetween(0.2, 0.5) : Math.random(); // 70% chance to have less extreme values
+    brightness42 = Math.random() < 0.7 ? randBetween(30, 60) : (Math.random() * 100); // 70% chance to have less extreme values
+    brightnessVariation42 = Math.random();
+    opacity42 = Math.random() < 0.5 ? randBetween(0.3, 0.6) : randBetween(0.6, 1); // 50% chance to be lighter or darker
+    outline42 = Math.random() < 0.7; // 70% chance to have outline on
+    if (outline42 && Math.random() < 0.1) fill42 = false; // If outline is on, 10% chance to have no fill
+    else fill42 = true;
+    maxCircle42Radius = Math.random() < 0.5 ? randBetween(50, 250) : randBetween(500, 1000); // 50% chance to generate smaller circles or bigger circles
+    
+    circle42Array = [];
+    
+    while (circle42Array.length < maxCircles42) new Circle42();
+  }
+  draw42();
+</script>
+<script>
+  const ctx53 = canvas53.getContext("2d");
+  canvas53.width = canvas53.height = 1000;
+  
+  let columns53 = 10;
+  let rows53 = 100;
+  let drawChance53 = 0.5;
+  let brightness53 = 50;
+  let brightnessVariation53 = 1;
+  let outline53 = false;
+  let saturation53 = 50;
+  let hueVariation53 = 0.1;
+  let whiteLines53 = true;
+  
+  function drawDiamond53(x, y, size, color, outline) {
+    ctx53.fillStyle = color;
+    
+    ctx53.lineWidth = 1;
+    ctx53.strokeStyle = "black";
+    
+    let half = size / 2;
+    
+    ctx53.beginPath();
+    ctx53.moveTo(x, y);
+    ctx53.lineTo(x + half, y + half);
+    ctx53.lineTo(x + size, y);
+    ctx53.lineTo(x + half, y - half);
+    ctx53.lineTo(x, y);
+    
+    ctx53.fill();
+    if (outline) ctx53.stroke();
+  }
+  
+  function draw53() {
+    ctx53.fillStyle = "white";
+    ctx53.fillRect(0, 0, canvas53.width, canvas53.height);
+    
+    columns53 = Math.round(randBetween(2, 16));
+    rows53 = Math.random() < 0.5 ? Math.round(randBetween(25, 50)) : Math.round(randBetween(100, 200));
+    
+    let arr = [0.2, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1];
+    drawChance53 = arr[Math.floor(Math.random() * arr.length)];
+    
+    brightness53 = Math.round(randBetween(0, 10)) * 10;
+    
+    outline53 = Math.random() < 0.25;
+    
+    brightnessVariation53 = Math.random();
+    
+    saturation53 = randBetween(0, 100);
+    
+    hueVariation53 = Math.random() * Math.random();
+    
+    
+    
+    let scaleX = canvas53.width / columns53;
+    let scaleY = canvas53.height / rows53;
+    let offsetY = Math.ceil(scaleX / scaleY);
+    
+    for (let x = 0; x < columns53; x++) {
+      let hue = Math.random() * 360;
+      let vHue = randSign() * (randBetween(90, 360) / rows53);
+      
+      for (let y = -offsetY; y < rows53 + offsetY; y++) {
+        let _y1 = y * scaleY;
+        let _y2 = x % 2 === 0 ? _y1 : canvas53.height - _y1;
+        
+        let brightness = 0;
+        if (Math.random() < 0.5) brightness = randBetween(brightness53, ((100 - brightness53) * brightnessVariation53) + brightness53);
+        else brightness = randBetween(brightness53, brightness53 * (1 - brightnessVariation53));
+        
+        if (Math.random() < drawChance53) drawDiamond53(x * scaleX, _y2, scaleX, `hsl(${hue + randBetween(-180 * hueVariation53, 180 * hueVariation53)}deg, ${randBetween(saturation53, 100)}%, ${brightness}%)`, outline53);
+        
+        hue += vHue;
+      }
+    }
+    
+    if (whiteLines53) {
+      for (let x = 0; x <= columns53; x++) {
+        let _x = x * scaleX;
+        ctx53.lineWidth = scaleY;
+        ctx53.strokeStyle = "white";
+        
+        ctx53.beginPath();
+        ctx53.moveTo(_x, 0);
+        ctx53.lineTo(_x, canvas53.height);
+        ctx53.stroke();
+      }
+    }
+  }
+  draw53();
+</script>
+<script>
+  const ctx9 = canvas9.getContext("2d");
+  canvas9.width = canvas9.height = 500;
+  
+  let maxLayers9 = 11;
+  let drawBtn9 = document.getElementById("draw-btn-9");
+  let angleOffset9Txt = document.getElementById("angle-offset-9-txt");
+  let angleOffset9 = Math.round(randBetween(15, 90));
+  angleOffset9Txt.innerHTML = angleOffset9 * 2;
+  
+  function drawBranch9(x, y, length, angle, layer) {
+    if (layer > maxLayers9) return;
+    
+    let endX = x + (length * Math.cos(toRad(angle)));
+    let endY = y + (length * Math.sin(toRad(angle)));
+    
+    ctx9.strokeStyle = "white";
+    ctx9.lineWidth = 2;
+    ctx9.lineCap = ctx9.lineJoin = "round";
+    ctx9.beginPath();
+    ctx9.moveTo(x, y);
+    ctx9.lineTo(endX, endY);
+    ctx9.stroke();
+    
+    let newLength = length * 0.65;
+    
+    drawBranch9(endX, endY, newLength, angle - angleOffset9, layer + 1);
+    drawBranch9(endX, endY, newLength, angle + angleOffset9, layer + 1);
+  }
+  
+  function draw9() {
+    ctx9.fillStyle = "black";
+    ctx9.fillRect(0, 0, canvas9.width, canvas9.height);
+    
+    maxLayers9++;
+    if (maxLayers9 === 12) drawBtn9.innerHTML = "Reset";
+    else drawBtn9.innerHTML = "Next Layer";
+    if (maxLayers9 > 12) {
+      maxLayers9 = 1;
+      angleOffset9 = Math.round(randBetween(15, 90));
+      angleOffset9Txt.innerHTML = angleOffset9 * 2;
+    }
+    
+    drawBranch9(canvas9.width / 2, canvas9.height - 50, 150, 270, 1);
+  }
+  draw9();
+</script>
+<script>
+  const ctx8 = canvas8.getContext("2d");
+  canvas8.width = canvas8.height = 500;
+  
+  let maxLayers8 = 11;
+  let drawBtn8 = document.getElementById("draw-btn-8");
+  
+  function drawBranch8(x, y, length, hue, angle, layer) {
+    if (layer > maxLayers8) return;
+    
+    let endX = x + (length * Math.cos(toRad(angle)));
+    let endY = y + (length * Math.sin(toRad(angle)));
+    
+    ctx8.strokeStyle = `hsl(${hue}deg, 100%, 50%)`;
+    ctx8.lineWidth = 2;
+    ctx8.lineCap = ctx8.lineJoin = "round";
+    ctx8.beginPath();
+    ctx8.moveTo(x, y);
+    ctx8.lineTo(endX, endY);
+    ctx8.stroke();
+    
+    let newLength = length * 0.65;
+    
+    drawBranch8(endX, endY, newLength, hue - 30, angle - 45, layer + 1);
+    drawBranch8(endX, endY, newLength, hue + 30, angle + 45, layer + 1);
+  }
+  
+  function draw8() {
+    ctx8.fillStyle = "black";
+    ctx8.fillRect(0, 0, canvas8.width, canvas8.height);
+    
+    maxLayers8++;
+    if (maxLayers8 === 12) drawBtn8.innerHTML = "Reset";
+    else drawBtn8.innerHTML = "Next Layer";
+    if (maxLayers8 > 12) maxLayers8 = 1;
+    
+    drawBranch8(canvas8.width / 2, canvas8.height - 50, 150, 0, 270, 1);
+  }
+  draw8();
+</script>
+<script>
+  const ctx7 = canvas7.getContext("2d");
+  canvas7.width = canvas7.height = 500;
+  
+  let maxLayers7 = 11;
+  let hue7 = Math.random() * 360;
+  let drawBtn7 = document.getElementById("draw-btn-7");
+  
+  function drawBranch7(x, y, length, lineWidth, brightness, angle, layer) {
+    if (layer > maxLayers7) return;
+    
+    let endX = x + (length * Math.cos(toRad(angle)));
+    let endY = y + (length * Math.sin(toRad(angle)));
+    
+    ctx7.strokeStyle = `hsl(${hue7}deg, 100%, ${brightness}%)`;
+    ctx7.lineWidth = lineWidth;
+    ctx7.lineCap = ctx7.lineJoin = "round";
+    ctx7.beginPath();
+    ctx7.moveTo(x, y);
+    ctx7.lineTo(endX, endY);
+    ctx7.stroke();
+    
+    let newLength = length * 0.65;
+    let newLineWidth = lineWidth * 0.8;
+    let newBrightness = brightness - 5;
+    
+    drawBranch7(endX, endY, newLength, newLineWidth, newBrightness, angle - 45, layer + 1);
+    drawBranch7(endX, endY, newLength, newLineWidth, newBrightness, angle + 45, layer + 1);
+  }
+  
+  function draw7() {
+    ctx7.fillStyle = "black";
+    ctx7.fillRect(0, 0, canvas7.width, canvas7.height);
+    
+    maxLayers7++;
+    if (maxLayers7 === 12) drawBtn7.innerHTML = "Reset";
+    else drawBtn7.innerHTML = "Next Layer";
+    if (maxLayers7 > 12) {
+      maxLayers7 = 1;
+      hue7 = Math.random() * 360;
+    }
+    
+    drawBranch7(canvas7.width / 2, canvas7.height - 50, 150, 10, 70, 270, 1);
+  }
+  draw7();
+</script>
+<script>
+  const ctx6 = canvas6.getContext("2d");
+  canvas6.width = canvas6.height = 500;
+  
+  let maxLayers6 = 11;
+  let drawBtn6 = document.getElementById("draw-btn-6");
+  
+  function drawBranch6(x, y, length, angle, layer) {
+    if (layer > maxLayers6) return;
+    
+    let endX = x + (length * Math.cos(toRad(angle)));
+    let endY = y + (length * Math.sin(toRad(angle)));
+    
+    ctx6.strokeStyle = "white";
+    ctx6.lineWidth = 2;
+    ctx6.lineCap = ctx6.lineJoin = "round";
+    ctx6.beginPath();
+    ctx6.moveTo(x, y);
+    ctx6.lineTo(endX, endY);
+    ctx6.stroke();
+    
+    let newLength = length * 0.65;
+    
+    drawBranch6(endX, endY, newLength, angle - 45, layer + 1);
+    drawBranch6(endX, endY, newLength, angle + 45, layer + 1);
+  }
+  
+  function draw6() {
+    ctx6.fillStyle = "black";
+    ctx6.fillRect(0, 0, canvas6.width, canvas6.height);
+    
+    maxLayers6++;
+    if (maxLayers6 === 12) drawBtn6.innerHTML = "Reset";
+    else drawBtn6.innerHTML = "Next Layer";
+    if (maxLayers6 > 12) maxLayers6 = 1;
+    
+    drawBranch6(canvas6.width / 2, canvas6.height - 50, 150, 270, 1);
+  }
+  draw6();
+</script>
+<script>
+  const ctx5 = canvas5.getContext("2d");
+  canvas5.width = canvas5.height = 500;
+  
+  function draw5() {
+    ctx5.fillStyle = "black";
+    ctx5.fillRect(0, 0, canvas5.width, canvas5.height);
+    
+    let gridSize = 100;
+    let tileSize = canvas5.width / gridSize;
+    
+    let cx = Math.floor(gridSize / 2);
+    let cy = Math.floor(gridSize / 2);
+    
+    for (let i = 0; i < 10000; i++) {
+      let d = Math.floor(Math.random() * 4);
+      
+      if (d === 0) { // Top right
+        cx++;
+        cy--;
+      }
+      else if (d === 1) { // Bottom right
+        cx++;
+        cy++;
+      }
+      else if (d === 2) { // Bottom left
+        cx--;
+        cy++;
+      }
+      else { // Top left
+        cx--;
+        cy--;
+      }
+      
+      cx = (cx + gridSize) % gridSize;
+      cy = (cy + gridSize) % gridSize;
+      
+      ctx5.fillStyle = "rgba(255, 255, 255, 0.1)";
+      ctx5.fillRect(cx * tileSize, cy * tileSize, tileSize, tileSize);
+    }
+  }
+  draw5();
+</script>
+<script>
+  const ctx4 = canvas4.getContext("2d");
+  canvas4.width = canvas4.height = 500;
+  
+  function draw4() {
+    ctx4.fillStyle = "white";
+    ctx4.fillRect(0, 0, canvas4.width, canvas4.height);
+    
+    let gridSize = 100;
+    let tileSize = canvas4.width / gridSize;
+    
+    let cx = Math.floor(gridSize / 2);
+    let cy = Math.floor(gridSize / 2);
+    
+    let hue = Math.random() * 360;
+    let brightness = Math.random() * 100;
+    
+    for (let i = 0; i < 20000; i++) {
+      let d = Math.floor(Math.random() * 4);
+      
+      if (d === 0) cx++; // Right
+      else if (d === 1) cy++; // Down
+      else if (d === 2) cx--; // Left
+      else cy--; // Up
+      
+      let step = Math.random() * 3;
+      if (brightness < step) brightness += step;
+      else if (brightness > 100 - step) brightness -= step;
+      else brightness += step * randSign();
+      
+      cx = (cx + gridSize) % gridSize;
+      cy = (cy + gridSize) % gridSize;
+      
+      ctx4.fillStyle = `hsl(${hue}deg, 100%, ${brightness}%)`;
+      ctx4.fillRect(cx * tileSize, cy * tileSize, tileSize, tileSize);
+    }
+  }
+  draw4();
+</script>
+<script>
+  const ctx3 = canvas3.getContext("2d");
+  canvas3.width = canvas3.height = 500;
+  
+  function draw3() {
+    ctx3.fillStyle = "white";
+    ctx3.fillRect(0, 0, canvas3.width, canvas3.height);
+    
+    let gridSize = 100;
+    let tileSize = canvas3.width / gridSize;
+    
+    let cx = Math.floor(gridSize / 2);
+    let cy = Math.floor(gridSize / 2);
+    
+    let d = Math.floor(Math.random() * 4);
+    
+    for (let i = 0; i < 10000; i++) {
+      if (Math.random() < 0.25) d = Math.floor(Math.random() * 4);
+      
+      if (d === 0) cx++; // Right
+      else if (d === 1) cy++; // Down
+      else if (d === 2) cx--; // Left
+      else cy--; // Up
+      
+      cx = (cx + gridSize) % gridSize;
+      cy = (cy + gridSize) % gridSize;
+      
+      ctx3.fillStyle = "rgba(0, 0, 0, 0.4)";
+      ctx3.fillRect(cx * tileSize, cy * tileSize, tileSize, tileSize);
+    }
+  }
+  draw3();
+</script>
+<script>
+  const ctx2 = canvas2.getContext("2d");
+  canvas2.width = canvas2.height = 500;
+  
+  function draw2() {
+    ctx2.fillStyle = "white";
+    ctx2.fillRect(0, 0, canvas2.width, canvas2.height);
+    
+    let gridSize = 100;
+    let tileSize = canvas2.width / gridSize;
+    
+    let cx = Math.floor(gridSize / 2);
+    let cy = Math.floor(gridSize / 2);
+    
+    let hue = Math.random() * 360;
+    
+    for (let i = 0; i < 20000; i++) {
+      let d = Math.floor(Math.random() * 4);
+      
+      if (d === 0) cx++; // Right
+      else if (d === 1) cy++; // Down
+      else if (d === 2) cx--; // Left
+      else cy--; // Up
+      
+      hue += randBetween(-3, 3);
+      
+      cx = (cx + gridSize) % gridSize;
+      cy = (cy + gridSize) % gridSize;
+      
+      ctx2.fillStyle = `hsl(${hue}deg, 100%, 50%)`;
+      ctx2.fillRect(cx * tileSize, cy * tileSize, tileSize, tileSize);
+    }
+  }
+  draw2();
+</script>
+<script>
+  const ctx1 = canvas1.getContext("2d");
+  canvas1.width = canvas1.height = 500;
+  
+  function draw1() {
+    ctx1.fillStyle = "white";
+    ctx1.fillRect(0, 0, canvas1.width, canvas1.height);
+    
+    let gridSize = 100;
+    let tileSize = canvas1.width / gridSize;
+    
+    let cx = Math.floor(gridSize / 2);
+    let cy = Math.floor(gridSize / 2);
+    
+    for (let i = 0; i < 10000; i++) {
+      let d = Math.floor(Math.random() * 4);
+      
+      if (d === 0) cx++; // Right
+      else if (d === 1) cy++; // Down
+      else if (d === 2) cx--; // Left
+      else cy--; // Up
+      
+      cx = (cx + gridSize) % gridSize;
+      cy = (cy + gridSize) % gridSize;
+      
+      ctx1.fillStyle = "black";
+      ctx1.fillRect(cx * tileSize, cy * tileSize, tileSize, tileSize);
+    }
+  }
+  draw1();
+</script>
+
+</body>
+</html>
