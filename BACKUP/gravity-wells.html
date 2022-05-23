@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>Gravity Wells ~ e4494s</title>
+  </head>
+<body>
+<script src = "scripts/main.js"></script>
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; Gravity Wells &mdash;&mdash;</h1>
+<p id = "how-it-works">
+  <b><i>How It Works:</i></b> A swarm of points will spawn on the canvas and gravitate towards invisible gravity wells that are placed around the screen. The points leave trails behind them as they move, creating flowing patterns showing their paths. Points disappear when they enter a gravity well, leaving room to add more points.
+  <br><br>
+  Click <span class = "setting">Add More Points</span> to add up to 1,000 points, without removing current points or clearing the canvas.
+  <br><br>
+  Turning up <span class = "setting">Gravity Well Strength</span> will make gravity wells more powerful and pull points towards them quicker.
+  <br><br>
+  <span class = "setting">Friction</span> affects how much points slow down over time, so they don't accelerate off the screen.
+  <br><br>
+  <span class = "setting">Point Spawning Velocity</span> is the speed points will be moving at intially.
+  <br><br>
+  <span class = "setting">Color Variation</span> changes how much variation in hue every point will have (0% means all points will be the same color, and 100% will be a rainbow of colors).
+  <br><br>
+  Clicking <span class = "setting">Randomize Geometry Settings</span> will randomize every setting, except the settings that are purely visual. Use this if you want a new set of settings with the same visual style.
+</p>
+<hr>
+<div><b>Settings Presets:</b></div>
+<div id = "presets-div"></div>
+<hr>
+<table>
+  <tr valign = "top">
+    <td>
+      <button id = "start-stop-btn" onclick = "startStop()">Pause</button>
+      <button onclick = "addPoints()">Add More Points</button>
+      <button onclick = "reset()">Reset</button>
+      <br><br>
+      <label for = "turbo-checkbox"><b><u>Turbo:</u></b> (&times;5 speed)</label>
+      <input type = "checkbox" id = "turbo-checkbox" oninput = "updateSettings(false)">
+      <br><br>
+      <div><i><b>Current Points:</b> <span id = "num-points-txt">999</span></i></div>
+      <br>
+      <canvas id = "canvas">If you're seeing this text, your browser does not support the canvas element.</canvas>
+      <br>
+      <button class = "download-canvas-btn" onclick = "downloadCanvas()">Download Canvas</button>
+    </td>
+    <td>
+      <button onclick = "loadPreset(0)">Reset Settings</button>
+      <br><br>
+      <button onclick = "randomizeAllSettings()">Randomize All Settings</button>
+      <br><br>
+      <button onclick = "randomizeGeometrySettings()">Randomize Geometry Settings</button>
+      <hr>
+      <div><b><u>Number of Gravity Wells:</u></b> <span id = "num-black-holes-txt">25</span></div>
+      <input type = "range" min = "0" max = "15" step = "1" value = "12" id = "num-black-holes-range" oninput = "updateSettings(true)">
+      <br><br>
+      <div><b><u>Gravity Well Strength:</u></b> &times;<span id = "black-hole-power-txt">1.5</span></div>
+      <input type = "range" min = "0" max = "12" step = "1" value = "2" id = "black-hole-power-range" oninput = "updateSettings(false)">
+      <hr>
+      <div><b><u>Friction:</u></b> <span id = "friction-txt">10</span>%</div>
+      <input type = "range" min = "5" max = "50" step = "5" value = "10" id = "friction-range" oninput = "updateSettings(false)">
+      <hr>
+      <div><b><u>Point Spawning:</u></b></div>
+      <input type = "radio" name = "point-spawning-radio" id = "point-spawning-radio-1" oninput = "updateSettings(true)" CHECKED>
+      <label for = "point-spawning-radio-1">Points spawn at edges</label>
+      <br>
+      <input type = "radio" name = "point-spawning-radio" id = "point-spawning-radio-2" oninput = "updateSettings(true)">
+      <label for = "point-spawning-radio-2">Points spawn randomly on canvas</label>
+      <br><br>
+      <div><b><u>Point Spawning Velocity:</u></b> <span id = "spawning-velocity-txt">0</span></div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "spawning-velocity-range" oninput = "updateSettings(true)">
+    </td>
+    <td>
+      <div><b><u>Trail Width:</u></b> <span id = "line-width-txt">0.5</span>px</div>
+      <input type = "range" min = "0" max = "12" step = "1" value = "4" id = "line-width-range" oninput = "updateSettings(false)">
+      <hr>
+      <div><b><u>Trail Opacity:</u></b> <span id = "opacity-txt">100</span>%</div>
+      <input type = "range" min = "0" max = "15" step = "1" value = "15" id = "opacity-range" oninput = "updateSettings(false)">
+      <hr>
+      <div><b><u>Trail Hue:</u></b> <span id = "hue-txt">0</span>&deg;</div>
+      <input type = "range" min = "0" max = "360" step = "15" value = "0" id = "hue-range" oninput = "updateSettings(false)">
+      <hr>
+      <div><b><u>Trail Brightness:</u></b> <span id = "brightness-txt">60</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "5" value = "60" id = "brightness-range" oninput = "updateSettings(false)">
+      <hr>
+      <div><b><u>Color Variation:</u></b> <span id = "color-variation-txt">40</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "10" value = "40" id = "color-variation-range" oninput = "updateSettings(false)">
+    </td>
+  </tr>
+</table>
+<br>
+<div id = "fps-body">FPS: <span id = "fps-txt"></span></div>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 1000;
+  let canvasRunning = true;
+  
+  let startStopBtn = document.getElementById("start-stop-btn");
+  let fpsTxt = document.getElementById("fps-txt");
+  let numPointsTxt = document.getElementById("num-points-txt");
+  let numBlackHolesTxt = document.getElementById("num-black-holes-txt");
+  let numBlackHolesRange = document.getElementById("num-black-holes-range");
+  let blackHolePowerTxt = document.getElementById("black-hole-power-txt");
+  let blackHolePowerRange = document.getElementById("black-hole-power-range");
+  let frictionTxt = document.getElementById("friction-txt");
+  let frictionRange = document.getElementById("friction-range");
+  let pointSpawningRadio1 = document.getElementById("point-spawning-radio-1");
+  let pointSpawningRadio2 = document.getElementById("point-spawning-radio-2");
+  let spawningVelocityTxt = document.getElementById("spawning-velocity-txt");
+  let spawningVelocityRange = document.getElementById("spawning-velocity-range");
+  let lineWidthTxt = document.getElementById("line-width-txt");
+  let lineWidthRange = document.getElementById("line-width-range");
+  let opacityTxt = document.getElementById("opacity-txt");
+  let opacityRange = document.getElementById("opacity-range");
+  let hueTxt = document.getElementById("hue-txt");
+  let hueRange = document.getElementById("hue-range");
+  let brightnessTxt = document.getElementById("brightness-txt");
+  let brightnessRange = document.getElementById("brightness-range");
+  let colorVariationTxt = document.getElementById("color-variation-txt");
+  let colorVariationRange = document.getElementById("color-variation-range");
+  let presetsDiv = document.getElementById("presets-div");
+  let turboCheckbox = document.getElementById("turbo-checkbox");
+  
+  let friction = 0.1;
+  let numBlackHoles = 25;
+  let numPoints = 999;
+  let minDist = 5;
+  let minAcceleration = 0.01;
+  let blackHolePower = 15;
+  let brightness = 60;
+  let lineWidth = 0.5;
+  let opacity = 1;
+  let edgeSpawning = true;
+  let hue = 0;
+  let stepsPerFrame = 1;
+  let spawningVelocity = 0;
+  let colorVariation = 0.4;
+  let turbo = false;
+  
+  function randCanvasEdgePos() {
+    let r = Math.floor(Math.random() * 4);
+    if (r === 0) return {x: Math.random() * canvas.width, y: 0};
+    else if (r === 1) return {x: canvas.width, y: Math.random() * canvas.height};
+    else if (r === 2) return {x: Math.random() * canvas.width, y: canvas.height};
+    else return {x: 0, y: Math.random() * canvas.height};
+  }
+  
+  function Point() {
+    let p = randCanvasEdgePos();
+    this.x = edgeSpawning ? p.x : Math.random() * canvas.width;
+    this.y = edgeSpawning ? p.y : Math.random() * canvas.height;
+    let a = Math.random() * Math.PI * 2;
+    this.vx = spawningVelocity * Math.cos(a);
+    this.vy = spawningVelocity * Math.sin(a);
+    this.stopped = false;
+    this.hueChangeIntensity = Math.random() * randSign();
+    this.color = `hsl(${hue + (this.hueChangeIntensity * colorVariation * 180)}deg, 100%, ${brightness}%)`;
+  }
+  Point.prototype.render = function() {
+    this.color = `hsl(${hue + (this.hueChangeIntensity * colorVariation * 180)}deg, 100%, ${brightness}%)`;
+    
+    let lastX = this.x;
+    let lastY = this.y;
+    this.x += this.vx;
+    this.y += this.vy;
+    this.vx *= 1 - friction;
+    this.vy *= 1 - friction;
+    for (let i = 0; i < blackHoleArray.length; i++) {
+      let dx = blackHoleArray[i].x - this.x;
+      let dy = blackHoleArray[i].y - this.y;
+      let distSq = (dx * dx) + (dy * dy);
+      let dist = Math.sqrt(distSq);
+      if (dist <= minDist) {
+        this.stopped = true;
+        this.x = blackHoleArray[i].x;
+        this.y = blackHoleArray[i].y;
+      }
+      let invDist = 1 / dist;
+      let angle = Math.atan2(dy, dx);
+      let velocity = blackHoleArray[i].powerRatio * blackHolePower * invDist;
+      velocity = Math.max(velocity, minAcceleration);
+      this.vx += velocity * Math.cos(angle);
+      this.vy += velocity * Math.sin(angle);
+    }
+    
+    ctx.strokeStyle = this.color;
+    ctx.lineWidth = lineWidth;
+    ctx.globalAlpha = opacity;
+    ctx.lineCap = ctx.lineJoin = "round";
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(this.x, this.y);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  };
+  let pointArray = [];
+  
+  function BlackHole() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.powerRatio = randBetween(0.5, 1);
+  }
+  let blackHoleArray = [];
+  
+  function addPoints() {
+    while (pointArray.length < numPoints) pointArray.push(new Point());
+    
+    numPointsTxt.innerHTML = pointArray.length;
+    
+    if (!canvasRunning) frame();
+  }
+  
+  function reset() {
+    ctx.fillStyle = "black";
+    ctx.globalAlpha = 1;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    blackHoleArray = [];
+    while (blackHoleArray.length < numBlackHoles) blackHoleArray.push(new BlackHole());
+    pointArray = [];
+    while (pointArray.length < numPoints) pointArray.push(new Point());
+    
+    numPointsTxt.innerHTML = pointArray.length;
+    
+    if (!canvasRunning) frame();
+  }
+  
+  let lastFrameTime = 0;
+  let lastFpsDisplayTime = 1000;
+  function frame() {
+    if (Date.now() - lastFpsDisplayTime >= 500) {
+      fpsTxt.innerHTML = Math.floor(1000 / (Date.now() - lastFrameTime));
+      lastFpsDisplayTime = Date.now();
+    }
+    lastFrameTime = Date.now();
+    
+    let steps = turbo ? stepsPerFrame * 5 : stepsPerFrame;
+    
+    for (let j = 0; j < steps; j++) {
+      for (let i = 0; i < pointArray.length; i++) {
+        pointArray[i].render();
+        if (pointArray[i].stopped) {
+          pointArray.splice(i, 1);
+          i--;
+        }
+      }
+    }
+    
+    numPointsTxt.innerHTML = pointArray.length;
+    
+    if (canvasRunning) requestAnimationFrame(frame);
+  }
+  reset();
+  frame();
+  
+  function startStop() {
+    if (canvasRunning) {
+      canvasRunning = false;
+      startStopBtn.innerHTML = "Play";
+    }
+    else {
+      canvasRunning = true;
+      frame();
+      startStopBtn.innerHTML = "Pause";
+    }
+  }
+  
+  let numBlackHolesRangeArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40, 50];
+  let blackHolePowerRangeArray = [50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 1000, 1500, 3000];
+  let lineWidthRangeArray = [0.1, 0.2, 0.3, 0.4, 0.5, 1, 2, 3, 4, 5, 10, 15, 20];
+  let opacityRangeArray = [1, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 100];
+  
+  function updateSettings(doReset) {
+    numBlackHoles = numBlackHolesTxt.innerHTML = numBlackHolesRangeArray[Number(numBlackHolesRange.value)];
+    blackHolePowerTxt.innerHTML = (blackHolePowerRangeArray[Number(blackHolePowerRange.value)] / 100).toMultipleOf(0.5);
+    blackHolePower = blackHolePowerRangeArray[Number(blackHolePowerRange.value)] / 10;
+    frictionTxt.innerHTML = Number(frictionRange.value);
+    friction = Number(frictionRange.value) / 100;
+    edgeSpawning = pointSpawningRadio1.checked;
+    spawningVelocity = spawningVelocityTxt.innerHTML = Number(spawningVelocityRange.value);
+    lineWidth = lineWidthTxt.innerHTML = lineWidthRangeArray[Number(lineWidthRange.value)];
+    opacityTxt.innerHTML = opacityRangeArray[Number(opacityRange.value)];
+    opacity = opacityRangeArray[Number(opacityRange.value)] / 100;
+    hue = hueTxt.innerHTML = Number(hueRange.value);
+    brightness = brightnessTxt.innerHTML = Number(brightnessRange.value);
+    colorVariationTxt.innerHTML = Number(colorVariationRange.value)
+    colorVariation = Number(colorVariationRange.value) / 100;
+    turbo = turboCheckbox.checked;
+    
+    if (doReset) reset();
+    
+    else if (!canvasRunning) frame();
+  }
+  
+  function randomizeRange(element, favorHigh) {
+    let oldRand = Math.random;
+    if (favorHigh) Math.random = () => 1 - (oldRand() * oldRand());
+    element.value = Number(randBetween(Number(element.min), Number(element.max))).toMultipleOf(Number(element.step));
+    Math.random = oldRand;
+  }
+  function randomizeAllSettings() {
+    randomizeRange(numBlackHolesRange, false);
+    randomizeRange(blackHolePowerRange, false);
+    randomizeRange(frictionRange, false);
+    if (Math.random() < 0.5) pointSpawningRadio1.checked = true;
+    else pointSpawningRadio2.checked = true;
+    randomizeRange(spawningVelocityRange, false);
+    randomizeRange(lineWidthRange, true);
+    randomizeRange(opacityRange, true);
+    randomizeRange(hueRange, false);
+    randomizeRange(brightnessRange, false);
+    randomizeRange(colorVariationRange, false);
+    
+    updateSettings(true);
+  }
+  function randomizeGeometrySettings() {
+    randomizeRange(numBlackHolesRange, false);
+    randomizeRange(blackHolePowerRange, false);
+    randomizeRange(frictionRange, false);
+    if (Math.random() < 0.5) pointSpawningRadio1.checked = true;
+    else pointSpawningRadio2.checked = true;
+    randomizeRange(spawningVelocityRange, false);
+    
+    updateSettings(true);
+  }
+  
+  let presetsArray = [
+    {
+      name: "Default",
+      numBlackHoles: 25,
+      blackHolePower: 150,
+      friction: 10,
+      edgeSpawning: true,
+      spawningVelocity: 0,
+      lineWidth: 0.5,
+      opacity: 100,
+      hue: 0,
+      brightness: 60,
+      colorVariation: 40
+    },
+    {
+      name: "Pastel Ocean",
+      numBlackHoles: 25,
+      blackHolePower: 150,
+      friction: 10,
+      edgeSpawning: true,
+      spawningVelocity: 0,
+      lineWidth: 20,
+      opacity: 10,
+      hue: 240,
+      brightness: 60,
+      colorVariation: 40
+    },
+    {
+      name: "Gentle Breeze",
+      numBlackHoles: 25,
+      blackHolePower: 150,
+      friction: 20,
+      edgeSpawning: false,
+      spawningVelocity: 0,
+      lineWidth: 1,
+      opacity: 100,
+      hue: 0,
+      brightness: 100,
+      colorVariation: 40
+    },
+    {
+      name: "Tangled Blond Locks",
+      numBlackHoles: 8,
+      blackHolePower: 350,
+      friction: 10,
+      edgeSpawning: false,
+      spawningVelocity: 10,
+      lineWidth: 1,
+      opacity: 100,
+      hue: 60,
+      brightness: 65,
+      colorVariation: 0
+    },
+    {
+      name: "Dual Singularities",
+      numBlackHoles: 2,
+      blackHolePower: 1000,
+      friction: 20,
+      edgeSpawning: false,
+      spawningVelocity: 10,
+      lineWidth: 0.5,
+      opacity: 100,
+      hue: 270,
+      brightness: 70,
+      colorVariation: 70
+    },
+    {
+      name: "Rainbow Burst",
+      numBlackHoles: 1,
+      blackHolePower: 3000,
+      friction: 15,
+      edgeSpawning: true,
+      spawningVelocity: 0,
+      lineWidth: 20,
+      opacity: 100,
+      hue: 0,
+      brightness: 50,
+      colorVariation: 100
+    }
+  ];
+  
+  function loadPreset(n) {
+    let p = presetsArray[n];
+    
+    numBlackHolesRange.value = numBlackHolesRangeArray.indexOf(p.numBlackHoles);
+    blackHolePowerRange.value = blackHolePowerRangeArray.indexOf(p.blackHolePower);
+    frictionRange.value = p.friction;
+    pointSpawningRadio1.checked = p.edgeSpawning;
+    spawningVelocityRange.value = p.spawningVelocity;
+    lineWidthRange.value = lineWidthRangeArray.indexOf(p.lineWidth);
+    opacityRange.value = opacityRangeArray.indexOf(p.opacity);
+    hueRange.value = p.hue;
+    brightnessRange.value = p.brightness;
+    colorVariationRange.value = p.colorVariation;
+    
+    updateSettings(true);
+  }
+  
+  for (let i = 1; i < presetsArray.length; i++) {
+    let btn = document.createElement("button");
+    btn.innerHTML = presetsArray[i].name;
+    btn.className = "preset-btn";
+    btn.onclick = () => loadPreset(i);
+    presetsDiv.appendChild(btn);
+  }
+  
+  function downloadCanvas() {
+    let link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "gravity-wells.png";
+    link.click();
+  }
+</script>
+</body>
+</html>
