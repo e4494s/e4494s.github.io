@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png"/>
+    <title>Ugly Code ~ e4494s</title>
+    <style>
+      #scripttxt {
+        border: 3px solid gray;
+        background-color: black;
+        color: white;
+        font-family: monospace;
+        min-width: 50px;
+        white-space: pre;
+      }
+    </style>
+  </head>
+<body>
+<h1>The Game of Life, but with horrible code</h1>
+<p id = "scripttxt"></p>
+<canvas id = "canvas"></canvas>
+<script>
+let ctx = canvas.getContext("2d");
+let canvas_width = 10;
+let canvas_height = 10;
+canvas.width = canvas_width;
+canvas.height = canvas_height;
+
+x();
+
+function drawTheNextFrameOfTheSimulation() {
+  ctx.clearRect(0, 0, getValueOfVariable(canvas_width), getValueOfVariable(canvas_height));
+  
+  requestAnimationFrame(drawTheNextFrameOfTheSimulation);
+}
+drawTheNextFrameOfTheSimulation();
+
+function isVariableTrue(variable) {
+  let variableToReturn;
+  if (variable === true) variableToReturn = true;
+  else if (variable === false) variableToReturn = false;
+  return variableToReturn;
+}
+
+function getValueOfVariable(variable) {
+  let variableToReturn = variable.valueOf();
+  return variableToReturn;
+}
+
+</script>
+<script>
+  scripttxt.innerHTML = document.getElementsByTagName("script")[0].innerHTML.split("\n").join("<br>").replace("<br>", "");
+</script>
+</body>
+</html>
