@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png"/>
+    <title>Jetpack Blob ~ e4494s</title>
+    <style>
+      #canvas {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: gray;
+      }
+      #test { font-family: monospace; color: white; font-weight: bold; font-size: 18px; position: absolute; right: 75px; bottom: 50px; }
+    </style>
+  </head>
+<body>
+<canvas id = "canvas"></canvas>
+<div id = "test"></div>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  
+  let gravity = 0.33;
+  let npcSpawnChance = 0.007;
+  let minNpcs = 2;
+  let coinWidth = 50;
+  let coinSize = 40;
+  let coinWidthSpeed = -2;
+  let laserSpeed = 10;
+  
+  const floor = {};
+  floor.height = 40;
+  floor.x = 0;
+  floor.sprite = new Image();
+  floor.sprite.src = "images/tiled-floor.png";
+  floor.render = function() {
+    this.x -= guy.speedForward;
+    while (this.x <= -canvas.width) this.x += canvas.width;
+    ctx.drawImage(this.sprite, this.x, 0, canvas.width * 2, this.height);
+    ctx.drawImage(this.sprite, this.x, canvas.height - this.height, canvas.width * 2, this.height);
+  };
+  
+  const background = {};
+  background.size = 120;
+  background.sprite = new Image();
+  background.sprite.src = "images/wall.png"//"images/wall.png";
+  background.x = 0;
+
+  background.render = function() {
+    this.x -= guy.speedForward / 3;
+    while (this.x <= -canvas.width) this.x += canvas.width;
+    ctx.drawImage(this.sprite, this.x, 0, canvas.width * 2, canvas.height);
+    ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
+    ctx.fillRect(this.x, 0, canvas.width * 2, canvas.height);
+  };
+  
+  let jetpackOn = false;
+  
+  const guy = {};
+  guy.actualX = Math.min(canvas.width / 4, 200);
+  guy.travelled = 0;
+  guy.coinsCollected = 0;
+  guy.width = 45;
+  guy.height = 75;
+  guy.speedY = 0;
+  guy.maxSpeedY = 10;
+  guy.speedForward = 6;
+  guy.accelerationForward = 0.001;
+  guy.jetpackPower = 1.25;
+  guy.minY = floor.height / 2;
+  guy.maxY = canvas.height - (guy.height + (floor.height / 2));
+  guy.y = guy.maxY;
+  guy.sprite = new Image();
+  guy.sprite.src = "images/jetpack-blob.png";
+  guy.jetpack = new Image();
+  guy.jetpack.src = "images/jetpack-rocket.png";
+  guy.lastKeyUpHeld = false;
+  guy.dead = false;
+  guy.deadAngle = 0;
+  guy.deadAngleSpeed = 3;
+  guy.invincible = false;
+  
+  guy.render = function() {
+    if (this.dead) {
+      this.sprite.src = "images/jetpack-blob-dead.png";
+      this.deadAngle += this.deadAngleSpeed;
+      if (this.deadAngle > 90) this.deadAngle = 90;
+    }
+    this.travelled += this.speedForward;
+    this.speedForward += this.accelerationForward;
+    if (this.speedForward < 0) this.speedForward = 0;
+    if (jetpackOn && !this.dead) {
+      if (!guy.lastKeyUpHeld && guy.speedY > 0) guy.speedY /= 1.1;
+      this.speedY -= this.jetpackPower;
+      for (let i = 0; i < 3; i++) {
+        addParticle(this.actualX - 5, this.y + 70, randBetween(17, 23), randBetween(60, 120), randBetween(3, 5), 0.5, "images/puff.png", false, false);
+      }
+    }
+    guy.lastKeyUpHeld = jetpackOn;
+    this.speedY += jetpackOn ? gravity : gravity * 1.25;
+    if (this.speedY < -this.maxSpeedY) this.speedY = -this.maxSpeedY;
+    if (this.speedY > this.maxSpeedY) this.speedY = this.maxSpeedY;
+    this.y += this.speedY;
+    if (this.y > this.maxY) {
+      this.y = this.maxY;
+      this.speedY = 0;
+    }
+    if (this.y < this.minY) {
+      this.y = this.minY;
+      this.speedY = 0;
+    }
+  };
+  guy.draw = function() {
+    if (!this.dead) {
+      ctx.drawImage(this.jetpack, this.actualX - 10, this.y + 5, 20, 60);
+      ctx.drawImage(this.sprite, this.actualX, this.y, this.width, this.height);
+      ctx.drawImage(this.jetpack, this.actualX - 15, this.y + 10, 20, 60);
+    }
+    else {
+      //ctx.drawRotatedImageFromCenter(this.jetpack, this.actualX, this.y + 35, 20, 60, this.deadAngle);
+      ctx.drawRotatedImageFromCenter(this.sprite, this.actualX + (this.width / 2), this.y + (this.height / 2), this.width, this.height, this.deadAngle);
+      //ctx.drawRotatedImageFromCenter(this.jetpack, this.actualX - 5, this.y + 40, 20, 60, this.deadAngle);
+    }
+  };
+  guy.touchingRect = function(x, y, width, height) {
+    if (this.actualX >= x + width || this.actualX + this.width <= x) return false;
+    if (this.y >= y + height || this.y + this.height <= y) return false;
+    return true;
+  };
+  guy.kill = function() {
+    this.dead = true;
+    for (let i = 0; i < 60; i++) {
+      addParticle(this.actualX + (this.width / 2), this.y + (this.height / 2), 17, ((i / 15) * 180) + 180, randBetween(1, 6), 0.15, "images/red-puff.png", false, true);
+    }
+    this.accelerationForward = -Math.max(0.075, this.speedForward / 500);
+    this.maxY = canvas.height - (this.width + (floor.height / 2));
+  };
+  
+  function particle(x, y, size, angle, power, decay, src, affectedByDistance, affectedByGravity) {
+    this.x = x;
+    this.y = y;
+    this.affectedByDistance = affectedByDistance;
+    this.affectedByGravity = affectedByGravity;
+    this.size = size;
+    this.speedX = power * Math.cos(angle * (Math.PI / 180));
+    this.speedY = power * Math.sin(angle * (Math.PI / 180));
+    this.age = 0;
+    this.decay = decay;
+    this.maxAge = Math.abs(this.size / this.decay);
+    this.sprite = new Image();
+    this.sprite.src = src;
+    this.dead = false;
+    this.render = function() {
+      this.age++;
+      this.x += this.speedX;
+      if (this.affectedByDistance) this.x -= guy.speedForward;
+      this.y += this.speedY;
+      if (this.affectedByGravity) this.speedY += gravity;
+      this.speedX *= 0.99;
+      this.speedY *= 0.99;
+      ctx.globalAlpha = 1 - (this.age / this.maxAge);
+      ctx.drawImageFromCenter(this.sprite, this.x, this.y, this.size - (this.age * this.decay), this.size - (this.age * this.decay));
+      ctx.globalAlpha = 1;
+      if (this.age >= this.maxAge) this.dead = true;
+    };
+  }
+  let particleArray = [];
+  function addParticle(x, y, size, angle, power, decay, src, affectedByDistance, affectedByGravity) {
+    let newParticle = new particle(x, y, size, angle, power, decay, src, affectedByDistance, affectedByGravity);
+    particleArray.push(newParticle);
+  }
+  
+  function npc(x, yOffset, size, speed, acceleration) {
+    this.x = x;
+    this.yOffset = yOffset;
+    this.size = size;
+    this.speed = speed;
+    this.acceleration = acceleration;
+    this.sprite = new Image();
+    this.sprite.src = `images/npc-blob${this.speed < 0 ? "L" : "R"}.png`;
+    this.dead = false;
+    this.maxSpeed = guy.speedForward * 0.5;
+    this.turnChance = 0.025;
+    this.render = function() {
+      this.x -= guy.speedForward;
+      this.x += this.speed;
+      this.speed += this.acceleration;
+      if (this.speed > this.maxSpeed) {
+        this.speed = this.maxSpeed;
+        if (Math.round(Math.random() * (1 / this.turnChance)) == (1 / (this.turnChance * 2))) this.acceleration *= -1;
+      }
+      if (this.speed < -this.maxSpeed) {
+        this.speed = -this.maxSpeed;
+        if (Math.round(Math.random() * (1 / this.turnChance)) == (1 / (this.turnChance * 2))) this.acceleration *= -1;
+      }
+      this.sprite.src = `images/npc-blob${this.speed < 0 ? "L" : "R"}.png`;
+      ctx.drawImage(this.sprite, this.x, (canvas.height - ((this.size * 75) + (floor.height / 2))) + this.yOffset, this.size * 45, this.size * 75);
+      if (this.x < (-this.size * 45) - 10) this.dead = true;
+    };
+  }
+  let npcArray = [];
+  function addNpc(x, yOffset, size, speed, acceleration) {
+    let newNpc = new npc(x, yOffset, size, speed, acceleration);
+    npcArray.push(newNpc);
+  }
+  function addRandomNpc() {
+    addNpc(
+      canvas.width + randBetween(50, 150),
+      randBetween(floor.height / -2.15, floor.height / 2.15),
+      randBetween(0.5, 0.85),
+      randBetween(guy.speedForward / -2, guy.speedForward / 2),
+      randBetween(-0.1, 0.1)
+    );
+  }
+  function coin(x, y) {
+    this.x = x;
+    this.y = y;
+    this.sprite = new Image();
+    this.sprite.src = "images/coin.png";
+    this.height = coinSize;
+    this.render = function() {
+      if (guy.touchingRect(this.x - (coinSize / 2), this.y - (coinSize / 2), coinSize, coinSize) && !guy.dead && !this.dead) {
+        this.dead = true;
+        guy.coinsCollected++;
+        for (let i = 0; i < 15; i++) {
+          addParticle(this.x, this.y, 13, (i / 15) * 360, 3, 0.35, "images/yellow-puff.png", true, false);
+        }
+      }
+      this.x -= guy.speedForward;
+      for (let i = 0; i < spikeArray.length; i++) {
+        if (this.touchingRect(spikeArray[i].x, spikeArray[i].y, spikeArray[i].width, spikeArray[i].height)) this.dead = true;
+      }
+      ctx.drawImageFromCenter(this.sprite, this.x, this.y, Math.min(coinWidth, coinSize), this.height);
+      if (this.x < -coinSize - 5) this.dead = true;
+    };
+    this.touchingRect = function(x, y, width, height) {
+      if (this.x - (Math.min(coinWidth, coinSize) / 2) >= x + width || this.x - (Math.min(coinWidth, coinSize) / 2) + Math.min(coinWidth, coinSize) <= x) return false;
+      if (this.y - (coinSize / 2) >= y + height || this.y - (coinSize / 2) + coinSize <= y) return false;
+      return true;
+    };
+  }
+  let coinArray = [];
+  function addCoin(x, y) {
+    let newCoin = new coin(x, y);
+    coinArray.push(newCoin);
+  }
+  function addCoinLine(y, length) {
+    let xOffset = randBetween(300, 800);
+    for (let i = 0; i < length; i++) {
+      let yPos = Math.round(randBetween(-1, 1));
+      addCoin(canvas.width + xOffset + (i * (coinSize + 5)), y + (yPos * coinSize));
+    }
+  }
+  function addCoinRect(y, width, height) {
+    let xOffset = randBetween(300, 800);
+    for (let i = 0; i < width; i++) {
+      for (let j = 0; j < height; j++) {
+        addCoin(canvas.width + xOffset + (i * (coinSize + 5)), y + (j * (coinSize + 5)));
+      }
+    }
+  }
+  function spike(x, y, isVertical) {
+    this.x = x;
+    this.y = y;
+    this.sprite = new Image();
+    this.isVertical = isVertical;
+    if (!this.isVertical) {
+      this.sprite.src = "images/spike.png";
+      this.width = 78;
+      this.height = 30;
+    }
+    else {
+      this.sprite.src = "images/vertical-spike.png";
+      this.width = 30;
+      this.height = 78;
+    }
+    this.dead = false;
+    this.render = function() {
+      this.x -= guy.speedForward;
+      if (guy.touchingRect(this.x, this.y, this.width, this.height) && !guy.dead && !this.dead) {
+        if (!guy.invincible) guy.kill();
+        else {
+          this.dead = true;
+          for (let i = 0; i < 15; i++) {
+            addParticle(this.x + (this.width / 2), this.y + (this.height / 2), randBetween(10, 20), (i / 15) * 360, randBetween(2, 4), randBetween(0.1, 0.3), "images/black-puff.png", true, true);
+          }
+        }
+      }
+      ctx.drawImage(this.sprite, this.x, this.y, this.width, this.height);
+      if (this.x < -this.width - 10) this.dead = true;
+    };
+  }
+  let spikeArray = [];
+  function addSpike(x, y, isVertical) {
+    let newSpike = new spike(x, y, isVertical);
+    spikeArray.push(newSpike);
+  }
+  function addVerticalSpikeLine(y, length) {
+    let xOffset = randBetween(700, 1200);
+    for (let i = 0; i < length; i++) {
+      addSpike(canvas.width + xOffset, y + (i * 26), false);
+    }
+  }
+  function addHorizontalSpikeLine(y, length) {
+    let xOffset = randBetween(700, 1200);
+    for (let i = 0; i < length; i++) {
+      addSpike(canvas.width + xOffset + (i * 26), y, true);
+    }
+  }
+  
+  function laser(x, y, beamLength, beamWidth, angle, speed, color) {
+    this.startX = x;
+    this.startY = y;
+    this.x1 = x - beamLength * Math.cos(angle * (Math.PI / 180));
+    this.y1 = y - beamLength * Math.sin(angle * (Math.PI / 180));
+    this.x2 = x;
+    this.y2 = y;
+    this.age = 0;
+    this.ageToPassStartingPoint = beamLength / speed;
+    this.beamWidth = beamWidth;
+    this.speedX = speed * Math.cos(angle * (Math.PI / 180));
+    this.speedY = speed * Math.sin(angle * (Math.PI / 180));
+    this.color = color;
+    this.render = function() {
+      this.age++;
+      this.x1 += this.speedX;
+      this.y1 += this.speedY;
+      this.x2 += this.speedX;
+      this.y2 += this.speedY;
+      ctx.strokeStyle = this.color;
+      ctx.lineWidth = this.beamWidth;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      if (this.age < this.ageToPassStartingPoint) ctx.moveTo(this.startX, this.startY);
+      else ctx.moveTo(this.x1, this.y1);
+      ctx.lineTo(this.x2, this.y2);
+      ctx.stroke();
+      if (
+        ((this.x1 > canvas.width || this.x1 < 0) && 
+        (this.x2 > canvas.width || this.x2 < 0)) || 
+        ((this.y1 > canvas.height || this.y1 < 0) && 
+        (this.y2 > canvas.height || this.y2 < 0))
+        ) {
+        if (!this.dead) console.log("blehhh dead laser :(");
+        this.dead = true;
+      }
+    };
+  }
+  let laserArray = [];
+  function addLaser(x, y, beamLength, beamWidth, angle, speed, color) {
+    let newLaser = new laser(x, y, beamLength, beamWidth, angle, speed, color);
+    laserArray.push(newLaser);
+  }
+  
+  function QuestionMark() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.font = `Bold ${Math.round(randBetween(20, 100))}px Arial`;
+  }
+  QuestionMark.prototype.render = function() {
+    if (Math.floor(Math.random() * 250) == 0) {
+      this.x = Math.random() * canvas.width;
+      this.y = Math.random() * canvas.height;
+      this.font = `Bold ${Math.round(randBetween(20, 100))}px Arial`;
+    }
+    this.x += randBetween(-2, 2);
+    this.y += randBetween(-2, 2);
+    ctx.strokeStyle = "gray";
+    ctx.lineWidth = 1;
+    ctx.font = this.font;
+    ctx.strokeText("?", this.x, this.y);
+  }
+  let questionMarkArray = [];
+  for (let i = 0; i < 20; i++) questionMarkArray.push(new QuestionMark());
+  
+  //
+  
+  let fps = 10;
+  let infiniteFps = true;
+  let finishingDistance = 50000//50000;
+  let finished = false;
+  function frame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    if (guy.travelled >= finishingDistance) finished = true;
+    
+    if (finished) {
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = "gray";
+      ctx.lineWidth = 1;
+      ctx.shadowColor = "white";
+      ctx.shadowBlur = 4;
+      for (let i = 0; i < questionMarkArray.length; i++) questionMarkArray[i].render();
+      ctx.font = "Bold 20px Arial";
+      ctx.fillStyle = "white";
+      ctx.fillText("Score: " + guy.coinsCollected, 50, (canvas.height / 2) - 100);
+      ctx.fillText("Ursa Major points to a place where broken things can be found.", 50, canvas.height / 2);
+      ctx.fillText("Under this is where your next step will be.", 50, (canvas.height / 2) + 50);
+      test.style.color = "transparent";
+    }
+    else {
+      guy.render();
+      if (guy.speedForward >= canvas.width + 500) {
+        console.log("yay u beat the game or something idk imma fix this later");
+        return;
+      }
+      background.render();
+      floor.render();
+      
+      if (Math.round(Math.random() * (1 / npcSpawnChance)) == 1 / (npcSpawnChance * 2)) { // Spawn random NPC
+        addRandomNpc();
+      }
+      if (npcArray.length <= minNpcs) { // If there are less than 2 NPCs, randomly spawn one
+        if (Math.round(Math.random() * (1 / 0.25)) == 1 / (0.5)) {
+          addRandomNpc();
+        }
+      }
+      for (let i = 0; i < npcArray.length; i++) { // Render NPCs
+        npcArray[i].render();
+        if (npcArray[i].dead) {
+          npcArray.splice(i, 1);
+          i--;
+        }
+      }
+      
+      if (coinArray.length == 0) { // Spawn random coins
+        switch (Math.round(Math.random() * 5)) {
+          case 1: case 2: case 3: case 4:
+            addCoinLine(randBetween(guy.minY + (coinSize * 2), guy.maxY - (coinSize * 2)), randBetween(5, 15));
+          break;
+          case 5:
+            let tempHeight = Math.round(randBetween(2, 4));
+            addCoinRect(randBetween(guy.minY + (coinSize * tempHeight), guy.maxY - (coinSize * tempHeight)), randBetween(5, 6), tempHeight);
+          break;
+        }
+      }
+      coinWidth += coinWidthSpeed; // Update coin width
+      if (coinWidth <= 0) {
+        coinWidth = 0;
+        coinWidthSpeed *= -1;
+      }
+      if (coinWidth >= 110) coinWidthSpeed *= -1;
+      for (let i = 0; i < coinArray.length; i++) { // Render coins
+        coinArray[i].render();
+        if (coinArray[i].dead) {
+          coinArray.splice(i, 1);
+          i--;
+        }
+      }
+      
+      if (spikeArray.length == 0) { // Spawn random coins
+        switch (Math.round(Math.random() * 2)) {
+          case 0: case 1:
+            let tempHeight = Math.floor(randBetween(4, 12));
+            let tempY;
+            if (Math.round(Math.random()) == 0) tempY = guy.minY;
+            else tempY = (guy.maxY + guy.height) - (26 * tempHeight);
+            addVerticalSpikeLine(tempY, tempHeight);
+          break;
+          case 2:
+            addHorizontalSpikeLine(canvas.height / 2, randBetween(8, 24));
+          break;
+        }
+      }
+      for (let i = 0; i < spikeArray.length; i++) { // Render spikes 
+        spikeArray[i].render();
+        if (spikeArray[i].dead) {
+          spikeArray.splice(i, 1);
+          i--;
+        }
+      }
+      
+      guy.draw();
+    
+      for (let i = 0; i < particleArray.length; i++) { // Render particles
+        particleArray[i].render();
+        if (particleArray[i].dead) {
+          particleArray.splice(i, 1);
+          i--;
+        }
+      }
+      
+      for (let i = 0; i < laserArray.length; i++) { // Render lasers
+        laserArray[i].render();
+        if (laserArray[i].dead) {
+          laserArray.splice(i, 1);
+          i--;
+        }
+      }
+      
+      test.innerHTML = `Distance: ${Math.floor(guy.travelled / 10)}<br>Score: ${guy.coinsCollected}<br>Speed: ${guy.speedForward.toFixed(2)}`;
+    }
+    
+    if (infiniteFps) requestAnimationFrame(frame)
+    else setTimeout(() => requestAnimationFrame(frame), 1000 / fps);
+  }
+  frame();
+  
+  //
+  
+  function keyDownHandler(e) {
+    if (e.key == "ArrowUp") jetpackOn = true;
+  }
+  function keyUpHandler(e) {
+    if (e.key == "ArrowUp") jetpackOn = false;
+  }
+  addEventListener("keydown", keyDownHandler);
+  addEventListener("keyup", keyUpHandler);
+</script>
+</body>
+</html>
