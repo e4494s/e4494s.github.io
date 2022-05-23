@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png">
+    <title>Lonely Chat Room ~ e4494s</title>
+    <style>
+      body, html {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        margin: 0;
+      }
+      body {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background-color: lightgray;
+        font-size: 14px;
+      }
+      
+      body, input, button {
+        font-family: monospace;
+      }
+      
+      #chat-messages {
+        background-color: white;
+        border: 2px solid gray;
+        border-bottom: none;
+        border-radius: 5px 5px 0 0;
+        padding: 5px;
+        width: 75%;
+        height: 65%;
+        overflow-y: scroll;
+        margin-left: 30px;
+        margin-top: 30px;
+      }
+      
+      #typing-box {
+        background-color: white;
+        border: 2px solid gray;
+        border-top: none;
+        border-bottom: none;
+        padding: 5px;
+        width: 75%;
+        height: 15px;
+        margin-left: 30px;
+        font-size: 12px;
+        font-style: italic;
+      }
+      
+      #chat-box {
+        background-color: white;
+        border: 2px solid gray;
+        border-radius: 0 0 5px 5px;
+        padding: 5px;
+        text-align: left;
+        width: 75%;
+        margin-left: 30px;
+      }
+      
+      #new-msg-content {
+        padding: 4px;
+        border: 2px solid rgb(50, 50, 50);
+        border-radius: 5px;
+        width: 30vw;
+      }
+      #new-msg-content:focus {
+        outline: none;
+      }
+      #new-msg-content::placeholder {
+        color: rgb(150, 150, 150);
+        font-style: italic;
+      }
+      
+      button {
+        border: 2px solid black;
+        border-radius: 5px;
+        background-color: white;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      button:hover {
+        background-color: lightgray;
+      }
+      button:active {
+        background-color: gray;
+      }
+      button:focus {
+        outline: none;
+      }
+      
+      .message {
+        display: block;
+        margin-bottom: 20px;
+        margin-top: 20px;
+      }
+      
+      .username {
+        padding: 3px;
+        margin-left: 7px;
+        margin-right: 7px;
+        font-weight: bold;
+        background: rgb(220, 220, 0);
+        border-radius: 5px;
+      }
+      
+      .time-stamp {
+        color: rgb(150, 150, 150);
+        font-size: 12px;
+        font-style: italic;
+      }
+    </style>
+  </head>
+<body onload = "init()">
+<div id = "chat-messages"></div>
+<div id = "typing-box"></div>
+<div id = "chat-box">
+  <table>
+    <tr>
+      <td valign = "middle">
+        <input id = "new-msg-content" maxlength = "500" placeholder = "Type something here...">
+        <button id = "send-btn" onclick = "sendNewMessage()">Send</button>
+      </td>
+    </tr>
+  </table>
+</div>
+<script src = "scripts/main.js"></script>
+<script src = "scripts/lists.js"></script>
+<script>
+  let chatMessages = document.getElementById("chat-messages");
+  let typing = document.getElementById("typing-box");
+  let newMsgText = document.getElementById("new-msg-content");
+  
+  let AIColor = "rgb(220, 220, 0)";
+  let userColor = "rgb(0, 220, 220)";
+  
+  let AIName = "_gary271";
+  let userName = "LonelyGuy55";
+  
+  function addMessage(username, content, isAI) {
+    content = content.trim();
+    if (content == "") return;
+    
+    let msg = document.createElement("div");
+    msg.className = "message";
+    
+    let time = document.createElement("span");
+    time.className = "time-stamp";
+    time.innerHTML = (new Date()).format();
+    msg.appendChild(time);
+    
+    let name = document.createElement("span");
+    name.className = "username";
+    name.innerText = username;
+    name.style.backgroundColor = isAI ? AIColor : userColor;
+    msg.appendChild(name);
+    
+    let text = document.createElement("span");
+    text.innerText = content;
+    msg.appendChild(text);
+    
+    chatMessages.appendChild(msg);
+    msg.scrollIntoView();
+    
+    if (!isAI) {
+      setTimeout(() => {
+        typing.innerHTML = "<b>" + AIName + "</b> is typing...";
+        respondMessage(content);
+      }, randBetween(500, 1000));
+    }
+  }
+  
+  function respondMessage(content) {
+    let response = "";
+    
+    if (response == "") {
+      response = "Okay, have a nice day!";
+    }
+    setTimeout(() => {
+      addMessage(AIName, response, true);
+      typing.innerHTML = "";
+    }, (response.length * randBetween(50, 100)).clamp(500, 4000));
+  }
+  
+  function sendNewMessage() {
+    addMessage(userName, newMsgText.value, false);
+    newMsgText.value = "";
+  }
+  
+  Date.prototype.format = function() {
+    let hours = this.getHours();
+    let meridian = "am";
+    if (hours > 12) {
+      hours -= 12;
+      meridian = "pm";
+    }
+    
+    let minutes = String(this.getMinutes());
+    minutes = minutes.padStart(2, "0");
+    
+    return hours + ":" + minutes + meridian;
+  };
+  
+  function oneIn(odds) {
+    return Math.floor(Math.random() * odds) == 0;
+  }
+  
+  function randLightColor() {
+    return `rgb(${randBetween(128, 235)}, ${randBetween(128, 235)}, ${randBetween(128, 235)})`;
+  }
+  
+  
+  
+  function init() {
+    typing.innerHTML = "<b>" + AIName + "</b> is typing...";
+    setTimeout(() => {
+      addMessage(AIName, "Welcome to the lonely chat room!", true);
+      typing.innerHTML = "";
+    }, randBetween(500, 1000));
+  }
+</script>
+</body>
+</html>
