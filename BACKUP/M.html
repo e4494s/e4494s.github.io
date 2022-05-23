@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = 'icon'  href = 'images/favicon.png' type = 'image/png'/>
+    <title>M ~ e4494s</title>
+    <style>
+      #canvas {
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+    </style>
+  </head>
+<body>
+<canvas id = 'canvas'>
+</canvas>
+<script>
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  let x, y;
+  let r1, g1, b1, r2, g2, b2
+  let font_size;
+  let thickness;
+  let bold;
+  let strobe = false;
+  let speed = 1;
+  let max_speed = 100;
+  function makeM() {
+    for (i = 0; i < Math.ceil(speed); i++) {
+      if (strobe) {
+        bold = (Math.round(Math.random()) == 0) ? 'bold ' : '';
+        font_size = Math.floor(Math.random() * 50) + 10;
+        thickness = Math.round(Math.random() * 10);
+        r1 = Math.floor(Math.random() * 255);
+        g1 = Math.floor(Math.random() * 255);
+        b1 = Math.floor(Math.random() * 255);
+        r2 = Math.floor(Math.random() * 255);
+        g2 = Math.floor(Math.random() * 255);
+        b2 = Math.floor(Math.random() * 255);
+      }
+      else {
+        font_size = 35;
+        bold = 'bold ';
+        thickness = 3;
+        r1 = g1 = b1 = 0;
+        r2 = g2 = b2 = 255;
+      }
+      ctx.font = `${bold} ${font_size}px verdana`;
+      ctx.lineWidth = thickness;
+      ctx.fillStyle = `rgb(${r1}, ${g1}, ${b1})`;
+      ctx.strokeStyle = `rgb(${r2}, ${g2}, ${b2})`;
+      x = Math.random() * canvas.width;
+      y = Math.random() * canvas.height;
+      ctx.strokeText('M', x, y);
+      ctx.fillText('M', x, y);
+    }
+  }
+  setInterval(makeM, 25);
+  
+  function keyDownHandler(e) {
+    if (e.keyCode == 37 && speed > 0) speed--;
+    if (e.keyCode == 39 && speed < max_speed) speed++;
+    if (e.keyCode == 32) strobe = !strobe;
+    if (e.keyCode == 8) ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  addEventListener('keydown', keyDownHandler);
+</script>
+</body>
+</html>
