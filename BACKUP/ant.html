@@ -1,0 +1,793 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = 'icon'  href = 'images/favicon.png' type = 'image/png'/>
+    <title>Langton's Ant ~ e4494s</title>
+  </head>
+<body>
+<style>
+  body, button, input {
+    font-family: monospace;
+  }
+  button {
+    cursor: pointer;
+    background-color: white;
+    border: 2px solid black;
+  }
+  button:focus {
+    outline: none;
+  }
+  button:hover {
+    background-color: lightgray;
+  }
+  button:active {
+    background-color: gray;
+  }
+  input {
+    border: 1px solid black;
+  }
+  input:focus {
+    outline: none;
+  }
+  table, tr, td {
+    /*border: 1px solid black;*/
+  }
+  #universe {
+    border: 1px solid black;
+  }
+  input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
+  .color {
+    cursor: pointer;
+    width: 75px;
+    height: 15px;
+    border-radius: 5px;
+    margin-right: 3px;
+  }
+  .dropbtn {
+    cursor: pointer;
+    border: 2px solid black;
+    width: 150px;
+  }
+
+  .dropdown {
+    position: relative;
+    display: inline-block;
+  }
+
+  .dropdown-content {
+    text-align: left;
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+  }
+
+  .dropdown-content div {
+    margin-top: 2px;
+    margin-left: 2px;
+    margin-bottom: 2px;
+    margin-right: 2px;
+    border: none;
+  }
+
+  .dropdown:hover .dropdown-content {
+    display: block;
+  }
+
+  /*.dropdown:hover .dropbtn {
+    background-color: lightgray;
+  }*/
+  .direction {
+    text-align: center;
+    width: 20px;
+    height: 20px;
+    margin-right: 2px;
+    margin-left: 2px;
+    background-color: lightgray;
+  }
+</style>
+<h1>Langton's Ant</h1>
+<table>
+  <tr>
+    <td rowspan = '20'>
+      <canvas id = 'universe' width = 500 height = 500>Sorry, your browser does not support the canvas element.</canvas>
+    </td>
+    <td style = 'height:25px'>
+      <button onclick = 'stopStart()' style = 'margin-right:5px' id = 'stopstartbtn'>Stop</button>
+      <button onclick = 'nextTick()' style = 'margin-right:5px'>Step</button>
+    </td>
+  </tr>
+  <tr>
+    <td style = 'height:25px'>
+      <div style = 'display:flex;margin-top:5px'>
+        <div style = 'margin-right:5px'>Frame rate:</div>
+        <input type = 'number' step = 'any' value = '20' id = 'fps_box' oninput = 'startTicking()' style = 'width:45px'>
+      </div>
+    </td>
+  </tr>
+  <tr style = 'height:25px'>
+  </tr>
+  <tr>
+    <td style = 'height:25px'>
+      <button onclick = 'randomAnts()' style = 'margin-right:5px'>Spawn Random Ants</button>
+    </td>
+  </tr>
+  <tr>
+    <td style = 'height:25px'>
+      <div style = 'display:flex'>
+        <div style = 'margin-right:5px'>Randomness intensity:</div>
+        <input type = 'number' step = 'any' id = 'intensity_box' style = 'width:45px;margin-right:10px' value = '0.05'>
+        <div>Randomize intensity</div>
+        <input type = 'checkbox' id = 'intensity_check'>
+      </div>
+    </td>
+  </tr>
+  <tr style = 'height:25px'>
+  </tr>
+  <tr>
+    <td>
+      <div>Cells:</div>
+      <input type = 'range' min = '1' max = '10' value = '2' class = 'slider' id = 'cellsrange' oninput = 'updateCellBoxes()'>
+      <table>
+        <tr>
+          <td>
+            <table>
+              <tr>
+                <td>
+                  <div style = 'text-align:center'>Cell 1</div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class = 'dropdown'>
+                    <button class = 'dropbtn' style = 'width:80px'>&nbsp;</button>
+                    <div class = 'dropdown-content'>
+                      <div class = 'color' onclick = 'cell0.color="red"' style = 'background-color:red'></div>
+                      <div class = 'color' onclick = 'cell0.color="orange"' style = 'background-color:orange'></div>
+                      <div class = 'color' onclick = 'cell0.color="yellow"' style = 'background-color:yellow'></div>
+                      <div class = 'color' onclick = 'cell0.color="green"' style = 'background-color:green'></div>
+                      <div class = 'color' onclick = 'cell0.color="blue"' style = 'background-color:blue'></div>
+                      <div class = 'color' onclick = 'cell0.color="purple"' style = 'background-color:purple'></div>
+                      <div class = 'color' onclick = 'cell0.color="black"' style = 'background-color:black'></div>
+                      <div class = 'color' onclick = 'cell0.color="gray"' style = 'background-color:gray'></div>
+                      <div class = 'color' onclick = 'cell0.color="lightgray"' style = 'background-color:lightgray'></div>
+                      <div class = 'color' onclick = 'cell0.color="white"' style = 'width:73px;height:13px;border:1px solid black'></div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div style = 'display:flex;align-content:center'>
+                    <div onclick = 'cell0.change=-90' class = 'direction'>&#11170;</div>
+                    <div onclick = 'cell0.change=0' class = 'direction'>&#11105;</div>
+                    <div onclick = 'cell0.change=90' class = 'direction'>&#11171;</div>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td>
+            <table>
+              <tr>
+                <td>
+                  <div style = 'text-align:center'>Cell 2</div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class = 'dropdown'>
+                    <button class = 'dropbtn' style = 'width:80px'>&nbsp;</button>
+                    <div class = 'dropdown-content'>
+                      <div class = 'color' onclick = 'cell1.color="red"' style = 'background-color:red'></div>
+                      <div class = 'color' onclick = 'cell1.color="orange"' style = 'background-color:orange'></div>
+                      <div class = 'color' onclick = 'cell1.color="yellow"' style = 'background-color:yellow'></div>
+                      <div class = 'color' onclick = 'cell1.color="green"' style = 'background-color:green'></div>
+                      <div class = 'color' onclick = 'cell1.color="blue"' style = 'background-color:blue'></div>
+                      <div class = 'color' onclick = 'cell1.color="purple"' style = 'background-color:purple'></div>
+                      <div class = 'color' onclick = 'cell1.color="black"' style = 'background-color:black'></div>
+                      <div class = 'color' onclick = 'cell1.color="gray"' style = 'background-color:gray'></div>
+                      <div class = 'color' onclick = 'cell1.color="lightgray"' style = 'background-color:lightgray'></div>
+                      <div class = 'color' onclick = 'cell1.color="white"' style = 'width:73px;height:13px;border:1px solid black'></div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div style = 'display:flex;align-content:center'>
+                    <div onclick = 'cell1.change=-90' class = 'direction'>&#11170;</div>
+                    <div onclick = 'cell1.change=0' class = 'direction'>&#11105;</div>
+                    <div onclick = 'cell1.change=90' class = 'direction'>&#11171;</div>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td>
+            <table>
+              <tr>
+                <td>
+                  <div style = 'text-align:center'>Cell 3</div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class = 'dropdown'>
+                    <button class = 'dropbtn' style = 'width:80px'>&nbsp;</button>
+                    <div class = 'dropdown-content'>
+                      <div class = 'color' onclick = 'cell2.color="red"' style = 'background-color:red'></div>
+                      <div class = 'color' onclick = 'cell2.color="orange"' style = 'background-color:orange'></div>
+                      <div class = 'color' onclick = 'cell2.color="yellow"' style = 'background-color:yellow'></div>
+                      <div class = 'color' onclick = 'cell2.color="green"' style = 'background-color:green'></div>
+                      <div class = 'color' onclick = 'cell2.color="blue"' style = 'background-color:blue'></div>
+                      <div class = 'color' onclick = 'cell2.color="purple"' style = 'background-color:purple'></div>
+                      <div class = 'color' onclick = 'cell2.color="black"' style = 'background-color:black'></div>
+                      <div class = 'color' onclick = 'cell2.color="gray"' style = 'background-color:gray'></div>
+                      <div class = 'color' onclick = 'cell2.color="lightgray"' style = 'background-color:lightgray'></div>
+                      <div class = 'color' onclick = 'cell2.color="white"' style = 'width:73px;height:13px;border:1px solid black'></div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div style = 'display:flex;align-content:center'>
+                    <div onclick = 'cell2.change=-90' class = 'direction'>&#11170;</div>
+                    <div onclick = 'cell2.change=0' class = 'direction'>&#11105;</div>
+                    <div onclick = 'cell2.change=90' class = 'direction'>&#11171;</div>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td>
+            <table>
+              <tr>
+                <td>
+                  <div style = 'text-align:center'>Cell 4</div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class = 'dropdown'>
+                    <button class = 'dropbtn' style = 'width:80px'>&nbsp;</button>
+                    <div class = 'dropdown-content'>
+                      <div class = 'color' onclick = 'cell3.color="red"' style = 'background-color:red'></div>
+                      <div class = 'color' onclick = 'cell3.color="orange"' style = 'background-color:orange'></div>
+                      <div class = 'color' onclick = 'cell3.color="yellow"' style = 'background-color:yellow'></div>
+                      <div class = 'color' onclick = 'cell3.color="green"' style = 'background-color:green'></div>
+                      <div class = 'color' onclick = 'cell3.color="blue"' style = 'background-color:blue'></div>
+                      <div class = 'color' onclick = 'cell3.color="purple"' style = 'background-color:purple'></div>
+                      <div class = 'color' onclick = 'cell3.color="black"' style = 'background-color:black'></div>
+                      <div class = 'color' onclick = 'cell3.color="gray"' style = 'background-color:gray'></div>
+                      <div class = 'color' onclick = 'cell3.color="lightgray"' style = 'background-color:lightgray'></div>
+                      <div class = 'color' onclick = 'cell3.color="white"' style = 'width:73px;height:13px;border:1px solid black'></div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div style = 'display:flex;align-content:center'>
+                    <div onclick = 'cell3.change=-90' class = 'direction'>&#11170;</div>
+                    <div onclick = 'cell3.change=0' class = 'direction'>&#11105;</div>
+                    <div onclick = 'cell3.change=90' class = 'direction'>&#11171;</div>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td>
+            <table>
+              <tr>
+                <td>
+                  <div style = 'text-align:center'>Cell 5</div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class = 'dropdown'>
+                    <button class = 'dropbtn' style = 'width:80px'>&nbsp;</button>
+                    <div class = 'dropdown-content'>
+                      <div class = 'color' onclick = 'cell4.color="red"' style = 'background-color:red'></div>
+                      <div class = 'color' onclick = 'cell4.color="orange"' style = 'background-color:orange'></div>
+                      <div class = 'color' onclick = 'cell4.color="yellow"' style = 'background-color:yellow'></div>
+                      <div class = 'color' onclick = 'cell4.color="green"' style = 'background-color:green'></div>
+                      <div class = 'color' onclick = 'cell4.color="blue"' style = 'background-color:blue'></div>
+                      <div class = 'color' onclick = 'cell4.color="purple"' style = 'background-color:purple'></div>
+                      <div class = 'color' onclick = 'cell4.color="black"' style = 'background-color:black'></div>
+                      <div class = 'color' onclick = 'cell4.color="gray"' style = 'background-color:gray'></div>
+                      <div class = 'color' onclick = 'cell4.color="lightgray"' style = 'background-color:lightgray'></div>
+                      <div class = 'color' onclick = 'cell4.color="white"' style = 'width:73px;height:13px;border:1px solid black'></div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div style = 'display:flex;align-content:center'>
+                    <div onclick = 'cell4.change=-90' class = 'direction'>&#11170;</div>
+                    <div onclick = 'cell4.change=0' class = 'direction'>&#11105;</div>
+                    <div onclick = 'cell4.change=90' class = 'direction'>&#11171;</div>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td>
+            <table>
+              <tr>
+                <td>
+                  <div style = 'text-align:center'>Cell 6</div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class = 'dropdown'>
+                    <button class = 'dropbtn' style = 'width:80px'>&nbsp;</button>
+                    <div class = 'dropdown-content'>
+                      <div class = 'color' onclick = 'cell5.color="red"' style = 'background-color:red'></div>
+                      <div class = 'color' onclick = 'cell5.color="orange"' style = 'background-color:orange'></div>
+                      <div class = 'color' onclick = 'cell5.color="yellow"' style = 'background-color:yellow'></div>
+                      <div class = 'color' onclick = 'cell5.color="green"' style = 'background-color:green'></div>
+                      <div class = 'color' onclick = 'cell5.color="blue"' style = 'background-color:blue'></div>
+                      <div class = 'color' onclick = 'cell5.color="purple"' style = 'background-color:purple'></div>
+                      <div class = 'color' onclick = 'cell5.color="black"' style = 'background-color:black'></div>
+                      <div class = 'color' onclick = 'cell5.color="gray"' style = 'background-color:gray'></div>
+                      <div class = 'color' onclick = 'cell5.color="lightgray"' style = 'background-color:lightgray'></div>
+                      <div class = 'color' onclick = 'cell5.color="white"' style = 'width:73px;height:13px;border:1px solid black'></div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div style = 'display:flex;align-content:center'>
+                    <div onclick = 'cell5.change=-90' class = 'direction'>&#11170;</div>
+                    <div onclick = 'cell5.change=0' class = 'direction'>&#11105;</div>
+                    <div onclick = 'cell5.change=90' class = 'direction'>&#11171;</div>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td>
+            <table>
+              <tr>
+                <td>
+                  <div style = 'text-align:center'>Cell 7</div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class = 'dropdown'>
+                    <button class = 'dropbtn' style = 'width:80px'>&nbsp;</button>
+                    <div class = 'dropdown-content'>
+                      <div class = 'color' onclick = 'cell6.color="red"' style = 'background-color:red'></div>
+                      <div class = 'color' onclick = 'cell6.color="orange"' style = 'background-color:orange'></div>
+                      <div class = 'color' onclick = 'cell6.color="yellow"' style = 'background-color:yellow'></div>
+                      <div class = 'color' onclick = 'cell6.color="green"' style = 'background-color:green'></div>
+                      <div class = 'color' onclick = 'cell6.color="blue"' style = 'background-color:blue'></div>
+                      <div class = 'color' onclick = 'cell6.color="purple"' style = 'background-color:purple'></div>
+                      <div class = 'color' onclick = 'cell6.color="black"' style = 'background-color:black'></div>
+                      <div class = 'color' onclick = 'cell6.color="gray"' style = 'background-color:gray'></div>
+                      <div class = 'color' onclick = 'cell6.color="lightgray"' style = 'background-color:lightgray'></div>
+                      <div class = 'color' onclick = 'cell6.color="white"' style = 'width:73px;height:13px;border:1px solid black'></div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div style = 'display:flex;align-content:center'>
+                    <div onclick = 'cell6.change=-90' class = 'direction'>&#11170;</div>
+                    <div onclick = 'cell6.change=0' class = 'direction'>&#11105;</div>
+                    <div onclick = 'cell6.change=90' class = 'direction'>&#11171;</div>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td>
+            <table>
+              <tr>
+                <td>
+                  <div style = 'text-align:center'>Cell 8</div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class = 'dropdown'>
+                    <button class = 'dropbtn' style = 'width:80px'>&nbsp;</button>
+                    <div class = 'dropdown-content'>
+                      <div class = 'color' onclick = 'cell7.color="red"' style = 'background-color:red'></div>
+                      <div class = 'color' onclick = 'cell7.color="orange"' style = 'background-color:orange'></div>
+                      <div class = 'color' onclick = 'cell7.color="yellow"' style = 'background-color:yellow'></div>
+                      <div class = 'color' onclick = 'cell7.color="green"' style = 'background-color:green'></div>
+                      <div class = 'color' onclick = 'cell7.color="blue"' style = 'background-color:blue'></div>
+                      <div class = 'color' onclick = 'cell7.color="purple"' style = 'background-color:purple'></div>
+                      <div class = 'color' onclick = 'cell7.color="black"' style = 'background-color:black'></div>
+                      <div class = 'color' onclick = 'cell7.color="gray"' style = 'background-color:gray'></div>
+                      <div class = 'color' onclick = 'cell7.color="lightgray"' style = 'background-color:lightgray'></div>
+                      <div class = 'color' onclick = 'cell7.color="white"' style = 'width:73px;height:13px;border:1px solid black'></div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div style = 'display:flex;align-content:center'>
+                    <div onclick = 'cell7.change=-90' class = 'direction'>&#11170;</div>
+                    <div onclick = 'cell7.change=0' class = 'direction'>&#11105;</div>
+                    <div onclick = 'cell7.change=90' class = 'direction'>&#11171;</div>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td>
+            <table>
+              <tr>
+                <td>
+                  <div style = 'text-align:center'>Cell 9</div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class = 'dropdown'>
+                    <button class = 'dropbtn' style = 'width:80px'>&nbsp;</button>
+                    <div class = 'dropdown-content'>
+                      <div class = 'color' onclick = 'cell8.color="red"' style = 'background-color:red'></div>
+                      <div class = 'color' onclick = 'cell8.color="orange"' style = 'background-color:orange'></div>
+                      <div class = 'color' onclick = 'cell8.color="yellow"' style = 'background-color:yellow'></div>
+                      <div class = 'color' onclick = 'cell8.color="green"' style = 'background-color:green'></div>
+                      <div class = 'color' onclick = 'cell8.color="blue"' style = 'background-color:blue'></div>
+                      <div class = 'color' onclick = 'cell8.color="purple"' style = 'background-color:purple'></div>
+                      <div class = 'color' onclick = 'cell8.color="black"' style = 'background-color:black'></div>
+                      <div class = 'color' onclick = 'cell8.color="gray"' style = 'background-color:gray'></div>
+                      <div class = 'color' onclick = 'cell8.color="lightgray"' style = 'background-color:lightgray'></div>
+                      <div class = 'color' onclick = 'cell8.color="white"' style = 'width:73px;height:13px;border:1px solid black'></div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div style = 'display:flex;align-content:center'>
+                    <div onclick = 'cell8.change=-90' class = 'direction'>&#11170;</div>
+                    <div onclick = 'cell8.change=0' class = 'direction'>&#11105;</div>
+                    <div onclick = 'cell8.change=90' class = 'direction'>&#11171;</div>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td>
+            <table>
+              <tr>
+                <td>
+                  <div style = 'text-align:center'>Cell 10</div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class = 'dropdown'>
+                    <button class = 'dropbtn' style = 'width:80px'>&nbsp;</button>
+                    <div class = 'dropdown-content'>
+                      <div class = 'color' onclick = 'cell9.color="red"' style = 'background-color:red'></div>
+                      <div class = 'color' onclick = 'cell9.color="orange"' style = 'background-color:orange'></div>
+                      <div class = 'color' onclick = 'cell9.color="yellow"' style = 'background-color:yellow'></div>
+                      <div class = 'color' onclick = 'cell9.color="green"' style = 'background-color:green'></div>
+                      <div class = 'color' onclick = 'cell9.color="blue"' style = 'background-color:blue'></div>
+                      <div class = 'color' onclick = 'cell9.color="purple"' style = 'background-color:purple'></div>
+                      <div class = 'color' onclick = 'cell9.color="black"' style = 'background-color:black'></div>
+                      <div class = 'color' onclick = 'cell9.color="gray"' style = 'background-color:gray'></div>
+                      <div class = 'color' onclick = 'cell9.color="lightgray"' style = 'background-color:lightgray'></div>
+                      <div class = 'color' onclick = 'cell9.color="white"' style = 'width:73px;height:13px;border:1px solid black'></div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div style = 'display:flex;align-content:center'>
+                    <div onclick = 'cell9.change=-90' class = 'direction'>&#11170;</div>
+                    <div onclick = 'cell9.change=0' class = 'direction'>&#11105;</div>
+                    <div onclick = 'cell9.change=90' class = 'direction'>&#11171;</div>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td style = 'height:25px'>
+      <div style = 'display:flex'>
+        <div style = 'padding-right:5px'>Grid Size:</div>
+        <input type = 'number' step = 'any' value = '250' id = 'size_box' style = 'width:45px;margin-right:10px'>
+        <button onclick = 'setGridSize()'>Apply and Randomize</button>
+      </div>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div id = 'census'>Generations: 0<br>Ants: 0<br>Empty Cells: 0<br>Filled Cells: 0</div>
+      <p id = 'test'></p>
+    </td>
+  </tr>
+</table>
+<script>
+  const ctx = universe.getContext('2d');
+  
+  let ant_color = 'pink';
+  let cells = 2;
+  let cell0 = {color: 'black', change: 90};
+  let cell1 = {color: 'green', change: -90};
+  let cell2 = {color: 'yellow', change: 90};
+  let cell3 = {color: 'green', change: -90};
+  let cell4 = {color: 'blue', change: -90};
+  let cell5 = {color: 'purple', change: -90};
+  let cell6 = {color: 'black', change: 90};
+  let cell7 = {color: 'gray', change: 0};
+  let cell8 = {color: 'lightgray', change: -90};
+  let cell9 = {color: 'white', change: -90};
+  
+  let fps_interval, last_tick_time, request_tick;
+  let fps = fps_box.value;
+  let running = true;
+  
+  let width = 125;
+  let height = 125;
+  let world = createArray(height);
+  let cell_size = 4;
+  
+  let generations = 0;
+  let ants = [];
+  
+  let intensity = 0.05;
+  
+  function ant(j, k) {
+    this.j = j;
+    this.k = k;
+    this.direction = 270;
+  }
+  
+  ant.prototype.render = function() {
+    ctx.fillStyle = ant_color;
+    ctx.fillRect(this.k * cell_size, this.j * cell_size, cell_size, cell_size); 
+    if (world[this.j][this.k] == 0) {
+      this.direction += cell0.change;
+      world[this.j][this.k]++;
+    }
+    else if (world[this.j][this.k] == 1) {
+      this.direction += cell1.change;
+      world[this.j][this.k]++;
+    }
+    else if (world[this.j][this.k] == 2) {
+      this.direction += cell2.change;
+      world[this.j][this.k]++;
+    }
+    else if (world[this.j][this.k] == 3) {
+      this.direction += cell3.change;
+      world[this.j][this.k]++;
+    }
+    else if (world[this.j][this.k] == 4) {
+      this.direction += cell4.change;
+      world[this.j][this.k]++;
+    }
+    else if (world[this.j][this.k] == 5) {
+      this.direction += cell5.change;
+      world[this.j][this.k]++;
+    }
+    else if (world[this.j][this.k] == 6) {
+      this.direction += cell6.change;
+      world[this.j][this.k]++;
+    }
+    else if (world[this.j][this.k] == 7) {
+      this.direction += cell7.change;
+      world[this.j][this.k]++;
+    }
+    else if (world[this.j][this.k] == 8) {
+      this.direction += cell8.change;
+      world[this.j][this.k]++;
+    }
+    else if (world[this.j][this.k] == 9) {
+      this.direction += cell9.change;
+      world[this.j][this.k]++;
+    }
+    if (world[this.j][this.k] > cells - 1) world[this.j][this.k] = 0;
+    while (this.direction >= 360) this.direction -= 360;
+    while (this.direction < 0) this.direction += 360;
+    if (this.direction == 0) this.j--;
+    if (this.direction == 90) this.k--;
+    if (this.direction == 180) this.j++;
+    if (this.direction == 270) this.k++;
+    if (this.j > height - 1 || this.j < 0 || this.k > width - 1 || this.k < 0) ants.splice(ants.indexOf(this.ant), 1);
+  }
+  
+  function makeAnt(j, k) {
+    let new_ant = new ant(j, k);
+    ants.push(new_ant);
+  }
+  
+  function nextTick() {
+    drawWorld();
+    for (let i = 0; i < ants.length; i++) ants[i].render();
+    generations++;
+    takeCensus();
+  }
+  makeAnt(50, 50);
+  startTicking();
+  clearWorld();
+  
+  function drawWorld() {
+    ctx.clearRect(0, 0, universe.width, universe.height);
+    for (let j = 0; j < height; j++) { // Iterate through rows
+      for (let k = 0; k < width; k++) { // Iterate through columns
+        if (world[j][k] == 0) ctx.fillStyle = cell0.color;
+        else if (world[j][k] == 1) ctx.fillStyle = cell1.color;
+        else if (world[j][k] == 2) ctx.fillStyle = cell2.color;
+        else if (world[j][k] == 3) ctx.fillStyle = cell3.color;
+        else if (world[j][k] == 4) ctx.fillStyle = cell4.color;
+        else if (world[j][k] == 5) ctx.fillStyle = cell5.color;
+        else if (world[j][k] == 6) ctx.fillStyle = cell6.color;
+        else if (world[j][k] == 7) ctx.fillStyle = cell7.color;
+        else if (world[j][k] == 8) ctx.fillStyle = cell8.color;
+        else if (world[j][k] == 9) ctx.fillStyle = cell9.color;
+        ctx.fillRect(k * cell_size, j * cell_size, cell_size, cell_size);
+      }
+    }
+  }
+  
+  function startTicking() {
+    fps = fps_box.value;
+    fps_interval = 1000 / fps;
+    last_tick_time = performance.now();
+    tick();
+  }
+  
+  function tick() {
+    let now = performance.now();
+    request_tick = requestAnimationFrame(tick);
+    let elapsed = now - last_tick_time;
+    if (elapsed > fps_interval) {
+      last_tick_time = now - (elapsed % fps_interval);
+      if (running) nextTick();
+    }
+  }
+  
+  function stopStart() {
+    if (!running) {
+      running = true;
+      startTicking();
+      stopstartbtn.innerHTML = 'Stop';
+    }
+    else {
+      running = false;
+      startTicking();
+      stopstartbtn.innerHTML = 'Start';
+    }
+  }
+  
+  function createArray(rows) {
+    let arr = [];
+    for (let i = 0; i < rows; i++) arr[i] = [];
+    return arr;
+  }
+  
+  function randomAnts() {
+    if (intensity_check.checked) {
+      intensity = Math.random();
+      intensity_box.value = intensity;
+    }
+    else intensity = intensity_box.value;
+    for (let j = 0; j < height; j++) {
+      for (let k = 0; k < width; k++) {
+        let rand = Math.random() * (1 / intensity);
+        if (Math.floor(rand) == 0) makeAnt(50, 50);
+      }
+    }
+    drawWorld();
+  }
+  
+  function getPopulation() {
+    let pop = 0;
+    for (let j = 0; j < height; j++) {
+      for (let k = 0; k < width; k++) {
+        if (world[j][k] == 1) pop++;
+      }
+    }
+    return pop;
+  }
+  
+  function takeCensus() {
+    /*census.innerHTML = `Generations: ${generations}<br>Population: ${getPopulation()}`;
+    if (getPopulation() - last_population != 0) {
+      census.innerHTML += (getPopulation() > last_population) ? ' (+' : ' (';
+      census.innerHTML += (getPopulation() - last_population) + ')';
+    }
+    census.innerHTML += `<br>Density: ${((getPopulation() / (width * height)) * 100).toFixed(2)}%`;*/
+    census.innerHTML = `Generations: ${generations}<br>Ants: ${ants.length}`;
+  }
+  
+  function setGridSize() {
+    if (size_box.value <= 0) size_box.value = 1;
+    size_box.value = Math.floor(size_box.value);
+    width = height = size_box.value;
+    cell_size = universe.width / width;
+  }
+  
+  function clearWorld() {
+    for (let j = 0; j < height; j++) {
+      for (let k = 0; k < width; k++) {
+        world[j][k] = 0;
+      }
+    }
+  }
+  
+  function getMousePosition(e) {
+    let rect = universe.getBoundingClientRect();
+    return {x: e.clientX - rect.left, y: e.clientY - rect.top};
+  }
+  
+  function mouseClick(e) {
+    if (e.detail > 1) e.preventDefault();
+    let pos = getMousePosition(e);
+    for (let j = 0; j < height; j++) {
+      for (let k = 0; k < width; k++) {
+        if (pos.x >= k * cell_size && pos.x < (k + 1) * cell_size && pos.y >= j * cell_size && pos.y < (j + 1) * cell_size) {
+          makeAnt(j, k);
+        }
+      }
+    }
+    drawWorld();
+    takeCensus();
+  }
+  addEventListener('mousedown', mouseClick);
+  
+  function updateCellBoxes() {
+    cells = cellsrange.value;
+  }
+  
+  /*let boxes = document.getElementsByClassName('color');
+  for (let i = 0; i < boxes.length; i++) {
+    boxes[i].oninput = function() {
+      switch (i) {
+        case 0: boxes[i].backgroundColor = cell0.color;
+        break;
+        case 1: boxes[i].backgroundColor = cell1.color;
+        break;
+        case 2: boxes[i].backgroundColor = cell2.color;
+        break;
+        case 3: boxes[i].backgroundColor = cell3.color;
+        break;
+        case 4: boxes[i].backgroundColor = cell4.color;
+        break;
+        case 5: boxes[i].backgroundColor = cell5.color;
+        break;
+        case 6: boxes[i].backgroundColor = cell6.color;
+        break;
+        case 7: boxes[i].backgroundColor = cell7.color;
+        break;
+        case 8: boxes[i].backgroundColor = cell8.color;
+        break;
+        case 9: boxes[i].backgroundColor = cell9.color;
+        break;
+      }
+    }
+  }*/
+</script>
+</body>
+</html>
