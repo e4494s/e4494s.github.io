@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png"/>
+    <title>Ciphers ~ e4494s</title>
+    <link rel = "stylesheet" href = "stylesheets/cipher.css"/>
+  </head>
+<body>
+<h1 id = "caesar">Caesar Shift</h1>
+<div><b><u>Input:</u></b>&nbsp;</div>
+<textarea id = "input1" spellcheck = "false" class = "field"></textarea>
+<br>
+<div><b><u>Key:</u></b>&nbsp;</div>
+<input id = "key1" class = "keytext" type = "number" step = "1" value = "0">
+<button onclick = "encodeInput1()">Encode</button>
+<button onclick = "decodeInput1()">Decode</button>
+<button onclick = "swapIO(1)">&UpArrowDownArrow;</button>
+<br><br>
+<div><b><u>Output:</u></b>&nbsp;</div>
+<div id = "output1" class = "field"></div>
+<br><br><br>
+<h1 id = "vigenere">Vigen&egrave;re Cipher</h1>
+<div><b><u>Input:</u></b>&nbsp;</div>
+<textarea id = "input2" spellcheck = "false" class = "field"></textarea>
+<br>
+<div><b><u>Key:</u></b>&nbsp;</div>
+<input id = "key2" class = "keytext" type = "text" value = "hello">
+<button onclick = "encodeInput2()">Encode</button>
+<button onclick = "decodeInput2()">Decode</button>
+<button onclick = "swapIO(2)">&UpArrowDownArrow;</button>
+<br><br>
+<div><b><u>Output:</u></b>&nbsp;</div>
+<div id = "output2" class = "field"></div>
+<br><br><br>
+<h1 id = "affine">Affine Cipher</h1>
+<div><b><u>Input:</u></b>&nbsp;</div>
+<textarea id = "input3" spellcheck = "false" class = "field"></textarea>
+<br>
+<div><b><u>Keys:</u></b>&nbsp;(A, B)</div>
+<input id = "key3_1" class = "keytext" type = "number" step = "1" value = "3">
+<input id = "key3_2" class = "keytext" type = "number" step = "1" value = "5">
+<button onclick = "encodeInput3()">Encode</button>
+<button onclick = "decodeInput2()">Decode</button>
+<button onclick = "swapIO(3)">&UpArrowDownArrow;</button>
+<br><br>
+<div style = 'font-size: 11px; width: 250px; line-height: 22px'>
+  <i>decode currently doesn't work for this cipher because it requires some very complicated mathy
+  stuff that I don't feel like trying to figure out right now</i>
+  <br>
+  so uh yeah<span style = 'font-size: 22px; font-family: serif'>&#9786;</span>
+</div>
+<div><b><u>Output:</u></b>&nbsp;</div>
+<div id = "output3" class = "field"></div>
+<!--<script src = "scripts/cipher.js"></script>-->
+<script>
+  function encodeInput1() {
+    output1.innerHTML = cipher.encode({cipher: 1, text: input1.value, key: Number(key1.value)});
+    key1.value = Math.floor(Number(key1.value));
+  }
+  function decodeInput1() {
+    output1.innerHTML = cipher.decode({cipher: 1, text: input1.value, key: Number(key1.value)});
+    key1.value = Math.floor(Number(key1.value));
+  }
+  
+  function encodeInput2() {
+    output2.innerHTML = cipher.encode({cipher: 2, text: input2.value, key: key2.value});
+  }
+  function decodeInput2() {
+    output2.innerHTML = cipher.decode({cipher: 2, text: input2.value, key: key2.value});
+  }
+  
+  function encodeInput3() {
+    key3_1.value = Math.floor(Number(key3_1.value));
+    key3_2.value = Math.floor(Number(key3_2.value));
+    if (key3_1.value % 2 == 0) key3_1.value--;
+    if (key3_1.value == 13) key3_1.value = 11;
+    output3.innerHTML = cipher.encode({cipher: 3, text: input3.value, key: [Number(key3_1.value), Number(key3_2.value)]});
+  }
+  function decodeInput3() {
+    key3_1.value = Math.floor(Number(key3_1.value));
+    key3_2.value = Math.floor(Number(key3_2.value));
+    if (key3_1.value % 2 != 0) key3_1.value--;
+    if (key3_1.value == 13) key3_1.value = 12;
+    if (key3_2.value % 2 != 0) key3_2.value--;
+    if (key3_2.value == 13) key3_2.value = 12;
+    output3.innerHTML = cipher.decode({cipher: 3, text: input3.value, key: [key3_1.value, key3_2.value]});
+  }
+  
+  function swapIO(n) {
+    if (document.getElementById("output" + n).innerHTML != "") document.getElementById("input" + n).value = document.getElementById("output" + n).innerHTML;
+    document.getElementById("output" + n).innerHTML = "";
+  }
+</script>
+<script>
+let cipher = {};
+
+cipher.alphabet = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz";
+
+cipher.encode = function(input) {
+  let output = "";
+  
+  if (input.cipher == 1) {
+    if (input.key === "" || typeof(input.key) != "number") return;
+    while (input.key < 0) input.key += 26;
+    while (input.key >= 26) input.key -= 26;
+    input.key = Math.floor(input.key);
+    for (let i = 0; i < input.text.length; i++) {
+      let j;
+      if (!cipher.alphabet.includes(input.text[i].toLowerCase())) j = input.text[i];
+      else j = cipher.alphabet[cipher.alphabet.indexOf(input.text[i].toLowerCase()) + input.key];
+      if (input.text[i].toUpperCase() == input.text[i]) j = j.toUpperCase();
+      output += j;
+    }
+  }
+  
+  if (input.cipher == 2) {
+    if (input.key === "" || typeof(input.key) != "string") return;
+    for (let i = 0; i < input.key.length; i++) {
+      if (!cipher.alphabet.includes(input.key[i].toLowerCase())) return;
+    }
+    input.key = input.key.toLowerCase();
+    let repeated_key = "";
+    for (let i = 0; i < input.key.length; i++) {
+      if (!cipher.alphabet.includes(input.key[i].toLowerCase())) return;
+    }
+    let j = 0;
+    for (let i = 0; i < input.text.length; i++) {
+      if (!cipher.alphabet.includes(input.text[i].toLowerCase())) repeated_key += input.text[i];
+      else {
+        repeated_key += input.key[j];
+        j++;
+      }
+      if (j > input.key.length - 1) j = 0;
+    }
+    for (let i = 0; i < input.text.length; i++) {
+      let j;
+      if (!cipher.alphabet.includes(input.text[i].toLowerCase())) j = input.text[i];
+      else j = cipher.alphabet[cipher.alphabet.indexOf(input.text[i].toLowerCase()) + cipher.alphabet.indexOf(repeated_key[i])];
+      if (input.text[i].toUpperCase() == input.text[i]) j = j.toUpperCase();
+      output += j;
+    }
+  }
+  
+  if (input.cipher == 3) {
+    if (input.key === "" || typeof(input.key[0]) != "number" || typeof(input.key[1]) != "number" || typeof(input.key) != "object") return;
+    let a = Math.floor(input.key[0]);
+    let b = Math.floor(input.key[1]);
+    for (let i = 0; i < input.text.length; i++) {
+      let j;
+      let n = ((a * cipher.alphabet.indexOf(input.text[i].toLowerCase())) + b) % 26;
+      console.log(n);
+      while (n < 0) n += 26;
+      while (n >= 26) n -= 26;
+      if (!cipher.alphabet.includes(input.text[i].toLowerCase())) j = input.text[i];
+      else j = cipher.alphabet[n];
+      if (input.text[i].toUpperCase() == input.text[i]) j = j.toUpperCase();
+      output += j;
+    }
+  }
+  
+  return output;
+};
+
+cipher.decode = function(input) {
+  let output = "";
+  
+  if (input.cipher == 1) {
+    while (input.key < 0) input.key += 26;
+    while (input.key >= 26) input.key -= 26;
+    input.key = Math.floor(input.key);
+    for (let i = 0; i < input.text.length; i++) {
+      let j;
+      if (!cipher.alphabet.includes(input.text[i].toLowerCase())) j = input.text[i];
+      else j = cipher.alphabet[cipher.alphabet.indexOf(input.text[i].toLowerCase()) + (26 - input.key)];
+      if (input.text[i].toUpperCase() == input.text[i]) j = j.toUpperCase();
+      output += j;
+    }
+  }
+  
+  if (input.cipher == 2) {
+    if (input.key === "" || typeof(input.key) != "string") return;
+    for (let i = 0; i < input.key.length; i++) {
+      if (!cipher.alphabet.includes(input.key[i].toLowerCase())) return;
+    }
+    input.key = input.key.toLowerCase();
+    let repeated_key = "";
+    for (let i = 0; i < input.key.length; i++) {
+      if (!cipher.alphabet.includes(input.key[i].toLowerCase())) return;
+    }
+    let j = 0;
+    for (let i = 0; i < input.text.length; i++) {
+      if (!cipher.alphabet.includes(input.text[i].toLowerCase())) repeated_key += input.text[i];
+      else {
+        repeated_key += input.key[j];
+        j++;
+      }
+      if (j > input.key.length - 1) j = 0;
+    }
+    for (let i = 0; i < input.text.length; i++) {
+      let j;
+      if (!cipher.alphabet.includes(input.text[i].toLowerCase())) j = input.text[i];
+      else j = cipher.alphabet[cipher.alphabet.indexOf(input.text[i].toLowerCase()) + (26 - cipher.alphabet.indexOf(repeated_key[i]))];
+      if (input.text[i].toUpperCase() == input.text[i]) j = j.toUpperCase();
+      output += j;
+    }
+  }
+  
+  return output;
+};
+</script>
+</body>
+</html>
