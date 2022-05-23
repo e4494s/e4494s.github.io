@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <title>The Stupidest Game Ever ~ e4494s</title>
+    <style>
+      h1 {
+        font-size: 30px;
+        padding: 15px;
+        text-align: center;
+        background: linear-gradient(to right, white, lightgray 15% 85%, white);
+      }
+      
+      #thebutton {
+        border: 3px solid black;
+        border-radius: 5px;
+        font-size: 20px;
+        font-weight: bold;
+      }
+      
+      .center {
+        text-align: center;
+      }
+      
+      .verticalspace {
+        height: 80px;
+      }
+      
+      #dialogueboxbox {
+        max-height: 250px;
+        overflow-y: scroll;
+        width: 500px;
+        max-width: 100%;
+        outline: 1px solid black;
+      }
+      
+      td {
+        padding: 10px;
+      }
+    </style>
+  </head>
+<body>
+<h1>The Stupidest Game Ever</h1>
+<div class = "verticalspace"></div>
+<div class = "center"><button id = "thebutton" onclick = "theClick()">The Button</button></div>
+<br><br>
+<div class = "center">You've clicked the button <span id = "clickstxt">0</span> time<span id = "plural">s</span>.</div>
+<br><br>
+<div id = "dialogueboxbox"><table id = "dialoguebox"></table></div>
+<script src = "scripts/main.js"></script>
+<script>
+  let clicks = 0;
+  
+  function theClick() {
+    thebutton.blur();
+    clicks++;
+    clickstxt.innerHTML = clicks;
+    if (clicks == 1) plural.innerHTML = "";
+    else plural.innerHTML = "s";
+    let row = document.createElement("tr");
+    let time = document.createElement("td");
+    time.innerHTML = printTime();
+    time.style.borderRight = "1px solid black";
+    row.appendChild(time);
+    let dialogue = document.createElement("td");
+    switch (clicks) {
+      case 1: dialogue.innerHTML = "Congratulations! You clicked the button for the first time!";
+      break;
+      case 2: dialogue.innerHTML = "This is the beginning of a wonderful journey.";
+      break;
+      case 3: dialogue.innerHTML = "Keep going!";
+      break;
+      case 5: dialogue.innerHTML = "Just clicking away.";
+      break;
+      case 10: dialogue.innerHTML = "You can unlock new things by clicking the button!";
+      break;
+      case 20: dialogue.innerHTML = "Next unlock at 25.";
+      break;
+      /*
+      case 0: dialogue.innerHTML = "";
+      break;
+      */
+    }
+    row.appendChild(dialogue);
+    if (dialogue.innerHTML != "") dialoguebox.insertBefore(row, dialoguebox.children[0]);
+  }
+  
+  let monthArray = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  
+  function printTime() {
+    let now = new Date();
+    return String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0") + ":" + String(now.getSeconds()).padStart(2, "0");
+  }
+</script>
+</body>
+</html>
