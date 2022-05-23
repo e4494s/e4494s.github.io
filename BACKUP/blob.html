@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <title>Blob Generator e4494s</title>
+    <style>
+      canvas {
+        width: 300px;
+        height: 300px;
+        border: none;
+        outline: 3px solid black;
+      }
+      
+      #randomizeallbtn {
+        width: 150px;
+        height: 40px;
+        font-size: 18px;
+        font-weight: bold;
+      }
+      
+      .colorpart, .eyespart {
+        width: 40px;
+        height: 40px;
+        border: 3px solid white;
+        border-radius: 10px;
+        display: inline-block;
+        cursor: pointer;
+        background-size: 100%;
+      }
+      .eyespart {
+        background-color: lightgray;
+        border: 3px solid lightgray;
+      }
+    </style>
+  </head>
+<body onload = "drawBlob()">
+<h1>Blob Generator</h1>
+<button onclick = "randomizeParts()" id = "randomizeallbtn">Randomize All</button>
+<br><br><br>
+<b><u>Color</u></b>
+<button onclick = "randomizeColor()">Randomize</button>
+<br><br>
+<div class = "colorpart" onclick = "updateColor(this, '#bcf000')" style = "background-color: #bcf000; border: 3px solid black"></div>
+<div class = "colorpart" onclick = "updateColor(this, '#00b3b3')" style = "background-color: #00b3b3"></div>
+<div class = "colorpart" onclick = "updateColor(this, '#4f7be3')" style = "background-color: #4f7be3"></div>
+<div class = "colorpart" onclick = "updateColor(this, '#ff3838')" style = "background-color: #ff3838"></div>
+<div class = "colorpart" onclick = "updateColor(this, '#ff2470')" style = "background-color: #ff2470"></div>
+<div class = "colorpart" onclick = "updateColor(this, '#e27c1d')" style = "background-color: #e27c1d"></div>
+<div class = "colorpart" onclick = "updateColor(this, '#03a800')" style = "background-color: #03a800"></div>
+<div class = "colorpart" onclick = "updateColor(this, '#a500a8')" style = "background-color: #a500a8"></div>
+<br><br>
+<b><u>Eyes</u></b>
+<button onclick = "randomizeEyes()">Randomize</button>
+<br><br>
+<div class = "eyespart" onclick = "updateEyes(this, 1)" style = "background-image: url('images/blob/eyes1.png'); border: 3px solid black"></div>
+<div class = "eyespart" onclick = "updateEyes(this, 2)" style = "background-image: url('images/blob/eyes2.png');"></div>
+<div class = "eyespart" onclick = "updateEyes(this, 3)" style = "background-image: url('images/blob/eyes3.png');"></div>
+<div class = "eyespart" onclick = "updateEyes(this, 4)" style = "background-image: url('images/blob/eyes4.png');"></div>
+<div class = "eyespart" onclick = "updateEyes(this, 5)" style = "background-image: url('images/blob/eyes5.png');"></div>
+<div class = "eyespart" onclick = "updateEyes(this, 6)" style = "background-image: url('images/blob/eyes6.png');"></div>
+<br><br>
+<canvas id = "canvas"></canvas>
+<input type = "color">
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  let ratio = 10;
+  canvas.width = canvas.height = 100 * ratio;
+  
+  const blob = {};
+  blob.color = "#bcf000";
+  blob.eyes = 1;
+  blob.eyesSprite = new Image();
+  blob.eyesSprite.src = "images/blob/eyes1.png";
+  
+  function drawBlob() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Body
+    ctx.fillStyle = blob.color;
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.moveTo(10 * ratio, 80 * ratio);
+    ctx.quadraticCurveTo(50 * ratio, 90 * ratio, 90 * ratio, 80 * ratio);
+    ctx.quadraticCurveTo(90 * ratio, 20 * ratio, 50 * ratio, 20 * ratio);
+    ctx.quadraticCurveTo(10 * ratio, 20 * ratio, 10 * ratio, 80 * ratio);
+    ctx.fill();
+    
+    // Eyes
+    blob.eyesSprite.src = `images/blob/eyes${blob.eyes}.png`;
+    let s = blob.eyes == 3 ? 20 : 10;
+    ctx.drawImageFromCenter(blob.eyesSprite, 35 * ratio, 45 * ratio, s * ratio, s * ratio);
+    ctx.drawImageFromCenter(blob.eyesSprite, 65 * ratio, 45 * ratio, s * ratio, s * ratio);
+  }
+  
+  
+  
+  function updateColor(caller, newColor) {
+    let parts = document.getElementsByClassName("colorpart");
+    for (let i = 0; i < parts.length; i++) {
+      parts[i].style.border = "3px solid white";
+      if (parts[i] == caller) parts[i].style.border = "3px solid black";
+    }
+    blob.color = newColor;
+    drawBlob();
+  }
+  function randomizeColor() {
+    let parts = document.getElementsByClassName("colorpart");
+    let r = Math.floor(Math.random() * parts.length);
+    updateColor(parts[r], parts[r].style.backgroundColor);
+  }
+  
+  function updateEyes(caller, newEyes) {
+    let parts = document.getElementsByClassName("eyespart");
+    for (let i = 0; i < parts.length; i++) {
+      parts[i].style.border = "3px solid lightgray";
+      if (parts[i] == caller) parts[i].style.border = "3px solid black";
+    }
+    blob.eyes = newEyes;
+    drawBlob();
+  }
+  function randomizeEyes() {
+    let parts = document.getElementsByClassName("eyespart");
+    let r = Math.floor(Math.random() * parts.length);
+    updateEyes(parts[r], r + 1);
+  }
+  
+  
+  
+  
+  function randomizeParts() {
+    randomizeColor();
+    randomizeEyes();
+  }
+</script>
+</body>
+</html>
