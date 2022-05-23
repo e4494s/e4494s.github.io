@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>Totalistic Cellular Automaton ~ e4494s</title>
+    <style>
+      #canvas {
+        width: 300px;
+        height: 300px;
+        background-color: transparent;
+      }
+      
+      input[type = number], input[type = text] {
+        border: 3px solid #ff9500; /* Accent color */
+        border-radius: 0;
+        width: 100px;
+      }
+      
+      label {
+        margin-right: 10px;
+      }
+      
+      .rulebtn {
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        font-style: italic;
+        margin: 10px;
+        border: 1px solid gray;
+      }
+      
+      .purple {
+        background-color: rgb(255, 100, 255);
+        border-radius: 3px;
+      }
+      
+      #applybtn {
+        border: 2px solid darkblue;
+        color: darkblue;
+        border-radius: 5px;
+        font-weight: bold;
+      }
+      
+      .celldiv {
+        width: 15px;
+        height: 15px;
+        border: 1px solid black;
+        margin: 2px;
+        cursor: pointer;
+        background-color: white;
+        float: left;
+      }
+      .celldiv[state = "0"] {
+        background-color: white;
+      }
+      .celldiv[state = "1"] {
+        background-color: gray;
+      }
+      .celldiv[state = "2"] {
+        background-color: red;
+      }
+      .celldiv[state = "3"] {
+        background-color: black;
+      }
+      
+      .checkbox {
+        border: 3px solid #ff9500; /* Accent color */
+        width: 12px;
+        height: 12px;
+        cursor: pointer;
+      }
+      .checkbox[state = checked] {
+        background-color: dimgray;
+      }
+      .checkbox[state = unchecked] {
+        background-color: white;
+      }
+    </style>
+  </head>
+<body>
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; Totalistic Cellular Automaton &mdash;&mdash;</h1>
+<br><br>
+<b><u>Rule:</u></b> <input id = "ruletxt" type = "number" min = "0" max = "1048575" step = "1" oninput = "setRule(Number(this.value))">
+<button onclick = "randomizeRule()">Randomize</button>
+<br><br>
+<!--<b><u>Quaternary Rule:</u></b> <input id = "quatruletxt" type = "text" oninput = "/*setQuaternaryRule(this.value)*/">-->
+<div class = "celldiv" onclick = "changeCellButton(this, 0)" state = "0"></div>
+<div class = "celldiv" onclick = "changeCellButton(this, 1)" state = "0"></div>
+<div class = "celldiv" onclick = "changeCellButton(this, 2)" state = "0"></div>
+<div class = "celldiv" onclick = "changeCellButton(this, 3)" state = "0"></div>
+<div class = "celldiv" onclick = "changeCellButton(this, 4)" state = "0"></div>
+<div class = "celldiv" onclick = "changeCellButton(this, 5)" state = "0"></div>
+<div class = "celldiv" onclick = "changeCellButton(this, 6)" state = "0"></div>
+<div class = "celldiv" onclick = "changeCellButton(this, 7)" state = "0"></div>
+<div class = "celldiv" onclick = "changeCellButton(this, 8)" state = "0"></div>
+<div class = "celldiv" onclick = "changeCellButton(this, 9)" state = "0"></div>
+<br><br>
+<div id = "rulestringtxt">0000000000</div>
+<br>
+<b><u>Starting Row:</u></b>
+<br>
+<input type = "radio" id = "startingrow0radio" name = "startingrow" oninput = "startingRow = 0; reset()" CHECKED>
+<label for = "startingrow0radio">Random cells</label>
+<input type = "radio" id = "startingrow1radio" name = "startingrow" oninput = "startingRow = 1; reset()">
+<label for = "startingrow1radio">Single 1-cell</label>
+<input type = "radio" id = "startingrow2radio" name = "startingrow" oninput = "startingRow = 2; reset()">
+<label for = "startingrow2radio">Single 2-cell</label>
+<input type = "radio" id = "startingrow3radio" name = "startingrow" oninput = "startingRow = 3; reset()">
+<label for = "startingrow3radio">Single 3-cell</label>
+<br><br>
+<b><u>Grid Size:</u></b> <div id = "gridsizetxt">200x200</div>
+<br>
+<input type = "range" id = "gridsizerange" value = "200" min = "25" max = "500" step = "25" oninput = "setGridSize(Number(this.value))">
+<br><br>
+<canvas id = "canvas"></canvas>
+<br>
+<button onclick = "if (!running) step()">Step</button>
+<button onclick = "reset()">Reset</button>
+<button onclick = "start()" id = "runbtn">Run</button>
+<br><br>
+<b><u>Run Until End:</u></b><div class = "checkbox" id = "rununtilendbox" state = "unchecked" onclick = "toggleRunUntilEnd()"></div>
+<br><br>
+<button class = "download-canvas-btn" onclick = "downloadCanvas()">Download</button>
+<br><br><br><br>
+<b><u>Interesting Rules:</u></b>
+<br>
+<button class = "rulebtn" onclick = "setRule(20409)" id = "ir20409">Stalagtites <span class = "purple">(20409)</span></button>
+<button class = "rulebtn" onclick = "setRule(216522)" id = "ir216522">Stalagtites 2 <span class = "purple">(216522)</span></button>
+<button class = "rulebtn" onclick = "setRule(695725)" id = "ir695725">Stalagtites 3 <span class = "purple">(695725)</span></button>
+<button class = "rulebtn" onclick = "setRule(840113)" id = "ir840113">Stalagtites 4 <span class = "purple">(840113)</span></button>
+<button class = "rulebtn" onclick = "setRule(805371)" id = "ir805371">Color Drip <span class = "purple">(805371)</span></button>
+<button class = "rulebtn" onclick = "setRule(612210)" id = "ir612210">Shaded Triangles <span class = "purple">(612210)</span></button>
+<button class = "rulebtn" onclick = "setRule(916906)" id = "ir916906">Threads <span class = "purple">(916906)</span></button>
+<button class = "rulebtn" onclick = "setRule(723862)" id = "ir723862">Hanging City <span class = "purple">(723862)</span></button>
+<button class = "rulebtn" onclick = "setRule(964759)" id = "ir964759">Scales <span class = "purple">(964759)</span></button>
+<button class = "rulebtn" onclick = "setRule(415439)" id = "ir415439">Zippers <span class = "purple">(415439)</span></button>
+<button class = "rulebtn" onclick = "setRule(182463)" id = "ir182463">Zippers 2 <span class = "purple">(182463)</span></button>
+<button class = "rulebtn" onclick = "setRule(400697)" id = "ir400697">Triangular Trees <span class = "purple">(400697)</span></button>
+<button class = "rulebtn" onclick = "setRule(981205)" id = "ir981205">Winding Arrows <span class = "purple">(981205)</span></button>
+<button class = "rulebtn" onclick = "setRule(881404)" id = "ir881404">Columns <span class = "purple">(881404)</span></button>
+<button class = "rulebtn" onclick = "setRule(49482)" id = "ir49482">Dripping <span class = "purple">(49482)</span></button>
+<button class = "rulebtn" onclick = "setRule(511801)" id = "ir511801">Pipes <span class = "purple">(511801)</span></button>
+<button class = "rulebtn" onclick = "setRule(349006)" id = "ir349006">Staircases <span class = "purple">(349006)</span></button>
+<button class = "rulebtn" onclick = "setRule(715567)" id = "ir715567">Staircases 2 <span class = "purple">(715567)</span></button>
+<button class = "rulebtn" onclick = "setRule(437340)" id = "ir437340">Striped Roads <span class = "purple">(437340)</span></button>
+<button class = "rulebtn" onclick = "setRule(403366)" id = "ir403366">Totem Poles <span class = "purple">(403366)</span></button>
+<button class = "rulebtn" onclick = "setRule(679121)" id = "ir679121">Totem Poles 2 <span class = "purple">(679121)</span></button>
+<button class = "rulebtn" onclick = "setRule(925071)" id = "ir925071">Cave System <span class = "purple">(925071)</span></button>
+<button class = "rulebtn" onclick = "setRule(225784)" id = "ir225784">Countryside Roads <span class = "purple">(225784)</span></button>
+<button class = "rulebtn" onclick = "setRule(836207)" id = "ir836207">Mouths <span class = "purple">(836207)</span></button>
+<button class = "rulebtn" onclick = "setRule(331006)" id = "ir331006">Drills <span class = "purple">(331006)</span></button>
+<button class = "rulebtn" onclick = "setRule(249075)" id = "ir249075">Bar Code <span class = "purple">(249075)</span></button>
+<button class = "rulebtn" onclick = "setRule(102131)" id = "ir102131">Bar Code with Stairs <span class = "purple">(102131)</span></button>
+<button class = "rulebtn" onclick = "setRule(544092)" id = "ir544092">City Skyline <span class = "purple">(544092)</span></button>
+<button class = "rulebtn" onclick = "setRule(846572)" id = "ir846572">City Skyline at Night <span class = "purple">(846572)</span></button>
+<button class = "rulebtn" onclick = "setRule(575431)" id = "ir575431">Staircases and Elevators <span class = "purple">(575431)</span></button>
+<button class = "rulebtn" onclick = "setRule(922487)" id = "ir922487">Staircases and Elevators 2 <span class = "purple">(922487)</span></button>
+<button class = "rulebtn" onclick = "setRule(78047)" id = "ir78047">Staircases and Elevators 3 <span class = "purple">(78047)</span></button>
+<button class = "rulebtn" onclick = "setRule(362529)" id = "ir362529">Ladders <span class = "purple">(362529)</span></button>
+<button class = "rulebtn" onclick = "setRule(447353)" id = "ir447353">Roots <span class = "purple">(447353)</span></button>
+<button class = "rulebtn" onclick = "setRule(160186)" id = "ir160186">Roots 2 <span class = "purple">(160186)</span></button>
+<button class = "rulebtn" onclick = "setRule(797578)" id = "ir797578">Stacked Towers <span class = "purple">(797578)</span></button>
+<button class = "rulebtn" onclick = "setRule(252719)" id = "ir252719">Interlocking Triangles <span class = "purple">(252719)</span></button>
+<button class = "rulebtn" onclick = "setRule(520221)" id = "ir520221">Stacked Triangles <span class = "purple">(520221)</span></button>
+<button class = "rulebtn" onclick = "setRule(523805)" id = "ir523805">Poles <span class = "purple">(523805)</span></button>
+<button class = "rulebtn" onclick = "setRule(469752)" id = "ir469752">Wrapping Paper <span class = "purple">(469752)</span></button>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 2000;
+  
+  let gridSize = 200;
+  let row = [];
+  let time = 0;
+  let running = false;
+  let startingRow = 0;
+  
+  let color = ["white", "gray", "red", "black"];
+  
+  let rule;
+  
+  let runUntilEnd = false;
+  
+  const MAX_RULES = 1048575;
+  
+  function setRule(number) {
+    number = Math.floor(number.clamp(0, MAX_RULES));
+    rule = number.toString(4);
+    while (rule.length < 10) rule = "0" + rule;
+    ruletxt.value = number;
+    let cells = document.getElementsByClassName("celldiv");
+    for (let i = 0; i < cells.length; i++) cells[i].setAttribute("state", rule[i]);
+    rulestringtxt.innerHTML = rule;
+    let rulebtns = document.getElementsByClassName("rulebtn");
+    for (let i = 0; i < rulebtns.length; i++) {
+      rulebtns[i].style.border = "1px solid gray";
+      if ("ir" + parseInt(rule, 4) == rulebtns[i].id) rulebtns[i].style.border = "4px solid black";
+    }
+    reset();
+  }
+  function setQuaternaryRule(quaternaryNumber) {
+    let number = parseInt(quaternaryNumber, 4);
+    setRule(number);
+  }
+  
+  function randomizeRule() {
+    let n = "";
+    for (let i = 0; i < 10; i++) n += String(Math.floor(Math.random() * 4));
+    setQuaternaryRule(n);
+  }
+  randomizeRule();
+  
+  function setGridSize(number) {
+    gridSize = number;
+    gridsizetxt.innerHTML = number + "x" + number;
+    reset();
+  }
+  
+  function step() {
+    let nextRow = [];
+    for (let i = 0; i < gridSize; i++) {
+      let total = Number(row[(i - 1 + gridSize) % gridSize]) + Number(row[i]) + Number(row[(i + 1) % gridSize]);
+      nextRow[i] = rule[total];
+    }
+    row = nextRow;
+    drawRow();
+    time++;
+    if (time >= gridSize) {
+      running = false;
+      runbtn.innerHTML = "Run";
+    }
+    if (running && !runUntilEnd) requestAnimationFrame(step);
+  }
+  
+  function start() {
+    if (running) {
+      running = false;
+      runbtn.innerHTML = "Run";
+    }
+    else {
+      if (time >= gridSize) reset();
+      running = true;
+      runbtn.innerHTML = "Stop";
+      step();
+    }
+  }
+  
+  function drawRow() {
+    let tileSize = canvas.width / gridSize;
+    for (let i = 0; i < gridSize; i++) {
+      ctx.fillStyle = color[Number(row[i])];
+      ctx.fillRect(i * tileSize, time * tileSize, tileSize, tileSize);
+    }
+  }
+  
+  function reset() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    time = 0;
+    row = [];
+    for (let i = 0; i < gridSize; i++) {
+      if (startingRow == 0) row.push(String(Math.floor(Math.random() * 4)));
+      else row.push("0");
+    }
+    if (startingRow == 1) row[Math.round(gridSize / 2)] = "1";
+    if (startingRow == 2) row[Math.round(gridSize / 2)] = "2";
+    if (startingRow == 3) row[Math.round(gridSize / 2)] = "3";
+    drawRow();
+    if (runUntilEnd) {
+      running = true;
+      while (running) step();
+    }
+    time++;
+  }
+  
+  function changeCellButton(element, i) {
+    let r = rule.split("");
+    let n = Number(element.getAttribute("state"));
+    n++;
+    if (n >= 4) n = 0;
+    element.setAttribute("state", n);
+    r[i] = element.getAttribute("state");
+    r = r.join("");
+    setQuaternaryRule(r);
+  }
+  
+  function toggleRunUntilEnd() {
+    if (rununtilendbox.getAttribute("state") == "checked") {
+      rununtilendbox.setAttribute("state", "unchecked");
+      runUntilEnd = false;
+    }
+    else {
+      rununtilendbox.setAttribute("state", "checked");
+      runUntilEnd = true;
+      reset();
+    }
+  }
+  
+  function downloadCanvas() {
+    let link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "totalistic.png";
+    link.click();
+  }
+</script>
+</body>
+</html>
