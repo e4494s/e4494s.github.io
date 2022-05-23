@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = 'icon'  href = 'images/favicon.png' type = 'image/png'/>
+    <title>3D ~ e4494s</title>
+    <style>
+      body {
+        margin: 0;
+      }
+      
+      canvas {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r120/three.min.js" integrity="sha512-kgjZw3xjgSUDy9lTU085y+UCVPz3lhxAtdOVkcO4O2dKl2VSBcNsQ9uMg/sXIM4SoOmCiYfyFO/n1/3GSXZtSg==" crossorigin="anonymous"></script>
+<!--<script>
+  let scene = new THREE.Scene();
+  
+  let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  
+  let renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+  
+  /*let geometry = new THREE.BoxGeometry(1, 1, 1);
+  let material = new THREE.MeshBasicMaterial({color: 0x0000ff});
+  let cube = new THREE.Mesh(geometry, material);
+  scene.add(cube);
+  
+  function animate() {
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+  }
+  animate();*/
+</script>-->
+<script>
+  let gravity = 0.1;
+  let bounciness = 0.8;
+  let friction = 0.1;
+  let air_resistance = 0.01;
+  
+  let rotation_speed = 0.01;
+  
+  let x_velocity = 0;
+  let y_velocity = 0;
+  let z_velocity = 0;
+  
+  let scene = new THREE.Scene();
+  
+  let camera = new THREE.PerspectiveCamera(40, (window.innerWidth / window.innerHeight), 0.1, 1000);
+  
+  let renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+  
+  let light = new THREE.PointLight(0xffffff);
+  light.position.set(-100, 200, 100);
+  scene.add(light);
+  
+  let light2 = new THREE.PointLight(0xffff00);
+  light2.position.set(100, -2000, -100);
+  scene.add(light2); 
+  
+  let geometry = new THREE.SphereGeometry(4, 32, 32);
+  let material = new THREE.MeshLambertMaterial({color: 0x579b2b, wireframe: true});
+  let cube = new THREE.Mesh(geometry, material);
+  cube.position.z = -100;
+  scene.add(cube);
+  
+  camera.position.z = 30;
+  
+  let render = function() {
+    requestAnimationFrame(render);
+    cube.position.x += x_velocity;
+    cube.position.y += y_velocity;
+    cube.position.z += z_velocity;
+    x_velocity *= 1 - air_resistance;
+    y_velocity *= 1 - air_resistance;
+    z_velocity += gravity;
+    if (cube.position.z >= 10) {
+      cube.position.z = 10;
+      z_velocity *= -bounciness;
+      x_velocity *= 1 - friction;
+      y_velocity *= 1 - friction;
+    }
+    renderer.render(scene, camera);
+  }
+  render();
+  
+  function keyDownHandler(e) {
+    if (e.keyCode == 65) x_velocity -= 0.1;
+    if (e.keyCode == 87) y_velocity += 0.1;
+    if (e.keyCode == 68) x_velocity += 0.1;
+    if (e.keyCode == 83) y_velocity -= 0.1;
+    if (e.keyCode == 32) z_velocity -= 1;
+  }
+  addEventListener('keydown', keyDownHandler);
+</script>
+</body>
+</html>
