@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>Mandelbrot ~ e4494s</title>
+    <style>
+      #colorhuediv {
+        background: lime;
+        text-shadow: 0 0 6px white, 0 0 6px white, 0 0 6px white, 0 0 6px white;
+        padding: 2px;
+        text-align: center;
+        width: 150px;
+      }
+    </style>
+  </head>
+<body>
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; The Mandelbrot Set &mdash;&mdash;</h1>
+<div>Max Iterations: <span id = "iterationstxt">50</span></div>
+<input type = "range" id = "iterationsrange" min = "1" max = "100" step = "1" value = "50" oninput = "maxIterations = Number(this.value); iterationstxt.innerHTML = this.value">
+<br><br>
+<div id = "colorhuediv">Color Hue: <span id = "colorhuetxt">90</span>&deg;</div>
+<input type = "range" id = "colorhuerange" min = "0" max = "360" step = "1" value = "90" oninput = "colorHue = colorhuetxt.innerHTML = this.value; colorhuediv.style.background = `hsl(${this.value}deg, 100%, 50%)`">
+<br><br>
+<button onclick = "plotMandelbrot()">Plot</button>
+<br><br>
+<canvas id = "canvas"></canvas>
+<br>
+<button class = "download-canvas-btn" onclick = "downloadCanvas()">Download</button>
+<script>
+  const ctx = canvas.getContext("2d");
+  let canvasSize = 500;
+  canvas.width = canvas.height = canvasSize;
+  canvas.style.width = canvas.style.height = canvasSize + "px";
+  
+  let zoomFactor = 175;
+  let panX = 2;
+  let panY = 1.6;
+  let inSetColor = "white";
+  let notInSetColor = "black";
+  let maxIterations = 50;
+  let colorHue = 90;
+  
+  function plotMandelbrot() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = notInSetColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    for (let x = 0; x < canvas.width; x++) {
+      for (let y = 0; y < canvas.height; y++) {
+        let intensity = numberInMandelbrot((x / zoomFactor) - panX, (y / zoomFactor) - panY);
+        if (intensity == 0) ctx.fillStyle = notInSetColor;
+        else ctx.fillStyle = `hsl(${colorHue}deg, 100%, ${intensity}%)`;
+        
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+  }
+  
+  function numberInMandelbrot(a, b) { // a + bi
+    let realCoefficient = a;
+    let imaginaryCoefficient = b;
+    
+    for (let i = 0; i < maxIterations; i++) {
+      let tempRealCoefficient = (realCoefficient * realCoefficient) - (imaginaryCoefficient * imaginaryCoefficient) + a;
+      let tempImaginaryCoefficient = (2 * realCoefficient * imaginaryCoefficient) + b;
+      realCoefficient = tempRealCoefficient;
+      imaginaryCoefficient = tempImaginaryCoefficient;
+      
+      if (realCoefficient * imaginaryCoefficient > 5) return (i / maxIterations) * 100;
+    }
+    
+    return 0;
+  }
+  
+  function downloadCanvas() {
+    let link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "mandelbrot.png";
+    link.click();
+  }
+</script>
+</body>
+</html>
