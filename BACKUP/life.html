@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png"/>
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>Conway's Game of Life ~ e4494s</title>
+  </head>
+<body>
+<style>
+  /*body, button, input {
+    font-family: monospace;
+  }
+  button {
+    cursor: pointer;
+    background-color: white;
+    border: 2px solid black;
+  }
+  button:focus {
+    outline: none;
+  }
+  button:hover {
+    background-color: lightgray;
+  }
+  button:active {
+    background-color: gray;
+  }
+  input {
+    border: 1px solid black;
+  }
+  input:focus {
+    outline: none;
+  }*/
+  table, tr, td {
+    /*border: 1px solid black;*/
+  }
+  .td {
+    padding: 0;
+    min-width: 0;
+  }
+  #universe {
+    background-color: transparent;
+    border: 2px solid #ff9500; /* Accent color */
+    image-rendering: pixelated;
+  }
+  /*input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type=number] {
+    -moz-appearance: textfield;
+  }*/
+  .color {
+    cursor: pointer;
+    width: 15px;
+    height: 15px;
+    border-radius: 5px;
+    margin-right: 3px;
+  }
+  input[type=checkbox]:not(#intensity_check) {
+    margin: 0;
+  }
+  .dropbtn {
+    cursor: pointer;
+    background-color: white;
+    border: 2px solid black;
+    width: 150px;
+  }
+
+  .dropdown {
+    position: relative;
+    display: inline-block;
+  }
+
+  .dropdown-content {
+    text-align: left;
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+  }
+
+  .dropdown-content button {
+    margin-top: 2px;
+    margin-left: 2px;
+    margin-bottom: 2px;
+    margin-right: 2px;
+    border: none;
+  }
+
+  .dropdown:hover .dropdown-content {
+    display: block;
+  }
+
+  .dropdown:hover .dropbtn {
+    background-color: lightgray;
+  }
+</style>
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; Conway's Game of Life &mdash;&mdash;</h1>
+<table>
+  <tr>
+    <td class = "td" rowspan = '20'>
+      <canvas id = 'universe' width = '500' height = '500'>Sorry, your browser does not support the canvas element.</canvas>
+      <br>
+      <button class = "download-canvas-btn" onclick = "downloadCanvas()">Download Canvas</button>
+    </td>
+    <td class = "td" style = 'height:25px'>
+      <button onclick = 'stopStart()' style = 'margin-right:5px' id = 'stopstartbtn'>Stop</button>
+      <button onclick = 'nextTick()' style = 'margin-right:5px'>Step</button>
+    </td>
+  </tr>
+  <tr>
+    <td class = "td" style = 'height:25px'>
+      <div style = 'display:flex;margin-top:5px'>
+        <div style = 'margin-right:5px'>Frame rate:</div>
+        <input type = 'number' step = 'any' value = '20' id = 'fps_box' oninput = 'startTicking()' style = 'width:45px'>
+      </div>
+    </td>
+  </tr>
+  <tr style = 'height:10px'>
+  </tr>
+  <tr>
+    <td class = "td" style = 'height:25px'>
+      <button onclick = 'randomizeWorld()' style = 'margin-right:5px'>Randomize</button>
+      <button onclick = 'clearWorld()' style = 'margin-right:5px'>Clear</button>
+      <button onclick = 'invertWorld()'>Invert</button>
+    </td>
+  </tr>
+  <tr>
+    <td class = "td" style = 'height:25px'>
+      <div style = 'display:flex'>
+        <div style = 'margin-right:5px'>Randomness intensity:</div>
+        <input type = 'number' step = 'any' id = 'intensity_box' style = 'width:45px;margin-right:10px' value = '0.5'>
+        <div>Randomize intensity</div>
+        <input type = 'checkbox' id = 'intensity_check'>
+      </div>
+    </td>
+  </tr>
+  <tr style = 'height:10px'>
+  </tr>
+  <tr>
+    <td class = "td" style = 'height:50px'>
+      <div id = 'cellcolortxt'>Cell color: black</div>
+      <div style = 'display:flex'>
+        <div class = 'color' onclick = 'setCellColor("red")' style = 'background-color:red'></div>
+        <div class = 'color' onclick = 'setCellColor("orange")' style = 'background-color:orange'></div>
+        <div class = 'color' onclick = 'setCellColor("yellow")' style = 'background-color:yellow'></div>
+        <div class = 'color' onclick = 'setCellColor("green")' style = 'background-color:green'></div>
+        <div class = 'color' onclick = 'setCellColor("blue")' style = 'background-color:blue'></div>
+        <div class = 'color' onclick = 'setCellColor("purple")' style = 'background-color:purple'></div>
+        <div class = 'color' onclick = 'setCellColor("black")' style = 'background-color:black'></div>
+        <div class = 'color' onclick = 'setCellColor("gray")' style = 'background-color:gray'></div>
+        <div class = 'color' onclick = 'setCellColor("lightgray")' style = 'background-color:lightgray'></div>
+        <div class = 'color' onclick = 'setCellColor("white")' style = 'width:13px;height:13px;border:1px solid black'></div>
+      </div>
+    </td>
+  </tr>
+  <tr>
+    <td class = "td" style = 'height:50px'>
+      <div id = 'backgroundcolortxt'>Background color: white</div>
+      <div style = 'display:flex'>
+        <div class = 'color' onclick = 'setBackgroundColor("red")' style = 'background-color:red'></div>
+        <div class = 'color' onclick = 'setBackgroundColor("orange")' style = 'background-color:orange'></div>
+        <div class = 'color' onclick = 'setBackgroundColor("yellow")' style = 'background-color:yellow'></div>
+        <div class = 'color' onclick = 'setBackgroundColor("green")' style = 'background-color:green'></div>
+        <div class = 'color' onclick = 'setBackgroundColor("blue")' style = 'background-color:blue'></div>
+        <div class = 'color' onclick = 'setBackgroundColor("purple")' style = 'background-color:purple'></div>
+        <div class = 'color' onclick = 'setBackgroundColor("black")' style = 'background-color:black'></div>
+        <div class = 'color' onclick = 'setBackgroundColor("gray")' style = 'background-color:gray'></div>
+        <div class = 'color' onclick = 'setBackgroundColor("lightgray")' style = 'background-color:lightgray'></div>
+        <div class = 'color' onclick = 'setBackgroundColor("white")' style = 'width:13px;height:13px;border:1px solid black'></div>
+      </div>
+    </td>
+  </tr>
+  <tr style = 'height:10px'>
+  </tr>
+  <tr>
+    <td class = "td" style = 'height:25px'>
+      <div style = 'display:flex'>
+        <div style = 'padding-right:5px'>Grid Size:</div>
+        <input type = 'number' step = 'any' value = '250' id = 'size_box' style = 'width:45px;margin-right:10px'>
+        <button onclick = 'setGridSize()'>Apply and Clear</button>
+      </div>
+    </td>
+  </tr>
+  <tr style = 'height:10px'>
+  </tr>
+  <tr>
+    <td class = "td">
+      <div><b>Born with __ neighbors</b></div>
+      <table style = 'text-align:center'>
+        <tr>
+          <td class = "td">
+            <input type = 'checkbox' id = 'born0' oninput = 'setRules()'>
+          </td>
+          <td class = "td">
+            <input type = 'checkbox' id = 'born1' oninput = 'setRules()'>
+          </td>
+          <td class = "td">
+            <input type = 'checkbox' id = 'born2' oninput = 'setRules()'>
+          </td>
+          <td class = "td">
+            <input type = 'checkbox' id = 'born3' oninput = 'setRules()' checked>
+          </td>
+          <td class = "td">
+            <input type = 'checkbox' id = 'born4' oninput = 'setRules()'>
+          </td>
+          <td class = "td">
+            <input type = 'checkbox' id = 'born5' oninput = 'setRules()'>
+          </td>
+          <td class = "td">
+            <input type = 'checkbox' id = 'born6' oninput = 'setRules()'>
+          </td>
+          <td class = "td">
+            <input type = 'checkbox' id = 'born7' oninput = 'setRules()'>
+          </td>
+          <td class = "td">
+            <input type = 'checkbox' id = 'born8' oninput = 'setRules()'>
+          </td>
+          <td class = "td">
+          <div class = 'dropdown'>
+            <button class = 'dropbtn'><b>Rule Presets</b></button>
+            <div class = 'dropdown-content'>
+              <button onclick = 'randomizeRules()'><i>Random</i></button>
+              <button onclick = 'born=[3];survive=[2,3];updateRuleChecks()'>Original</button>
+              <!--<button onclick = 'born=[1,2];survive=[];updateRuleChecks()'>Reactor (Exploding)</button>
+              <br>
+              <button onclick = 'born=[1,2,3,4,5,6,7,8];survive=[];updateRuleChecks()'>Pyramid (Expanding)</button>
+              <br>
+              <button onclick = 'born=[3,5];survive=[2,4];updateRuleChecks()'>Spinning (Stable)</button>
+              <br>
+              <button onclick = 'born=[2,5,6,7];survive=[0,2,3,4,5,6,7];updateRuleChecks()'>Circuit board (Expanding)</button>
+              <br>
+              <button onclick = 'born=[3,4];survive=[0,1,2,3,4,5,6];updateRuleChecks()'>Lines (Expanding)</button>-->
+              <button onclick = 'born=[3,6];survive=[1,2,5];updateRuleChecks()'>2x2 (Chaotic)</button>
+              <button onclick = 'born=[3,4];survive=[3,4];updateRuleChecks()'>34 Life (Exploding)</button>
+              <button onclick = 'born=[3,5,7];survive=[1,3,5,8];updateRuleChecks()'>Amoeba (Chaotic)</button>
+              <button onclick = 'born=[3,4,5];survive=[4,5,6,7];updateRuleChecks()'>Assimilation (Stable)</button>
+              <button onclick = 'born=[3,7,8];survive=[2,3,5,6,7,8];updateRuleChecks()'>Coagulations (Exploding)</button>
+              <button onclick = 'born=[3];survive=[4,5,6,7,8];updateRuleChecks()'>Coral (Exploding)</button>
+              <button onclick = 'born=[3,6,7,8];survive=[3,4,6,7,8];updateRuleChecks()'>Day and Night (Stable)</button>
+              <button onclick = 'born=[3,5,6,7,8];survive=[5,6,7,8];updateRuleChecks()'>Diamoeba (Chaotic)</button>
+              <button onclick = 'born=[3];survive=[0,1,2,3,4,5,6,7,8];updateRuleChecks()'>Flakes (Expanding)</button>
+              <button onclick = 'born=[1];survive=[1];updateRuleChecks()'>Gnarl (Exploding)</button>
+              <button onclick = 'born=[3,6];survive=[2,3];updateRuleChecks()'>HighLife (Chaotic)</button>
+              <button onclick = 'born=[0,1,2,3,4,7,8];survive=[3,4,6,7,8];updateRuleChecks()'>InverseLife (Chaotic)</button>
+              <button onclick = 'born=[3,4,5];survive=[5];updateRuleChecks()'>Long Life (Stable)</button>
+              <button onclick = 'born=[3];survive=[1,2,3,4,5];updateRuleChecks()'>Maze (Exploding)</button>
+              <button onclick = 'born=[3];survive=[1,2,3,4];updateRuleChecks()'>Mazectric (Exploding)</button>
+              <button onclick = 'born=[3,6,8];survive=[2,4,5];updateRuleChecks()'>Move (Stable)</button>
+              <button onclick = 'born=[3,6,8];survive=[2,3,8];updateRuleChecks()'>Psuedo Life (Chaotic)</button>
+              <button onclick = 'born=[1,3,5,7];survive=[1,3,5,7];updateRuleChecks()'>Replicator (Exploding)</button>
+              <button onclick = 'born=[2];survive=[];updateRuleChecks()'>Seeds (Exploding)</button>
+              <button onclick = 'born=[2,3,4];survive=[];updateRuleChecks()'>Serviettes (Exploding)</button>
+              <button onclick = 'born=[3,6,7,8];survive=[2,3,5,6,7,8];updateRuleChecks()'>Stains (Stable)</button>
+              <button onclick = 'born=[4,5,6,7,8];survive=[2,3,4,5];updateRuleChecks()'>WalledCities (Stable)</button>
+              <button onclick = 'born=[4,6,7,8];survive=[3,5,6,7,8];updateRuleChecks()'>Anneal (Stable)</button>
+              <button onclick = 'born=[2];survive=[0];updateRuleChecks()'>Live Free or Die (Exploding)</button>
+              <button onclick = 'born=[2,5,6,7,8];survive=[5,6,7,8];updateRuleChecks()'>Iceballs (Exploding)</button>
+            </div>
+          </div>
+          </td>
+        </tr>
+        <tr>
+          <td class = "td">
+            <div>0</div>
+          </td>
+          <td class = "td">
+            <div>1</div>
+          </td>
+          <td class = "td">
+            <div>2</div>
+          </td>
+          <td class = "td">
+            <div>3</div>
+          </td>
+          <td class = "td">
+            <div>4</div>
+          </td>
+          <td class = "td">
+            <div>5</div>
+          </td>
+          <td class = "td">
+            <div>6</div>
+          </td>
+          <td class = "td">
+            <div>7</div>
+          </td>
+          <td class = "td">
+            <div>8</div>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class = "td">
+      <div><b>Survive with __ neighbors</b></div>
+      <table style = 'text-align:center'>
+        <tr>
+          <td class = "td">
+            <input type = 'checkbox' id = 'survive0' oninput = 'setRules()'>
+          </td>
+          <td class = "td">
+            <input type = 'checkbox' id = 'survive1' oninput = 'setRules()'>
+          </td>
+          <td class = "td">
+            <input type = 'checkbox' id = 'survive2' oninput = 'setRules()' checked>
+          </td>
+          <td class = "td">
+            <input type = 'checkbox' id = 'survive3' oninput = 'setRules()' checked>
+          </td>
+          <td class = "td">
+            <input type = 'checkbox' id = 'survive4' oninput = 'setRules()'>
+          </td>
+          <td class = "td">
+            <input type = 'checkbox' id = 'survive5' oninput = 'setRules()'>
+          </td>
+          <td class = "td">
+            <input type = 'checkbox' id = 'survive6' oninput = 'setRules()'>
+          </td>
+          <td class = "td">
+            <input type = 'checkbox' id = 'survive7' oninput = 'setRules()'>
+          </td>
+          <td class = "td">
+            <input type = 'checkbox' id = 'survive8' oninput = 'setRules()'>
+          </td>
+        </tr>
+        <tr>
+          <td class = "td">
+            <div>0</div>
+          </td>
+          <td class = "td">
+            <div>1</div>
+          </td>
+          <td class = "td">
+            <div>2</div>
+          </td>
+          <td class = "td">
+            <div>3</div>
+          </td>
+          <td class = "td">
+            <div>4</div>
+          </td>
+          <td class = "td">
+            <div>5</div>
+          </td>
+          <td class = "td">
+            <div>6</div>
+          </td>
+          <td class = "td">
+            <div>7</div>
+          </td>
+          <td class = "td">
+            <div>8</div>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class = "td">
+      <div id = 'census'>Generations: 0<br>Population: 0<br>Density: 0.00%</div>
+    </td>
+  </tr>
+</table>
+<script>
+  const ctx = universe.getContext('2d');
+  
+  let cell_color = 'black';
+  let background_color = 'white';
+  
+  let fps_interval, last_tick_time, request_tick;
+  let fps = fps_box.value;
+  let running = true;
+  let mouse_down = false;
+  
+  let width = 250;
+  let height = 250;
+  let world = createArray(height);
+  let world_copy = createArray(height);
+  let cell_size = 2;
+  
+  let generations = 0;
+  let last_population = 0;
+  
+  let intensity = 0.5;
+  
+  let born = [3];
+  let survive = [2, 3];
+  
+  function nextTick() {
+    last_population = getPopulation();
+    for (let j = 0; j < height; j++) {  // Iterate through rows
+      for (let k = 0; k < width; k++) { // Iterate through columns
+        world_copy[j][k] = world[j][k]; // Update world copy
+      }
+    }
+    for (let j = 0; j < height; j++) {  // Iterate through rows
+      for (let k = 0; k < width; k++) { // Iterate through columns
+        if (world[j][k] == 0) {
+          if (neighbors(j, k) == born[0] || neighbors(j, k) == born[1] || neighbors(j, k) == born[2] || neighbors(j, k) == born[3] || neighbors(j, k) == born[4] || neighbors(j, k) == born[5] || neighbors(j, k) == born[6] || neighbors(j, k) == born[7] || neighbors(j, k) == born[8])
+            world_copy[j][k] = 1; // Cell is born
+        }
+        else if (world[j][k] == 1) {
+          if (neighbors(j, k) != survive[0] && neighbors(j, k) != survive[1] && neighbors(j, k) != survive[2] && neighbors(j, k) != survive[3] && neighbors(j, k) != survive[4] && neighbors(j, k) != survive[5] && neighbors(j, k) != survive[6] && neighbors(j, k) != survive[7] && neighbors(j, k) != survive[8])
+            world_copy[j][k] = 0; // Cell dies
+        }
+      }
+    }
+    updateWorld();
+    drawWorld();
+    generations++;
+    takeCensus();
+  }
+  randomizeWorld();
+  startTicking();
+  
+  function updateWorld() {
+    for (let j = 0; j < height; j++) {  // Iterate through rows
+      for (let k = 0; k < width; k++) { // Iterate through columns
+        world[j][k] = world_copy[j][k];
+      }
+    }
+  }
+  
+  function drawWorld() {
+    ctx.fillStyle = background_color;
+    //ctx.globalAlpha = 0.2;
+    ctx.fillRect(0, 0, universe.width, universe.height);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = cell_color;
+    for (let j = 0; j < height; j++) {  // Iterate through rows
+      for (let k = 0; k < width; k++) { // Iterate through columns
+        if (world[j][k] == 1) ctx.fillRect(k * cell_size, j * cell_size, cell_size, cell_size);
+      }
+    }
+  }
+  
+  function startTicking() {
+    fps = fps_box.value;
+    fps_interval = 1000 / fps;
+    last_tick_time = performance.now();
+    tick();
+  }
+  
+  function tick() {
+    let now = performance.now();
+    request_tick = requestAnimationFrame(tick);
+    let elapsed = now - last_tick_time;
+    if (elapsed > fps_interval) {
+      last_tick_time = now - (elapsed % fps_interval);
+      if (running) nextTick();
+    }
+  }
+  
+  function stopStart() {
+    if (!running) {
+      running = true;
+      startTicking();
+      stopstartbtn.innerHTML = 'Stop';
+    }
+    else {
+      running = false;
+      startTicking();
+      stopstartbtn.innerHTML = 'Start';
+    }
+  }
+  
+  function createArray(rows) {
+    let arr = [];
+    for (let i = 0; i < rows; i++) arr[i] = [];
+    return arr;
+  }
+  
+  function randomizeWorld() {
+    clearWorld();
+    if (intensity_check.checked) {
+      intensity = Math.random();
+      intensity_box.value = intensity;
+    }
+    else intensity = intensity_box.value;
+    for (let j = 0; j < height; j++) {
+      for (let k = 0; k < width; k++) {
+        let rand = Math.random() * (1 / intensity);
+        if (Math.floor(rand) == 0) world[j][k] = 1;
+        else world[j][k] = 0;
+      }
+    }
+    drawWorld();
+    takeCensus();
+  }
+  
+  function clearWorld() {
+    last_population = getPopulation();
+    generations = 0;
+    for (let j = 0; j < height; j++) {
+      for (let k = 0; k < width; k++) {
+        world[j][k] = 0;
+        world_copy[j][k] = 0;
+      }
+    }
+    drawWorld();
+    takeCensus();
+  }
+  
+  function getPopulation() {
+    let pop = 0;
+    for (let j = 0; j < height; j++) {
+      for (let k = 0; k < width; k++) {
+        if (world[j][k] == 1) pop++;
+      }
+    }
+    return pop;
+  }
+  
+  function takeCensus() {
+    census.innerHTML = `Generations: ${generations}<br>Population: ${getPopulation()}`;
+    if (getPopulation() - last_population != 0) {
+      census.innerHTML += (getPopulation() > last_population) ? ' (+' : ' (';
+      census.innerHTML += (getPopulation() - last_population) + ')';
+    }
+    census.innerHTML += `<br>Density: ${((getPopulation() / (width * height)) * 100).toFixed(2)}%`;
+  }
+  
+  function neighbors(row, col) {
+    let count = 0;
+    if (row - 1 >= 0) {                        // Not in first row
+      if (world[row - 1][col] == 1) count++;
+    }
+    if (row - 1 >= 0 && col - 1 >= 0) {        // Not in upper left corner
+      if (world[row - 1][col - 1] == 1) count++;
+    }
+    if (row - 1 >= 0 && col + 1 < width) {     // Not in upper right corner
+      if (world[row - 1][col + 1] == 1) count++;
+    }
+    if (col - 1 >= 0) {                        // Not in first column
+      if (world[row][col - 1] == 1) count++;
+    }
+    if (col + 1 < width) {                     // Not in last column
+      if (world[row][col + 1] == 1) count++;
+    }
+    if (row + 1 < height && col - 1 >= 0) {    // Not in bottom left corner
+      if (world[row + 1][col - 1] == 1) count++;
+    }
+    if (row + 1 < height && col + 1 < width) { // Not in bottom right corner
+      if (world[row + 1][col + 1] == 1) count++;
+    }
+    if (row + 1 < height) {                    // Not in last row
+      if (world[row + 1][col] == 1) count++;
+    }
+    return count;
+  }
+  function setCellColor(c) {
+    cell_color = c;
+    cellcolortxt.innerHTML = `Cell color: ${cell_color}`;
+    drawWorld();
+  }
+  function setBackgroundColor(c) {
+    background_color = c;
+    backgroundcolortxt.innerHTML = `Background color: ${background_color}`;
+    drawWorld();
+  }
+  
+  function setGridSize() {
+    if (size_box.value <= 0) size_box.value = 1;
+    size_box.value = Math.floor(size_box.value);
+    width = height = size_box.value;
+    cell_size = universe.width / width;
+    clearWorld();
+  }
+  
+  function setRules() {
+    born = [];
+    if (born0.checked) born.push(0);
+    if (born1.checked) born.push(1);
+    if (born2.checked) born.push(2);
+    if (born3.checked) born.push(3);
+    if (born4.checked) born.push(4);
+    if (born5.checked) born.push(5);
+    if (born6.checked) born.push(6);
+    if (born7.checked) born.push(7);
+    if (born8.checked) born.push(8);
+    survive = [];
+    if (survive0.checked) survive.push(0);
+    if (survive1.checked) survive.push(1);
+    if (survive2.checked) survive.push(2);
+    if (survive3.checked) survive.push(3);
+    if (survive4.checked) survive.push(4);
+    if (survive5.checked) survive.push(5);
+    if (survive6.checked) survive.push(6);
+    if (survive7.checked) survive.push(7);
+    if (survive8.checked) survive.push(8);
+  }
+  
+  function getMousePosition(e) {
+    let rect = universe.getBoundingClientRect();
+    return {x: e.clientX - rect.left, y: e.clientY - rect.top};
+  }
+  
+  function mouseClick(e) {
+    if (e.which == 1) mouse_down = true;
+    if (e.detail > 1) e.preventDefault();
+    let pos = getMousePosition(e);
+    for (let j = 0; j < height; j++) {
+      for (let k = 0; k < width; k++) {
+        if (pos.x >= k * cell_size && pos.x < (k + 1) * cell_size && pos.y >= j * cell_size && pos.y < (j + 1) * cell_size) {
+          if (world[j][k] == 0) world[j][k] = 1;
+          else world[j][k] = 0;
+        }
+      }
+    }
+    drawWorld();
+    takeCensus();
+  }
+  addEventListener('mousedown', mouseClick);
+  
+  function mouseUp(e) {
+    if (e.which == 1) mouse_down = false;
+  }
+  addEventListener('mouseup', mouseUp);
+  
+  function mouseDrag(e) {
+    if (mouse_down) {
+      let pos = getMousePosition(e);
+      for (let j = 0; j < height; j++) {
+        for (let k = 0; k < width; k++) {
+          if (pos.x >= k * cell_size && pos.x < (k + 1) * cell_size && pos.y >= j * cell_size && pos.y < (j + 1) * cell_size) world[j][k] = 1;
+        }
+      }
+    }
+    drawWorld();
+    takeCensus();
+  }
+  addEventListener('mousemove', mouseDrag);
+  
+  function updateRuleChecks() {
+    born0.checked = (born.includes(0)) ? true : false;
+    born1.checked = (born.includes(1)) ? true : false;
+    born2.checked = (born.includes(2)) ? true : false;
+    born3.checked = (born.includes(3)) ? true : false;
+    born4.checked = (born.includes(4)) ? true : false;
+    born5.checked = (born.includes(5)) ? true : false;
+    born6.checked = (born.includes(6)) ? true : false;
+    born7.checked = (born.includes(7)) ? true : false;
+    born8.checked = (born.includes(8)) ? true : false;
+    survive0.checked = (survive.includes(0)) ? true : false;
+    survive1.checked = (survive.includes(1)) ? true : false;
+    survive2.checked = (survive.includes(2)) ? true : false;
+    survive3.checked = (survive.includes(3)) ? true : false;
+    survive4.checked = (survive.includes(4)) ? true : false;
+    survive5.checked = (survive.includes(5)) ? true : false;
+    survive6.checked = (survive.includes(6)) ? true : false;
+    survive7.checked = (survive.includes(7)) ? true : false;
+    survive8.checked = (survive.includes(8)) ? true : false;
+  }
+  
+  function randomizeRules() {
+    born = [];
+    for (let i = 0; i < 9; i++) if (Math.round(Math.random()) == 1) if (i != 0 && i != 1) born.push(i);
+    survive = [];
+    for (let i = 0; i < 9; i++) if (Math.round(Math.random()) == 1) survive.push(i);
+    updateRuleChecks();
+  }
+  
+  function invertWorld() {
+    for (let j = 0; j < height; j++) {
+      for (let k = 0; k < width; k++) {
+        if (world[j][k] == 1) world[j][k] = 0;
+        else world[j][k] = 1;
+      }
+    }
+    drawWorld();
+    takeCensus();
+  }
+  
+  function downloadCanvas() {
+    let link = document.createElement("a");
+    link.href = universe.toDataURL();
+    link.download = "life.png";
+    link.click();
+  }
+</script>
+</body>
+</html>
