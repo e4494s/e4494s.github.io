@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <title>Circle Packing ~ e4494s</title>
+    <style>
+      #canvas {
+        width: 400px;
+        height: 400px;
+        background-color: black;
+        border: none;
+      }
+    </style>
+  </head>
+<body>
+<h1>Circle Packing</h1>
+<canvas id = "canvas"></canvas>
+<button onclick = "startStop()">Start/Stop</button>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 1000;
+  let canvasRunning = true;
+  
+  let circleGrowSpeed = 0.5;
+  
+  function addCircles() {
+    for (let i = 0; i < 10; i++) {
+      let x = Math.random() * canvas.width;
+      let y = Math.random() * canvas.height;
+    }
+  }
+  
+  function Circle() {
+    let x = Math.random() * canvas.width;
+    let y = Math.random() * canvas.height;
+    while (isPointInCircles(x, y)) {
+      x = Math.random() * canvas.width;
+      y = Math.random() * canvas.height;
+    }
+    this.x = x;
+    this.y = y;
+    this.radius = 0;
+    this.color = `hsl(${Math.random() * 360}deg, 100%, 50%)`;
+    this.stuck = false;
+  }
+  Circle.prototype.grow = function() {
+    if (this.stuck) return;
+    for (let i = 0; i < circleArray.length; i++) {
+      if (i != circleArray.indexOf(this)) {
+        let distX = this.x - circleArray[i].x;
+        let distY = this.y - circleArray[i].y;
+        let distSq = (distX * distX) + (distY * distY);
+        if (distSq <= (this.radius + circleArray[i].radius) * (this.radius + circleArray[i].radius)) {
+          this.stuck = true;
+          circleArray.push(new Circle());
+        }
+      }
+    }
+    if (!this.stuck) this.radius += circleGrowSpeed;
+  };
+  Circle.prototype.draw = function() {
+    ctx.strokeStyle = this.color;
+    ctx.lineWidth = 5;
+    let r = Math.max(0, this.radius - (ctx.lineWidth / 2));
+    ctx.strokeCircle(this.x, this.y, r);
+  };
+  
+  let circleArray = [];
+  for (let i = 0; i < 10; i++) circleArray.push(new Circle());
+  
+  function isPointInCircles(x, y) {
+    for (let i = 0; i < circleArray.length; i++) {
+      let distX = x - circleArray[i].x;
+      let distY = y - circleArray[i].y;
+      let distSq = (distX * distX) + (distY * distY);
+      if (distSq <= circleArray[i].radius * circleArray[i].radius) return true;
+    }
+    return false;
+  }
+  
+  function frame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    for (let i = 0; i < circleArray.length; i++) {
+      circleArray[i].grow();
+      circleArray[i].draw();
+    }
+    
+    if (canvasRunning) requestAnimationFrame(frame);
+  }
+  frame();
+  
+  function startStop() {
+    if (canvasRunning) canvasRunning = false;
+    else {
+      canvasRunning = true;
+      frame();
+    }
+  }
+</script>
+</body>
+</html>
