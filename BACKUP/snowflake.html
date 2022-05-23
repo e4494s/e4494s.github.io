@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>Brownian Snowflake ~ e4494s</title>
+    <style>
+      .plus-minus-btn {
+        margin-top: 5px;
+        padding: 2px;
+        border: 2px solid #ff9500; /* Accent color */
+        width: 25px;
+        height: 25px;
+        font-weight: bold;
+        border-radius: 7px;
+      }
+    </style>
+  </head>
+<body>
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; Brownian Snowflake Generator &mdash;&mdash;</h1>
+<p id = "how-it-works">
+  <b><i>How It Works:</i></b> The snowflake generates by aggregating particles that move around randomly (Brownian motion) and stick to each other when they touch, similar to <a href = "brownian-tree.html" target = "_blank">Brownian Tree</a>. The resulting structure is mirrored to make each arm symmetric, and then mirrored in a circle, with <span class = "setting">Snowflake Symmetry</span> affecting the level of symmetry.
+  <br><br>
+  <span class = "setting">Ice Particle Radius</span> changes how large each particle is. Smaller particles will be more compact but take longer to aggregate, and larger particles will be more spread out and collect quicker.
+  <br><br>
+  <span class = "setting">Snowflake Thickness</span> is purely a visual setting, and does not affect the actual size of the ice particles, just how large they are drawn.
+  <br><br>
+  <span class = "setting">Ice Particle Spread</span> changes how much the ice particle moves randomly, with lower settings making it move in nearly a straight line to the center.
+  <br><br>
+  <span class = "setting">Ice Particle Stickiness</span> changes how likely an ice particle is to stick when it touches another particle. Lower settings will make the entire snowflake more compressed, while higher settings will keep ice particles more widely spaced.
+  <br><br>
+  Turning on <span class = "setting">Pinch Snowflake Edges</span> will make particles toward the edge of the snowflake smaller, to create a more natural edge to the flake.
+  <br><br>
+  Clicking <span class = "setting">Randomize Geometry Settings</span> will randomize every setting, except the settings that are purely visual. Use this if you want a new set of settings with the same visual style.
+</p>
+<hr>
+<div><b>Settings Presets:</b></div>
+<div id = "presets-div"></div>
+<hr>
+<table>
+  <tr>
+    <td>
+      <button id = "start-stop-btn" onclick = "startStop()">Pause</button>
+      <button onclick = "reset()">Reset</button>
+      <br><br>
+      <canvas id = "canvas"></canvas>
+      <br>
+      <button class = "download-canvas-btn" onclick = "downloadCanvas()">Download Canvas</button>
+    </td>
+    <td>
+      <button onclick = "loadSettingsPreset(0)">Reset Settings</button>
+      <br><br>
+      <button onclick = "randomizeAllSettings()">Randomize All Settings</button>
+      <br><br>
+      <button onclick = "randomizeGeometrySettings()">Randomize Geometry Settings</button>
+      <hr>
+      <div><b><u>Total Ice Particles:</u></b> <span id = "total-ice-particles-txt">0</span></div>
+      <hr>
+      <div><b><u>Snowflake Symmetry:</u></b> <span id = "snowflake-symmetry-txt">6</span>-fold</div>
+      <input type = "range" min = "3" max = "12" step = "1" value = "6" id = "snowflake-symmetry-range" oninput = "updateSettings(true)">
+      <hr>
+      <div><b><u>Ice Particle Radius:</u></b> <span id = "ice-particle-radius-txt">4</span>px</div>
+      <input type = "range" min = "4" max = "10" step = "1" value = "4" id = "ice-particle-radius-range" oninput = "updateSettings(true)">
+      <br><br>
+      <div><b><u>Ice Particle Spread:</u></b> <span id = "ice-particle-speed-txt">5</span>x</div>
+      <input type = "range" min = "1" max = "10" step = "1" value = "5" id = "ice-particle-speed-range" oninput = "updateSettings(true)">
+      <br><br>
+      <div><b><u>Ice Particle Stickiness:</u></b> <span id = "ice-particle-stickiness-txt">30</span>%</div>
+      <input type = "range" min = "10" max = "100" step = "10" value = "30" id = "ice-particle-stickiness-range" oninput = "updateSettings(true)">
+    </td>
+    <td>
+      <div><b><u>Snowflake Hue:</u></b> <span id = "snowflake-hue-txt">240</span>&deg;</div>
+      <input type = "range" min = "0" max = "360" step = "15" value = "240" id = "snowflake-hue-range" oninput = "updateSettings(false)">
+      <br><br>
+      <div><b><u>Snowflake Thickness:</u></b> <span id = "snowflake-thickness-txt">8</span>px</div>
+      <input type = "range" min = "2" max = "20" step = "1" value = "8" id = "snowflake-thickness-range" oninput = "updateSettings(false)">
+      <br><br>
+      <div><b><u>Snowflake Opacity:</u></b> <span id = "snowflake-opacity-txt">50</span>%</div>
+      <input type = "range" min = "5" max = "100" step = "5" value = "50" id = "snowflake-opacity-range" oninput = "updateSettings(false)">
+      <hr>
+      <label for = "decrease-snowflake-thickness-checkbox"><b><u>Pinch Snowflake Edges:</u></b></label>
+      <input type = "checkbox" id = "decrease-snowflake-thickness-checkbox" oninput = "updateSettings(false)" CHECKED>
+      <hr>
+      <label for = "rainbow-snowflake-checkbox"><b><u>Rainbow Snowflake:</u></b></label>
+      <input type = "checkbox" id = "rainbow-snowflake-checkbox" oninput = "updateSettings(false)">
+      <br><br>
+      <label for = "use-snowflake-color-palette-checkbox"><b><u>Use Color Palette:</u></b></label>
+      <input type = "checkbox" id = "use-snowflake-color-palette-checkbox" oninput = "updateSettings(false)">
+      <br>
+      <label for = "use-snowflake-color-palette-checkbox">(overrides rainbow snowflake)</label>
+      <br><br>
+      <div><b><u>Selected Color Palette:</u></b> <span id = "snowflake-color-palette-txt">1</span>/124</div>
+      <button class = "plus-minus-btn" onclick = "minusColorPalette()" oninput = "updateSettings(false)">&LongLeftArrow;</button>
+      <button class = "plus-minus-btn" onclick = "plusColorPalette()" oninput = "updateSettings(false)">&LongRightArrow;</button>
+      <br><br>
+      <button onclick = "randomizeSnowflakeColorPalette()">Randomize Color Palette</button>
+    </td>
+  </tr>
+</table>
+<br>
+<div id = "fps-body">FPS: <span id = "fps-txt"></span></div>
+<br>
+<span id = "screensaver-txt"><a href = "snowflake-screensaver.html" target = "_blank">Check out the screensaver!</a> Every setting is randomized every 5 seconds, creating infinite unique designs.</span>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 1000;
+  let canvasRunning = true;
+  
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.rotate(-Math.PI / 2);
+  
+  let startStopBtn = document.getElementById("start-stop-btn");
+  let totalIceParticlesTxt = document.getElementById("total-ice-particles-txt");
+  let snowflakeSymmetryTxt = document.getElementById("snowflake-symmetry-txt");
+  let snowflakeSymmetryRange = document.getElementById("snowflake-symmetry-range");
+  let iceParticleRadiusTxt = document.getElementById("ice-particle-radius-txt");
+  let iceParticleRadiusRange = document.getElementById("ice-particle-radius-range");
+  let iceParticleSpeedTxt = document.getElementById("ice-particle-speed-txt");
+  let iceParticleSpeedRange = document.getElementById("ice-particle-speed-range");
+  let iceParticleStickinessTxt = document.getElementById("ice-particle-stickiness-txt");
+  let iceParticleStickinessRange = document.getElementById("ice-particle-stickiness-range");
+  let snowflakeHueTxt = document.getElementById("snowflake-hue-txt");
+  let snowflakeHueRange = document.getElementById("snowflake-hue-range");
+  let snowflakeThicknessTxt = document.getElementById("snowflake-thickness-txt");
+  let snowflakeThicknessRange = document.getElementById("snowflake-thickness-range");
+  let snowflakeOpacityTxt = document.getElementById("snowflake-opacity-txt");
+  let snowflakeOpacityRange = document.getElementById("snowflake-opacity-range");
+  let rainbowSnowflakeCheckbox = document.getElementById("rainbow-snowflake-checkbox");
+  let decreaseSnowflakeThicknessCheckbox = document.getElementById("decrease-snowflake-thickness-checkbox");
+  let useSnowflakeColorPaletteCheckbox = document.getElementById("use-snowflake-color-palette-checkbox");
+  let snowflakeColorPaletteTxt = document.getElementById("snowflake-color-palette-txt");
+  let fpsTxt = document.getElementById("fps-txt");
+  let presetsDiv = document.getElementById("presets-div");
+  
+  let snowflakeArray = [];
+  let snowflakeSymmetry = 6;
+  let snowflakeAngle = (Math.PI * 2) / snowflakeSymmetry;
+  let maxSnowflakeSize = 400;
+  let snowflakeThickness = 8;
+  let snowflakeOpacity = 0.5;
+  let snowflakeHue = 240;
+  let rainbowSnowflake = false;
+  let decreaseSnowflakeThickness = true;
+  let useSnowflakeColorPalette = false;
+  let snowflakeColorPalette = 1;
+  
+  let presetsArray = [
+    {
+      name: "Default",
+      snowflakeSymmetry: 6,
+      iceParticleRadius: 4,
+      iceParticleSpread: 5,
+      iceParticleStickiness: 30,
+      snowflakeHue: 240,
+      snowflakeThickness: 8,
+      snowflakeOpacity: 50,
+      decreaseSnowflakeThickness: true,
+      rainbowSnowflake: false,
+      useSnowflakeColorPalette: false,
+      snowflakeColorPalette: 1
+    },
+    {
+      name: "Aztec Sundial",
+      snowflakeSymmetry: 12,
+      iceParticleRadius: 4,
+      iceParticleSpread: 1,
+      iceParticleStickiness: 100,
+      snowflakeHue: 240,
+      snowflakeThickness: 20,
+      snowflakeOpacity: 100,
+      decreaseSnowflakeThickness: true,
+      rainbowSnowflake: false,
+      useSnowflakeColorPalette: true,
+      snowflakeColorPalette: 70
+    },
+    {
+      name: "Ghastly Cross",
+      snowflakeSymmetry: 4,
+      iceParticleRadius: 4,
+      iceParticleSpread: 10,
+      iceParticleStickiness: 100,
+      snowflakeHue: 240,
+      snowflakeThickness: 20,
+      snowflakeOpacity: 25,
+      decreaseSnowflakeThickness: true,
+      rainbowSnowflake: false,
+      useSnowflakeColorPalette: true,
+      snowflakeColorPalette: 18
+    },
+    {
+      name: "Blossoming Sunflower",
+      snowflakeSymmetry: 9,
+      iceParticleRadius: 6,
+      iceParticleSpread: 10,
+      iceParticleStickiness: 50,
+      snowflakeHue: 240,
+      snowflakeThickness: 20,
+      snowflakeOpacity: 100,
+      decreaseSnowflakeThickness: false,
+      rainbowSnowflake: false,
+      useSnowflakeColorPalette: true,
+      snowflakeColorPalette: 90
+    },
+    {
+      name: "Neon Star",
+      snowflakeSymmetry: 5,
+      iceParticleRadius: 5,
+      iceParticleSpread: 5,
+      iceParticleStickiness: 10,
+      snowflakeHue: 180,
+      snowflakeThickness: 6,
+      snowflakeOpacity: 25,
+      decreaseSnowflakeThickness: false,
+      rainbowSnowflake: true,
+      useSnowflakeColorPalette: false,
+      snowflakeColorPalette: 1
+    },
+    {
+      name: "Jade Crystals",
+      snowflakeSymmetry: 9,
+      iceParticleRadius: 4,
+      iceParticleSpread: 5,
+      iceParticleStickiness: 100,
+      snowflakeHue: 240,
+      snowflakeThickness: 12,
+      snowflakeOpacity: 25,
+      decreaseSnowflakeThickness: true,
+      rainbowSnowflake: false,
+      useSnowflakeColorPalette: true,
+      snowflakeColorPalette: 15
+    }
+  ];
+  
+  let IceParticle = {};
+  IceParticle.x = 0;
+  IceParticle.y = 0;
+  IceParticle.speedY = 5;
+  IceParticle.speedX = 2;
+  IceParticle.radius = 4;
+  IceParticle.stickiness = 0.3;
+  IceParticle.stepsPerFrame = 1000;
+  IceParticle.running = true;
+  IceParticle.resetPos = function() {
+    this.x = canvas.width / 2;
+    this.y = (canvas.width / 2) * Math.sin(Math.random() * snowflakeAngle);
+  };
+  IceParticle.walk = function() {
+    if (!this.running) return;
+    for (let j = 0; j < this.stepsPerFrame; j++) {
+      this.x -= randBetween(0.5, 1) * this.speedX;
+      this.y += randBetween(0.5, 1) * this.speedY * randSign();
+      
+      let currentMaxHeight = Math.sin(snowflakeAngle) * this.x;
+      if (this.y >= currentMaxHeight || this.y <= 0) {
+        this.y = (this.y + currentMaxHeight) % currentMaxHeight;
+      }
+      
+      for (let i = snowflakeArray.length - 1; i >= 0; i--) {
+        let distX = this.x - snowflakeArray[i].x;
+        let distY = this.y - snowflakeArray[i].y;
+        let distSq = (distX * distX) + (distY * distY);
+        if (distSq <= 4 * this.radius * this.radius && Math.random() <= this.stickiness) {
+          if (this.x < (canvas.width / 2) - (this.radius * 2)) {
+            snowflakeArray.push({x: this.x, y: this.y});
+            this.resetPos();
+          }
+          else {
+            this.running = false;
+            return;
+          }
+        }
+      }
+      if (this.x <= 0) {
+        snowflakeArray.push({x: this.x, y: this.y});
+        this.resetPos();
+      }
+    }
+  };
+  
+  function drawSnowflake() {
+    ctx.clearRect(-canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
+    
+    let color;
+    let r;
+    let g;
+    let b;
+    let palette = snowflakeColorPalette.toString(5).padStart(3, "0");
+    switch (Number(palette.charAt(0))) {
+      case 0: r = (curr, max) => 0;
+      break;
+      case 1: r = (curr, max) => 127;
+      break;
+      case 2: r = (curr, max) => 255;
+      break;
+      case 3: r = (curr, max) => (curr / max) * 255;
+      break;
+      case 4: r = (curr, max) => 255 - ((curr / max) * 255);
+      break;
+    }
+    switch (Number(palette.charAt(1))) {
+      case 0: g = (curr, max) => 0;
+      break;
+      case 1: g = (curr, max) => 127;
+      break;
+      case 2: g = (curr, max) => 255;
+      break;
+      case 3: g = (curr, max) => (curr / max) * 255;
+      break;
+      case 4: g = (curr, max) => 255 - ((curr / max) * 255);
+      break;
+    }
+    switch (Number(palette.charAt(2))) {
+      case 0: b = (curr, max) => 0;
+      break;
+      case 1: b = (curr, max) => 127;
+      break;
+      case 2: b = (curr, max) => 255;
+      break;
+      case 3: b = (curr, max) => (curr / max) * 255;
+      break;
+      case 4: b = (curr, max) => 255 - ((curr / max) * 255);
+      break;
+    }
+    color = (curr, max) => `rgb(${r(curr, max)}, ${g(curr, max)}, ${b(curr, max)})`;
+    
+    ctx.save();
+    ctx.globalAlpha = snowflakeOpacity;
+    for (let i = 0; i < snowflakeSymmetry; i++) {
+      ctx.rotate(snowflakeAngle);
+      for (let j = 0; j < snowflakeArray.length; j++) {
+        if (rainbowSnowflake) ctx.fillStyle = `hsl(${snowflakeHue + ((j / snowflakeArray.length) * 360)}deg, 100%, ${80 - ((j / snowflakeArray.length) * 30)}%)`;
+        else ctx.fillStyle = `hsl(${snowflakeHue}deg, 100%, ${95 - ((j / snowflakeArray.length) * 30)}%)`;
+        if (useSnowflakeColorPalette) ctx.fillStyle = color(j, snowflakeArray.length);
+        let thickness = decreaseSnowflakeThickness ? (snowflakeThickness - (snowflakeThickness * (j / snowflakeArray.length))) + (snowflakeThickness / 4) : snowflakeThickness;
+        ctx.fillCircle(snowflakeArray[j].x, snowflakeArray[j].y, thickness);
+        ctx.fillCircle(snowflakeArray[j].x, -snowflakeArray[j].y, thickness);
+      }
+    }
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+  
+  let lastFrameTime = 0;
+  let lastFpsDisplayTime = 1000;
+  
+  function frame() {
+    if (Date.now() - lastFpsDisplayTime >= 500) {
+      fpsTxt.innerHTML = Math.floor(1000 / (Date.now() - lastFrameTime));
+      lastFpsDisplayTime = Date.now();
+    }
+    lastFrameTime = Date.now();
+    
+    snowflakeAngle = (Math.PI * 2) / snowflakeSymmetry;
+    
+    IceParticle.walk();
+    
+    if (IceParticle.running) drawSnowflake();
+    
+    if (snowflakeArray.length >= maxSnowflakeSize) {
+      snowflakeArray.length = maxSnowflakeSize;
+      IceParticle.running = false;
+    }
+    
+    totalIceParticlesTxt.innerHTML = comma(snowflakeArray.length * 2 * snowflakeSymmetry);
+    
+    if (canvasRunning) requestAnimationFrame(frame);
+  }
+  randomizeSnowflakeColorPalette();
+  IceParticle.resetPos();
+  frame();
+  
+  function startStop() {
+    if (canvasRunning) {
+      canvasRunning = false;
+      startStopBtn.innerHTML = "Play";
+    }
+    else {
+      canvasRunning = true;
+      startStopBtn.innerHTML = "Pause";
+      frame();
+    }
+  }
+  
+  function reset() {
+    snowflakeArray = [];
+    IceParticle.running = true;
+  }
+  
+  function updateSettings(doReset) {
+    snowflakeSymmetry = snowflakeSymmetryTxt.innerHTML = Number(snowflakeSymmetryRange.value);
+    IceParticle.radius = iceParticleRadiusTxt.innerHTML = Number(iceParticleRadiusRange.value);
+    IceParticle.speedY = iceParticleSpeedTxt.innerHTML = Number(iceParticleSpeedRange.value);
+    IceParticle.stickiness = Number(iceParticleStickinessRange.value) / 100;
+    iceParticleStickinessTxt.innerHTML = Number(iceParticleStickinessRange.value);
+    snowflakeHue = snowflakeHueTxt.innerHTML = Number(snowflakeHueRange.value);
+    snowflakeThickness = snowflakeThicknessTxt.innerHTML = Number(snowflakeThicknessRange.value);
+    snowflakeOpacity = Number(snowflakeOpacityRange.value) / 100;
+    snowflakeOpacityTxt.innerHTML = Number(snowflakeOpacityRange.value);
+    rainbowSnowflake = rainbowSnowflakeCheckbox.checked;
+    decreaseSnowflakeThickness = decreaseSnowflakeThicknessCheckbox.checked;
+    useSnowflakeColorPalette = useSnowflakeColorPaletteCheckbox.checked;
+    snowflakeColorPaletteTxt.innerHTML = snowflakeColorPalette;
+    snowflakeColorPaletteTxt.innerHTML = snowflakeColorPalette;
+    
+    if (doReset) reset();
+    
+    drawSnowflake();
+  }
+  
+  function comma(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+  
+  function randomizeRange(element) {
+    return Number(randBetween(Number(element.min), Number(element.max))).toMultipleOf(Number(element.step));
+  }
+  
+  function randomizeSnowflakeColorPalette() {
+    snowflakeColorPalette = Math.round(randBetween(1, 124));
+    snowflakeColorPaletteTxt.innerHTML = snowflakeColorPalette;
+    
+    drawSnowflake();
+  }
+  
+  function randomizeGeometrySettings() {
+    snowflakeSymmetryRange.value = randomizeRange(snowflakeSymmetryRange);
+    iceParticleRadiusRange.value = randomizeRange(iceParticleRadiusRange);
+    iceParticleSpeedRange.value = randomizeRange(iceParticleSpeedRange);
+    iceParticleStickinessRange.value = randomizeRange(iceParticleStickinessRange);
+    
+    updateSettings(true);
+    
+    reset();
+  }
+  
+  function randomizeAllSettings() {
+    snowflakeSymmetryRange.value = randomizeRange(snowflakeSymmetryRange);
+    iceParticleRadiusRange.value = randomizeRange(iceParticleRadiusRange);
+    iceParticleSpeedRange.value = randomizeRange(iceParticleSpeedRange);
+    iceParticleStickinessRange.value = randomizeRange(iceParticleStickinessRange);
+    snowflakeHueRange.value = randomizeRange(snowflakeHueRange);
+    snowflakeThicknessRange.value = randomizeRange(snowflakeThicknessRange);
+    snowflakeOpacityRange.value = randomizeRange(snowflakeOpacityRange);
+    rainbowSnowflakeCheckbox.checked = Math.random() >= 0.5;
+    decreaseSnowflakeThicknessCheckbox.checked = Math.random() >= 0.5;
+    useSnowflakeColorPaletteCheckbox.checked = Math.random() >= 0.5;
+    snowflakeColorPalette = Math.round(randBetween(1, 124));
+    
+    updateSettings(true);
+    
+    reset();
+  }
+  
+  function plusColorPalette() {
+    snowflakeColorPalette++;
+    if (snowflakeColorPalette >= 125) snowflakeColorPalette = 1;
+    snowflakeColorPaletteTxt.innerHTML = snowflakeColorPalette;
+    
+    drawSnowflake();
+  }
+  
+  function minusColorPalette() {
+    snowflakeColorPalette--;
+    if (snowflakeColorPalette <= 0) snowflakeColorPalette = 124;
+    snowflakeColorPaletteTxt.innerHTML = snowflakeColorPalette;
+    
+    drawSnowflake();
+  }
+  
+  /*
+      useSnowflakeColorPalette: false,
+      snowflakeColorPalette: 1
+  */
+  
+  function loadSettingsPreset(n) {
+    let p = presetsArray[n];
+    snowflakeSymmetryRange.value = p.snowflakeSymmetry;
+    iceParticleRadiusRange.value = p.iceParticleRadius;
+    iceParticleSpeedRange.value = p.iceParticleSpread;
+    iceParticleStickinessRange.value = p.iceParticleStickiness;
+    snowflakeHueRange.value = p.snowflakeHue;
+    snowflakeThicknessRange.value = p.snowflakeThickness;
+    snowflakeOpacityRange.value = p.snowflakeOpacity;
+    decreaseSnowflakeThicknessCheckbox.checked = p.decreaseSnowflakeThickness;
+    rainbowSnowflakeCheckbox.checked = p.rainbowSnowflake;
+    useSnowflakeColorPaletteCheckbox.checked = p.useSnowflakeColorPalette;
+    snowflakeColorPalette = p.snowflakeColorPalette;
+    
+    updateSettings(true);
+  }
+  
+  for (let i = 1; i < presetsArray.length; i++) {
+    let btn = document.createElement("button");
+    btn.innerHTML = presetsArray[i].name;
+    btn.className = "preset-btn";
+    btn.onclick = () => loadSettingsPreset(i);
+    presetsDiv.appendChild(btn);
+  }
+  function downloadCanvas() {
+    let link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "snowflake.png";
+    link.click();
+  }
+</script>
+</body>
+</html>
