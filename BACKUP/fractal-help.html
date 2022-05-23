@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png"/>
+    <title>Fractal Help ~ e4494s</title>
+    <style>
+      html, body {
+        font-family: monospace;
+      }
+      
+      img {
+        width: 200px;
+        height: 200px;
+        image-rendering: pixelated;
+      }
+      
+      .title {
+        font-weight: bold;
+        text-decoration: underline;
+      }
+      
+      .small {
+        font-size: 9px;
+        font-style: italic;
+      }
+      
+      .cell {
+        width: 20px;
+        height: 20px;
+        border: 1px solid black;
+      }
+      
+      i {
+        background-color: lightgray;
+      }
+    </style>
+  </head>
+<body>
+<h1>How to use the <a href = "fractalization.html">Fractal Generator</a></h1>
+Clicking on one of the squares in the grid will create a filled cell (you can tell this apart from other cells by the white circle in its center, regardless of its color).
+<br><br>
+<div class = "cell" style = "background: radial-gradient(white, black, black)"></div>
+<br><br><br>
+Clicking again will turn the cell into a colored cell (the color will be the "click color" you currently have set).
+<br><br>
+<div class = "cell" style = "background: gray"></div>
+<br><br><br>
+A third click will turn it into an empty cell.
+<br><br>
+<div class = "cell"></div>
+<br><br><br>
+When the grid is fractalized, it will draw the entire grid at every occurence of a filled cell. This basically means it will create a grid of grids, so that this original grid becomes this fractal.
+<br><br>
+<img src = "images/fractals/example-grid.png">
+becomes
+<img src = "images/fractals/example-fractal.png">
+<br><br><br><br>
+Any colored cells will be drawn with each grid, but will not affect the shape of the entire fractal. Here, the same original grid is used except with an orange accent to it, and the resulting fractal has the same shape as the non-colored version, but with orange highlights.
+<br><br>
+<img src = "images/fractals/example-colored-grid.png">
+becomes
+<img src = "images/fractals/example-colored-fractal.png">
+<br><br><br><br>
+<h2>Tips for creating beautiful fractals</h2>
+<i>1.) Try to reach to the edges of the grid, and center your design.</i>
+<br><br>
+For example, this grid is uncentered and doesn't reach the edges, and as a result it looks like this, which is unconnected and off-center.
+<br><br>
+<img src = "images/fractals/poor-grid1.png">
+which becomes
+<img src = "images/fractals/poor-fractal1.png">
+<br><br><br><br>
+However, if the same basic shape is centered and reached to the edges, this is the result.
+<br><br>
+<img src = "images/fractals/good-grid1.png">
+which becomes
+<img src = "images/fractals/good-fractal1.png">
+<br><br><br><br>
+A second example: A simple design uncentered and not reaching the edges:
+<br><br>
+<img src = "images/fractals/poor-grid2.png">
+which becomes
+<img src = "images/fractals/poor-fractal2.png">
+<br><br><br><br>
+As compared to the same shape, stretched to the edges and centered:
+<br><br>
+<img src = "images/fractals/good-grid2.png">
+which becomes
+<img src = "images/fractals/good-fractal2.png">
+</body>
+</html>
