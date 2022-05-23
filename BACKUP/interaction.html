@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = 'icon'  href = 'images/favicon.png' type = 'image/png'/>
+    <title>Interaction ~ e4494s</title>
+    <style>
+      #canvas {
+        width: 500px;
+        height: 500px;
+        border: 1px solid black;
+      }
+    </style>
+  </head>
+<body>
+<canvas id = 'canvas'>
+</canvas>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 500;
+  
+  let gravity = 0.5;
+  let air_resistance = 0.005;
+  let friction = 0.1;
+  
+  let key_power = 10;
+  
+  let red = {};
+  
+  red.x = 25;
+  red.y = 25;
+  red.velocity_x = 0;
+  red.velocity_y = 0;
+  red.bounciness = 0.8;
+  red.image = new Image();
+  red.image.src = 'images/redball.png';
+  red.width = 50;
+  red.height = 50;
+  red.toBlue = 0;
+  
+  red.render = function() {
+    red.velocity_y += gravity;
+    red.velocity_y *= 1 - air_resistance;
+    red.velocity_x *= 1 - air_resistance;
+    red.x += red.velocity_x;
+    red.y += red.velocity_y;
+    if (red.y + red.height >= canvas.height) { // Bounce off bottom
+      red.y = canvas.height - red.height;
+      red.velocity_x *= 1 - friction;
+      red.velocity_y *= -red.bounciness;
+    }
+    if (red.y <= 0) { // Bounce off top
+      red.y = 0;
+      red.velocity_x *= 1 - friction;
+      red.velocity_y *= -red.bounciness;
+    }
+    if (red.x <= 0) { // Bounce off the left
+      red.x = 0;
+      red.velocity_y *= 1 - friction;
+      red.velocity_x *= -red.bounciness;
+    }
+    if (red.x + red.width >= canvas.width) {
+      red.x = canvas.width - red.width;
+      red.velocity_y *= 1 - friction;
+      red.velocity_x *= -red.bounciness;
+    }
+    red.toBlue = Math.sqrt(Math.pow(Math.abs(blue.x - red.x), 2) + Math.pow(Math.abs(blue.y - red.y), 2));
+    if (red.toBlue <= red.width) {
+      red.velocity_x *= -red.bounciness;
+      red.velocity_y *= -red.bounciness;
+    }
+    ctx.drawImage(red.image, red.x, red.y, red.width, red.height);
+  };
+  
+  let blue = {};
+  
+  blue.x = 25;
+  blue.y = 25;
+  blue.velocity_x = 0;
+  blue.velocity_y = 0;
+  blue.bounciness = 0.8;
+  blue.image = new Image();
+  blue.image.src = 'images/blueball.png';
+  blue.width = 50;
+  blue.height = 50;
+  blue.toRed = 0;
+  
+  blue.render = function() {
+    blue.velocity_y += gravity;
+    blue.velocity_y *= 1 - air_resistance;
+    blue.velocity_x *= 1 - air_resistance;
+    blue.x += blue.velocity_x;
+    blue.y += blue.velocity_y;
+    if (blue.y + blue.height >= canvas.height) { // Bounce off bottom
+      blue.y = canvas.height - blue.height;
+      blue.velocity_x *= 1 - friction;
+      blue.velocity_y *= -blue.bounciness;
+    }
+    if (blue.y <= 0) { // Bounce off top
+      blue.y = 0;
+      blue.velocity_x *= 1 - friction;
+      blue.velocity_y *= -blue.bounciness;
+    }
+    if (blue.x <= 0) { // Bounce off the left
+      blue.x = 0;
+      blue.velocity_y *= 1 - friction;
+      blue.velocity_x *= -blue.bounciness;
+    }
+    if (blue.x + blue.width >= canvas.width) {
+      blue.x = canvas.width - blue.width;
+      blue.velocity_y *= 1 - friction;
+      blue.velocity_x *= -blue.bounciness;
+    }
+    blue.xToRed = Math.abs(red.x - blue.x);
+    blue.yToRed = Math.abs(red.y - blue.y);
+    if (blue.xToRed <= blue.width && blue.yToRed <= blue.height) {
+      blue.velocity_x *= -blue.bounciness;
+      blue.velocity_y *= -blue.bounciness;
+    }
+    ctx.drawImage(blue.image, blue.x, blue.y, blue.width, blue.height);
+  };
+  
+  function frame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    red.render();
+    blue.render();
+    requestAnimationFrame(frame);
+  }
+  frame();
+  
+  function keyHandler(e) {
+    if (e.keyCode == 37) red.velocity_x -= key_power;
+    if (e.keyCode == 38) red.velocity_y -= key_power;
+    if (e.keyCode == 39) red.velocity_x += key_power;
+    if (e.keyCode == 40) red.velocity_y += key_power;
+    
+    if (e.keyCode == 65) blue.velocity_x -= key_power;
+    if (e.keyCode == 87) blue.velocity_y -= key_power;
+    if (e.keyCode == 68) blue.velocity_x += key_power;
+    if (e.keyCode == 83) blue.velocity_y += key_power;
+  }
+  addEventListener('keydown', keyHandler);
+  
+  
+  /*
+  sprite.prototype.render = function() {
+    if ((this.speed_x < 0) && (this.x > 0)) this.x += this.speed_x;
+    if ((this.speed_x > 0) && (this.x + this.image.width < intCanvas.width )) this.x += this.speed_x;
+    if ((this.speed_y < 0) && (this.y > 0)) this.y += this.speed_y;
+    if ((this.speed_y > 0) && (this.y + this.image.height < intCanvas.height)) this.y += this.speed_y;
+    if (this.visible) ctx.drawImage(this.image, this.x, this.y);
+  }
+  
+  function keyUpHandler(keyUpEvent) {
+    if (keyUpEvent.keyCode == 37 || keyUpEvent.keyCode == 39) {triangle.speed_x = 0;}
+    if (keyUpEvent.keyCode == 38 || keyUpEvent.keyCode == 40) {triangle.speed_y = 0;}
+    
+    if (keyUpEvent.keyCode == 65 || keyUpEvent.keyCode == 68) {square.speed_x = 0;}
+    if (keyUpEvent.keyCode == 87 || keyUpEvent.keyCode == 83) {square.speed_y = 0;}
+  }
+  
+  function keyDownHandler(keyDownEvent) {
+    if (keyDownEvent.keyCode == 37) {triangle.speed_x = - sprite_speed;}
+    if (keyDownEvent.keyCode == 38) {triangle.speed_y = - sprite_speed;}
+    if (keyDownEvent.keyCode == 39) {triangle.speed_x = sprite_speed;}
+    if (keyDownEvent.keyCode == 40) {triangle.speed_y = sprite_speed;}
+    
+    if (keyDownEvent.keyCode == 65) {square.speed_x = - sprite_speed;}
+    if (keyDownEvent.keyCode == 87) {square.speed_y = - sprite_speed;}
+    if (keyDownEvent.keyCode == 68) {square.speed_x = sprite_speed;}
+    if (keyDownEvent.keyCode == 83) {square.speed_y = sprite_speed;}
+    keyDownEvent.preventDefault()
+  }
+  
+  setInterval(frame, update_rate);*/
+</script>
+</body>
+</html>
