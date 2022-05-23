@@ -27,7 +27,6 @@
   let canvasRunning = true;
   
   let animTime = 0;
-  let animTimeSpeed = 2;
   let ellipseOffsetFactor = 0.3;
   let ellipseCount = 24;
   let ellipseWidth = 40;
@@ -47,6 +46,7 @@
   let rainbowWireframe = true;
   let widthRatio = 0.42;
   let heightRatio = 1;
+  let reverse = true;
   
   let lastFrameTime = 0;
   let lastFpsDisplayTime = 1000;
@@ -107,7 +107,7 @@
     //animTime += animTimeSpeed;
     //while (animTime >= 720) animTime -= 720;
     //while (animTime <= 0) animTime += 720;
-    animTime = 360 * (timeSinceSwitch / timeToSwitch);
+    animTime = (timeSinceSwitch / timeToSwitch) * 360 * (reverse ? -1 : 1);
     
     if (showWireframe) {
       ctx.lineWidth = wireframeThickness;
@@ -156,7 +156,7 @@
   function randomSettings() {
     clearCanvas();
     
-    animTimeSpeed = 1.5 * randSign();
+    reverse = Math.random() < 0.5;
     ellipseOffsetFactor = randRange(-10, 10, 0.1);
     ellipseCount = randRange(1, 100, 1);
     dotRatio = randBetween(5, 60) / 800;
