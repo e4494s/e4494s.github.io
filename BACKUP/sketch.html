@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = 'icon'  href = 'images/favicon.png' type = 'image/png'/>
+    <title>Sketch ~ e4494s</title>
+    <style>
+    body {
+      user-select: none;
+    }
+    canvas {
+      cursor: none;
+      border: 1px solid black;
+      width: 256px;
+      height: 256px;
+      padding: 1px 1px 1px 1px;
+      background-image: url('images/transparent.png');
+      background-size: 100%;
+    }
+    #topcanvas {
+      background-image: none;
+      border: 1px solid rgba(0, 0, 0, 0);
+      /*background-color: rgba(255, 0, 0, 0.25);*/
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+    img {
+      width: 128px;
+      height: 128px;
+      border: 3px solid black;
+      padding: 1px 1px 1px 1px;
+    }
+    #canvasimg {
+      margin-left: 100px;
+      margin-bottom: 62px;
+    }
+    #palette {
+      background-color: burlywood;
+      border: 8px solid darkkhaki;
+      border-radius: 15px 30px 15px 5px;
+      width: 125px;
+      height: 125px;
+      text-align: center;
+      display: table-cell;
+      vertical-align: middle;
+    }
+    .color {
+      width: 20px;
+      height: 20px;
+      border: 2px solid black;
+      border-radius: 7px;
+      display: inline-block;
+      cursor: pointer;
+    }
+    .color:focus {
+      outline: none;
+    }
+    #dotbox {
+      border: 1px solid black;
+      padding: 1px 1px 1px 1px;
+      width: 50px;
+      text-align: center;
+      display: table-cell;
+      vertical-align: middle;
+      background-image: url('images/transparent.png');
+      background-size: 512%;
+    }
+    #dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: black;
+      display: inline-block;
+    }
+    input[type=text] {
+      width: 100px;
+      border: 2px solid black;
+      border-radius: 0;
+    }
+    input:focus {
+      outline: none;
+    }
+    button {
+      background-color: white;
+      border: 2px solid black;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: lightgray;
+    }
+    button:active {
+      background-color: gray;
+    }
+    button:focus {
+      outline: none;
+    }
+    .smallbrk, .mediumbrk, .largebrk {
+      margin: 0;
+      border: none;
+    }
+    .smallbrk {
+      height: 3px;
+    }
+    .mediumbrk {
+      height: 5px;
+    }
+    .largebrk {
+      height: 7px;
+    }
+    #permalinkbtn {
+      background-color: rgba(0, 0, 255, 0.5);
+    }
+    #permalinkbtn:hover {
+      background-color: rgba(0, 0, 255, 0.7);
+    }
+    #permalinkbtn:active {
+      background-color: rgba(0, 0, 255, 0.9);
+    }
+    </style>
+  </head>
+<body onload = 'drawHash()'>
+<button onclick = 'undo()'>Undo &larr;</button>
+<button onclick = 'clearCanvas()'>Clear</button>
+<hr class = 'smallbrk'>
+<canvas id = 'canvas'></canvas>
+<canvas id = 'topcanvas'></canvas>
+<img id = 'canvasimg'>
+<div id = 'palette'>
+  <button class = 'color' onclick = 'setColor(this.id)' id = 'red' style = 'background-color: red'></button>
+  <button class = 'color' onclick = 'setColor(this.id)' id = 'darkorange' style = 'background-color: darkorange'></button>
+  <button class = 'color' onclick = 'setColor(this.id)' id = 'orange' style = 'background-color: orange'></button>
+  <button class = 'color' onclick = 'setColor(this.id)' id = 'yellow' style = 'background-color: yellow'></button>
+  <button class = 'color' onclick = 'setColor(this.id)' id = 'lightgreen' style = 'background-color: lightgreen'></button>
+  <hr class = 'smallbrk'>
+  <button class = 'color' onclick = 'setColor(this.id)' id = 'lime' style = 'background-color: lime'></button>
+  <button class = 'color' onclick = 'setColor(this.id)' id = 'green' style = 'background-color: green'></button>
+  <button class = 'color' onclick = 'setColor(this.id)' id = 'blue' style = 'background-color: blue'></button>
+  <button class = 'color' onclick = 'setColor(this.id)' id = 'purple' style = 'background-color: purple'></button>
+  <button class = 'color' onclick = 'setColor(this.id)' id = 'hotpink' style = 'background-color: hotpink'></button>
+  <hr class = 'smallbrk'>
+  <button class = 'color' onclick = 'setColor(this.id)' id = 'white' style = 'background-color: white'></button>
+  <button class = 'color' onclick = 'setColor(this.id)' id = 'lightgray' style = 'background-color: lightgray'></button>
+  <button class = 'color' onclick = 'setColor(this.id)' id = 'gray' style = 'background-color: gray'></button>
+  <button class = 'color' onclick = 'setColor(this.id)' id = 'dimgray' style = 'background-color: dimgray'></button>
+  <button class = 'color' onclick = 'setColor(this.id)' id = 'black' style = 'background-color: black'></button>
+  <hr class = 'mediumbrk'>
+  <input type = 'text' id = 'colortxt' value = 'black'>
+  <hr class = 'smallbrk'>
+  <button onclick = 'setColor(colortxt.value)'>Set Color</button>
+</div>
+<div id = 'dotbox'>
+  <span id = 'dot'></span>
+</div>
+<input type = 'range' min = '1' max = '50' step = '1' value = '5' id = 'sizerange'><label for = 'sizerange' id = 'sizelabel'>Brush Size: 5px</label>
+<br>
+<button onclick = 'setColor(randColor())'>Random Color</button>
+<!--<hr class = 'smallbrk'>
+<button onclick = 'permalink()' id = 'permalinkbtn'>Create Permalink</button>-->
+<script>
+  const ctx = canvas.getContext('2d');
+  const tctx = topcanvas.getContext('2d');
+  let ratio = 3;
+  canvas.width = canvas.height = topcanvas.width = topcanvas.height = 256 * ratio;
+  let rect = canvas.getBoundingClientRect();
+  topcanvas.style.left = rect.left + 'px';
+  topcanvas.style.top = rect.top + 'px';
+  
+  let versions = [];
+  versions.push(canvas.toDataURL());
+  let curr_version = 0;
+  let v = new Image();
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.lineWidth = 10 * ratio;
+  
+  
+  let layers = [];
+  //layers.push({color: 'red', size: 3, path: [{x: 200, y: 100}, {x: 50, y: 50}, {x: 50, y: 75}, {x: 56, y: 123}]});
+  function renderLayers(){//
+  for (let i = 0; i < layers.length; i++) {
+    ctx.strokeStyle = layers[i].color;
+    ctx.lineWidth = layers[i].size * ratio;
+    ctx.beginPath();
+    for (let j = 0; j < layers[i].path.length; j++) {
+      ctx.lineTo(layers[i].path[j].x * ratio, layers[i].path[j].y * ratio);
+      ctx.stroke();
+    }
+    ctx.closePath();
+  }
+  }//
+  let mouse_down = false;
+  let mouse_x = 0;
+  let mouse_y = 0;
+  
+  let randColor = () => `rgb(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`;
+  
+  function setColor(new_color) {
+    ctx.strokeStyle = new_color;
+    dot.style.backgroundColor = new_color;
+    colortxt.value = new_color;
+  }
+  
+  sizerange.oninput = function() {
+    ctx.lineWidth = this.value * ratio;
+    dot.style.width = dot.style.height = `${this.value}px`;
+    sizelabel.innerHTML = `Brush Size: ${this.value}px`;
+  }
+  
+  
+  
+  
+  function updateCanvasImg() {
+    canvasimg.src = canvas.toDataURL();
+    requestAnimationFrame(updateCanvasImg);
+  }
+  updateCanvasImg();
+  
+  function mouseDownHandler(e) {
+    rect = canvas.getBoundingClientRect();
+    if (e.which == 1) mouse_down = true;
+    ctx.moveTo((e.clientX - rect.left) * ratio, (e.clientY - rect.top) * ratio);
+    ctx.beginPath();
+    layers.push({color: ctx.strokeStyle, size: ctx.lineWidth / ratio, path: [{x: e.clientX - rect.left, y: e.clientY - rect.top}]});
+  }
+  function mouseUpHandler(e) {
+    if (e.which == 1) {
+      mouse_down = false;
+      ctx.closePath();
+      updateVersion();
+      updateHash();
+    }
+  }
+  function mouseMoveHandler(e) {
+    mouse_x = (e.clientX - rect.left) * ratio;
+    mouse_y = (e.clientY - rect.top) * ratio;
+    rect = canvas.getBoundingClientRect();
+    if (mouse_down) {
+      ctx.lineTo((e.clientX - rect.left) * ratio, (e.clientY - rect.top) * ratio); 
+      ctx.stroke();
+      layers[layers.length - 1].path.push({x: e.clientX - rect.left, y: e.clientY - rect.top});
+    }
+    tctx.clearRect(0, 0, canvas.width, canvas.height);
+    tctx.fillStyle = ctx.strokeStyle;
+    tctx.beginPath();
+    tctx.arc(mouse_x, mouse_y, ctx.lineWidth / 2, 0, Math.PI * 2);
+    tctx.fill();
+  }
+  /*canvas.*/addEventListener('mousedown', mouseDownHandler);
+  /*canvas.*/addEventListener('mouseup', mouseUpHandler);
+  /*canvas.*/addEventListener('mousemove', mouseMoveHandler);
+  
+  function clearCanvas() {
+    if (!confirm('Are you sure you want to clear the canvas? This cannot be undone.')) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    window.location.hash = '';
+    versions = [];
+    layers = [];
+  }
+  
+  function undo() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (curr_version == 0) return;
+    curr_version--;
+    versions.length--;
+    layers.length--;
+    v.src = versions[curr_version];
+    setTimeout(() => ctx.drawImage(v, 0, 0, canvas.width, canvas.height), 1);
+    //console.log({curr_version, versions});
+  }
+  
+  function updateVersion() {
+    curr_version++;
+    versions.push(canvas.toDataURL());
+  }
+  
+  function updateHash() {
+    //window.location.hash = JSON.stringify(layers);
+  }
+  
+  function drawHash() {
+    layers = JSON.parse(decodeURIComponent(window.location.hash.replace('#', '')));
+    renderLayers();
+  }
+  
+  function sizeof(object) {
+    let object_list = [];
+    let stack = [object];
+    let bytes = 0;
+    while (stack.length) {
+      let value = stack.pop();
+      if (typeof value === 'boolean') {
+        bytes += 4;
+      }
+      else if (typeof value === 'string') {
+        bytes += value.length * 2;
+      }
+      else if (typeof value === 'number') {
+        bytes += 8;
+      }
+      else if (typeof value === 'object' && object_list.indexOf(value) === -1) {
+        object_list.push(value);
+        for (let i in value) {
+          stack.push(value[i]);
+        }
+      }
+    }
+    return bytes;
+  }
+</script>
+</body>
+</html>
