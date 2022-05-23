@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>Servo ~ e4494s</title>
+    <style>
+      #canvas {
+        background-color: white;
+      }
+      
+      .inline-section {
+        display: inline-block;
+        margin-right: 10px;
+      }
+    </style>
+  </head>
+<body>
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; Servo &mdash;&mdash;</h1>
+<p id = "how-it-works">
+  <b><i>How It Works:</i></b> Each arm in the servo has a set number of joints (which you can see by the black dots on the lines) which bend the arm at those positions.
+  <br><br>
+  Turning on <span class = "setting">Alternate Joint Direction</span> will make each joint alternate which direction it bends in, whereas having it off will make all joints bend in the same direction.
+  <br><br>
+  <span class = "setting">Arm Offset Factor</span> controls how each arm is oriented initially, so that instead of every arm beginning perfectly evenly around the servo, they will be offset by some factor, to create more intricate and unique patterns.
+  <br><br>
+  Clicking <span class = "setting">Randomize Geometry Settings</span> will randomize every setting, except the settings that are purely visual. Use this if you want a new set of settings with the same visual style.
+</p>
+<hr>
+<div><b>Settings Presets:</b></div>
+<div id = "presets-div"></div>
+<hr>
+<table>
+  <tr valign = "top">
+    <td>
+      <div class = "inline-section">
+        <button id = "start-stop-btn" onclick = "startStop()">Pause</button>
+      </div>
+      <div class = "inline-section">
+        <div><b><u>Speed:</u></b> <span id = "anim-time-speed-txt">1</span>x</div>
+        <input type = "range" id = "anim-time-speed-range" min = "0.25" max = "5" step = "0.25" value = "1" oninput = "resetArms()">
+      </div>
+      <div class = "inline-section">
+        <label for = "reverse-checkbox"><b><u>Reverse:</u></b></label>
+        <input type = "checkbox" id = "reverse-checkbox" oninput = "resetArms()">
+      </div>
+      <br><br>
+      <div><b><u>Servo Angle:</u></b> <span id = "anim-time-txt">0</span>&deg;</div>
+      <input type = "range" id = "anim-time-range" min = "0" max = "360" step = "1" value = "0" oninput = "resetArms()" style = "width: 200px">
+      <br><br>
+      <canvas id = "canvas"></canvas>
+      <br>
+      <button class = "download-canvas-btn" onclick = "downloadCanvas()">Download Canvas</button>
+    </td>
+    <td>
+      <button onclick = "resetSettings()">Reset Settings</button>
+      <br><br>
+      <button onclick = "randomizeAllSettings()">Randomize All Settings</button>
+      <br><br>
+      <button onclick = "randomizeGeometrySettings()">Randomize Geometry Settings</button>
+      <hr>
+      <label for = "trailing-checkbox"><b><u>Trailing:</u></b></label>
+      <input type = "checkbox" id = "trailing-checkbox" oninput = "resetArms()">
+      <hr>
+      <div><b><u>Number of Arms:</u></b> <span id = "arm-count-txt">6</span></div>
+      <input type = "range" id = "arm-count-range" min = "1" max = "20" step = "1" value = "6" oninput = "resetArms()">
+      <hr>
+      <div><b><u>Arm Joints:</u></b> <span id = "arm-joints-txt">3</span></div>
+      <input type = "range" id = "arm-joints-range" min = "0" max = "8" step = "1" value = "3" oninput = "resetArms()">
+      <hr>
+      <div><b><u>Arm Offset Factor:</u></b> <span id = "arm-offset-factor-txt">1</span>x</div>
+      <input type = "range" id = "arm-offset-factor-range" min = "-5" max = "5" step = "0.5" value = "1" oninput = "resetArms()">
+      <hr>
+      <label for = "alternate-joint-direction-checkbox"><b><u>Alternate Joint Direction:</u></b></label>
+      <input type = "checkbox" id = "alternate-joint-direction-checkbox" oninput = "resetArms()" CHECKED>
+      <hr>
+      <div><b><u>Arm Length:</u></b> <span id = "arm-length-txt">300</span>px</div>
+      <input type = "range" id = "arm-length-range" min = "200" max = "400" step = "25" value = "300" oninput = "resetArms()">
+    </td>
+    <td>
+      <div><b><u>Arm Thickness:</u></b> <span id = "arm-thickness-txt">2</span>px</div>
+      <input type = "range" id = "arm-thickness-range" min = "1" max = "10" step = "1" value = "2" oninput = "resetArms()">
+      <hr>
+      <div><b><u>Joint Size:</u></b> <span id = "joint-radius-txt">3</span>px</div>
+      <input type = "range" id = "joint-radius-range" min = "1" max = "10" step = "1" value = "3" oninput = "resetArms()">
+      <hr>
+      <div><b><u>Shadow Opacity:</u></b> <span id = "shadow-opacity-txt">25</span>%</div>
+      <input type = "range" id = "shadow-opacity-range" min = "5" max = "100" step = "5" value = "25" oninput = "resetArms()">
+      <hr>
+      <label for = "show-arms-checkbox"><b><u>Show Arms:</u></b></label>
+      <input type = "checkbox" id = "show-arms-checkbox" oninput = "resetArms()" CHECKED>
+      <br><br>
+      <label for = "show-joints-checkbox"><b><u>Show Joints:</u></b></label>
+      <input type = "checkbox" id = "show-joints-checkbox" oninput = "resetArms()" CHECKED>
+      <br><br>
+      <label for = "show-shadows-checkbox"><b><u>Show Shadows:</u></b></label>
+      <input type = "checkbox" id = "show-shadows-checkbox" oninput = "resetArms()">
+      <hr>
+      <label for = "rainbow-arms-checkbox"><b><u>Rainbow Arms:</u></b></label>
+      <input type = "checkbox" id = "rainbow-arms-checkbox" oninput = "resetArms()">
+      <br><br>
+      <label for = "rainbow-joints-checkbox"><b><u>Rainbow Joints:</u></b></label>
+      <input type = "checkbox" id = "rainbow-joints-checkbox" oninput = "resetArms()">
+      <br><br>
+      <label for = "rainbow-shadows-checkbox"><b><u>Rainbow Shadows:</u></b></label>
+      <input type = "checkbox" id = "rainbow-shadows-checkbox" oninput = "resetArms()">
+    </td>
+  </tr>
+</table>
+<br>
+<div id = "fps-body">FPS: <span id = "fps-txt"></span></div>
+<br>
+<span id = "screensaver-txt"><a href = "servo-screensaver.html" target = "_blank">Check out the screensaver!</a> Every setting is randomized every 5 seconds, creating infinite unique designs.</span>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 800;
+  let canvasRunning = true;
+  
+  let startStopBtn = document.getElementById("start-stop-btn");
+  let animTimeSpeedTxt = document.getElementById("anim-time-speed-txt");
+  let animTimeSpeedRange = document.getElementById("anim-time-speed-range");
+  let reverseCheckbox = document.getElementById("reverse-checkbox");
+  let animTimeTxt = document.getElementById("anim-time-txt");
+  let animTimeRange = document.getElementById("anim-time-range");
+  let trailingCheckbox = document.getElementById("trailing-checkbox");
+  let armCountTxt = document.getElementById("arm-count-txt");
+  let armCountRange = document.getElementById("arm-count-range");
+  let armJointsTxt = document.getElementById("arm-joints-txt");
+  let armJointsRange = document.getElementById("arm-joints-range");
+  let armOffsetFactorTxt = document.getElementById("arm-offset-factor-txt");
+  let armOffsetFactorRange = document.getElementById("arm-offset-factor-range");
+  let alternateJointDirectionCheckbox = document.getElementById("alternate-joint-direction-checkbox");
+  let armLengthTxt = document.getElementById("arm-length-txt");
+  let armLengthRange = document.getElementById("arm-length-range");
+  let armThicknessTxt = document.getElementById("arm-thickness-txt");
+  let armThicknessRange = document.getElementById("arm-thickness-range");
+  let jointRadiusTxt = document.getElementById("joint-radius-txt");
+  let jointRadiusRange = document.getElementById("joint-radius-range");
+  let shadowOpacityTxt = document.getElementById("shadow-opacity-txt");
+  let shadowOpacityRange = document.getElementById("shadow-opacity-range");
+  let showArmsCheckbox = document.getElementById("show-arms-checkbox");
+  let showJointsCheckbox = document.getElementById("show-joints-checkbox");
+  let showShadowsCheckbox = document.getElementById("show-shadows-checkbox");
+  let rainbowArmsCheckbox = document.getElementById("rainbow-arms-checkbox");
+  let rainbowJointsCheckbox = document.getElementById("rainbow-joints-checkbox");
+  let rainbowShadowsCheckbox = document.getElementById("rainbow-shadows-checkbox");
+  let presetsDiv = document.getElementById("presets-div");
+  let fpsTxt = document.getElementById("fps-txt");
+  
+  let animTime = 0;
+  let animTimeSpeed = 1;
+  let armLength = 300;
+  let armCount = 6;
+  let armJoints = 3;
+  let alternateJointDirection = true;
+  let armOffsetFactor = 1;
+  let showJoints = true;
+  let showArms = true;
+  let showShadows = false;
+  let rainbowJoints = false;
+  let rainbowArms = false;
+  let rainbowShadows = false;
+  let trailing = false;
+  let armThickness = 2;
+  let jointRadius = 3;
+  let shadowOpacity = 25;
+  
+  let presetArray = [
+    {
+      name: "Dark Star",
+      animTimeSpeed: 1,
+      armLength: 350,
+      armCount: 12,
+      armJoints: 2,
+      alternateJointDirection: false,
+      armOffsetFactor: 1,
+      showJoints: false,
+      showArms: false,
+      showShadows: true,
+      rainbowJoints: false,
+      rainbowArms: false,
+      rainbowShadows: false,
+      trailing: true,
+      armThickness: 2,
+      jointRadius: 3,
+      shadowOpacity: 50
+    },
+    {
+      name: "Twirling Strings",
+      animTimeSpeed: 1,
+      armLength: 400,
+      armCount: 20,
+      armJoints: 5,
+      alternateJointDirection: false,
+      armOffsetFactor: -4,
+      showJoints: false,
+      showArms: true,
+      showShadows: false,
+      rainbowJoints: false,
+      rainbowArms: false,
+      rainbowShadows: false,
+      trailing: false,
+      armThickness: 2,
+      jointRadius: 3,
+      shadowOpacity: 25
+    },
+    {
+      name: "Stained Glass Mountains",
+      animTimeSpeed: 0.5,
+      armLength: 400,
+      armCount: 20,
+      armJoints: 1,
+      alternateJointDirection: true,
+      armOffsetFactor: -1,
+      showJoints: false,
+      showArms: true,
+      showShadows: true,
+      rainbowJoints: false,
+      rainbowArms: true,
+      rainbowShadows: true,
+      trailing: false,
+      armThickness: 2,
+      jointRadius: 3,
+      shadowOpacity: 40
+    },
+    {
+      name: "Crystal Whirlwind",
+      animTimeSpeed: 1,
+      armLength: 400,
+      armCount: 20,
+      armJoints: 3,
+      alternateJointDirection: false,
+      armOffsetFactor: -1,
+      showJoints: false,
+      showArms: false,
+      showShadows: true,
+      rainbowJoints: false,
+      rainbowArms: false,
+      rainbowShadows: false,
+      trailing: false,
+      armThickness: 2,
+      jointRadius: 3,
+      shadowOpacity: 25
+    },
+    {
+      name: "Star Dance",
+      animTimeSpeed: 1,
+      armLength: 400,
+      armCount: 5,
+      armJoints: 2,
+      alternateJointDirection: true,
+      armOffsetFactor: 1,
+      showJoints: true,
+      showArms: false,
+      showShadows: false,
+      rainbowJoints: true,
+      rainbowArms: false,
+      rainbowShadows: false,
+      trailing: true,
+      armThickness: 2,
+      jointRadius: 10,
+      shadowOpacity: 25
+    },
+    {
+      name: "Planet",
+      animTimeSpeed: 1,
+      armLength: 400,
+      armCount: 20,
+      armJoints: 3,
+      alternateJointDirection: false,
+      armOffsetFactor: -1,
+      showJoints: true,
+      showArms: false,
+      showShadows: false,
+      rainbowJoints: false,
+      rainbowArms: false,
+      rainbowShadows: false,
+      trailing: true,
+      armThickness: 2,
+      jointRadius: 2,
+      shadowOpacity: 25
+    },
+    {
+      name: "Spinning Crowns",
+      animTimeSpeed: 1,
+      armLength: 400,
+      armCount: 20,
+      armJoints: 1,
+      alternateJointDirection: true,
+      armOffsetFactor: -2,
+      showJoints: true,
+      showArms: false,
+      showShadows: true,
+      rainbowJoints: false,
+      rainbowArms: false,
+      rainbowShadows: false,
+      trailing: false,
+      armThickness: 2,
+      jointRadius: 10,
+      shadowOpacity: 100
+    },
+    {
+      name: "Interlocking Stars",
+      animTimeSpeed: 1,
+      armLength: 400,
+      armCount: 20,
+      armJoints: 8,
+      alternateJointDirection: false,
+      armOffsetFactor: 5,
+      showJoints: true,
+      showArms: true,
+      showShadows: true,
+      rainbowJoints: true,
+      rainbowArms: true,
+      rainbowShadows: false,
+      trailing: false,
+      armThickness: 2,
+      jointRadius: 3,
+      shadowOpacity: 25
+    }
+    /*{
+      name: "",
+      animTimeSpeed: 1,
+      armLength: 300,
+      armCount: 6,
+      armJoints: 3,
+      alternateJointDirection: true,
+      armOffsetFactor: 1,
+      showJoints: true,
+      showArms: true,
+      showShadows: false,
+      rainbowJoints: false,
+      rainbowArms: false,
+      rainbowShadows: false,
+      trailing: false,
+      armThickness: 2,
+      jointRadius: 3,
+      shadowOpacity: 25
+    }*/
+  ];
+  
+  function Arm(angle) {
+    this.angle = angle;
+    this.pointArray = [];
+  }
+  Arm.prototype.render = function() {
+    ctx.beginPath();
+    ctx.moveTo(canvas.width / 2, canvas.height / 2);
+    let currLength = armLength / (armJoints + 1);
+    let currX = (canvas.width / 2) + (Math.cos(toRad(this.angle + animTime)) * currLength);
+    let currY = (canvas.height / 2) + (Math.sin(toRad(this.angle + animTime)) * currLength);
+    let currSign = alternateJointDirection ? 1 : -1;
+    this.pointArray = [];
+    ctx.lineTo(currX, currY);
+    this.pointArray.push({x: currX, y: currY});
+    for (let i = 1; i <= armJoints; i++) {
+      if (alternateJointDirection) currSign *= -1;
+      currX += Math.cos(toRad((this.angle * armOffsetFactor) + (animTime * i * currSign))) * currLength;
+      currY += Math.sin(toRad((this.angle * armOffsetFactor) + (animTime * i * currSign))) * currLength;
+      ctx.lineTo(currX, currY);
+      this.pointArray.push({x: currX, y: currY});
+    }
+    if (showShadows) {
+      ctx.fillStyle = rainbowShadows ? `hsla(${this.angle + animTime}deg, 100%, 50%, ${shadowOpacity / 100})` : `rgba(0, 0, 0, ${shadowOpacity / 100})`;
+      ctx.fill();
+    }
+    if (showArms) {
+      ctx.strokeStyle = rainbowArms ? `hsl(${this.angle + animTime}deg, 100%, 50%)` : "black";
+      ctx.stroke();
+    }
+    if (showJoints) {
+      ctx.fillStyle = rainbowJoints ? `hsl(${this.angle + animTime}deg, 100%, 50%)` : "black";
+      for (let i = 0; i < this.pointArray.length; i++) ctx.fillCircle(this.pointArray[i].x, this.pointArray[i].y, jointRadius);
+    }
+  };
+  let armArray = [];
+  
+  let lastFrameTime = 0;
+  let lastFpsDisplayTime = 1000;
+  
+  function frame() {
+    if (Date.now() - lastFpsDisplayTime >= 500) {
+      fpsTxt.innerHTML = Math.floor(1000 / (Date.now() - lastFrameTime));
+      lastFpsDisplayTime = Date.now();
+    }
+    lastFrameTime = Date.now();
+    
+    if (trailing) {
+      ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    if (canvasRunning) animTime += animTimeSpeed;
+    while (animTime >= 360) animTime -= 360;
+    while (animTime < 0) animTime += 360;
+    animTimeRange.value = animTimeTxt.innerHTML = animTime;
+    
+    ctx.lineWidth = armThickness;
+    ctx.lineCap = ctx.lineJoin = "round";
+    for (let i = 0; i < armArray.length; i++) {
+      armArray[i].render();
+    }
+    
+    if (canvasRunning) requestAnimationFrame(frame);
+  }
+  
+  function startStop() {
+    if (canvasRunning) {
+      canvasRunning = false;
+      startStopBtn.innerHTML = "Play";
+    }
+    else {
+      canvasRunning = true;
+      frame();
+      startStopBtn.innerHTML = "Pause";
+    }
+  }
+  
+  function resetArms() {
+    armArray = [];
+    
+    animTimeSpeed = Number(animTimeSpeedRange.value);
+    animTimeSpeedTxt.innerHTML = animTimeSpeed;
+    if (reverseCheckbox.checked) animTimeSpeed *= -1;
+    armLength = Number(armLengthRange.value);
+    armLengthTxt.innerHTML = armLength;
+    armCount = Number(armCountRange.value);
+    armCountTxt.innerHTML = armCount;
+    armJoints = Number(armJointsRange.value);
+    armJointsTxt.innerHTML = armJoints;
+    alternateJointDirection = alternateJointDirectionCheckbox.checked;
+    animTime = Number(animTimeRange.value);
+    animTimeTxt.innerHTML = animTime;
+    armOffsetFactor = Number(armOffsetFactorRange.value);
+    armOffsetFactorTxt.innerHTML = armOffsetFactor;
+    showJoints = showJointsCheckbox.checked;
+    showArms = showArmsCheckbox.checked;
+    showShadows = showShadowsCheckbox.checked;
+    trailing = trailingCheckbox.checked;
+    armThickness = Number(armThicknessRange.value);
+    armThicknessTxt.innerHTML = armThickness;
+    jointRadius = Number(jointRadiusRange.value);
+    jointRadiusTxt.innerHTML = jointRadius;
+    shadowOpacity = Number(shadowOpacityRange.value);
+    shadowOpacityTxt.innerHTML = shadowOpacity;
+    rainbowArms = rainbowArmsCheckbox.checked;
+    rainbowJoints = rainbowJointsCheckbox.checked;
+    rainbowShadows = rainbowShadowsCheckbox.checked;
+    
+    for (let i = 0; i < armCount; i++) {
+      armArray.push(new Arm((i / armCount) * 360));
+    }
+    
+    if (!canvasRunning) frame();
+  }
+  resetArms();
+  frame();
+  
+  function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  
+  function resetSettings() {
+    animTimeSpeedRange.value = animTimeSpeedRange.defaultValue;
+    reverseCheckbox.checked = false;
+    armLengthRange.value = armLengthRange.defaultValue;
+    armCountRange.value = armCountRange.defaultValue;
+    armJointsRange.value = armJointsRange.defaultValue;
+    alternateJointDirectionCheckbox.checked = true;
+    armOffsetFactorRange.value = armOffsetFactorRange.defaultValue;
+    showJointsCheckbox.checked = true;
+    showArmsCheckbox.checked = true;
+    showShadowsCheckbox.checked = false;
+    trailingCheckbox.checked = false;
+    armThicknessRange.value = armThicknessRange.defaultValue;
+    jointRadiusRange.value = jointRadiusRange.defaultValue;
+    shadowOpacityRange.value = shadowOpacityRange.defaultValue;
+    rainbowArmsCheckbox.checked = false;
+    rainbowJointsCheckbox.checked = false;
+    rainbowShadowsCheckbox.checked = false;
+    
+    clearCanvas();
+    resetArms();
+  }
+  
+  function randomizeRange(element) {
+    return Number(randBetween(Number(element.min), Number(element.max))).toMultipleOf(Number(element.step));
+  }
+  const coin = () => Math.random() >= 0.5;
+  
+  function randomizeAllSettings() {
+    reverseCheckbox.checked = coin();
+    armLengthRange.value = randomizeRange(armLengthRange);
+    armCountRange.value = randomizeRange(armCountRange);
+    armJointsRange.value = randomizeRange(armJointsRange);
+    alternateJointDirectionCheckbox.checked = coin();
+    armOffsetFactorRange.value = randomizeRange(armOffsetFactorRange);
+    do {
+      showJointsCheckbox.checked = coin();
+      showArmsCheckbox.checked = Math.floor(Math.random() * 3) != 0;;
+      showShadowsCheckbox.checked = coin();
+    }
+    while (!showJointsCheckbox.checked && !showArmsCheckbox.checked && !showShadowsCheckbox.checked);
+    trailingCheckbox.checked = Math.floor(Math.random() * 3) == 0;
+    armThicknessRange.value = randomizeRange(armThicknessRange);
+    jointRadiusRange.value = randomizeRange(jointRadiusRange);
+    shadowOpacityRange.value = randomizeRange(shadowOpacityRange);
+    rainbowArmsCheckbox.checked = coin();
+    rainbowJointsCheckbox.checked = coin();
+    rainbowShadowsCheckbox.checked = coin();
+    
+    clearCanvas();
+    resetArms();
+  }
+  
+  function randomizeGeometrySettings() {
+    reverseCheckbox.checked = coin();
+    armLengthRange.value = randomizeRange(armLengthRange);
+    armCountRange.value = randomizeRange(armCountRange);
+    armJointsRange.value = randomizeRange(armJointsRange);
+    alternateJointDirectionCheckbox.checked = coin();
+    armOffsetFactorRange.value = randomizeRange(armOffsetFactorRange);
+    
+    clearCanvas();
+    resetArms();
+  }
+  
+  function loadSettingsPreset(n) {
+    animTimeSpeedRange.value = presetArray[n].animTimeSpeed;
+    armLengthRange.value = presetArray[n].armLength;
+    armCountRange.value = presetArray[n].armCount;
+    armJointsRange.value = presetArray[n].armJoints;
+    alternateJointDirectionCheckbox.checked = presetArray[n].alternateJointDirection;
+    armOffsetFactorRange.value = presetArray[n].armOffsetFactor;
+    showJointsCheckbox.checked = presetArray[n].showJoints;
+    showArmsCheckbox.checked = presetArray[n].showArms;
+    showShadowsCheckbox.checked = presetArray[n].showShadows;
+    trailingCheckbox.checked = presetArray[n].trailing;
+    armThicknessRange.value = presetArray[n].armThickness;
+    jointRadiusRange.value = presetArray[n].jointRadius;
+    shadowOpacityRange.value = presetArray[n].shadowOpacity;
+    rainbowArmsCheckbox.checked = presetArray[n].rainbowArms;
+    rainbowJointsCheckbox.checked = presetArray[n].rainbowJoints;
+    rainbowShadowsCheckbox.checked = presetArray[n].rainbowShadows;
+    
+    clearCanvas();
+    resetArms();
+  }
+  
+  for (let i = 0; i < presetArray.length; i++) {
+    let btn = document.createElement("button");
+    btn.innerHTML = presetArray[i].name;
+    btn.className = "preset-btn";
+    btn.onclick = () => loadSettingsPreset(i);
+    presetsDiv.appendChild(btn);
+  }
+  
+  function downloadCanvas() {
+    let link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "servo.png";
+    link.click();
+  }
+</script>
+</body>
+</html>
