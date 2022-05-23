@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png"/>
+    <title>Math ~ e4494s</title>
+    <style>
+      body {
+        font-family: monospace;
+      }
+      input {
+        font-family: monospace;
+      }
+      input:focus {
+        outline: none;
+      }
+      button {
+        border: 3px solid black;
+        background-color: white;
+        color: black;
+        padding-top: 3px;
+        padding-bottom: 3px;
+        padding-left: 5px;
+        padding-right: 5px;
+        font-family: monospace;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      button:focus {
+        outline: none;
+      }
+      h1 {
+        font-size: 25px;
+      }
+      .link {
+        cursor: pointer;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+<body onload = 'document.getElementById("links").scrollIntoView()'>
+<div id = 'links'>
+  <span class = 'link' onclick = 'document.getElementById("howmanytriangles").scrollIntoView()'>Find how many triangles satisfy the given conditions</span>
+</div>
+<div style = 'font-size: 15px' id = 'howmanytriangles'>
+  <h1>Find how many triangles satisfy the given conditions</h1>
+  <b>Side <u>a</u> </b><input type = 'text' id = 'howmanytriangles_sidea'><br><br>
+  <b>Angle <u>A</u> </b><input type = 'text' id = 'howmanytriangles_angleA'><br><br>
+  <b>Side <u>b</u> </b><input type = 'text' id = 'howmanytriangles_sideb'><br><br>
+  <button onclick = 'howmanytriangles_calculate()'><b>Calculate</b></button><br><br>
+  <div>
+    <span><b>Solution: </b></span>
+    <span id = 'howmanytriangles_answer'></span>
+  </div>
+</div>
+<!--<div style = 'font-size: 15px' id = 'solvetriangle'>
+  <h1>Solve the triangle</h1>
+  <b>Side <u>a</u> </b><br><br>
+  <b>Side <u>b</u> </b><br><br>
+  <b>Side <u>b</u> </b><br><br>
+  <b>Angle <u>A</u> </b><br><br>
+  <b>Angle <u>B</u> </b><br><br>
+  <b>Angle <u>C</u> </b><br><br>
+  <button onclick = 'solvetriangle_calculate()'><b>Calculate</b></button><br><br>
+  <div>
+    <span><b>Solution: </b></span>
+    <span id = 'solvetriangle_answer'></span>
+  </div>
+</div>-->
+<script>
+  function howmanytriangles_calculate() {
+    document.getElementById('howmanytriangles_answer').innerHTML = countSolutions(howmanytriangles_sidea.value, howmanytriangles_angleA.value, howmanytriangles_sideb.value);
+  }
+  function countSolutions(a, Angle, b) {
+    a = Number(a);
+    Angle = Number(Angle);
+    b = Number(b);
+    let h = b * Math.sin(Angle);
+    if (Angle < 90) {
+      if (h < a && a < b) return 2;
+      if (h < b && b < a) return 1;
+      if (a < h && h < b) return 0;
+    }
+    if (Angle >= 90) {
+      if (a > b) return 1;
+      if (a <= b) return 0;
+    }
+  }
+  
+  function 
+</script>
+</body>
+</html>
