@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "https://e4494s.neocities.org/images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <title>Page Not Found ~ e4494s</title>
+    <style>
+      canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+        z-index: -1;
+      }
+      
+      h1 {
+        text-align: center;
+        text-shadow: 0 0 5px yellow, 0 0 5px yellow, 0 0 5px yellow;
+      }
+      
+      div {
+        text-align: center;
+      }
+    </style>
+  </head>
+<body>
+<canvas id = "canvas"></canvas>
+<h1>Page Not Found...</h1>
+<br>
+<div>Click <a href = "https://e4494s.neocities.org">here</a> to be redirected to the main page.</div>
+<script src = "https://e4494s.neocities.org/scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  
+  let sprite = new Image();
+  sprite.src = "https://e4494s.neocities.org/images/favicon.png";
+  let width = 100;
+  let height = 100;
+  let x = Math.random() * canvas.width;
+  let y = Math.random() * canvas.height;
+  let vx = 1;
+  let vy = 1;
+  let r = Math.random() * 360;
+  let vr = 1;
+  
+  let bgClearOpacity = 0//0.013;
+  
+  function frame() {
+    ctx.globalAlpha = bgClearOpacity;
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.globalAlpha = 1;
+    
+    x += vx;
+    y += vy;
+    r += vr;
+    if (x > canvas.width - (width / 2)) {
+      x = canvas.width - (width / 2);
+      vx *= -1;
+      vr *= -1;
+    }
+    if (x < width / 2) {
+      x = width / 2;
+      vx *= -1;
+      vr *= -1;
+    }
+    if (y > canvas.height - (height / 2)) {
+      y = canvas.height - (height / 2);
+      vy *= -1;
+      vr *= -1;
+    }
+    if (y < height / 2) {
+      y = height / 2;
+      vy *= -1;
+      vr *= -1;
+    }
+    ctx.drawRotatedImageFromCenter(sprite, x, y, width, height, r);
+    
+    requestAnimationFrame(frame);
+  }
+  frame();
+</script>
+</body>
+</html>
