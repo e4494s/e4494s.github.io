@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>Profile Generator ~ e4494s</title>
+    <style>
+      canvas {
+        width: 70px;
+        height: 70px;
+        display: block;
+        border: none;
+        background-color: yellow;
+        margin-right: 15px;
+        cursor: pointer;
+      }
+      
+      .username-txt {
+        font-weight: bold;
+        font-size: 20px;
+      }
+      
+      .user-table {
+        margin-top: 20px;
+        margin-bottom: 20px;
+      }
+      
+      td, tr {
+        min-width: 0;
+        padding: 0;
+        margin: 0;
+        white-space: nowrap;
+        /*border: 1px solid black;*/
+      }
+      
+      .reroll-btn {
+        display: inline-block;
+        margin: 5px;
+        border: none;
+        width: 35px;
+        height: 35px;
+        opacity: 100%;
+        vertical-align: top;
+      }
+      .reroll-btn, .reroll-btn:hover, .reroll-btn:active {
+        background-size: 100% 100%;
+        background-color: transparent;
+      }
+      .reroll-btn:hover {
+        opacity: 50%;
+      }
+      .reroll-btn:active {
+        opacity: 25%;
+      }
+      
+      .picture-div {
+        display: inline-block;
+        vertical-align: top;
+        margin: 5px;
+        border: none;
+        width: 40px;
+      }
+      
+      .reroll-btn-example {
+        width: 40px;
+        height: 40px;
+        margin: 5px;
+        border: none;
+        background-size: 100% 100%;
+        background-color: transparent;
+        display: inline-block;
+        vertical-align: middle;
+      }
+      .reroll-btn-example-txt {
+        display: inline-block;
+        vertical-align: middle;
+        margin-left: 5px;
+      }
+    </style>
+  </head>
+<body onload = "init()">
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; Profile Generator &mdash;&mdash;</h1>
+<div>
+  Generate a group of random usernames and profile pictures, free to use as your profile anywhere.<br>Click these buttons by each profile to change what you want to reroll:
+  <br><br>
+  <img class = "reroll-btn-example" src = "images/reroll-both-icon.png"> <span class = "reroll-btn-example-txt"><i>Reroll Picture <b><u>and</u></b> Username</i></span>
+  <br><br>
+  <img class = "reroll-btn-example" src = "images/reroll-picture-icon.png"> <span class = "reroll-btn-example-txt"><i>Reroll Profile Picture</i></span>
+  <br><br>
+  <img class = "reroll-btn-example" src = "images/similar-picture-icon.png"> <span class = "reroll-btn-example-txt"><i>Reroll <b><u>Similar</u></b> Profile Picture</i></span>
+  <br><br>
+  <img class = "reroll-btn-example" src = "images/reroll-username-icon.png"> <span class = "reroll-btn-example-txt"><i>Reroll Username</i></span>
+</div>
+<br><br>
+<div>Click on a profile picture to download it with its username.</div>
+<hr>
+<button onclick = "rerollAll()">Reroll All</button>
+<button class = "download-canvas-btn" onclick = "downloadAll()">Download All</button>
+<div id = "canvas-div"></div>
+<script src = "scripts/main.js"></script>
+<script>
+  let numCanvases = 5;
+  let C = [];
+  let profilePictureResolution = 250;
+  
+  let possibleUsernames = 0;
+  
+  let canvasDiv = document.getElementById("canvas-div");
+  
+  function init() {
+    possibleUsernames = ((articles.length + 1) * connectors.length * adjectives.length * nouns.length * 300) + (nouns.length * nouns.length * connectors.length * 600);
+    /*
+    Possible articles (including no article), times
+    possible connectors (including no connector), times
+    possible adjectives, times
+    possible nouns, times
+    possible text cases (3), times
+    possible ending digits (100)
+    PLUS
+    possible articles (only "" and "the"), times
+    possible nouns, times
+    possible nouns, times
+    possible connectors (including no connector), times
+    possible text cases (3), times
+    possible ending digits (100)
+    */
+    
+    for (let i = 0; i < numCanvases; i++) {
+      let obj = {};
+      
+      obj.canvas = document.createElement("canvas");
+      obj.canvas.width = profilePictureResolution;
+      obj.canvas.height = profilePictureResolution;
+      obj.canvas.title = "Click to download";
+      
+      obj.downloadLink = document.createElement("a");
+      obj.downloadLink.href = "";
+      obj.downloadLink.download = "";
+      obj.downloadLink.style.width = obj.downloadLink.style.width = profilePictureResolution;
+      
+      obj.canvas.onclick = () => obj.downloadLink.click();
+      
+      obj.ctx = obj.canvas.getContext("2d");
+      
+      obj.user = new User();
+      obj.user.setProfilePicture(profilePictureResolution, "rand");
+      
+      obj.table = document.createElement("table");
+      obj.table.className = "user-table";
+      let tr = document.createElement("tr");
+      obj.table.appendChild(tr);
+      let td2 = document.createElement("td");
+      td2.vAlign = "middle";
+      td2.style.verticalAlign = "middle";
+      
+      let btnDiv = document.createElement("div");
+      btnDiv.style = "display: inline-block; margin: auto; padding: 5px; vertical-align: middle";
+      
+      let btn3 = document.createElement("button");
+      btn3.title = "Reroll Picture and Username";
+      btn3.className = "reroll-btn";
+      btn3.onclick = () => rerollBoth(obj);
+      btn3.style.backgroundImage = "url('images/reroll-both-icon.png')";
+      btnDiv.appendChild(btn3);
+      
+      let pictureDiv = document.createElement("div");
+      pictureDiv.className = "picture-div";
+      
+      let btn2 = document.createElement("button");
+      btn2.title = "Reroll Picture";
+      btn2.className = "reroll-btn";
+      btn2.style.margin = "0";
+      btn2.onclick = () => rerollPicture(obj);
+      btn2.style.backgroundImage = "url('images/reroll-picture-icon.png')";
+      pictureDiv.appendChild(btn2);
+      pictureDiv.appendChild(document.createElement("br"));
+      let btn4 = document.createElement("button");
+      btn4.title = "Reroll Similar Picture";
+      btn4.className = "reroll-btn";
+      btn4.style.margin = "0";
+      btn4.onclick = () => rerollSimilarPicture(obj);
+      btn4.style.backgroundImage = "url('images/similar-picture-icon.png')";
+      pictureDiv.appendChild(btn4);
+      
+      btnDiv.appendChild(pictureDiv);
+      
+      let btn1 = document.createElement("button");
+      btn1.title = "Reroll Username";
+      btn1.className = "reroll-btn";
+      btn1.onclick = () => rerollUsername(obj);
+      btn1.style.backgroundImage = "url('images/reroll-username-icon.png')";
+      btnDiv.appendChild(btn1);
+      
+      td2.appendChild(btnDiv);
+      
+      tr.appendChild(td2);
+      
+      let td = document.createElement("td");
+      td.vAlign = "middle";
+      td.style.verticalAlign = "middle";
+      td.appendChild(obj.canvas);
+      tr.appendChild(td);
+      
+      let td3 = document.createElement("td");
+      td3.className = "username-td";
+      td3.vAlign = "middle";
+      td3.style.verticalAlign = "middle";
+      obj.usernameTxt = document.createElement("span");
+      obj.usernameTxt.className = "username-txt";
+      obj.usernameTxt.innerHTML = obj.user.username;
+      td3.appendChild(obj.usernameTxt);
+      tr.appendChild(td3);
+      
+      canvasDiv.appendChild(obj.table);
+      C.push(obj);
+      
+      displayUser(obj);
+    }
+  }
+  
+  const RATIOA = Math.sqrt(3) / 3;
+  
+  let articles = ["the", "very", "really", "some"];
+  
+  let adjectives = [];
+  let adjectivesA = ["happy", "sad", "ecstatic", "depressed", "lonely", "outgoing", "fuzzy", "fluffy", "shiny", "red", "yellow", "green", "blue", "purple", "indigo", "black", "white", "gray", "cyan", "skinny", "fat", "tall", "short", "beautiful", "adorable", "stunning", "pointy", "sharp", "edible", "incredible", "amazing", "weird", "smart", "fancy", "loud", "quiet", "silent", "soaked", "squishy", "exterior", "interior", "flying", "dead", "undead", "young", "old", "spiky", "cold", "hot", "frozen", "melted", "burnt", "broken", "lost", "brittle", "crazy", "insane", "unstable", "stable", "stealthy", "obvious", "common", "uncommon", "rare", "epic", "legendary", "mythical", "first", "second", "third", "fourth", "fifth", "unbelievable", "ridiculous", "ancient", "modern", "contemporary", "rusty", "rusted", "rotten", "shattered", "dusty", "forgotten", "worn", "smiling", "laughing", "crying", "smirking", "gasping", "scared", "brave", "cowardly", "inventive", "petty", "quick", "speedy", "slow", "unstoppable", "charged", "drained", "jumpy", "clumsy", "massive", "big", "huge", "tiny", "little", "small", "average", "extraordinary", "ordinary", "blossoming", "blooming", "sunny", "cloudy", "dry", "wet", "aquatic", "friendly", "accelerated", "boring", "exciting", "flaming", "icy", "earthen", "muddy", "salty", "sweet", "sour", "bitter", "smooth", "rough", "unexpected", "cool", "awesome", "lame", "blind", "deaf", "mute", "aggressive", "calm", "confident", "overconfident", "insecure", "slippery", "slimy", "sticky", "picky", "bratty", "chilly", "sideways", "clean", "soapy", "boiling", "foreign", "torn", "scratchy", "sparky", "circular", "rectangular", "hexagonal", "pentagonal", "elliptic", "round", "square", "triangular", "spherical", "cubic", "odorless", "connected", "disconnected", "fizzy", "carbonated", "sugary", "caffeinated", "soft", "baby", "elderly", "spinning", "rotating", "revolving", "disposable", "timed", "obscure", "fiery", "flat", "artistic", "famous", "infamous", "invisible", "visible", "stuffed", "sandy", "carpeted", "empty", "abandoned", "derelict", "deserted", "overloaded", "nautical", "alluring", "attractive", "merciful", "gracious", "kind", "loving", "magnificent", "malevolent", "evil", "dark", "despicable", "popular", "unpopular", "distant", "safe", "dangerous", "unknown", "anonymous", "faulty", "operational", "rich", "poor", "wealthy", "clever", "fragile", "sturdy", "funny", "funky", "musical", "strange", "sneaky", "kingly", "royal", "stone", "gold", "silver", "bronze", "metallic", "nostalgic", "sickly", "healthy", "eerie", "mysterious", "electric", "heavy", "light", "disguised", "hidden", "covert", "armed", "deadly", "fatal", "toxic", "poisonous", "venomous", "carnivorous", "pacifist", "furious", "inferior", "superior", "glossy", "savory", "unamused", "immovable", "constant", "comatose", "brainy", "handsome", "scalding", "pretty", "cute", "charming", "rude", "mean", "harsh", "extroverted", "introverted", "charismatic", "hostile", "comfortable", "uncomfortable", "cozy", "snuggly", "drunk", "drunken", "high", "low", "large", "medium", "beloved", "respectable", "respected", "influential", "efficient", "inefficient", "effective", "ineffective", "bothersome", "trashy", "rejected", "desolate", "hopeless", "hopeful", "sarcastic", "ironic", "competent", "incompetent", "sleepy", "sleeping", "unconscious", "lucid", "joyous", "glorious", "exalted", "cyclic", "advanced", "backwards", "honest", "tricky", "lying", "last", "final", "ultimate", "highest", "lowest", "glorified", "stupendous", "bony", "lean", "slim", "stout", "severe", "strict", "curvy", "narrow", "obtuse", "dense", "obese", "giant", "puny", "wide", "deep", "odd", "shy", "ill", "tan", "new", "fun", "neat", "foul", "fine", "damp", "wary", "nice", "dull", "numb", "bold", "dyed", "grim", "nosy", "easy", "pale", "icky", "ripe", "vile", "buff", "tough", "strong", "muscular", "fond", "open", "weak", "late", "sore", "edgy", "unfunny", "mild", "tidy", "hurt", "injured", "sprained", "fractured", "wise", "true", "boxy", "fake"];
+  let adjectivesB = ["tame", "docile", "real", "full", "lacy", "firm", "dear", "racy", "glad", "drab", "mini", "used", "zany", "found", "faithful", "witty", "silly", "vivid", "vague", "specific", "proud", "dizzy", "timid", "scary", "super", "local", "cruel", "shaky", "stern", "civil", "rapid", "lumpy", "pagan", "arrogant", "bloody", "creepy", "crowded", "defiant", "petrified", "fossilized", "doubtful", "fair", "fierce", "gentle", "jolly", "misty", "nutty", "plain", "prickly", "puzzled", "splendid", "spotless", "talented", "tender", "sensitive", "thoughtful", "troubled", "uptight", "vast", "omniscent", "omnipotent", "holy", "divine", "righteous", "wicked", "zealous", "shrunken", "cheerful", "horrific", "athletic", "blinding", "obedient", "abstract", "personal", "generous", "textured", "sensible", "negative", "positive", "imaginary", "critical", "haunting", "sinister", "colorful", "rainbow", "muted", "reckless", "thankful", "detailed", "animated", "cartoon", "normal", "abnormal", "forceful", "barbaric", "modest", "helpless", "handheld", "hesitant", "likeable", "resolute", "secret", "cautious", "glowing", "romantic", "gorgeous", "wasteful", "stretchy", "special", "quilted", "ghostly", "origami", "paper", "stitched", "starved", "trained", "masterful", "wishful", "stained", "corrupt", "shrimpy", "durable", "magical", "enchanted", "pensive", "spotted", "striped", "blessed", "compact", "beastly", "evasive", "ominous", "angelic", "extreme", "festive", "serious", "panicky", "twisted", "violent", "eternal", "missing", "immortal", "mortal", "godly", "rounded", "classic", "crimson", "shaded", "sketchy", "sincere", "stylish", "deadpan", "grizzly", "capable", "revered", "spoiled", "crooked", "demonic", "careful", "unusual", "playful", "idiotic", "ungodly", "unholy", "mutated", "uncanny", "jealous", "moonlit", "immense", "folded", "handmade", "homemade", "crafted", "crafty", "sly", "drugged", "ghastly", "melodic", "guarded", "painful", "elegant", "spastic", "dynamic", "frantic", "explosive", "volatile", "thirsty", "hungry", "expert", "quirky", "social", "luxury", "sporty", "single", "chubby", "unique", "custom", "limber", "hybrid", "iconic", "moronic", "solemn", "psycho", "dreamy", "velvet", "trendy", "savage", "rugged", "robust", "wobbly", "buried", "lovely", "pink", "exotic", "floaty", "ashy", "gifted", "mellow", "serene", "lively", "candid", "mature", "unsure", "greasy", "floral", "banded", "greedy", "quaint", "cheesy", "somber", "hushed", "excellent", "mashed", "smushed", "squashed", "winged", "camo", "minty", "fresh", "watchful", "sluggish", "soupy"];
+  adjectives = adjectivesA.concat(adjectivesB);
+  
+  let nouns = [];
+  let nounsA = ["chair", "table", "duck", "dog", "cat", "person", "human", "napkin", "donut", "burrito", "taco", "plate", "bone", "pants", "tuxedo", "pizza", "bird", "eagle", "bottle", "horse", "tree", "bush", "plant", "animal", "grass", "shrub", "galaxy", "planet", "moon", "sun", "curtain", "carpet", "pole", "candy", "lollipop", "chocolate", "butter", "peanut", "almond", "pistachio", "walnut", "cashew", "fruit", "apple", "lemon", "pear", "avocado", "guacamole", "cereal", "hat", "cowboy", "lawyer", "plum", "peach", "asparagus", "pepper", "carrot", "cake", "cupcake", "brownie", "cookie", "beef", "pork", "meat", "student", "teacher", "flag", "paper", "laptop", "computer", "keyboard", "typewriter", "architect", "engineer", "scientist", "chemist", "biologist", "business", "phone", "bench", "novel", "calzone", "restaurant", "cannon", "fire", "ice", "water", "sniper", "soldier", "gun", "bullet", "eyeball", "nose", "ear", "arm", "leg", "hand", "finger", "elbow", "shoulder", "knee", "foot", "toe", "door", "window", "doorknob", "thing", "item", "character", "pencil", "pen", "marker", "store", "wallet", "money", "glasses", "hair", "food", "drawer", "bread", "loaf", "juice", "bowl", "floor", "wall", "fence", "principal", "astronaut", "astronomer", "astrologer", "artist", "plumber", "welder", "diver", "swimmer", "fish", "shark", "dolphin", "deer", "buck", "platypus", "bear", "parrot", "dynamite", "bomb", "crown", "king", "queen", "prince", "princess", "assistant", "merchant", "pirate", "ninja", "samurai", "sword", "crossbow", "arrow", "letter", "axe", "mace", "spear", "shield", "fortress", "castle", "house", "building", "kingdom", "catapult", "trebuchet", "loser", "winner", "witch", "broom", "monster", "alien", "sailor", "boat", "ship", "warrior", "nation", "country", "state", "ocean", "lake", "stream", "river", "pond", "puddle", "storm", "lightning", "mountain", "hill", "valley", "dragon", "beast", "key", "fridge", "freezer", "microwave", "oven", "toaster", "shower", "bathtub", "cord", "lamp", "cactus", "flower", "stem", "leaf", "acorn", "seed", "crab", "seashell", "shell", "tail", "car", "truck", "minivan", "scooter", "tricycle", "bicycle", "skateboard", "sandal", "clover", "rug", "cube", "square", "rectangle", "triangle", "pyramid", "sphere", "circle", "hexagon", "pentagon", "dollar", "chip", "potato", "fry", "kid", "child", "adult", "teen", "teenager", "youngling", "senior", "junior", "sophomore", "freshman", "pea", "couch", "armchair", "board", "plank", "scythe", "sunglasses", "disguise", "pearl", "eyepatch", "jeans", "blanket", "quilt", "bonfire", "campfire", "ant", "anteater", "wasp", "bee", "butterfly", "moth", "hornet", "ketchup", "mustard", "mayo", "burger", "scarecrow", "crow", "raven", "poet", "dreamer", "girl", "boy", "guy", "dude", "chick", "man", "woman", "lady", "female", "male", "month", "week", "day", "hour", "minute", "year", "decade", "century", "life", "coffee", "latte", "steam", "beard", "puppy", "kitten", "backpack", "school", "eraser", "caterpillar", "tissue", "towel", "beetle", "tooth", "brush", "assassin", "killer", "murderer", "staircase", "hero", "savior", "dictator", "president", "politician", "word", "superhero", "villain", "pot", "toy", "dress", "tie", "wig", "pain", "death", "card", "candle", "rock", "stone", "pebble", "boulder", "cliff", "tower", "panda", "worm", "snake", "cobra", "harmonica", "piano", "guitar", "drum", "flute", "kazoo", "brick", "fireplace", "cork", "shard", "slice", "tuba", "trumpet", "saxophone", "disciple", "apostle", "follower", "leader", "chief", "commander", "captain", "colonel", "hunter", "bandit", "thief", "burglar", "robot", "android", "machine", "golem", "bot", "mercenary", "vigilante", "fork"];
+  let nounsB = ["knife", "chopstick", "belt", "band", "mug", "cup", "tea", "bag", "box", "podium", "feather", "talon", "quill", "blaster", "tiger", "lion", "prodigy", "shelter", "foundation", "corn", "seafood", "pastor", "preacher", "blood", "creep", "weirdo", "youth", "nomad", "vagrant", "titan", "god", "goddess", "demigod", "puzzle", "piece", "cardboard", "image", "picture", "camera", "film", "movie", "show", "projector", "cartoon", "friend", "girlfriend", "boyfriend", "wife", "husband", "spouse", "brother", "sister", "cousin", "aunt", "uncle", "grandpa", "grandma", "grandfather", "grandmother", "son", "daughter", "nephew", "niece", "origami", "rookie", "pro", "master", "apprentice", "boss", "crook", "demon", "angel", "mutation", "psycho", "gardener", "wolf", "gator", "cricket", "frog", "toad", "tadpole", "eel", "ostrich", "jacket", "coat", "block", "pie", "jam", "sea", "tub", "bath", "fly", "law", "owl", "eye", "map", "cap", "air", "bun", "pet", "ponytail", "pony", "mother", "father", "oil", "pig", "sky", "cinnamon", "wax", "tax", "paycheck", "lamb", "vest", "chin", "bowtie", "turtle", "tortoise", "yarn", "desk", "note", "bulb", "comb", "tape", "nail", "wine", "pump", "knot", "rice", "sushi", "ham", "hamburger", "pasta", "spaghetti", "locker", "gown", "haircut", "gravy", "biscuit", "oat", "snack", "salmon", "cod", "catfish", "chicken", "roll", "squash", "pumpkin", "cucumber", "pickle", "tile", "whip", "wire", "wing", "hood", "club", "room", "mouse", "dime", "bull", "quarter", "nickel", "penny", "coin", "camp", "sink", "glue", "sand", "coal", "doll", "edge", "mint", "actor", "actress", "stew", "muffin", "pipe", "wish", "piper", "pianist", "guitarist", "conductor", "composer", "kite", "sugar", "salad", "ranch", "cream", "scarf", "honey", "error", "judge", "witness", "shirt", "paint", "crowd", "laser", "dagger", "blade", "katana", "jewel", "hyena", "guide", "grain", "voice", "coach", "player", "thumb", "noise", "field", "straw", "toast", "crime", "sandwich", "crush", "berry", "watch", "snail", "sponge", "wrench", "turkey", "feast", "meal", "breakfast", "lunch", "dinner", "supper", "brunch", "circus", "engine", "poison", "memory", "battle", "basket", "monkey", "marble", "cow", "star", "milk", "bean", "tank", "wind", "rifle", "island", "cloud", "egg", "pillow", "fang", "soup", "claw", "fan", "medicine", "pill", "lid", "grill", "skillet", "pancake", "waffle", "syrup", "batter", "crowbar", "syringe", "lizard", "crystal", "tractor", "rabbit", "bunny", "hare", "shovel", "spade", "heart", "brain", "kidney", "liver", "disease", "orange", "notepad", "lasagna", "balloon", "ball", "baseball", "basketball", "football", "visitor", "shotgun", "popcorn", "fireman", "cop", "gorilla", "ladybug", "whistle", "mailbox", "library", "kitchen", "kennel", "cage", "mirror", "corpse", "goblin", "zombie", "wizard", "warlock", "potion", "pistol", "harbor", "anchor", "rope", "chain", "yogurt", "bakery", "painting", "plane", "writer", "nurse", "record", "thread", "harp", "melody", "throat", "barrel", "train", "canvas", "button", "crayon", "cobweb", "bubble", "kettle", "muscle", "weight", "log", "doctor", "skeleton", "skull", "pocket", "bridge", "violin", "bat", "grenade", "rocket", "missile", "torpedo", "nuke"];
+  nouns = nounsA.concat(nounsB);
+  
+  let connectors = ["", "-", "_"];
+  
+  function randArticle() {
+    return Math.random() < 0.5 ? "" : articles[Math.floor(Math.random() * Math.random() * articles.length)];
+  }
+  function randAdjective() {
+    return adjectives[Math.floor(Math.random() * adjectives.length)];
+  }
+  function randNoun() {
+    return nouns[Math.floor(Math.random() * nouns.length)];
+  }
+  function randNums() {
+    return String(Math.floor(Math.random() * 10)) + String(Math.floor(Math.random() * 10));
+  }
+  function randConnector() {
+    return connectors[Math.floor(Math.random() * connectors.length)];
+  }
+  function capitalize(string, mode) {
+    if (mode === 0) return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase(); // Titlecase
+    if (mode === 1) return string.toLowerCase(); // lowercase
+    if (mode === 2) return string.toUpperCase(); // UPPERCASE
+  }
+  
+  function drawPolygon(context, x, y, radius, sides) {
+    let a = (Math.PI * 2) / sides;
+    
+    context.beginPath();
+    
+    context.moveTo(x, y - radius);
+    
+    for (let i = 0; i <= sides + 1; i++) {
+      context.lineTo(x + (radius * Math.cos((a * i) - (Math.PI / 2))), y + (radius * Math.sin((a * i) - (Math.PI / 2))));
+    }
+  }
+  function drawStar(context, x, y, outRadius, inRadius, points) {
+    let a = (Math.PI * 2) / points;
+    
+    context.beginPath();
+    
+    context.moveTo(x, y - outRadius);
+    context.lineTo(x + (inRadius * Math.cos((a / 2) - (Math.PI / 2))), y + (inRadius * Math.sin((a / 2) - (Math.PI / 2))));
+    
+    for (let i = 0; i <= points + 2; i++) {
+      context.lineTo(x + (outRadius * Math.cos((a * i) - (Math.PI / 2))), y + (outRadius * Math.sin((a * i) - (Math.PI / 2))));
+      context.lineTo(x + (inRadius * Math.cos((a * (i + 0.5)) - (Math.PI / 2))), y + (inRadius * Math.sin((a * (i + 0.5)) - (Math.PI / 2))));
+    }
+  }
+  
+  function drawRoundedRect(context, x, y, width, height, cornerRadius) {
+    if (typeof cornerRadius === "number") cornerRadius = [cornerRadius, cornerRadius, cornerRadius, cornerRadius];
+    
+    context.beginPath();
+    context.moveTo(x + cornerRadius[0], y);
+    context.lineTo(x + width - cornerRadius[1], y);
+    context.quadraticCurveTo(x + width, y, x + width, y + cornerRadius[1]);
+    context.lineTo(x + width, y + height - cornerRadius[2]);
+    context.quadraticCurveTo(x + width, y + height, x + width - cornerRadius[2], y + height);
+    context.lineTo(x + cornerRadius[3], y + height);
+    context.quadraticCurveTo(x, y + height, x, y + height - cornerRadius[3]);
+    context.lineTo(x, y + cornerRadius[0]);
+    context.quadraticCurveTo(x, y, x + cornerRadius[0], y);
+  }
+  function drawRoundedRectFromCenter(context, x, y, width, height, cornerRadius) {
+    drawRoundedRect(context, x - (width / 2), y - (width / 2), width, height, cornerRadius);
+  }
+  
+  function longestUsername() {
+    let longest = 0;
+    let article = "";
+    for (let i = 0; i < articles.length; i++) {
+      if (articles[i].length > longest) {
+        longest = articles[i].length;
+        article = articles[i];
+      }
+    }
+    
+    longest = 0;
+    let adjective = "";
+    for (let i = 0; i < adjectives.length; i++) {
+      if (adjectives[i].length > longest) {
+        longest = adjectives[i].length;
+        adjective = adjectives[i];
+      }
+    }
+    
+    longest = 0;
+    let noun = "";
+    for (let i = 0; i < nouns.length; i++) {
+      if (nouns[i].length > longest) {
+        longest = nouns[i].length;
+        noun = nouns[i];
+      }
+    }
+    
+    return capitalize(article + "_" + adjective + "_" + noun + "99", 0);
+  }
+  
+  function User() {
+    this.setUsername();
+  }
+  User.prototype.setUsername = function() {
+    let textCase = Math.floor(Math.random() * Math.random() * 3);
+    
+    let connector = randConnector();
+    
+    if ((textCase === 1 || textCase === 2) && connector === "") {
+      // if username is in the style of "thesourdog" or "THESOURDOG," reroll connector to make that less likely (and easier to read)
+      connector = randConnector();
+    }
+    
+    if (Math.random() < 0.66) { // 66% chance to be article + adjective + noun
+      let article = capitalize(randArticle(), textCase);
+      let start = "";
+      if (article !== "") start = article + connector;
+      
+      let adjective = capitalize(randAdjective(), textCase);
+      
+      let noun = capitalize(randNoun(), textCase);
+      
+      this.username = start + adjective + connector + noun + randNums();
+    }
+    else { // 33% chance to be noun + noun
+      let article = Math.random() < 0.5 ? capitalize("the", textCase) : "";
+      let start = "";
+      if (article !== "") start = article + connector;
+      
+      let noun1 = capitalize(randNoun(), textCase);
+      let noun2 = capitalize(randNoun(), textCase);
+      
+      this.username = start + noun1 + connector + noun2 + randNums();
+    }
+    
+    if (this.username.length > 30) {
+      console.log(this.username + " was too long.");
+      this.setUsername();
+    }
+    //this.username = longestUsername();
+    // Uncomment the above line for an example of longest possible username to make sure nothing ever overflows
+  };
+  User.prototype.setProfilePicture = function(size, picMode) {
+    let _canvas = document.createElement("canvas");
+    let _ctx = _canvas.getContext("2d");
+    _canvas.width = _canvas.height = size;
+    
+    _ctx.lineCap = _ctx.lineJoin = "round";
+    
+    let mode = picMode === "rand" ? Math.floor(Math.random() * 6) : picMode;
+    this.picMode = mode// = 6;
+    
+    let hue1 = Math.random() * 360;
+    let color1 = `hsl(${hue1}deg, ${randBetween(50, 100)}%, ${randBetween(30, 70)}%)`;
+    let hue2 = hue1 + 180 + randBetween(-15, 15);
+    let color2 = `hsl(${hue2}deg, ${randBetween(80, 100)}%, ${randBetween(30, 70)}%)`;
+    let lightAccentColor = `hsl(${hue2}deg, ${randBetween(80, 100)}%, ${randBetween(60, 80)}%)`;
+    let darkAccentColor = `hsl(${hue2}deg, ${randBetween(80, 100)}%, ${randBetween(20, 40)}%)`;
+    
+    // Draw background
+    
+    _ctx.fillStyle = color1;
+    _ctx.fillRect(0, 0, _canvas.width, _canvas.height);
+    
+    if (mode === 0) { // Mirrored random pixels
+      _ctx.fillStyle = color2;
+      let staticOn = Math.random() < 0.5; // If this is on, then the mirrored pixels will be random colors instead of all the same color
+      
+      let gridSize = 10;
+      let tileSize = _canvas.width / gridSize;
+      for (let y = 0; y < gridSize / 2; y++) {
+        for (let x = 0; x < gridSize / 2; x++) {
+          if (staticOn) _ctx.fillStyle = `hsl(${hue1 + 180 + randBetween(-15, 15)}deg, ${randBetween(80, 100)}%, ${randBetween(20, 80)}%)`;
+          else _ctx.fillStyle = color2;
+          let odds = staticOn ? 1 : 0.5;
+          
+          if (Math.random() < odds) {
+            let xM = gridSize - x - 1; // Mirrored x
+            let yM = gridSize - y - 1; // Mirored y
+            _ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+            _ctx.fillRect(xM * tileSize, y * tileSize, tileSize, tileSize);
+            _ctx.fillRect(x * tileSize, yM * tileSize, tileSize, tileSize);
+            _ctx.fillRect(xM * tileSize, yM * tileSize, tileSize, tileSize);
+          }
+        }
+      }
+    }
+    
+    else if (mode === 1) { // Random polygon / star
+      _ctx.fillStyle = lightAccentColor;
+      _ctx.strokeStyle = darkAccentColor;
+      _ctx.lineWidth = _canvas.width * randBetween(0.04, 0.08);
+      
+      let sides = Math.round(randBetween(3, 8));
+      let isPolygon = Math.random() < 0.5;
+      
+      if (isPolygon) {
+        if (sides === 3) drawPolygon(_ctx, _canvas.width / 2, _canvas.height * RATIOA, _canvas.width * 0.4, sides);
+        else drawPolygon(_ctx, _canvas.width / 2, _canvas.height / 2, _canvas.width * 0.4, sides);
+        _ctx.fill();
+        _ctx.stroke();
+      }
+      else {
+        if (sides === 3) drawStar(_ctx, _canvas.width / 2, _canvas.height * RATIOA, _canvas.width * 0.4, _canvas.width * 0.1, sides);
+        else drawStar(_ctx, _canvas.width / 2, _canvas.height / 2, _canvas.width * 0.4, _canvas.width * 0.2, sides);
+        _ctx.fill();
+        _ctx.stroke();
+      }
+    }
+    
+    else if (mode === 2) { // Random dice roll
+      color2 = `hsl(${Math.random() * 360}deg, ${randBetween(80, 100)}%, ${randBetween(30, 50)}%)`;
+      
+      _ctx.fillStyle = "white";
+      _ctx.strokeStyle = darkAccentColor;
+      _ctx.lineWidth = _canvas.width * 0.05;
+      
+      let pipSize = _canvas.width * 0.06;
+      
+      drawRoundedRectFromCenter(_ctx, _canvas.width / 2, _canvas.height / 2, _canvas.width * 0.8, _canvas.height * 0.8, _canvas.width * 0.15);
+      _ctx.fill();
+      _ctx.stroke();
+      
+      _ctx.fillStyle = darkAccentColor;
+      let roll = Math.ceil(Math.random() * 6);
+      switch (roll) {
+        case 1:
+          _ctx.fillCircle(_canvas.width / 2, _canvas.height / 2, pipSize);
+        break;
+        case 2:
+          _ctx.fillCircle(_canvas.width * 0.3, _canvas.height * 0.7, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.7, _canvas.height * 0.3, pipSize);
+        break;
+        case 3:
+          _ctx.fillCircle(_canvas.width * 0.3, _canvas.height * 0.7, pipSize);
+          _ctx.fillCircle(_canvas.width / 2, _canvas.height / 2, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.7, _canvas.height * 0.3, pipSize);
+        break;
+        case 4:
+          _ctx.fillCircle(_canvas.width * 0.3, _canvas.height * 0.7, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.7, _canvas.height * 0.3, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.3, _canvas.height * 0.3, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.7, _canvas.height * 0.7, pipSize);
+        break;
+        case 5:
+          _ctx.fillCircle(_canvas.width * 0.3, _canvas.height * 0.7, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.7, _canvas.height * 0.3, pipSize);
+          _ctx.fillCircle(_canvas.width / 2, _canvas.height / 2, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.3, _canvas.height * 0.3, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.7, _canvas.height * 0.7, pipSize);
+        break;
+        case 6:
+          _ctx.fillCircle(_canvas.width * 0.3, _canvas.height * 0.3, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.7, _canvas.height * 0.3, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.3, _canvas.height / 2, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.7, _canvas.height / 2, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.3, _canvas.height * 0.7, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.7, _canvas.height * 0.7, pipSize);
+        break;
+      }
+    }
+    
+    else if (mode === 3) { // Silhouette default profile picture
+      let hatColor = `hsl(${Math.random() * 360}deg, ${Math.random() * 100}%, ${Math.random() * 20}%)`;
+      
+      // Body and head
+      _ctx.fillStyle = color2;
+      _ctx.fillCircle(_canvas.width / 2, _canvas.height, _canvas.width * 0.4);
+      _ctx.fillCircle(_canvas.width / 2, _canvas.height * 0.3, _canvas.width * 0.2);
+      
+      // Eyes
+      let eyeRadius = _canvas.width * 0.06;
+      let eyeY = _canvas.height * 0.3;
+      let leftEyeX = _canvas.width * 0.4;
+      let rightEyeX = _canvas.width * 0.6;
+      
+      _ctx.fillStyle = "white";
+      _ctx.fillCircle(leftEyeX, eyeY, eyeRadius);
+      _ctx.fillCircle(rightEyeX, eyeY, eyeRadius);
+      
+      let pupilRadius = _canvas.width * randBetween(0.02, 0.045);
+      let pupilOffset = eyeRadius - pupilRadius;
+      let pupilAngle = Math.random() * Math.PI * 2;
+      
+      _ctx.fillStyle = "black";
+      
+      _ctx.fillCircle(leftEyeX + (pupilOffset * Math.cos(pupilAngle)), eyeY + (pupilOffset * Math.sin(pupilAngle)), pupilRadius);
+      
+      if (Math.random() < 0.25) pupilAngle = Math.random() * Math.PI * 2; // 25% chance to have eyes looking in different directions
+      
+      _ctx.fillCircle(rightEyeX + (pupilOffset * Math.cos(pupilAngle)), eyeY + (pupilOffset * Math.sin(pupilAngle)), pupilRadius);
+      
+      // Mouth
+      if (Math.random() < 0.75) { // 75% chance to have a mouth
+        _ctx.fillStyle = "black";
+        let mouthY = _canvas.height * 0.42;
+        
+        let mouthType = Math.floor(Math.random() * 2);
+        
+        if (mouthType === 0) _ctx.fillCircle(_canvas.width / 2, mouthY, _canvas.width * randBetween(0.02, 0.04)); // Open mouth
+        if (mouthType === 1) _ctx.fillRectFromCenter(_canvas.width / 2, mouthY, _canvas.width * randBetween(0.05, 0.1), _canvas.height * 0.02); // Closed mouth
+      }
+      
+      // Hat
+      if (Math.random() < 0.5) { // 50% chance to have a hat
+        let hatHeight = _canvas.height * randBetween(0.08, 0.25);
+        let hatWidth = _canvas.width * randBetween(0.2, 0.3);
+        let hatLength = _canvas.width * randBetween(0.4, 0.6);
+        let hatY = _canvas.height * 0.16;
+        
+        _ctx.fillStyle = hatColor;
+        _ctx.fillRect((_canvas.width / 2) - (hatWidth / 2), hatY - hatHeight, hatWidth, hatHeight);
+        _ctx.fillRectFromCenter(_canvas.width / 2, hatY, hatLength, _canvas.height * 0.05);
+      }
+      
+      // Tie
+      if (Math.random() < 0.5) { // 50% chance to have a tie
+        let knotSize = _canvas.width * 0.04;
+        let tieY = (_canvas.height * 0.6) + knotSize;
+        let tieLength = _canvas.height * randBetween(0.22, 0.33);
+        let tieWidth = _canvas.width * randBetween(0.08, 0.13);
+        let tieRatio = randBetween(0.6, 0.8);
+        
+        _ctx.fillColor = hatColor;
+        _ctx.fillCircle(_canvas.width / 2, tieY, knotSize);
+        
+        _ctx.beginPath();
+        _ctx.moveTo(_canvas.width * (0.5 - 0.015), tieY);
+        _ctx.lineTo((_canvas.width / 2) - (tieWidth / 2), tieY + (tieLength * tieRatio));
+        _ctx.lineTo(_canvas.width / 2, tieY + tieLength);
+        _ctx.lineTo((_canvas.width / 2) + (tieWidth / 2), tieY + (tieLength * tieRatio));
+        _ctx.lineTo(_canvas.width * (0.5 + 0.015), tieY);
+        _ctx.fill();
+      }
+    }
+    
+    else if (mode === 4) { // Network
+      let numPoints = Math.round(randBetween(4, 8));
+      _ctx.fillStyle = _ctx.strokeStyle = color2;
+      _ctx.lineWidth = _canvas.width * 0.015;
+      
+      let networkRadius = _canvas.width * 0.4;
+      let nodeRadius = _canvas.width * 0.05;
+      let drawChance = 1//0.25;
+      
+      for (let i = 0; i < numPoints; i++) {
+        let iA = (i / numPoints) * Math.PI * 2;
+        let iX = (_canvas.width / 2) + (networkRadius * Math.cos(iA - (Math.PI / 2)));
+        let iY = (_canvas.height / 2) + (networkRadius * Math.sin(iA - (Math.PI / 2)));
+        _ctx.fillCircle(iX, iY, nodeRadius);
+        for (let j = 0; j < numPoints; j++) {
+          if (i !== j && Math.random() < drawChance) {
+            let jA = (j / numPoints) * Math.PI * 2;
+            let jX = (_canvas.width / 2) + (networkRadius * Math.cos(jA - (Math.PI / 2)));
+            let jY = (_canvas.height / 2) + (networkRadius * Math.sin(jA - (Math.PI / 2)));
+            
+            _ctx.beginPath();
+            _ctx.moveTo(iX, iY);
+            _ctx.lineTo(jX, jY);
+            _ctx.stroke();
+          }
+        }
+      }
+    }
+    
+    else if (mode === 5) { // Spiral shell
+      _ctx.fillStyle = lightAccentColor;
+      _ctx.strokeStyle = darkAccentColor;
+      
+      let scale = randBetween(2.5, 5);
+      let maxRadius = _canvas.width * 0.4;
+      let maxTheta = maxRadius / scale;
+      let points = 200;
+      
+      let offsetAngle = toRad(-45) - maxTheta;
+      
+      _ctx.lineWidth = _canvas.width * randBetween(0.04, 0.08) * scale * 0.15;
+      
+      let theta = 0;
+      
+      _ctx.beginPath();
+      for (let i = 0; i <= points; i++) {
+        theta = (i / points) * maxTheta;
+        let r = scale * theta;
+        let a = theta + offsetAngle;
+        
+        _ctx.lineTo((_canvas.width / 2) + (r * Math.cos(a)), (_canvas.height / 2) + (r * Math.sin(a)));
+      }
+      
+      let _theta = theta - (Math.PI * 2);
+      let _a = _theta + offsetAngle;
+      let _r = scale * _theta;
+      _ctx.lineTo((_canvas.width / 2) + (_r * Math.cos(_a)), (_canvas.height / 2) + (_r * Math.sin(_a)));
+      
+      _ctx.fill();
+      _ctx.stroke();
+    }
+    
+    else if (mode === 6) { // Flower
+      let numPetals = Math.round(randBetween(4, 8));
+      let petalRadius = _canvas.width * 0.1;
+      let pistilRadius = _canvas.width * 0.1;
+      
+      _ctx.fillStyle = lightAccentColor;
+      _ctx.strokeStyle = darkAccentColor;
+      _ctx.lineWidth = _canvas.width * 0.05;
+      
+      for (let i = 0; i < numPetals; i++) {
+        let a = ((i / numPetals) * Math.PI * 2) - (Math.PI / 2);
+        let r = pistilRadius;
+        _ctx.ellipse((_canvas.width / 2) + (r * Math.cos(a)), (_canvas.height / 2) + (r * Math.sin(a)), petalRadius, petalRadius * 2, a + (Math.PI / 2), 0, Math.PI * 2);
+        _ctx.fill();
+        //_ctx.stroke();
+      }
+      
+      _ctx.fillCircle(_canvas.width / 2, _canvas.height / 2, pistilRadius);
+      _ctx.strokeCircle(_canvas.width / 2, _canvas.height / 2, pistilRadius);
+    }
+    
+    this.profilePicture = _ctx.getImageData(0, 0, _canvas.width, _canvas.height);
+  };
+  
+  function displayUser(canvas) {
+    canvas.usernameTxt.innerHTML = canvas.user.username;
+    canvas.ctx.clearRect(0, 0, canvas.canvas.width, canvas.canvas.height);
+    canvas.ctx.putImageData(canvas.user.profilePicture, 0, 0);
+    canvas.downloadLink.href = canvas.canvas.toDataURL();
+    canvas.downloadLink.download = canvas.user.username + ".png";
+  }
+  function rerollUsername(canvas) {
+    canvas.user.setUsername();
+    displayUser(canvas);
+  }
+  function rerollPicture(canvas) {
+    canvas.user.setProfilePicture(profilePictureResolution, "rand");
+    displayUser(canvas);
+  }
+  function rerollBoth(canvas) {
+    rerollUsername(canvas);
+    rerollPicture(canvas);
+  }
+  function rerollSimilarPicture(canvas) {
+    canvas.user.setProfilePicture(profilePictureResolution, canvas.user.picMode);
+    displayUser(canvas);
+  }
+  function rerollAll() {
+    for (let i = 0; i < C.length; i++) {
+      rerollBoth(C[i]);
+    }
+  }
+  function downloadAll() {
+    if (!window.confirm("Are you sure you want to download all 5 profiles?")) return;
+    
+    for (let i = 0; i < C.length; i++) {
+      C[i].downloadLink.click();
+    }
+  }
+  
+  function hasDuplicates(arr) {
+    let duplicates = [];
+    for (let i = 0; i < arr.length; i++) {
+      for (let j = 0; j < arr.length; j++) {
+        if (i !== j) {
+          if (arr[i] === arr[j] && !duplicates.includes(arr[i])) duplicates.push(arr[i]);
+        }
+      }
+    }
+    
+    return duplicates;
+  }
+  
+  function averageRandTries(x, numRepeats) {
+    // Return the average number of times Math.random() has to be called before it is less than X(averaged over numRepeats iterations)
+    let totalTries = 0;
+    for (let i = 0; i < numRepeats; i++) {
+      let tries = 0;
+      let curr = Math.random();
+      while (curr >= x) {
+        tries++;
+        curr = Math.random();
+      }
+      totalTries += tries;
+    }
+    return Math.round(totalTries / numRepeats);
+  }
+</script>
+</body>
+</html>
