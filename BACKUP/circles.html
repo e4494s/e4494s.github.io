@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = 'icon'  href = 'images/favicon.png' type = 'image/png'/>
+    <title>Circles ~ e4494s</title>
+    <style>
+      canvas {
+        width: 100%;
+        height: 100%;
+        bottom: 0;
+        left: 0;
+        position: absolute;
+        background-color: black;
+      }
+      
+      body {
+        user-select: none;
+        font-size: 13px;
+        margin: 0;
+      }
+      
+      table, tr, td, th {
+        border: 1px solid black;
+      }
+      
+      input[type=radio] {
+        cursor: pointer;
+        width: 10px;
+        height: 10px;
+      }
+      
+      input:focus, button:focus {
+        outline: none;
+      }
+      
+      button {
+        cursor: pointer;
+      }
+      
+      label {
+        cursor: pointer;
+      }
+      
+      #ballstxt {
+        font-weight: bold;
+        font-size: 20px;
+      }
+      
+      .accentimg {
+        background-color: black;
+        border-radius: 5px;
+        border: 2px solid black;
+        max-width: 25px;
+        max-height: 25px;
+        cursor: pointer;
+      }
+      
+      .rainbow {
+        cursor: pointer;
+        border: 2px solid black;
+        width: 75px;
+        height: 15px;
+      }
+    </style>
+  </head>
+<body>
+<table id = 'menus'>
+  <tr>
+    <td rowspan = '3' style = 'max-width: 250px'>
+      <div><b><u>Mode</u></b></div>
+      <input type = 'radio' id = 'mode0' name = 'mode' onclick = 'mode = 0' CHECKED>
+      <label for = 'mode0'><u>Normal:</u> Balls bounce off of each other</label>
+      <br>
+      <input type = 'radio' id = 'mode1' name = 'mode' onclick = 'mode = 1'>
+      <label for = 'mode1'><u>Sticky:</u> Balls stick to each other</label>
+      <br>
+      <input type = 'radio' id = 'mode2' name = 'mode' onclick = 'mode = 2'>
+      <label for = 'mode2'><u>Slow:</u> Balls pass slowly through each other</label>
+      <br>
+      <input type = 'radio' id = 'mode3' name = 'mode' onclick = 'mode = 3'>
+      <label for = 'mode3'><u>Destroy:</u> Colliding balls have a small chance to destroy each other</label>
+    </td>
+    <td>
+      <input type = 'checkbox' id = 'trailingcheck'>
+      <label for = 'trailingcheck'>Trailing</label>
+    </td>
+    <td rowspan = '3'>
+      <button onclick = 'randomizeBalls()'>Randomize Balls</button>
+      <br>
+      <button onclick = 'centerBalls()'>Center Balls</button>
+    </td>
+    <td>
+      <img class = 'accentimg' src = 'images/ballshine.png' onclick = 'switchAccent(this.src)'>
+      <img class = 'accentimg' src = 'images/bounce/circle.png' onclick = 'switchAccent(this.src)'>
+      <img class = 'accentimg' src = 'images/blank.png' onclick = 'switchAccent(this.src)'>
+      <br>
+      <input type = 'text' id = 'sourcetxt'>
+      <label for = 'sourcetxt'>Accent Image Source</label>
+      <br>
+      <button onclick = 'changeSource()'>Set Source</button>
+      <br>
+      <input type = 'range' min = '0' max = '1' step = '0.05' value = '0.75' id = 'accentopacityrange'>
+      <label for = 'accentopacityrange'>Accent Opacity</label>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <p id = 'ballstxt'>Balls: 150</p>
+    </td>
+    <td>
+      <div><b><u>Ball Color</u></b></div>
+      <img src = 'images/rainbowdark.png' onclick = 'switchBallColor("dark")' class = 'rainbow'>
+      <img src = 'images/rainbow.png' onclick = 'switchBallColor("normal")' class = 'rainbow'>
+      <img src = 'images/rainbowlight.png' onclick = 'switchBallColor("light")' class = 'rainbow'>
+      <img src = 'images/blank.png' onclick = 'switchBallColor("none")' class = 'rainbow'>
+    </td>
+  </tr>
+</table>
+<canvas id = 'canvas'></canvas>
+<script>
+  const ctx = canvas.getContext('2d');
+  let menu_rect = menus.getBoundingClientRect();
+  let ratio = 3;
+  canvas.width = window.innerWidth * ratio;
+  canvas.height = (window.innerHeight - menu_rect.height) * ratio;
+  canvas.style.width = `${window.innerWidth}px`;
+  canvas.style.height = `${window.innerHeight - menu_rect.height}px`;
+  let rect = canvas.getBoundingClientRect();
+  
+  //
+  
+  function drawCircle(x, y, size) {
+    ctx.beginPath();
+    ctx.arc(x + (size / 2), y + (size / 2), (size / 2), 0, Math.PI * 2);
+    ctx.fill();
+  }
+  
+  let randBetween = (min, max) => (Math.random() * (max - min)) + min;
+  
+  let randColor = () => `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
+  let randLightColor = () => `rgb(${randBetween(127.5, 255)}, ${randBetween(127.5, 255)}, ${randBetween(127.5, 255)})`;
+  let randDarkColor = () => `rgb(${Math.random() * 100}, ${Math.random() * 100}, ${Math.random() * 100})`;
+  
+  let coin = () => Math.round(Math.random()) == 0;
+  
+  let odds = (percent) => Math.round(Math.random() * (1 / percent)) == 0;
+  
+  let circlesTouching = (x1, y1, r1, x2, y2, r2) => (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) <= ((r1 + r2) * (r1 + r2));
+  
+  //
+  
+  let mode = 0;
+  // 0: Normal
+  // 1: Sticky
+  // 2: Slow
+  // 3: Destroy
+  let trailing = false;
+  trailingcheck.onchange = function() {
+    if (trailing) trailing = false;
+    else {
+      trailing = true;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      /*ctx.fillStyle = 'black';
+      ctx.globalAlpha = 1 / trail_length;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);*/
+    }
+  };
+  let trail_length = 10;
+  if (trailing) {
+    ctx.fillStyle = 'black';
+    ctx.globalAlpha = 1 / trail_length;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  
+  let friction = 0.05;
+  let default_density = 0.25;
+  let gravity = 0.3 * ratio;
+  let wind = 0 * ratio;
+  
+  let accent = new Image();
+  accent.src = 'images/ballshine.png';
+  let accent_opacity = 0.75;
+  
+  function switchAccent(new_accent) {
+    accent.src = new_accent;
+  }
+  accentopacityrange.oninput = function() {
+    accent_opacity = this.value;
+  };
+  
+  function changeSource() {
+    accent.src = sourcetxt.value;
+  }
+  
+  let new_ball_color = 'dark';
+  
+  function switchBallColor(rainbow) {
+    new_ball_color = rainbow;
+    for (let i = 0; i < balls.length; i++) {
+      if (rainbow == 'dark') balls[i].color = randDarkColor();
+      if (rainbow == 'normal') balls[i].color = randColor();
+      if (rainbow == 'light') balls[i].color = randLightColor();
+      if (rainbow == 'none') balls[i].color = 'rgba(0, 0, 0, 0)';
+    }
+  }
+  
+  let pop_image = new Image();
+  pop_image.src = 'images/ballshine.png';
+  
+  function ball() {
+    this.x = 0;
+    this.y = 0;
+    this.vx = 0;
+    this.vy = 0;
+    this.size = 50 * ratio;
+    this.density = 0.25;
+    this.mass = Math.PI * (this.size / 2) * (this.size / 2) * this.density;
+    this.center = {x: this.x + (this.size / 2), y: this.y + (this.size / 2)};
+    this.bounciness = 0.8;
+    this.color = 'blue';
+    this.colliding = false;
+    this.hitbox = true;
+    this.render = function() {
+      if (!this.hitbox) return;
+      this.x += (mode == 0 || mode == 3)?this.vx:mode == 1?this.colliding?0:this.vx:this.vx / (this.colliding?5:1);
+      this.y += (mode == 0 || mode == 3)?this.vy:mode == 1?this.colliding?0:this.vy:this.vy / (this.colliding?5:1);
+      this.vy += gravity;
+      this.vx += wind;
+      
+      this.center.x = this.x + (this.size / 2);
+      this.center.y = this.y + (this.size / 2);
+      this.mass = Math.PI * (this.size / 2) * (this.size / 2) * this.density;
+      
+      if (this.y <= 0) { // Bounce off the top
+        this.y = 0;
+        this.vy *= -this.bounciness;
+        this.vx *= 1 - friction;
+      }
+      if (this.x <= 0) { // Bounce off the left
+        this.x = 0;
+        this.vx *= -this.bounciness;
+      }
+      if (this.y + this.size >= canvas.height) { // Bounce off the bottom
+        this.y = canvas.height - this.size;
+        this.vy *= -this.bounciness;
+        this.vx *= 1 - friction;
+      }
+      if (this.x + this.size >= canvas.width) { // Bounce off the right
+        this.x = canvas.width - this.size;
+        this.vx *= -this.bounciness;
+      }
+      //ctx.fillStyle = this.color;
+      if (mode == 0) {
+        ctx.fillStyle = this.color;
+      }
+      if (mode == 1) {
+        ctx.fillStyle = this.colliding?'green':this.color;
+      }
+      if (mode == 2) {
+        ctx.fillStyle = this.colliding?'blue':this.color;
+      }
+      if (mode == 3) {
+        ctx.fillStyle = this.colliding?'red':this.color;
+      }
+      ctx.globalAlpha = 1;
+      drawCircle(this.x, this.y, this.size);
+      ctx.globalAlpha = accent_opacity;
+      ctx.drawImage(accent, this.x, this.y, this.size, this.size);
+    };
+  }
+  
+  let balls = [];
+  
+  function makeBall(x, y, size, bounciness, density, color) {
+    let new_ball = new ball();
+    new_ball.x = x;
+    new_ball.y = y;
+    new_ball.vx = randBetween(0, 5 * ratio) * (coin()?1:-1);
+    if (gravity == 0) new_ball.vy = randBetween(0, 5 * ratio) * (coin()?1:-1);
+    new_ball.size = size;
+    new_ball.density = density;
+    new_ball.bounciness = bounciness;
+    new_ball.color = color;
+    balls.push(new_ball);
+  }
+  
+  function detectCollisions() {
+    for (let i = 0; i < balls.length; i++) {
+      balls[i].colliding = false;
+    }
+    for (let i = 0; i < balls.length; i++) {
+      for (let j = 0; j < balls.length; j++) {
+        if (i != j && balls[i].hitbox && balls[j].hitbox) {
+          if (circlesTouching(balls[i].center.x, balls[i].center.y, balls[i].size / 2, balls[j].center.x, balls[j].center.y, balls[j].size / 2)) {
+            let ball1 = balls[i];
+            let ball2 = balls[j];
+            ball1.colliding = true;
+            ball2.colliding = true;
+            if (mode == 0 || mode == 3) {
+              let vCollision = {x: ball2.center.x - ball1.center.x, y: ball2.center.y - ball1.center.y};
+              let distance = Math.sqrt((ball2.center.x - ball1.center.x) * (ball2.center.x - ball1.center.x) + (ball2.center.y - ball1.center.y) * (ball2.center.y - ball1.center.y));
+              let vCollisionNorm = {x: vCollision.x / distance, y: vCollision.y / distance};
+              let vRelativeVelocity = {x: ball1.vx - ball2.vx, y: ball1.vy - ball2.vy};
+              let speed = vRelativeVelocity.x * vCollisionNorm.x + vRelativeVelocity.y * vCollisionNorm.y;
+              if (speed >= 0) {
+                let impulse = 2 * speed / (ball1.mass + ball2.mass);
+                ball1.vx -= (impulse * ball2.mass * vCollisionNorm.x);
+                ball1.vy -= (impulse * ball2.mass * vCollisionNorm.y);
+                ball2.vx += (impulse * ball1.mass * vCollisionNorm.x);
+                ball2.vy += (impulse * ball1.mass * vCollisionNorm.y);
+              }
+            }
+            if (mode == 1) {
+              ball1.vx = 0;
+              ball1.vy = 0;
+              ball2.vx = 0;
+              ball2.vy = 0;
+            }
+            if (mode == 3) {
+              //if (Math.ceil(Math.random() * 1000) == 500) {
+              //if (Math.ceil(Math.random() * balls.length * 25) == balls.length) {
+              if (odds(Math.min((1 / (balls.length * 3)), 0.004))) {
+                ball1.hitbox = false;
+                makePop(ball1.x + (ball1.size / 2), ball1.y + (ball1.size / 2), 0, 30, 7 * ratio);
+                ball2.hitbox = false;
+                makePop(ball2.x + (ball2.size / 2), ball2.y + (ball2.size / 2), 0, 30, 7 * ratio);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  function pop() {
+    this.x = 0;
+    this.y = 0;
+    this.starting_size = 50 * ratio;
+    this.tick = 0;
+    this.max_ticks = 500;
+    this.speed = 0.5 * ratio;
+    this.finished = false;
+    this.render = function() {
+      ctx.globalAlpha = 1 - ((1 / this.max_ticks) * this.tick);
+      if (!this.finished) ctx.drawImage(pop_image, this.x - (this.tick * this.speed * 0.5), this.y - (this.tick * this.speed * 0.5), this.starting_size + (this.tick * this.speed), this.starting_size + (this.tick * this.speed));
+      this.tick++;
+      if (this.tick >= this.max_ticks) this.finished = true;
+    };
+  }
+  
+  let pops = [];
+  
+  function makePop(x, y, starting_size, max_ticks, speed) {
+    let new_pop = new pop();
+    new_pop.x = x;
+    new_pop.y = y;
+    new_pop.starting_size = starting_size;
+    new_pop.max_ticks = max_ticks;
+    new_pop.speed = speed;
+    pops.push(new_pop);
+  }
+  
+  let starting_balls = 150;
+  for (let i = 0; i < starting_balls - 1; i++) {
+    let i_size =  randBetween(25 * ratio, 50 * ratio);
+    //let i_size = 10;
+    makeBall(randBetween(0, canvas.width - i_size), randBetween(0, canvas.height - i_size), i_size, Math.random(), default_density, new_ball_color == 'dark'?randDarkColor():new_ball_color == 'normal'?randColor():new_ball_color == 'light'?randLightColor():new_ball_color == 'none'?'rgba(0, 0, 0, 0)':'blue');
+  }
+  makeBall(randBetween(0, canvas.width - (150 * ratio)), randBetween(0, canvas.height - (150 * ratio)), 150 * ratio, Math.random(), default_density, new_ball_color == 'dark'?randDarkColor():new_ball_color == 'normal'?randColor():new_ball_color == 'light'?randLightColor():new_ball_color == 'none'?'rgba(0, 0, 0, 0)':'blue');
+  
+  let impulse = 10;
+  
+  function frame() {
+    if (trailing) {
+      ctx.globalAlpha = 1 / trail_length;
+      ctx.fillStyle = 'black';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.globalAlpha = 1;
+    }
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < balls.length; i++) {
+      balls[i].render();
+      if (!balls[i].hitbox) balls.splice(i, 1);
+    }
+    detectCollisions();
+    for (let i = 0; i < pops.length; i++) {
+      pops[i].render();
+      if (pops[i].finished) pops.splice(i, 1);
+    }
+    ballstxt.innerHTML = `Balls: ${balls.length}`;
+    requestAnimationFrame(frame);
+    //setTimeout(() => requestAnimationFrame(frame), 100);
+  }
+  frame();
+  
+  function randomizeBalls() {
+    for (let i = 0; i < balls.length; i++) {
+      balls[i].colliding = false;
+      balls[i].x = randBetween(0, canvas.width - balls[i].size);
+      balls[i].y = randBetween(0, canvas.height - balls[i].size);
+      balls[i].vx = randBetween(0, 20 * ratio) * (coin()?1:-1);
+      balls[i].vy = randBetween(0, 20 * ratio) * (coin()?1:-1);
+    }
+  }
+  function centerBalls() {
+    for (let i = 0; i < balls.length; i++) {
+      balls[i].x = (canvas.width / 2) - (balls[i].size / 2);
+      balls[i].y = (canvas.height / 2) - (balls[i].size / 2);
+      balls[i].vx = randBetween(0, 20 * ratio) * (coin()?1:-1);
+      balls[i].vy = randBetween(0, 20 * ratio) * (coin()?1:-1);
+    }
+  }
+  
+  let mouse_down = false;
+  
+  function keyDownHandler(e) {
+    let k = e.code;
+    if (k == 'ArrowUp' || k == 'ArrowLeft' || k == 'ArrowDown' || k == 'ArrowRight' || k == 'Tab') e.preventDefault();
+    for (let i = 0; i < balls.length; i++) {
+      if (k == 'KeyW' || k == 'ArrowUp') balls[i].vy -= impulse * ratio;
+      if (k == 'KeyA' || k == 'ArrowLeft') balls[i].vx -= impulse * ratio;
+      if (k == 'KeyS' || k == 'ArrowDown') balls[i].vy += impulse * ratio;
+      if (k == 'KeyD' || k == 'ArrowRight') balls[i].vx += impulse * ratio;
+    }
+  }
+  addEventListener('keydown', keyDownHandler);
+  
+  function mouseDownHandler(e) {
+    mouse_down = true;
+    let size =  randBetween(25 * ratio, 50 * ratio);
+    if ((e.clientY * ratio) - (size / 2) > (rect.top * ratio) && (e.clientX * ratio) - (size / 2) > (rect.left * ratio) && (e.clientY * ratio) + (size / 2) < (rect.bottom * ratio) && (e.clientX * ratio) + (size / 2) < (rect.right * ratio)) makeBall((e.clientX * ratio) - (size / 2) - (rect.left * ratio), (e.clientY * ratio) - (size / 2) - (rect.top * ratio), size, Math.random(), default_density, new_ball_color == 'dark'?randDarkColor():new_ball_color == 'normal'?randColor():new_ball_color == 'light'?randLightColor():new_ball_color == 'none'?'rgba(0, 0, 0, 0)':'blue');
+  }
+  addEventListener('mousedown', mouseDownHandler);
+  function mouseUpHandler(e) {
+    mouse_down = false;
+  }
+  addEventListener('mouseup', mouseUpHandler);
+  function mouseMoveHandler(e) {
+    let size =  randBetween(25 * ratio, 50 * ratio);
+    if ((e.clientY * ratio) - (size / 2) > (rect.top * ratio) && (e.clientX * ratio) - (size / 2) > (rect.left * ratio) && (e.clientY * ratio) + (size / 2) < (rect.bottom * ratio) && (e.clientX * ratio) + (size / 2) < (rect.right * ratio) && mouse_down) makeBall((e.clientX * ratio) - (size / 2) - (rect.left * ratio), (e.clientY * ratio) - (size / 2) - (rect.top * ratio), size, Math.random(), default_density, new_ball_color == 'dark'?randDarkColor():new_ball_color == 'normal'?randColor():new_ball_color == 'light'?randLightColor():new_ball_color == 'none'?'rgba(0, 0, 0, 0)':'blue');
+  }
+  addEventListener('mousemove', mouseMoveHandler);
+  
+  //
+  //
+  //
+  
+  let fullscreen = false;
+  let url = new URLSearchParams(window.location.search);
+  let cmd = url.get('command');
+  let balls_command;
+  eval(cmd);
+  canvas.width = window.innerWidth * ratio;
+  canvas.height = (window.innerHeight - menu_rect.height) * ratio;
+  canvas.style.width = `${window.innerWidth}px`;
+  canvas.style.height = `${window.innerHeight - menu_rect.height}px`;
+  if (fullscreen) {
+    canvas.width = window.innerWidth * ratio;
+    canvas.height = window.innerHeight * ratio;
+    canvas.style.width = `${window.innerWidth}px`;
+    canvas.style.height = `${window.innerHeight}px`;
+    rect = canvas.getBoundingClientRect();
+  }
+  for (let i = 0; i < balls.length; i++) eval(balls_command);
+</script>
+</body>
+</html>
