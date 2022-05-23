@@ -1,0 +1,95 @@
+#top-title {
+  height: 50px;
+  width: 168px;
+  background: url("https://e4494s.neocities.org/images/e4494s-top-title.png");
+  display: inline-block;
+  background-size: 100% 100%;
+}
+
+#screensaver-txt {
+  font-weight: bold;
+  font-style: italic;
+  font-size: 14px;
+}
+
+h1 {
+  color: #ff9500; /* Accent color */
+  font-size: 35px;
+  font-style: italic;
+}
+
+#how-it-works {
+  color: rgb(64, 64, 64);
+  font-style: italic;
+  font-size: 12px;
+  background-color: rgb(220, 220, 220);
+  padding: 5px;
+  border-radius: 8px;
+}
+
+#fps-body {
+  color: dimgray;
+  font-style: italic;
+  font-weight: bold;
+}
+
+#canvas {
+  width: 400px;
+  height: 400px;
+  background-color: black;
+  border: 2px solid #ff9500; /* Accent color */
+}
+
+.download-canvas-btn {
+  border-color: blue;
+  background-color: transparent;
+}
+.download-canvas-btn:hover {
+  background-color: #ccccff;
+}
+.download-canvas-btn:active {
+  background-color: #9999ff;
+}
+
+.setting {
+  font-weight: bold;
+  font-size: 15px;
+  color: #cc7700; /* Dark accent color */
+}
+
+hr {
+  border: 2px solid #ff9500; /* Accent color */
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+td {
+  padding-left: 10px;
+  padding-right: 10px;
+  min-width: 200px;
+}
+
+button {
+  font-weight: bold;
+  border-width: 6px;
+  border-color: #ff9500; /* Accent color */
+  border-style: double dashed double dashed;
+  border-radius: 0;
+  background-color: white;
+}
+button:hover {
+  background-color: #ffd599; /* Light accent color */
+}
+button:active {
+  background-color: #ffbf66; /* Medium light accent color */
+}
+
+.preset-btn {
+  font-style: italic;
+  font-weight: normal;
+  font-size: 12px;
+  border-width: 4px;
+  border-style: double hidden double hidden;
+  margin: 5px;
+  border-radius: 12px;
+}
