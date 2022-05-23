@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>Walker ~ e4494s</title>
+    <!--<style>
+      #canvas {
+        width: 400px;
+        height: 400px;
+        border: 2px solid black;
+      }
+      
+      hr {
+        border: 2px solid black;
+        margin-top: 15px;
+        margin-bottom: 15px;
+      }
+      
+      td {
+        padding-left: 10px;
+        padding-right: 10px;
+        min-width: 200px;
+      }
+    </style>-->
+  </head>
+<body>
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; Random Walker Shading &mdash;&mdash;</h1>
+<p id = "how-it-works">
+  <b><i>How It Works:</i></b> Every step, a random walker chooses a random direction (of its 8 grid neighbors) to move to. The pixels are colored based on how often a particular square was touched by the walker (e.g., a position that was only touched twice would be less colored than one that the walker reached 50 times, with darker colors indicating it was touched more).
+  <br><br>
+  <span class = "setting">Walker Turn Chance</span> is the probability that the walker will change direction each step, so lower settings will make the walker tend to take more straight paths more than wander around.
+  <br><br>
+  <span class = "setting">Pixel Coloring Intensity</span> affects how much the weight of a tile is multiplied to make patterns stand out more (so that tiles touched more than once stand out more from tiles never touched).
+  <br><br>
+  Selecting <span class = "setting">"Black or White"</span> for <span class = "setting">Pixel Coloring Mode</span> will make every cell be either white (if it was touched <u>less</u> than half the average) or black (if it was touched <u>more</u> than half the average).
+  <br><br>
+  Turning on <span class = "setting">Inverse Pixel Coloring</span> will make every pixel be drawn as the inverse of its actual color (so that more-visited cells will be drawn ligher, instead of darker).
+</p>
+<hr>
+<div><b>Settings Presets:</b></div>
+<div id = "presets-div"></div>
+<hr>
+<table>
+  <tr>
+    <td>
+      <button onclick = "Walker.walk()">Walk More</button>
+      <button onclick = "reset()">Reset</button>
+      <br><br>
+      <div><b><u>Current Iterations:</u></b> <span id = "walker-iterations-txt">0</span></div>
+      <br>
+      <div><b><u>Iterations Per Step:</u></b> <span id = "walker-iterations-per-step-txt">100,000</span></div>
+      <input type = "range" min = "50000" max = "1000000" step = "50000" value = "100000" id = "walker-iterations-per-step-range" oninput = "updateSettings()">
+      <br><br>
+      <canvas id = "canvas"></canvas>
+      <br>
+      <button class = "download-canvas-btn" onclick = "downloadCanvas()">Download</button>
+    </td>
+    <td>
+      <button onclick = "drawPixels()">Apply Setting Changes</button>
+      <br><br>
+      <button onclick = "loadPreset(0)">Reset Settings</button>
+      <hr>
+      <div><b><u>Walker Turn Chance:</u></b> <span id = "walker-turn-chance-txt">100</span>%</div>
+      <input type = "range" min = "5" max = "100" step = "5" value = "100" id = "walker-turn-chance-range" oninput = "updateSettings()">
+      <hr>
+      <div><b><u>Pixel Coloring Intensity:</u></b> <span id = "pixel-intensity-txt">3.0</span>x</div>
+      <input type = "range" min = "0.5" max = "10" step = "0.5" value = "3" id = "pixel-intensity-range" oninput = "updateSettings()">
+      <hr>
+      <div><b><u>Pixel Coloring Hue:</u></b> <span id = "pixel-hue-txt">0</span>&deg;</div>
+      <input type = "range" min = "0" max = "360" step = "15" value = "0" id = "pixel-hue-range" oninput = "updateSettings()">
+      <hr>
+      <div><b><u>Pixel Coloring Mode:</u></b></div>
+      <input type = "radio" name = "pixel-mode-radio" id = "pixel-mode-0-radio" oninput = "updateSettings()" CHECKED>
+      <label for = "pixel-mode-0-radio">Single color</label>
+      <br>
+      <input type = "radio" name = "pixel-mode-radio" id = "pixel-mode-1-radio" oninput = "updateSettings()">
+      <label for = "pixel-mode-1-radio">Rainbow colors</label>
+      <br>
+      <input type = "radio" name = "pixel-mode-radio" id = "pixel-mode-2-radio" oninput = "updateSettings()">
+      <label for = "pixel-mode-2-radio">Black or white</label>
+      <hr>
+      <label for = "grayscale-pixels-checkbox"><b><u>Grayscale Pixels:</u></b></label>
+      <input type = "checkbox" id = "grayscale-pixels-checkbox" oninput = "updateSettings()">
+      <hr>
+      <label for = "inverse-pixels-checkbox"><b><u>Inverse Pixel Coloring:</u></b></label>
+      <input type = "checkbox" id = "inverse-pixels-checkbox" oninput = "updateSettings()">
+    </td>
+  </tr>
+</table>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 300;
+  
+  let walkerIterationsTxt = document.getElementById("walker-iterations-txt");
+  let walkerIterationsPerStepTxt = document.getElementById("walker-iterations-per-step-txt");
+  let walkerIterationsPerStepRange = document.getElementById("walker-iterations-per-step-range");
+  let walkerTurnChanceTxt = document.getElementById("walker-turn-chance-txt");
+  let walkerTurnChanceRange = document.getElementById("walker-turn-chance-range");
+  let pixelIntensityTxt = document.getElementById("pixel-intensity-txt");
+  let pixelIntensityRange = document.getElementById("pixel-intensity-range");
+  let pixelHueTxt = document.getElementById("pixel-hue-txt");
+  let pixelHueRange = document.getElementById("pixel-hue-range");
+  let pixelMode0Radio = document.getElementById("pixel-mode-0-radio");
+  let pixelMode1Radio = document.getElementById("pixel-mode-1-radio");
+  let pixelMode2Radio = document.getElementById("pixel-mode-2-radio");
+  let grayscalePixelsCheckbox = document.getElementById("grayscale-pixels-checkbox");
+  let inversePixelsCheckbox = document.getElementById("inverse-pixels-checkbox");
+  let presetsDiv = document.getElementById("presets-div");
+  
+  function comma(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+  
+  let pixelIntensity = 3;
+  let pixelHue = 0;
+  let pixelMode = 0; // 0: Single color | 1: Rainbow | 2: Black or white
+  let grayscalePixels = false;
+  let inversePixels = false;
+  
+  let pixelArray = [];
+  for (let x = 0; x < canvas.width; x++) {
+    let row = [];
+    for (let y = 0; y < canvas.height; y++) {
+      row.push(0);
+    }
+    pixelArray.push(row);
+  }
+  
+  
+  
+  let Walker = {
+    x: Math.floor(canvas.width / 2),
+    y: Math.floor(canvas.height / 2),
+    iterations: 0,
+    iterationsPerStep: 100000,
+    direction: Math.floor(Math.random() * 8),
+    turnChance: 1
+  };
+  
+  Walker.walk = function() {
+    for (let i = 0; i < this.iterationsPerStep; i++) {
+      this.iterations++;
+      if (Math.random() <= this.turnChance) this.direction = Math.floor(Math.random() * 8);
+      if (this.direction == 0) this.y = ((this.y - 1) + canvas.height) % canvas.height;
+      else if (this.direction == 1) {
+        this.x = (this.x + 1) % canvas.width;
+        this.y = ((this.y - 1) + canvas.height) % canvas.height;
+      }
+      else if (this.direction == 2) this.x = (this.x + 1) % canvas.width;
+      else if (this.direction == 3) {
+        this.x = (this.x + 1) % canvas.width;
+        this.y = (this.y + 1) % canvas.height;
+      }
+      else if (this.direction == 4) this.y = (this.y + 1) % canvas.height;
+      else if (this.direction == 5) {
+        this.x = ((this.x - 1) + canvas.width) % canvas.width;
+        this.y = (this.y + 1) % canvas.height;
+      }
+      else if (this.direction == 6) this.x = ((this.x - 1) + canvas.width) % canvas.width;
+      else {
+        this.x = ((this.x - 1) + canvas.width) % canvas.width;
+        this.y = ((this.y - 1) + canvas.height) % canvas.height;
+      }
+      pixelArray[this.x][this.y]++;
+    }
+    drawPixels();
+  };
+  
+  function drawPixels() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let highestWeight = 0;
+    for (let x = 0; x < canvas.width; x++) {
+      for (let y = 0; y < canvas.height; y++) {
+        if (pixelArray[x][y] > highestWeight) highestWeight = pixelArray[x][y];
+      }
+    }
+    for (let x = 0; x < canvas.width; x++) {
+      for (let y = 0; y < canvas.height; y++) {
+        let brightness;
+        if (inversePixels) brightness = ((pixelArray[x][y] / highestWeight) * 100 * pixelIntensity);
+        else brightness = 100 - ((pixelArray[x][y] / highestWeight) * 100 * pixelIntensity);
+        if (pixelMode == 0) { // Single color
+          ctx.fillStyle = `hsl(${pixelHue}deg, ${grayscalePixels ? 0 : 100}%, ${brightness}%)`;
+        }
+        else if (pixelMode == 1) { // Rainbow colors
+          ctx.fillStyle = `hsl(${pixelHue + ((x / canvas.width) * 360)}deg, ${grayscalePixels ? 0 : 100}%, ${brightness}%)`;
+        }
+        else { // Black or white
+          ctx.fillStyle = brightness >= 50 ? "white" : "black";
+        }
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+    walkerIterationsTxt.innerHTML = comma(Walker.iterations);
+  }
+  
+  function updateSettings() {
+    Walker.iterationsPerStep = Number(walkerIterationsPerStepRange.value);
+    walkerIterationsPerStepTxt.innerHTML = comma(Walker.iterationsPerStep);
+    Walker.turnChance = Number(walkerTurnChanceRange.value) / 100;
+    walkerTurnChanceTxt.innerHTML = walkerTurnChanceRange.value;
+    pixelIntensity = Number(pixelIntensityRange.value);
+    pixelIntensityTxt.innerHTML = pixelIntensity.toFixed(1);
+    pixelHue = Number(pixelHueRange.value);
+    pixelHueTxt.innerHTML = pixelHue;
+    if (pixelMode0Radio.checked) pixelMode = 0;
+    else if (pixelMode1Radio.checked) pixelMode = 1;
+    else if (pixelMode2Radio.checked) pixelMode = 2;
+    grayscalePixels = grayscalePixelsCheckbox.checked;
+    inversePixels = inversePixelsCheckbox.checked;
+  }
+  
+  let presetsArray = [
+    {
+      name: "Default",
+      turnChance: 100,
+      pixelIntensity: 3,
+      pixelHue: 0,
+      pixelMode: 0,
+      grayscalePixels: false,
+      inversePixels: false
+    },
+    {
+      name: "Cosmic Landscape",
+      turnChance: 100,
+      pixelIntensity: 2,
+      pixelHue: 0,
+      pixelMode: 1,
+      grayscalePixels: false,
+      inversePixels: true
+    },
+    {
+      name: "Galactic Infrastructure",
+      turnChance: 25,
+      pixelIntensity: 3,
+      pixelHue: 240,
+      pixelMode: 0,
+      grayscalePixels: false,
+      inversePixels: true
+    },
+    {
+      name: "Composition Notebook Pattern",
+      turnChance: 100,
+      pixelIntensity: 5,
+      pixelHue: 0,
+      pixelMode: 2,
+      grayscalePixels: false,
+      inversePixels: true
+    },
+    {
+      name: "Glimmering Riches",
+      turnChance: 5,
+      pixelIntensity: 2,
+      pixelHue: 60,
+      pixelMode: 0,
+      grayscalePixels: false,
+      inversePixels: true
+    }
+  ];
+  
+  function loadPreset(n) {
+    let p = presetsArray[n];
+    
+    walkerTurnChanceRange.value = p.turnChance;
+    pixelIntensityRange.value = p.pixelIntensity;
+    pixelHueRange.value = p.pixelHue;
+    pixelMode0Radio.checked = false;
+    pixelMode1Radio.checked = false;
+    pixelMode2Radio.checked = false;
+    if (p.pixelMode === 0) pixelMode0Radio.checked = true;
+    else if (p.pixelMode === 1) pixelMode1Radio.checked = true;
+    else if (p.pixelMode === 2) pixelMode2Radio.checked = true;
+    grayscalePixelsCheckbox.checked = p.grayscalePixels;
+    inversePixelsCheckbox.checked = p.inversePixels;
+    
+    updateSettings();
+    reset();
+  }
+  
+  function reset() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pixelArray = [];
+    for (let x = 0; x < canvas.width; x++) {
+      let row = [];
+      for (let y = 0; y < canvas.height; y++) {
+        row.push(0);
+      }
+      pixelArray.push(row);
+    }
+    Walker.x = Math.floor(canvas.width / 2);
+    Walker.y = Math.floor(canvas.height / 2);
+    Walker.iterations = 0;
+    Walker.walk();
+  }
+  
+  reset();
+  
+  for (let i = 1; i < presetsArray.length; i++) {
+    let btn = document.createElement("button");
+    btn.innerHTML = presetsArray[i].name;
+    btn.className = "preset-btn";
+    btn.onclick = () => loadPreset(i);
+    presetsDiv.appendChild(btn);
+  }
+  
+  function downloadCanvas() {
+    let link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "walker.png";
+    link.click();
+  }
+</script>
+</body>
+</html>
