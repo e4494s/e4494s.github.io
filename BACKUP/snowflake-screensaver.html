@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <title>Brownian Snowflake Screensaver ~ e4494s</title>
+    <style>
+      #canvas {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        background-color: black;
+      }
+    </style>
+  </head>
+<body>
+<canvas id = "canvas"></canvas>
+<script src = "scripts/main.js"></script>
+<script>
+  let canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth * 2;
+  canvas.height = window.innerHeight * 2;
+  let canvasRunning = true;
+  
+  let offsetAngle = -Math.PI / 2;
+  
+  let snowflakeArray = [];
+  let snowflakeSymmetry = 6;
+  let snowflakeAngle = (Math.PI * 2) / snowflakeSymmetry;
+  let maxSnowflakeSize = 400;
+  let snowflakeThickness = 8 / 1000;
+  let snowflakeOpacity = 0.5;
+  let snowflakeHue = 240;
+  let rainbowSnowflake = false;
+  let decreaseSnowflakeThickness = true;
+  let useSnowflakeColorPalette = false;
+  let snowflakeColorPalette = 1;
+  let minCanvasSize = Math.min(canvas.width, canvas.height);
+  let snowflakeActualSize = minCanvasSize * 0.85;
+  let totalTurn = Math.PI;
+  
+  let IceParticle = {};
+  IceParticle.x = 0;
+  IceParticle.y = 0;
+  IceParticle.speedY = 5 / 1000;
+  IceParticle.speedX = 2 / 1000;
+  IceParticle.radius = 4 / 1000;
+  IceParticle.stickiness = 0.3;
+  IceParticle.stepsPerFrame = 1000;
+  IceParticle.running = true;
+  IceParticle.resetPos = function() {
+    this.x = 1;
+    this.y = Math.sin(Math.random() * snowflakeAngle);
+  };
+  IceParticle.walk = function() {
+    if (!this.running) return;
+    for (let j = 0; j < this.stepsPerFrame; j++) {
+      this.x -= randBetween(0.5, 1) * this.speedX;
+      this.y += randBetween(0.5, 1) * this.speedY * randSign();
+      
+      let currentMaxHeight = Math.sin(snowflakeAngle) * this.x;
+      if (this.y >= currentMaxHeight || this.y <= 0) {
+        this.y = (this.y + currentMaxHeight) % currentMaxHeight;
+      }
+      
+      for (let i = snowflakeArray.length - 1; i >= 0; i--) {
+        let distX = this.x - snowflakeArray[i].x;
+        let distY = this.y - snowflakeArray[i].y;
+        let distSq = (distX * distX) + (distY * distY);
+        if (distSq <= 4 * this.radius * this.radius && Math.random() <= this.stickiness) {
+          if (this.x < 0.5 - (this.radius * 2)) {
+            snowflakeArray.push({x: this.x, y: this.y});
+            this.resetPos();
+          }
+          else {
+            this.running = false;
+            return;
+          }
+        }
+      }
+      if (this.x <= 0) {
+        snowflakeArray.push({x: this.x, y: this.y});
+        this.resetPos();
+      }
+    }
+  };
+  
+  function drawSnowflake() {
+    clearCanvas();
+    
+    let color;
+    let r;
+    let g;
+    let b;
+    let palette = snowflakeColorPalette.toString(5).padStart(3, "0");
+    switch (Number(palette.charAt(0))) {
+      case 0: r = (curr, max) => 0;
+      break;
+      case 1: r = (curr, max) => 127;
+      break;
+      case 2: r = (curr, max) => 255;
+      break;
+      case 3: r = (curr, max) => (curr / max) * 255;
+      break;
+      case 4: r = (curr, max) => 255 - ((curr / max) * 255);
+      break;
+    }
+    switch (Number(palette.charAt(1))) {
+      case 0: g = (curr, max) => 0;
+      break;
+      case 1: g = (curr, max) => 127;
+      break;
+      case 2: g = (curr, max) => 255;
+      break;
+      case 3: g = (curr, max) => (curr / max) * 255;
+      break;
+      case 4: g = (curr, max) => 255 - ((curr / max) * 255);
+      break;
+    }
+    switch (Number(palette.charAt(2))) {
+      case 0: b = (curr, max) => 0;
+      break;
+      case 1: b = (curr, max) => 127;
+      break;
+      case 2: b = (curr, max) => 255;
+      break;
+      case 3: b = (curr, max) => (curr / max) * 255;
+      break;
+      case 4: b = (curr, max) => 255 - ((curr / max) * 255);
+      break;
+    }
+    color = (curr, max) => `rgb(${r(curr, max)}, ${g(curr, max)}, ${b(curr, max)})`;
+    
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate(offsetAngle);
+    ctx.globalAlpha = snowflakeOpacity;
+    for (let i = 0; i < snowflakeSymmetry; i++) {
+      ctx.rotate(snowflakeAngle);
+      for (let j = 0; j < snowflakeArray.length; j++) {
+        if (rainbowSnowflake) ctx.fillStyle = `hsl(${snowflakeHue + ((j / snowflakeArray.length) * 360)}deg, 100%, ${80 - ((j / snowflakeArray.length) * 30)}%)`;
+        else ctx.fillStyle = `hsl(${snowflakeHue}deg, 100%, ${95 - ((j / snowflakeArray.length) * 30)}%)`;
+        if (useSnowflakeColorPalette) ctx.fillStyle = color(j, snowflakeArray.length);
+        let t = snowflakeThickness * snowflakeActualSize;
+        let thickness = decreaseSnowflakeThickness ? (t - (t * (j / snowflakeArray.length))) + (t / 4) : t;
+        ctx.fillCircle(snowflakeArray[j].x * snowflakeActualSize, snowflakeArray[j].y * snowflakeActualSize, thickness);
+        ctx.fillCircle(snowflakeArray[j].x * snowflakeActualSize, -snowflakeArray[j].y * snowflakeActualSize, thickness);
+      }
+    }
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+  
+  let timeToSwitch = 5000;
+  let lastSwitchTime = 0;
+  
+  function frame() {
+    let timeSinceSwitch = Date.now() - lastSwitchTime;
+    if (timeSinceSwitch >= timeToSwitch) {
+      randomSettings();
+      lastSwitchTime = Date.now();
+      timeSinceSwitch = 0;
+    }
+    
+    offsetAngle = (-Math.PI / 2) + (totalTurn * (timeSinceSwitch / timeToSwitch));
+    
+    snowflakeAngle = (Math.PI * 2) / snowflakeSymmetry;
+    
+    IceParticle.walk();
+    
+    drawSnowflake();
+    
+    if (snowflakeArray.length >= maxSnowflakeSize) {
+      snowflakeArray.length = maxSnowflakeSize;
+      IceParticle.running = false;
+    }
+    
+    let thickness = 0.017 * minCanvasSize;
+    let timeRatio = (timeSinceSwitch / timeToSwitch) * 1.08;
+    ctx.fillStyle = `hsl(0deg, 0%, ${(timeRatio * 80) + 20}%)`;//timeRatio >= 1 ? "white" : "rgb(100, 100, 100)";
+    
+    ctx.fillRect(0, canvas.height - thickness, timeRatio * canvas.width, thickness); // Bottom
+    
+    let len = timeRatio * canvas.width; // Top
+    ctx.fillRect(canvas.width - len, 0, len, thickness);
+    
+    ctx.fillRect(0, 0, thickness, timeRatio * canvas.height); // Left
+    
+    len = timeRatio * canvas.height;
+    ctx.fillRect(canvas.width - thickness, canvas.height - len, thickness, len); // Right
+    
+    if (canvasRunning) requestAnimationFrame(frame);
+  }
+  randomSettings();
+  frame();
+  
+  function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  
+  function randRange(min, max, step) {
+    return randBetween(min, max).toMultipleOf(step);
+  }
+  
+  function randomSettings() {
+    snowflakeSymmetry = Math.round(randBetween(3, 12));
+    IceParticle.radius = randBetween(4, 10) / 1000;
+    IceParticle.speedY = randBetween(1, 10) / 1000;
+    IceParticle.stickiness = randBetween(0.1, 1);
+    snowflakeHue = Math.random() * 360;
+    snowflakeThickness = randBetween(4, 20) / 1000;
+    snowflakeOpacity = ((1 - (Math.random() * Math.random())) *  0.9) + 0.1;
+    decreaseSnowflakeThickness = Math.random() < 0.5;
+    let mode = Math.floor(Math.random() * 3);
+    rainbowSnowflake = mode === 1;
+    useSnowflakeColorPalette = mode === 2;
+    snowflakeColorPalette = Math.round(randBetween(1, 124));
+    
+    clearCanvas();
+    snowflakeArray = [];
+    IceParticle.running = true;
+    offsetAngle = -Math.PI / 2;
+  }
+  
+  window.onresize = () => {
+    canvas.width = window.innerWidth * 2;
+    canvas.height = window.innerHeight * 2;
+    minCanvasSize = Math.min(canvas.width, canvas.height);
+    snowflakeActualSize = minCanvasSize * 0.85;
+    
+    drawSnowflake();
+  };
+</script>
+</body>
+</html>
