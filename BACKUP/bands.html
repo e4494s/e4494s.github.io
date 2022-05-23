@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>Bands ~ e4494s</title>
+  </head>
+<body>
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; Bands &mdash;&mdash;</h1>
+<p id = "how-it-works">
+  <b><i>How It Works:</i></b> A number of circular arcs are drawn at even distances apart from each other, reaching outwards circularly.
+  <br><br>
+  <span class = "setting">Band Spacing</span> affects how far apart each band is from its neighbors.
+  <br><br>
+  <span class = "setting">Band Thickness</span> changes the width each band is drawn at.
+  <br><br>
+  <span class = "setting">Min Band Length</span> and <span class = "setting">Max Band Length</span> affect the minimum angle a band can span and the maximum angle a band can span, respectively.
+  <br><br>
+  Turning on <span class = "setting">Connect Bands</span> will make the end of every band connect to the next band with a line.
+  <br><br>
+  Turning on <span class = "setting">Align Bands</span> will make every band align with end of the previous band, instead of being placed randomly around its level.
+  <br><br>
+  Changing <span class = "setting">Band Direction</span> will affect which direction each band new is (clockwise or counterclockwise). <span class = "setting">"Randomize Direction"</span> will make the direction randomized, <span class = "setting">"Same Direction"</span> will make all bands either clockwise or counterclockwise, and <span class = "setting">"Alternate Direction"</span> will make bands alternate between clockwise and counterclockwise.
+  <br><br>
+  <span class = "setting">Band Contrast</span> changes how much brightness contrast there is between the center of the bands and the outer edge of the bands.
+  <br><br>
+  Clicking <span class = "setting">Randomize Geometry Settings</span> will randomize every setting, except the settings that are purely visual. Use this if you want a new set of settings with the same visual style.
+</p>
+<hr>
+<div><b>Settings Presets:</b></div>
+<div id = "presets-div"></div>
+<hr>
+<table>
+  <tr>
+    <td valign = "top">
+      <button onclick = "drawBands()">Redraw</button>
+      <br><br>
+      <canvas id = "canvas"></canvas>
+      <br>
+      <button class = "download-canvas-btn" onclick = "downloadCanvas()">Download</button>
+    </td>
+    <td valign = "top">
+      <button onclick = "loadPreset(0)">Reset Settings</button>
+      <br><br>
+      <button onclick = "randomizeSettings()">Randomize All Settings</button>
+      <br><br>
+      <button onclick = "randomizeGeometrySettings()">Randomize Geometry Settings</button>
+      <hr>
+      <div><b><u>Number of Bands:</u></b> <span id = "num-bands-txt">30</span></div>
+      <input type = "range" min = "0" max = "23" value = "12" step = "1" id = "num-bands-range" oninput = "updateSettings()">
+      <hr>
+      <div><b><u>Band Spacing:</u></b> <span id = "band-spacing-txt">15</span>px</div>
+      <input type = "range" min = "1" max = "50" value = "15" step = "1" id = "band-spacing-range" oninput = "updateSettings()">
+      <br><br>
+      <div><b><u>Band Thickness:</u></b> <span id = "band-thickness-txt">5</span>px</div>
+      <input type = "range" min = "1" max = "25" value = "5" step = "1" id = "band-thickness-range" oninput = "updateSettings()">
+      <hr>
+      <div><b><u>Min Band Length:</u></b> <span id = "min-angle-txt">0</span>&deg;</div>
+      <input type = "range" min = "0" max = "360" value = "0" step = "5" id = "min-angle-range" oninput = "updateSettings()">
+      <br><br>
+      <div><b><u>Max Band Length:</u></b> <span id = "max-angle-txt">360</span>&deg;</div>
+      <input type = "range" min = "0" max = "360" value = "360" step = "5" id = "max-angle-range" oninput = "updateSettings()">
+    </td>
+    <td valign = "top">
+      <label for = "connect-bands-checkbox"><b><u>Connect Bands:</u></b></label>
+      <input type = "checkbox" id = "connect-bands-checkbox" oninput = "updateSettings()" CHECKED>
+      <br><br>
+      <label for = "align-bands-checkbox"><b><u>Align Bands:</u></b></label>
+      <input type = "checkbox" id = "align-bands-checkbox" oninput = "updateSettings()" CHECKED>
+      <hr>
+      <div><b><u>Band Direction:</u></b></div>
+      <input type = "radio" name = "band-direction-radio" id = "band-direction-radio-1" oninput = "updateSettings()">
+      <label for = "band-direction-radio-1">Randomize Direction</label>
+      <br>
+      <input type = "radio" name = "band-direction-radio" id = "band-direction-radio-2" oninput = "updateSettings()">
+      <label for = "band-direction-radio-2">Same Direction</label>
+      <br>
+      <input type = "radio" name = "band-direction-radio" id = "band-direction-radio-3" oninput = "updateSettings()" CHECKED>
+      <label for = "band-direction-radio-3">Alternate Direction</label>
+      <hr>
+      <div><b><u>Band Hue:</u></b> <span id = "hue-txt">60</span>&deg;</div>
+      <input type = "range" min = "0" max = "360" value = "60" step = "5" id = "hue-range" oninput = "updateSettings()">
+      <br><br>
+      <div><b><u>Band Contrast:</u></b> <span id = "contrast-txt">75</span>%</div>
+      <input type = "range" min = "0" max = "100" value = "75" step = "5" id = "contrast-range" oninput = "updateSettings()">
+      <br><br>
+      <label for = "rainbow-checkbox"><b><u>Rainbow Bands:</u></b></label>
+      <input type = "checkbox" id = "rainbow-checkbox" oninput = "updateSettings()">
+    </td>
+  </tr>
+</table>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 1000;
+  
+  let numBandsTxt = document.getElementById("num-bands-txt");
+  let numBandsRange = document.getElementById("num-bands-range");
+  let bandSpacingTxt = document.getElementById("band-spacing-txt");
+  let bandSpacingRange = document.getElementById("band-spacing-range");
+  let bandThicknessTxt = document.getElementById("band-thickness-txt");
+  let bandThicknessRange = document.getElementById("band-thickness-range");
+  let minAngleTxt = document.getElementById("min-angle-txt");
+  let minAngleRange = document.getElementById("min-angle-range");
+  let maxAngleTxt = document.getElementById("max-angle-txt");
+  let maxAngleRange = document.getElementById("max-angle-range");
+  let connectBandsCheckbox = document.getElementById("connect-bands-checkbox");
+  let alignBandsCheckbox = document.getElementById("align-bands-checkbox");
+  let bandDirectionRadio1 = document.getElementById("band-direction-radio-1");
+  let bandDirectionRadio2 = document.getElementById("band-direction-radio-2");
+  let bandDirectionRadio3 = document.getElementById("band-direction-radio-3");
+  let hueTxt = document.getElementById("hue-txt");
+  let hueRange = document.getElementById("hue-range");
+  let contrastTxt = document.getElementById("contrast-txt");
+  let contrastRange = document.getElementById("contrast-range");
+  let rainbowCheckbox = document.getElementById("rainbow-checkbox");
+  let presetsDiv = document.getElementById("presets-div");
+  
+  let numBands = 30;
+  let bandThickness = 5;
+  let bandSpacing = 15;
+  let connectBands = true;
+  let randomizeDirection = false;
+  let alternateDirection = true;
+  let alignBands = true;
+  let minAngle = 0;
+  let maxAngle = 360;
+  let hue = 60;
+  let rainbow = false;
+  let contrast = 75;
+  
+  function drawBands() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.lineWidth = bandThickness;
+    ctx.lineJoin = ctx.lineCap = "round";
+    
+    let currAngle = Math.random() * Math.PI * 2;
+    let currX = canvas.width / 2;
+    let currY = canvas.height / 2;
+    
+    if (connectBands) ctx.beginPath();
+    for (let i = 0; i < numBands; i++) {
+      let h = rainbow ? ((i / numBands) * 360) + hue : hue;
+      ctx.strokeStyle = `hsl(${h}deg, 100%, ${((i / numBands) * contrast) + ((100 - contrast) / 2)}%)`;
+      //`hsl(${hue}deg, 100%, ${((i / numBands) * 70) + 15}%)`;
+      
+      if (!alignBands) currAngle = Math.random() * Math.PI * 2;
+      let sign = Math.random() >= 0.5 ? 1 : -1;
+      if (!randomizeDirection) {
+        if (alternateDirection) sign = i % 2 === 1 ? 1 : -1;
+        else sign = 1;
+      }
+      
+      let nextAngle = currAngle + (toRad(randBetween(minAngle, maxAngle)) * sign);
+      let radius = i * bandSpacing;
+      let nextX1 = (canvas.width / 2) + (radius * Math.cos(currAngle));
+      let nextY1 = (canvas.height / 2) + (radius * Math.sin(currAngle));
+      let nextX2 = (canvas.width / 2) + (radius * Math.cos(nextAngle));
+      let nextY2 = (canvas.height / 2) + (radius * Math.sin(nextAngle));
+      
+      ctx.beginPath();
+      ctx.arc(canvas.width / 2, canvas.height / 2, radius, currAngle, nextAngle, sign === -1);
+      ctx.stroke();
+      if (connectBands) {
+        ctx.beginPath();
+        ctx.moveTo(currX, currY);
+        ctx.lineTo(nextX1, nextY1);
+        ctx.stroke();
+      }
+      
+      currAngle = nextAngle;
+      currX = nextX2;
+      currY = nextY2;
+    }
+  }
+  drawBands();
+  
+  function randomizeSettings() {
+    //if (!window.confirm("Are you sure you want to randomize all settings?")) return;
+    
+    let randomizeRange = element => element.value = Number(randBetween(Number(element.min), Number(element.max))).toMultipleOf(Number(element.step));
+    
+    randomizeRange(numBandsRange);
+    randomizeRange(hueRange);
+    rainbowCheckbox.checked = Math.random() >= 0.5;
+    randomizeRange(contrastRange);
+    randomizeRange(maxAngleRange);
+    minAngleRange.max = maxAngleRange.value;
+    randomizeRange(minAngleRange);
+    randomizeRange(bandThicknessRange);
+    randomizeRange(bandSpacingRange);
+    let dir = Math.floor(Math.random() * 3);
+    bandDirectionRadio1.checked = dir === 0;
+    bandDirectionRadio2.checked = dir === 1;
+    bandDirectionRadio3.checked = dir === 2;
+    connectBandsCheckbox.checked = Math.random() >= 0.5;
+    if (!connectBandsCheckbox.checked) alignBandsCheckbox.checked = Math.random() >= 0.5;
+    else alignBandsCheckbox.checked = true;
+    
+    updateSettings();
+  }
+  
+  function randomizeGeometrySettings() {
+    let randomizeRange = element => element.value = Number(randBetween(Number(element.min), Number(element.max))).toMultipleOf(Number(element.step));
+    
+    randomizeRange(numBandsRange);
+    randomizeRange(maxAngleRange);
+    minAngleRange.max = maxAngleRange.value;
+    randomizeRange(minAngleRange);
+    randomizeRange(bandSpacingRange);
+    let dir = Math.floor(Math.random() * 3);
+    bandDirectionRadio1.checked = dir === 0;
+    bandDirectionRadio2.checked = dir === 1;
+    bandDirectionRadio3.checked = dir === 2;
+    
+    updateSettings();
+  }
+  
+  let presetsArray = [
+    {
+      name: "Default",
+      numBands: 30,
+      hue: 60,
+      rainbow: false,
+      contrast: 75,
+      maxAngle: 360,
+      minAngle: 0,
+      bandThickness: 5,
+      bandSpacing: 15,
+      bandDirection: 3,
+      alignBands: true,
+      connectBands: true
+    },
+    {
+      name: "Classic Vinyl",
+      numBands: 50,
+      hue: 300,
+      rainbow: true,
+      contrast: 0,
+      maxAngle: 360,
+      minAngle: 90,
+      bandThickness: 10,
+      bandSpacing: 15,
+      bandDirection: 1,
+      alignBands: false,
+      connectBands: false
+    },
+    {
+      name: "Desolate Planet",
+      numBands: 50,
+      hue: 0,
+      rainbow: false,
+      contrast: 100,
+      maxAngle: 280,
+      minAngle: 235,
+      bandThickness: 5,
+      bandSpacing: 9,
+      bandDirection: 3,
+      alignBands: true,
+      connectBands: false
+    },
+    {
+      name: "Minimalist Logo",
+      numBands: 7,
+      hue: 240,
+      rainbow: false,
+      contrast: 100,
+      maxAngle: 270,
+      minAngle: 90,
+      bandThickness: 25,
+      bandSpacing: 50,
+      bandDirection: 1,
+      alignBands: false,
+      connectBands: false
+    },
+    {
+      name: "Mechanical Cyclone",
+      numBands: 150,
+      hue: 20,
+      rainbow: false,
+      contrast: 100,
+      maxAngle: 360,
+      minAngle: 0,
+      bandThickness: 8,
+      bandSpacing: 5,
+      bandDirection: 3,
+      alignBands: true,
+      connectBands: true
+    },
+    {
+      name: "Spiraling Zigzags",
+      numBands: 200,
+      hue: 100,
+      rainbow: true,
+      contrast: 75,
+      maxAngle: 25,
+      minAngle: 0,
+      bandThickness: 10,
+      bandSpacing: 3,
+      bandDirection: 3,
+      alignBands: true,
+      connectBands: true
+    },
+    {
+      name: "Chromatic Bands",
+      numBands: 35,
+      hue: 30,
+      rainbow: true,
+      contrast: 75,
+      maxAngle: 180,
+      minAngle: 90,
+      bandThickness: 25,
+      bandSpacing: 20,
+      bandDirection: 3,
+      alignBands: true,
+      connectBands: true
+    }
+  ];
+  
+  function loadPreset(n) {
+    let p = presetsArray[n];
+    
+    numBandsRange.value = numBandsRangeArray.indexOf(p.numBands);
+    hueRange.value = p.hue;
+    rainbowCheckbox.checked = p.rainbow;
+    contrastRange.value = p.contrast;
+    maxAngleRange.value = minAngleRange.max = p.maxAngle;
+    minAngleRange.value = p.minAngle;
+    bandThicknessRange.value = p.bandThickness;
+    bandSpacingRange.value = p.bandSpacing;
+    bandDirectionRadio1.checked = false;
+    bandDirectionRadio2.checked = false;
+    bandDirectionRadio3.checked = false;
+    if (p.bandDirection === 1) bandDirectionRadio1.checked = true;
+    else if (p.bandDirection === 2) bandDirectionRadio2.checked = true;
+    else if (p.bandDirection === 3) bandDirectionRadio3.checked = true;
+    alignBandsCheckbox.checked = p.alignBands;
+    connectBandsCheckbox.checked = p.connectBands;
+    
+    updateSettings();
+  }
+  
+  let numBandsRangeArray = [2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 150, 200];
+  
+  function updateSettings() {
+    numBands = numBandsTxt.innerHTML = numBandsRangeArray[Number(numBandsRange.value)];
+    
+    hue = hueTxt.innerHTML = Number(hueRange.value);
+    
+    rainbow = rainbowCheckbox.checked;
+    
+    contrast = contrastTxt.innerHTML = Number(contrastRange.value);
+    
+    maxAngle = maxAngleTxt.innerHTML = Number(maxAngleRange.value);
+    minAngleRange.max = maxAngle;
+    minAngle = minAngleTxt.innerHTML = Number(minAngleRange.value);
+    
+    bandThickness = bandThicknessTxt.innerHTML = Number(bandThicknessRange.value);
+    
+    bandSpacing = bandSpacingTxt.innerHTML = Number(bandSpacingRange.value);
+    
+    randomizeDirection = false;
+    alternateDirection = false;
+    if (bandDirectionRadio1.checked) randomizeDirection = true;
+    else if (bandDirectionRadio3.checked) alternateDirection = true;
+    
+    alignBands = alignBandsCheckbox.checked;
+    connectBands = connectBandsCheckbox.checked;
+    
+    drawBands();
+  }
+  
+  for (let i = 1; i < presetsArray.length; i++) {
+    let btn = document.createElement("button");
+    btn.innerHTML = presetsArray[i].name;
+    btn.className = "preset-btn";
+    btn.onclick = () => loadPreset(i);
+    presetsDiv.appendChild(btn);
+  }
+  
+  function downloadCanvas() {
+    let link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "bands.png";
+    link.click();
+  }
+</script>
+</body>
+</html>
