@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>Ternary Elementary Cellular Automaton ~ e4494s</title>
+    <style>
+      #canvas {
+        width: 300px;
+        height: 300px;
+        background-color: transparent;
+      }
+      
+      td {
+        padding: 15px;
+        font-weight: bold;
+      }
+      
+      input[type = number] {
+        border: 3px solid #ff9500; /* Accent color */
+        border-radius: 0;
+        width: 150px;
+      }
+      
+      .rulebtn {
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        font-style: italic;
+        margin: 5px;
+      }
+      
+      .gray {
+        background-color: rgb(255, 100, 255);
+        border-radius: 3px;
+      }
+      
+      label {
+        margin-right: 10px;
+      }
+      
+      .colorbutton {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        border: 1px solid black;
+        margin: 2px;
+      }
+      
+      .openbtn {
+        border: 1px solid black;
+        border-radius: 10px;
+        font-style: italic;
+        font-size: 10px;
+      }
+    </style>
+  </head>
+<body>
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; Ternary Elementary Cellular Automaton &mdash;&mdash;</h1>
+<b><u>Rule:</u></b> <input id = "ruletxt" type = "text" oninput = "setBase36Rule(this.value)">
+<button onclick = "randomizeRule()">Randomize</button>
+<br><br>
+<button onclick = "openRuleTable()" id = "ruletablebtn" class = "openbtn">Open rule table</button>
+<table>
+  <tr id = "ruletable" style = "display: none">
+    <td>
+      222 --> <span id = "ruletxt0">0</span>
+      <br>
+      221 --> <span id = "ruletxt1">0</span>
+      <br>
+      220 --> <span id = "ruletxt2">0</span>
+      <br>
+      212 --> <span id = "ruletxt3">0</span>
+      <br>
+      211 --> <span id = "ruletxt4">0</span>
+      <br>
+      210 --> <span id = "ruletxt5">0</span>
+      <br>
+      202 --> <span id = "ruletxt6">0</span>
+      <br>
+      201 --> <span id = "ruletxt7">0</span>
+      <br>
+      200 --> <span id = "ruletxt8">0</span>
+    </td>
+    <td>
+      122 --> <span id = "ruletxt9">0</span>
+      <br>
+      121 --> <span id = "ruletxt10">0</span>
+      <br>
+      120 --> <span id = "ruletxt11">0</span>
+      <br>
+      112 --> <span id = "ruletxt12">0</span>
+      <br>
+      111 --> <span id = "ruletxt13">0</span>
+      <br>
+      110 --> <span id = "ruletxt14">0</span>
+      <br>
+      102 --> <span id = "ruletxt15">0</span>
+      <br>
+      101 --> <span id = "ruletxt16">0</span>
+      <br>
+      100 --> <span id = "ruletxt17">0</span>
+    </td>
+    <td>
+      022 --> <span id = "ruletxt18">0</span>
+      <br>
+      021 --> <span id = "ruletxt19">0</span>
+      <br>
+      020 --> <span id = "ruletxt20">0</span>
+      <br>
+      012 --> <span id = "ruletxt21">0</span>
+      <br>
+      011 --> <span id = "ruletxt22">0</span>
+      <br>
+      010 --> <span id = "ruletxt23">0</span>
+      <br>
+      002 --> <span id = "ruletxt24">0</span>
+      <br>
+      001 --> <span id = "ruletxt25">0</span>
+      <br>
+      000 --> <span id = "ruletxt26">0</span>
+    </td>
+  </tr>
+</table>
+<br>
+<b><u>Starting Row:</u></b>
+<br>
+<input type = "radio" id = "startingrow0radio" name = "startingrow" oninput = "startingRow = 0; reset()" CHECKED>
+<label for = "startingrow0radio">Random cells</label>
+<input type = "radio" id = "startingrow1radio" name = "startingrow" oninput = "startingRow = 1; reset()">
+<label for = "startingrow1radio">[1]</label>
+<input type = "radio" id = "startingrow2radio" name = "startingrow" oninput = "startingRow = 2; reset()">
+<label for = "startingrow2radio">[2]</label>
+<input type = "radio" id = "startingrow3radio" name = "startingrow" oninput = "startingRow = 3; reset()">
+<label for = "startingrow3radio">[1][2]</label>
+<input type = "radio" id = "startingrow4radio" name = "startingrow" oninput = "startingRow = 4; reset()">
+<label for = "startingrow4radio">[2][1]</label>
+<br><br>
+<b><u>Grid Size:</u></b> <span id = "gridsizetxt">150x150</span>
+<br>
+<input type = "range" id = "gridsizerange" value = "150" min = "25" max = "500" step = "25" oninput = "setGridSize(Number(this.value))">
+<br><br>
+<button onclick = "openColorSelector()" id = "colordivbtn" class = "openbtn">Open color selector</button>
+<br><br>
+<div id = "colordiv" style = "display: none">
+  <b><u>Cell 0 Color:</u></b>
+  <br>
+  <input type = "text" value = "white" id = "cell0input" onchange = "updateColors()">
+  <button onclick = "cell0input.value = randHexColor(); updateColors()">Randomize</button>
+  <div id = "cell0colordiv"></div>
+  <br><br>
+  <b><u>Cell 1 Color:</u></b>
+  <br>
+  <input type = "text" value = "blue" id = "cell1input" onchange = "updateColors()">
+  <button onclick = "cell1input.value = randHexColor(); updateColors()">Randomize</button>
+  <div id = "cell1colordiv"></div>
+  <br><br>
+  <b><u>Cell 2 Color:</u></b>
+  <br>
+  <input type = "text" value = "black" id = "cell2input" onchange = "updateColors()">
+  <button onclick = "cell2input.value = randHexColor(); updateColors()">Randomize</button>
+  <div id = "cell2colordiv"></div>
+</div>
+<br>
+<canvas id = "canvas"></canvas>
+<br>
+<button onclick = "if (!running) step()">Step</button>
+<button onclick = "reset()">Reset</button>
+<button onclick = "start()" id = "runbtn">Run</button>
+<br><br>
+<button class = "download-canvas-btn" onclick = "downloadCanvas()">Download</button>
+<br><br><br><br>
+<b><u>Interesting Rules:</u></b>
+<br>
+<button class = "rulebtn" onclick = "setBase36Rule('9qbcdvo2')">Sprawling Cities <span class = "gray">(9qbcdvo2)</span></button>
+<button class = "rulebtn" onclick = "setBase36Rule('1ec40qpbm')">Shaded Pyramid <span class = "gray">(1ec40qpbm)</span></button>
+<button class = "rulebtn" onclick = "setBase36Rule('p9n7lmap')">Snowy Mountainside <span class = "gray">(p9n7lmap)</span></button>
+<button class = "rulebtn" onclick = "setBase36Rule('2mo7r591k')">Neon Bridges <span class = "gray">(2mo7r591k)</span></button>
+<button class = "rulebtn" onclick = "setBase36Rule('1rju81xoo')">Color Drip <span class = "gray">(1rju81xoo)</span></button>
+<button class = "rulebtn" onclick = "setBase36Rule('19lw5wen3')">Glacial Field <span class = "gray">(19lw5wen3)</span></button>
+<button class = "rulebtn" onclick = "setBase36Rule('nho1rcam')">Village on a Hill <span class = "gray">(nho1rcam)</span></button>
+<button class = "rulebtn" onclick = "setBase36Rule('iorbzj09')">Diagonal Lines <span class = "gray">(iorbzj09)</span></button>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 1000;
+  
+  let gridSize = 150;
+  let row = [];
+  let time = 0;
+  let startingRow = 0;
+  let running = false;
+  
+  let rule;
+  
+  let ruleTableOpen = false;
+  let colorSelectorOpen = false;
+  
+  let color = ["white", "blue", "black"];
+  
+  const MAX_RULES = 7625597484987; // 3^3^3
+  
+  function setRule(number) {
+    number = Math.floor(number.clamp(0, MAX_RULES));
+    rule = number.toString(3);
+    while (rule.length < 27) rule = "0" + rule;
+    for (let i = 0; i < 27; i++) document.getElementById("ruletxt" + i).innerHTML = rule[i];
+    ruletxt.value = (parseInt(rule, 3)).toString(36);
+    reset();
+  }
+  function setTernaryRule(ternaryNumber) {
+    setRule(parseInt(ternaryNumber, 3));
+  }
+  function setBase36Rule(base36Number) {
+    let dec = parseInt(base36Number, 36);
+    setRule(dec);
+  }
+  randomizeRule();
+  
+  function randomizeRule() {
+    let n = "";
+    for (let i = 0; i < 27; i++) n += String(Math.floor(Math.random() * 3));
+    setTernaryRule(n);
+  }
+  
+  function setGridSize(number) {
+    gridSize = number;
+    gridsizetxt.innerHTML = number + "x" + number;
+    reset();
+  }
+  
+  function step() {
+    let nextRow = [];
+    for (let i = 0; i < gridSize; i++) {
+      let pattern = row[(i - 1 + gridSize) % gridSize] + row[i] + row[(i + 1) % gridSize];
+      for (let j = 0; j < 27; j++) {
+        let k = (26 - j).toString(3);
+        while (k.length < 3) k = "0" + k;
+        if (pattern == k) {
+          nextRow[i] = rule[j];
+        }
+      }
+    }
+    row = nextRow;
+    drawRow();
+    time++;
+    if (time >= gridSize) {
+      running = false;
+      runbtn.innerHTML = "Run";
+    }
+    if (running) requestAnimationFrame(step);
+  }
+  
+  function start() {
+    if (running) {
+      running = false;
+      runbtn.innerHTML = "Run";
+    }
+    else {
+      running = true;
+      runbtn.innerHTML = "Stop";
+      step();
+    }
+  }
+  
+  function drawRow() {
+    let tileSize = canvas.width / gridSize;
+    for (let i = 0; i < gridSize; i++) {
+      ctx.fillStyle = color[Number(row[i])];
+      ctx.fillRect(i * tileSize, time * tileSize, tileSize, tileSize);
+    }
+  }
+  
+  function reset() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    time = 0;
+    row = [];
+    for (let i = 0; i < gridSize; i++) {
+      if (startingRow == 0) row.push(String(Math.floor(Math.random() * 3)));
+      else row.push("0");
+    }
+    if (startingRow == 1) row[Math.round(gridSize / 2)] = "1";
+    if (startingRow == 2) row[Math.round(gridSize / 2)] = "2";
+    if (startingRow == 3) {
+      row[Math.round(gridSize / 2)] = "1";
+      row[Math.round(gridSize / 2) + 1] = "2";
+    }
+    if (startingRow == 4) {
+      row[Math.round(gridSize / 2)] = "2";
+      row[Math.round(gridSize / 2) + 1] = "1";
+    }
+    drawRow();
+    time++;
+  }
+  
+  function openRuleTable() {
+    if (ruleTableOpen) {
+      ruleTableOpen = false;
+      ruletable.style.display = "none";
+      ruletablebtn.innerHTML = "Open rule table";
+    }
+    else {
+      ruleTableOpen = true;
+      ruletable.style.display = "block";
+      ruletablebtn.innerHTML = "Close rule table";
+    }
+  }
+  
+  function openColorSelector() {
+    if (colorSelectorOpen) {
+      colorSelectorOpen = false;
+      colordiv.style.display = "none";
+      colordivbtn.innerHTML = "Open color selector";
+    }
+    else {
+      colorSelectorOpen = true;
+      colordiv.style.display = "block";
+      colordivbtn.innerHTML = "Close color selector";
+    }
+  }
+  
+  function createColorBar(onclick) {
+    let color_bar = document.createElement("div");
+    for (let i = 0; i < 11; i++) {
+      let color = document.createElement("button");
+      color.className = "colorbutton";
+      color.onclick = () => eval(onclick);
+      let bg;
+      switch (i) {
+        case 0: bg = "red";
+        break;
+        case 1: bg = "orange";
+        break;
+        case 2: bg = "yellow";
+        break;
+        case 3: bg = "green";
+        break;
+        case 4: bg = "blue";
+        break;
+        case 5: bg = "purple";
+        break;
+        case 6: bg = "black";
+        break;
+        case 7: bg = "dimgray";
+        break;
+        case 8: bg = "gray";
+        break;
+        case 9: bg = "lightgray";
+        break;
+        case 10: bg = "white";
+        break;
+      }
+      color.style.background = bg;
+      color_bar.appendChild(color);
+    }
+    return color_bar;
+  }
+  
+  cell0colordiv.appendChild(createColorBar("cell0input.value = color.style.background; updateColors()"));
+  cell1colordiv.appendChild(createColorBar("cell1input.value = color.style.background; updateColors()"));
+  cell2colordiv.appendChild(createColorBar("cell2input.value = color.style.background; updateColors()"));
+  
+  function updateColors() {
+    color[0] = cell0input.style.borderColor = cell0input.value;
+    color[1] = cell1input.style.borderColor = cell1input.value;
+    color[2] = cell2input.style.borderColor = cell2input.value;
+  }
+  
+  function downloadCanvas() {
+    let link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "ternary-elementary.png";
+    link.click();
+  }
+</script>
+</body>
+</html>
