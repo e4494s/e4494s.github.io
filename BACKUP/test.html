@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png"/>
+    <title>Test ~ e4494s</title>
+    <style>
+      body {
+        font-family: monospace;
+      }
+      .title {
+        font-size: 15px;
+        text-align: center;
+      }
+      big {
+        font-size: 25px;
+      }
+    </style>
+  </head>
+<body>
+<p class = 'title' id = 'massamount'>You have <big>x</big> mass.</p>
+<p class = 'title' id = 'explanation'>Press M to generate mass.</p>
+<script>
+  let mass = localStorage.getItem('massL');
+  if (mass === null) {
+    mass = 10;
+    save('massL', mass);
+  }
+  //let mass = 10;
+  
+  
+  function frame() {
+    num();
+    send('massamount', `You have <big>${mass}</big> mass.`);
+  }
+  let frame_interval = setInterval(frame, 25);
+  
+  function saving() {
+    save('massL', mass);
+  }
+  let saving_interval = setInterval(saving, 1000);
+  
+  function num() {
+    mass = Number(mass);
+  }
+  function keyDownHandler(event) {
+    num();
+    if (event.keyCode == 77) mass *= 13;
+  }
+  addEventListener('keydown', keyDownHandler);
+</script>
+<script src = 'scripts/functions.js'></script>
+</body>
+</html>
