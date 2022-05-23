@@ -1,0 +1,268 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png"/>
+    <title>Animation ~ e4494s</title>
+    <style>
+      #canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+      
+      #topcanvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 2;
+      }
+    </style>
+  </head>
+<body>
+<canvas id = "canvas"></canvas>
+<canvas id = "topcanvas"></canvas>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth * 4;
+  canvas.height = window.innerHeight * 4;
+  const topctx = topcanvas.getContext("2d");
+  topcanvas.width = window.innerWidth * 4;
+  topcanvas.height = window.innerHeight * 4;
+  
+  topctx.lineWidth = 4;
+  
+  let mode = 1;
+  let tracing = true;
+  
+  let bgHue1 = Math.random() * 360;
+  let bgHue2 = bgHue1 + 45 + Math.random() * 270;
+  let background = [
+    new HSL(bgHue1, 100, 50),
+    new HSL(bgHue2, 100, 50)
+  ];
+  let background_angle = 0;
+  
+  let square = {};
+  square.x = canvas.width / 2;
+  square.y = canvas.height / 2;
+  square.lastX = square.x;
+  square.lastY = square.y;
+  square.angle = 0;
+  let a = (Math.random() * 360);
+  a = 45;
+  square.vx = 15 * Math.cos(a * (Math.PI / 180));
+  square.vy = 15 * Math.sin(a * (Math.PI / 180));
+  square.vAngle = Math.round(Math.random()) == 0 ? 3 : -3;
+  square.width = 250;
+  square.height = 250;
+  square.colors = [];
+  for (let i = 4; i > 0; i--) {
+    square.colors.push(new HSL(undefined, 100, 50));
+  }
+  square.colors.push(new HSL(0, 0, 0));
+  
+  square.circle = {};
+  square.circle.angle = Math.random() * 360;
+  square.circle.distance = (Math.random() * 500) + 250;
+  square.circle.x = square.circle.distance * Math.cos(square.circle.angle * (Math.PI / 180));
+  square.circle.y = square.circle.distance * Math.sin(square.circle.angle * (Math.PI / 180));
+  square.circle.vAngle = -square.vAngle;
+  square.circle.vDistance = 0;//-5;
+  square.circle.radius = 75;
+  square.circle.colors = [];
+  for (let i = 4; i > 0; i--) {
+    square.circle.colors.push(new HSL(undefined, 100, 60));
+  }
+  square.circle.colors.push(new HSL(0, 0, 100));
+  
+  square.render = function() {
+    this.x += this.vx;
+    if (this.x < (this.width / 2) * Math.SQRT2) {
+      this.x = (this.width / 2) * Math.SQRT2;
+      this.vx *= -1;
+      this.vAngle *= -1;
+    }
+    if (this.x > canvas.width - ((this.width / 2) * Math.SQRT2)) {
+      this.x = canvas.width - ((this.width / 2) * Math.SQRT2);
+      this.vx *= -1;
+      this.vAngle *= -1;
+    }
+    
+    this.y += this.vy;
+    if (this.y < (this.height / 2) * Math.SQRT2) {
+      this.y = (this.height / 2) * Math.SQRT2;
+      this.vy *= -1;
+      this.vAngle *= -1;
+    }
+    if (this.y > canvas.height - ((this.height / 2) * Math.SQRT2)) {
+      this.y = canvas.height - ((this.height / 2) * Math.SQRT2);
+      this.vy *= -1;
+      this.vAngle *= -1;
+    }
+    
+    this.angle += this.vAngle;
+    while (this.angle >= 360) this.angle -= 360;
+    
+    for (let i = 0; i < this.colors.length; i++) this.colors[i].increment(0.75, 0, 0);
+    
+    this.circle.angle += this.circle.vAngle;
+    this.circle.distance += this.circle.vDistance;
+    this.circle.x = this.circle.distance * Math.cos(this.circle.angle * (Math.PI / 180));
+    this.circle.y = this.circle.distance * Math.sin(this.circle.angle * (Math.PI / 180));
+    
+    ctx.save();
+    topctx.save()
+    ctx.translate(this.x, this.y);
+    topctx.translate(this.x, this.y);
+    this.circle.distance += this.circle.vDistance;
+    if (this.circle.distance > 750) {
+      this.circle.distance = 750;
+      this.circle.vDistance *= -1;
+    }
+    if (this.circle.distance < 250) {
+      this.circle.distance = 250;
+      this.circle.vDistance *= -1;
+    }
+    for (let i = this.circle.colors.length - 1; i >= 0; i--) {
+      ctx.fillStyle = this.circle.colors[i].print();
+      ctx.fillCircle(this.circle.x, this.circle.y, ((i + 1) / this.circle.colors.length) * this.circle.radius, ((i + 1) / this.circle.colors.length) * this.circle.radius);
+    }
+    if (tracing) {
+      topctx.lineTo(this.circle.x, this.circle.y);
+      topctx.stroke();
+    }
+    ctx.rotate(this.angle * (Math.PI / 180));
+    for (let i = this.colors.length - 1; i >= 0; i--) {
+      ctx.fillStyle = this.colors[i].print();
+      ctx.fillRectFromCenter(0, 0, ((i + 1) / this.colors.length) * this.width, ((i + 1) / this.colors.length) * this.height);
+    }
+    ctx.restore();
+    topctx.restore();
+  };
+  
+  function RGB(r, g, b) {
+    this.r = typeof r != "undefined" ? r : Math.round(Math.random() * 255);
+    this.g = typeof g != "undefined" ? g : Math.round(Math.random() * 255);
+    this.b = typeof b != "undefined" ? b : Math.round(Math.random() * 255);
+    this.vr = 1;
+    this.vg = 1;
+    this.vb = 1;
+    this.randomize = function() {
+      this.r = Math.round(Math.random() * 255);
+      this.g = Math.round(Math.random() * 255);
+      this.b = Math.round(Math.random() * 255);
+    };
+    this.invert = function() {
+      this.r = 255 - this.r;
+      this.g = 255 - this.g;
+      this.b = 255 - this.b;
+    };
+    this.increment = function(n) {
+      this.r += n * this.vr;
+      this.g += n * this.vg;
+      this.b += n * this.vb;
+      if (this.r > 255) {
+        this.r = 255;
+        this.vr = -1;
+      }
+      if (this.r < 0) {
+        this.r = 0;
+        this.vr = 1;
+      }
+      if (this.g > 255) {
+        this.g = 255;
+        this.vg = -1;
+      }
+      if (this.g < 0) {
+        this.g = 0;
+        this.vg = 1;
+      }
+      if (this.b > 255) {
+        this.b = 255;
+        this.vb = -1;
+      }
+      if (this.b < 0) {
+        this.b = 0;
+        this.vb = 1;
+      }
+    };
+    this.print = () => `rgb(${this.r},${this.g},${this.b})`;
+  }
+  
+  function HSL(h, s, l) {
+    this.h = typeof h != "undefined" ? h : Math.round(Math.random() * 360);
+    this.s = typeof s != "undefined" ? s : Math.round(Math.random() * 100);
+    this.l = typeof l != "undefined" ? l : Math.round(Math.random() * 100);
+    this.vs = 1;
+    this.vl = 1;
+    this.randomize = function() {
+      this.h = Math.round(Math.random() * 360);
+      this.s = Math.round(Math.random() * 100);
+      this.l = Math.round(Math.random() * 100);
+    };
+    this.invert = function() {
+      this.h = 360 - this.h;
+      this.s = 100 - this.s;
+      this.l = 100 - this.l;
+    };
+    this.increment = function(n1, n2, n3) {
+      this.h += n1;
+      this.s += n2 * this.vs;
+      this.l += n3 * this.vl;
+      while (this.h > 360) this.h -= 360;
+      
+      if (this.s > 100) {
+        this.s = 100;
+        this.vs = -1;
+      }
+      if (this.s < 0) {
+        this.s = 0;
+        this.vs = 1;
+      }
+      if (this.l > 100) {
+        this.l = 100;
+        this.vl = -1;
+      }
+      if (this.l < 0) {
+        this.l = 0;
+        this.vl = 1;
+      }
+    };
+    this.print = () => `hsl(${this.h}deg,${this.s}%,${this.l}%)`;
+  }
+  
+  CanvasRenderingContext2D.prototype.fillRectFromCenter = function(x, y, width, height) {
+    this.fillRect(x - width / 2, y - height / 2, width, height);
+  }
+  CanvasRenderingContext2D.prototype.fillCircle = function(x, y, radius) {
+    this.beginPath();
+    this.arc(x, y, radius, 0, Math.PI * 2);
+    this.fill();
+  }
+  
+  //
+  
+  function frame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.globalAlpha = 1;
+    if (mode == 1) {
+      square.render();
+      background_angle += 0.25;
+      let grad = `linear-gradient(${background_angle}deg`;
+      for (let i = 0; i < background.length; i++) grad += "," + background[i].print();
+      grad += ")";
+      canvas.style.background = grad;
+    }
+    requestAnimationFrame(frame);
+  }
+  frame();
+  
+  //
+</script>
+</body>
+</html>
