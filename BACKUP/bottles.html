@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel='icon' href='images/favicon.png' type='image/png'/>
+    <title>Bottles ~ e4494s</title>
+    <style>
+      body, button {
+        font-family: Arial;
+      }
+    </style>
+  </head>
+<body>
+<input type='number' id='bottleAmount'><button onclick='makeBottles()'>Go</button>
+<p id='bottleText'></p>
+<script>
+let plural1 = 's';
+let plural2 = 's';
+const MAX_VALUE = 500;
+let bottle_amount = document.getElementById('bottleAmount');
+let bottle_text = document.getElementById('bottleText');
+function makeBottles() {
+  bottle_amount.value = Math.round(bottle_amount.value);
+  if (bottle_amount.value > MAX_VALUE) bottle_amount.value = MAX_VALUE;
+  bottle_text.innerHTML = '';
+  for (i = bottle_amount.value; i > 0; i--) {
+    if (i == 1) plural1 = '';
+    else plural1 = 's';
+    if (i - 1 == 1) plural2 = '';
+    else plural2 = 's';
+    if (i != 1) bottle_text.innerHTML += `<br><br>${i} bottle${plural1} of beer on the wall, ${i} bottle${plural1} of beer. Take one down, pass it around, ${i - 1} bottle${plural2} of beer on the wall.`;
+    else bottle_text.innerHTML += `<br><br>${i} bottle${plural1} of beer on the wall, ${i} bottle${plural1} of beer. Take one down, pass it around, no more bottles of beer on the wall!`;
+  }
+}
+</script>
+</body>
+</html>
