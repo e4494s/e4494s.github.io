@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = 'icon'  href = 'images/favicon.png' type = 'image/png'/>
+    <title>Gibberish ~ e4494s</title>
+  </head>
+<body>
+<button onclick = 'writeGib()'>Generate</button>
+<p id = 'gibtext'></p>
+<script>
+  let gib = document.getElementById('gibtext');
+  let letters = 5;
+  let words = 15;
+  function getVowel() {
+    switch(Math.floor(Math.random() * 5)) {
+      case 0: return 'a';
+      break;
+      case 1: return 'e';
+      break;
+      case 2: return 'i';
+      break;
+      case 3: return 'o';
+      break;
+      case 4: return 'u';
+    }
+  }
+  
+  function getConsonant() {
+    switch(Math.floor(Math.random() * 21)) {
+      case 0: return 'b';
+      break;
+      case 1: return 'c';
+      break;
+      case 2: return 'd';
+      break;
+      case 3: return 'f';
+      break;
+      case 4: return 'g';
+      break;
+      case 5: return 'h';
+      break;
+      case 6: return 'j';
+      break;
+      case 7: return 'k';
+      break;
+      case 8: return 'l';
+      break;
+      case 9: return 'm';
+      break;
+      case 10: return 'n';
+      break;
+      case 11: return 'p';
+      break;
+      case 12: return 'q';
+      break;
+      case 13: return 'r';
+      break;
+      case 14: return 's';
+      break;
+      case 15: return 't';
+      break;
+      case 16: return 'v';
+      break;
+      case 17: return 'w';
+      break;
+      case 18: return 'x';
+      break;
+      case 19: return 'y';
+      break;
+      case 20: return 'z';
+    }
+  }
+  
+  function getGib() {
+    let i = 0;
+    let string = '';
+    while (i < letters) {
+      string += getConsonant();
+      while (string == 'x') string = getConsonant();
+      i++;
+      if (i < letters) string += getVowel();
+      i++;
+    }
+    return string + ' ';
+  }
+  
+  function writeGib() {
+    gib.innerHTML = '';
+    for (let i = 0; i < words; i++) gib.innerHTML += getGib();
+  }
+</script>
+</body>
+</html>
