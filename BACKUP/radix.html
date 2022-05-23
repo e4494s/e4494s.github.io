@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = 'icon'  href = 'images/favicon.png' type = 'image/png'/>
+    <title>Radix ~ e4494s</title>
+    <style>
+      html, body {
+        font-family: sans-serif;
+      }
+      input {
+        width: 35px;
+        border: 2px solid black;
+      }
+      input:focus, button:focus {
+        outline: none;
+      }
+      button {
+        border-radius: 4px;
+        border: 2px solid black;
+        background-image: linear-gradient(to top, white, gray);
+      }
+      button:active {
+        background-image: linear-gradient(to bottom, white, gray);
+      }
+    </style>
+  </head>
+<body>
+Count to <input type = 'number' id = 'numbertxt'> in base <input type = 'number' id = 'basetxt'>
+<button id = 'countbutton' onclick = 'count()'>Go</button>
+<p id = 'txt'></p>
+<script>
+  let numbertxt = document.getElementById('numbertxt');
+  let basetxt = document.getElementById('basetxt');
+  let txt = document.getElementById('txt');
+  let base, number;
+  const MAX_NUMBERS = 1000;
+  let can_count = true;
+  function count() {
+    number = numbertxt.value;
+    base = basetxt.value;
+    txt.innerHTML = '';
+    let i = 0;
+    while (i <= number) {
+      i++;
+      if (toOnes(i) >= (base - 1)) i += (9 - base);
+      txt.innerHTML += i;
+      if (i != number) txt.innerHTML += ', ';
+    }
+  }
+  function toOnes(num) {
+    while (num >= 10) num -= 10;
+    return num;
+  }
+</script>
+</body>
+</html>
