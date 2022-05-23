@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = 'icon'  href = 'images/favicon.png' type = 'image/png'/>
+    <title>Physics ~ e4494s</title>
+    <style>
+      #canvas {
+        width: 500px;
+        height: 500px;
+        border: 1px solid black;
+      }
+    </style>
+  </head>
+<body>
+<canvas id = 'canvas'>
+</canvas>
+<script>
+  const ctx = canvas.getContext('2d');
+  canvas.width = 500;
+  canvas.height = 500;
+  
+  let width = 50;
+  let height = 50;
+  
+  let gravity = 0.25;
+  let blackhole = {};
+  blackhole.power = 0.3;
+  blackhole.x = canvas.width - (width + 25);
+  blackhole.y = 25;
+  blackhole.image = new Image();
+  blackhole.image.src = 'images/blackhole.png';
+  
+  let ball = {};
+  ball.x = 25;
+  ball.y = 25;
+  ball.velocityX = 0;
+  ball.velocityY = 0;
+  //ball.gravity_acc = 0;
+  //ball.blackhole_acc = 0;
+  //ball.vector = {
+    //angle: 0,
+    //magnitude: 0
+  //};
+  ball.image = new Image();
+  ball.image.src = 'images/ball.png';
+  ball.moveTowards = function(targetX, targetY, targetPower) {
+    let distX = targetX - ball.x;
+    let distY = targetY - ball.y;
+    let angleToTarget = Math.atan(distY / distX);
+    let moveDistX = Math.cos(angleToTarget) * targetPower;
+    let moveDistY = Math.sin(angleToTarget) * targetPower;
+    ball.velocityX += moveDistX;
+    ball.velocityY += moveDistY;
+  };
+  
+  function frame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ball.moveTowards(ball.x, canvas.height - height, gravity);
+    ball.moveTowards(blackhole.x, blackhole.y, blackhole.power);
+    ball.x += ball.velocityX;
+    ball.y += ball.velocityY;
+    ctx.drawImage(ball.image, ball.x, ball.y, width, height);
+    ctx.drawImage(blackhole.image, blackhole.x, blackhole.y, width, height);
+    requestAnimationFrame(frame);
+  }
+  frame();
+  
+  function mouseMoveHandler(e) {
+    blackhole.x = e.clientX;
+    blackhole.y = e.clientY;
+  }
+  addEventListener('mousemove', mouseMoveHandler);
+</script>
+</body>
+</html>
