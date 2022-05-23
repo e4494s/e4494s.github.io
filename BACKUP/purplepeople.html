@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = 'icon'  href = 'images/favicon.png' type = 'image/png'/>
+    <title>Purple People ~ e4494s</title>
+    <style>
+      #canvas {
+        position: absolute;
+        left: 0;
+        top: 0;
+        background-image: url('images/cardboardbackground.jpg');
+        cursor: pointer;
+      }
+    </style>
+  </head>
+<body>
+<canvas id = 'canvas'></canvas>
+<script>
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const rct = canvas.getBoundingClientRect();
+  
+  let people = [];
+  let len = 0;
+  let scale = 0.35;
+  let sizeW = 0;
+  let sizeH = 0;
+  let speed = 1;
+  let keys_down = false;
+  let max_people = 30;
+  let counter = 0;
+  let will_switch = true;
+  let can_switch = true;
+  //let mouse_down = false;
+  
+  const TERMINAL_VELOCITY = speed * 5;
+  //const TERMINAL_VELOCITY = 1e+5;
+  const REPEAT = 10;
+  const FPS = 40;
+  
+  
+  function Person(xPos, yPos) {
+    this.x = xPos;
+    this.y = yPos;
+    this.velocity_x = 0;
+    this.velocity_y = 0;
+    this.image = new Image();
+    this.image.src = 'images/person/left_still.png';
+  }
+  Person.prototype.render = function() {
+    this.x += this.velocity_x;
+    this.y += this.velocity_y;
+    sizeH = this.image.height * scale;
+    sizeW = this.image.width * scale;
+    if (this.y < 0) { // Don't trail off the top
+      this.y = 0;
+      if (keys_down) this.velocity_y = 0;
+      else this.velocity_y *= -1;
+    }
+    if (this.y + sizeH > canvas.height) { // Don't trail off the bottom
+      this.y = canvas.height - sizeH;
+      if (keys_down) this.velocity_y = 0;
+      else this.velocity_y *= -1;
+    }
+    if (this.x < 0) { // Don't trail off the left
+      this.x = 0;
+      if (keys_down) this.velocity_x = 0;
+      else this.velocity_x *= -1;
+    }
+    if (this.x + sizeW > canvas.width) { // Don't trail off the right
+      this.x = canvas.width - sizeW;
+      if (keys_down) this.velocity_x = 0;
+      else this.velocity_x *= -1;
+    }
+    /*
+    if (coin() == 1 && this.velocity_x < TERMINAL_VELOCITY) {
+      if (this.velocity_x + speed > 0 || counter1 >= REPEAT) {
+        this.velocity_x += speed;
+        if (counter1 >= REPEAT && this.velocity_x > 0) counter1 = 0;
+      }
+      else counter1++;
+    }
+    else if (this.velocity_x > -TERMINAL_VELOCITY) {
+      if (this.velocity_x - speed < 0 || counter2 >= REPEAT) {
+        this.velocity_x -= speed;
+        if (counter2 >= REPEAT && this.velocity_x < 0) counter2 = 0;
+      }
+      else counter2++;
+    }
+    */
+    
+    /*
+    if (coin() == 1 && this.velocity_x < TERMINAL_VELOCITY) {
+      if (this.velocity_x + speed < 0 || counter1 >= REPEAT) this.velocity_x += speed;
+      else counter1++;
+    }
+    else {if (this.velocity_x > -TERMINAL_VELOCITY) {
+      if (this.velocity_x - speed > 0 || counter2 >= REPEAT) this.velocity_x -= speed;
+      else counter2++;
+    }}
+    */
+    
+    /*
+    if (this.velocity_x > 0 && this.velocity_x - speed < 0) will_switch = true;
+    if (this.velocity_x > 0 && this.velocity_x - speed > 0) will_switch = false;
+    if (this.velocity_x < 0 && this.velocity_x + speed > 0) will_switch = true;
+    if (this.velocity_x < 0 && this.velocity_x + speed < 0) will_switch = true;
+    if (counter >= REPEAT) {
+      can_switch = true;
+    }
+    else if (counter < REPEAT) counter++;
+    if (keys_down) can_switch = false;
+    
+    if (coin() == 1 && this.velocity_x < TERMINAL_VELOCITY && !will_switch) this.velocity_x += speed;
+    else if (this.velocity_x > -TERMINAL_VELOCITY && !will_switch) this.velocity_x -= speed;
+    if (will_switch && can_switch) {
+      if (this.velocity_x < 0) this.velocity_x += 1;
+      else this.velocity_x -= 1;
+      counter = 0;
+    }
+    */
+    if (coin() == 1 && this.velocity_x < TERMINAL_VELOCITY) this.velocity_x += speed;
+    else if (this.velocity_x > -TERMINAL_VELOCITY) this.velocity_x -= speed;
+    if (coin() == 1 && this.velocity_y < TERMINAL_VELOCITY) this.velocity_y += speed;
+    else if (this.velocity_y > -TERMINAL_VELOCITY) this.velocity_y -= speed;
+    if (this.velocity_x < -TERMINAL_VELOCITY) this.velocity_x = -TERMINAL_VELOCITY;
+    if (this.velocity_x > TERMINAL_VELOCITY) this.velocity_x = TERMINAL_VELOCITY;
+    if (this.velocity_y < -TERMINAL_VELOCITY) this.velocity_y = -TERMINAL_VELOCITY;
+    if (this.velocity_y > TERMINAL_VELOCITY) this.velocity_y = TERMINAL_VELOCITY;
+    if (this.velocity_x < 0) this.image.src = 'images/person/left_still.png';
+    if (this.velocity_x > 0) this.image.src = 'images/person/right_still.png';
+    ctx.drawImage(this.image, this.x, this.y, sizeW, sizeH);
+  }
+  
+  Person.prototype.walkTo = function(newX, newY) {
+    this.x = newX;
+    this.y = newY;
+  }
+  
+  function frame() {
+    clear();
+    len = people.length;
+    for (i = 0; i < len; i++) people[i].render();
+  }
+  let frame_interval = setInterval(frame, 1000 / FPS);
+  
+  function makePerson(personX, personY) {
+    let new_person = new Person(personX, personY);
+    people.push(new_person);
+  }
+  makePerson(canvas.width / 2, canvas.height / 2);
+  
+  function clear() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  
+  function mouseDownHandler(e) {
+    if (people.length <= max_people) makePerson(e.clientX - (sizeW / 2), e.clientY - (sizeH / 2));
+    if (people.length >= max_people) {
+      //mouse_down = true;
+      for (let i = 0; i < len; i++) people[i].walkTo(e.clientX - (sizeW / 2), e.clientY - (sizeH / 2));
+      document.getElementById('canvas').style = 'cursor: default';
+    }
+  }
+  addEventListener('mousedown', mouseDownHandler);
+  
+  /*function mouseMoveHandler(e) {
+    if (mouse_down) {for (let i = 0; i < len; i++) people[i].walkTo(e.clientX - (sizeW / 2), e.clientY - (sizeH / 2));}
+  }
+  addEventListener('mousemove', mouseMoveHandler);
+  
+  function mouseUpHandler(e) {
+    if (e.which == 1) {mouse_down = false;}
+  }
+  addEventListener('mouseup', mouseUpHandler);*/
+  
+  
+  
+  
+  function keyDownHandler(e) {
+    len = people.length;
+    if (e.keyCode == 37) {for (i = 0; i < len; i++) people[i].velocity_x -= 5;keys_down = true;} // Left arrow key pressed, propel left
+    if (e.keyCode == 38) {for (i = 0; i < len; i++) people[i].velocity_y -= 5;keys_down = true;} // Up arrow key pressed, propel up
+    if (e.keyCode == 39) {for (i = 0; i < len; i++) people[i].velocity_x += 5;keys_down = true;} // Right arrow key pressed, propel right
+    if (e.keyCode == 40) {for (i = 0; i < len; i++) people[i].velocity_y += 5;keys_down = true;} // Down arrow key pressed, propel down
+  }
+  addEventListener('keydown', keyDownHandler);
+  
+  function keyUpHandler(e) {
+    if (e.keyCode == 37 || e.keyCode == 38 || e.keyCode == 39 || e.keyCode == 40) keys_down = false;
+  }
+  addEventListener('keyup', keyUpHandler);
+  
+  function coin() {
+    return Math.round(Math.random());
+  }
+</script>
+</body>
+</html>
