@@ -1,0 +1,207 @@
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 1200;
+  let canvasRatio = canvas.width / 500;
+  let canvasRect = canvas.getBoundingClientRect();
+  let canvasRunning = false;
+  
+  let Gravity = {
+    power: 0.25,
+    angle: 90
+  };
+  
+  let terminalVelocity = 15;
+  let maxBalls = 300;
+  let ballDecay = 0.05;
+  let ballSize = 15;
+  let slowMode = false;
+  
+  let Mouse = {
+    down: false,
+    draggingBlackHole: false,
+    blackHoleOffsetX: 0,
+    blackHoleOffsetY: 0
+  };
+  
+  let BlackHole = {
+    x: 600,
+    y: 1110,
+    radius: 75,
+    power: 0.25
+  };
+  BlackHole.render = function() {
+    ctx.strokeStyle = ctx.shadowColor = Mouse.draggingBlackHole ? "hsl(270deg, 100%, 60%)" : "hsl(270deg, 100%, 40%)";
+    ctx.shadowBlur = 15;
+    ctx.lineWidth = 3;
+    for (let i = 0; i < 6; i++) ctx.strokeCircle(this.x, this.y, this.radius);
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "black";
+    ctx.fillCircle(this.x, this.y, this.radius);
+  };
+  
+  let Circle = {
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    radius: 400,
+    thickness: 3
+  };
+  Circle.render = function() {
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = this.thickness * 2;
+    ctx.strokeCircle(this.x, this.y, this.radius);
+    ctx.lineWidth = this.thickness;
+    ctx.strokeCircle(this.x, this.y, this.radius + (this.thickness * 4));
+  };
+  
+  function Ball(x, y) {
+    this.x = x;
+    this.y = y;
+    let a = Math.random() * Math.PI * 2;
+    let m = Math.random() * 4;
+    this.vx = m * Math.cos(a);
+    this.vy = m * Math.sin(a);
+    this.color = `hsl(${Math.random() * 360}deg, 100%, 50%)`;
+    this.radius = randBetween(ballSize / 3, ballSize);
+  }
+  Ball.prototype.render = function() {
+    this.x += this.vx;
+    this.y += this.vy;
+    
+    this.radius -= Math.random() * ballDecay;
+    if (this.radius <= 0) {
+      ballArray.splice(ballArray.indexOf(this), 1);
+      return;
+    }
+    
+    let cx = this.x - Circle.x;
+    let cy = this.y - Circle.y;
+    if ((cx * cx) + (cy * cy) >= (Circle.radius - this.radius - Circle.thickness) * (Circle.radius - this.radius - Circle.thickness)) {
+      let angle = Math.atan2(cy, cx);
+      
+      this.x = Circle.x + ((Circle.radius - this.radius - Circle.thickness) * Math.cos(angle));
+      this.y = Circle.y + ((Circle.radius - this.radius - Circle.thickness) * Math.sin(angle));
+      
+      let normal = angle + (Math.PI / 2);
+      
+      let resultX = this.vx - (2 * ((this.vx * Math.cos(normal)) + (this.vy * Math.sin(normal))) * Math.cos(normal));
+      let resultY = this.vy - (2 * ((this.vx * Math.cos(normal)) + (this.vy * Math.sin(normal))) * Math.sin(normal));
+      
+      this.vx = -resultX;
+      this.vy = -resultY;
+    }
+    else {
+      //this.vy += Gravity.power * Math.sin(toRad(Gravity.angle));
+      //this.vx += Gravity.power * Math.cos(toRad(Gravity.angle));
+      let dx = BlackHole.x - this.x;
+      let dy = BlackHole.y - this.y;
+      let angleTo = Math.atan2(dy, dx);
+      this.vx += BlackHole.power * Math.cos(angleTo);
+      this.vy += BlackHole.power * Math.sin(angleTo);
+    }
+    
+    if (Math.abs(this.vx) >= terminalVelocity) this.vx = terminalVelocity * Math.sign(this.vx);
+    if (Math.abs(this.vy) >= terminalVelocity) this.vy = terminalVelocity * Math.sign(this.vy);
+    
+    ctx.fillStyle = this.color;
+    ctx.fillCircle(this.x, this.y, this.radius);
+  };
+  let ballArray = [];
+  
+  function frame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    Circle.render();
+    
+    BlackHole.render();
+    
+    for (let i = 0; i < ballArray.length; i++) ballArray[i].render();
+    
+    if (canvasRunning) {
+      if (slowMode) setTimeout(() => requestAnimationFrame(frame), 50);
+      else requestAnimationFrame(frame);
+    }
+  }
+  frame();
+  
+  function startCanvas() {
+    if (canvasRunning) canvasRunning = false;
+    else {
+      canvasRunning = true;
+      frame();
+    }
+  }
+  
+  canvas.addEventListener("mousedown", e => {
+    if (!canvasRunning) return;
+    e.preventDefault();
+    Mouse.down = true;
+    canvasRect = canvas.getBoundingClientRect();
+    let eX = (e.clientX - canvasRect.left) * canvasRatio;
+    let eY = (e.clientY - canvasRect.top) * canvasRatio;
+    let dx = eX - BlackHole.x;
+    let dy = eY - BlackHole.y;
+    let distSq = (dx * dx) + (dy * dy);
+    if (distSq <= BlackHole.radius * BlackHole.radius) {
+      Mouse.draggingBlackHole = true;
+      Mouse.blackHoleOffsetX = dx;
+      Mouse.blackHoleOffsetY = dy;
+    }
+    else {
+      Mouse.draggingBlackHole = false;
+      ballArray.push(new Ball(eX, eY));
+      while (ballArray.length > maxBalls) ballArray.shift();
+    }
+  });
+  window.addEventListener("mouseup", e => {
+    if (!canvasRunning) return;
+    Mouse.down = false;
+    Mouse.draggingBlackHole = false;
+  });
+  canvas.addEventListener("mousemove", e => {
+    if (!canvasRunning || !Mouse.down) return;
+    e.preventDefault();
+    canvasRect = canvas.getBoundingClientRect();
+    let eX = (e.clientX - canvasRect.left) * canvasRatio;
+    let eY = (e.clientY - canvasRect.top) * canvasRatio;
+    if (Mouse.draggingBlackHole) {
+      BlackHole.x = eX - Mouse.blackHoleOffsetX;
+      BlackHole.y = eY - Mouse.blackHoleOffsetY;
+    }
+    else {
+      ballArray.push(new Ball(eX, eY));
+      while (ballArray.length > maxBalls) ballArray.shift();
+    }
+  });
+  
+  function updateSettings() {
+    ballDecay = Number(ballDecayRange.value) / 1000;
+    ballDecayTxt.innerHTML = (Number(ballDecayRange.value) / 1000).toFixed(3);
+    slowMode = slowModeCheckbox.checked;
+    BlackHole.power = Number(blackHolePowerRange.value) / 100;
+    blackHolePowerTxt.innerHTML = (Number(blackHolePowerRange.value) / 100).toFixed(2);
+    if (blackHoleRepelsCheckbox.checked) BlackHole.power *= -1;
+    ballSize = ballSizeTxt.innerHTML = Number(ballSizeRange.value);
+  }
+  
+  function randomizeBalls() {
+    for (let i = 0; i < ballArray.length; i++) {
+      let a = Math.random() * Math.PI * 2;
+      let r = Math.random() * (Circle.radius - Circle.thickness - ballArray[i].radius);
+      ballArray[i].x = Circle.x + (r * Math.cos(a));
+      ballArray[i].y = Circle.y + (r * Math.sin(a));
+      a = Math.random() * Math.PI * 2;
+      let m = Math.random() * 4;
+      ballArray[i].vx = m * Math.cos(a);
+      ballArray[i].vy = m * Math.sin(a);
+    }
+  }
+  
+  function centerBalls() {
+    for (let i = 0; i < ballArray.length; i++) {
+      ballArray[i].x = Circle.x;
+      ballArray[i].y = Circle.y;
+      let a = Math.random() * Math.PI * 2;
+      let m = Math.random() * 4;
+      ballArray[i].vx = m * Math.cos(a);
+      ballArray[i].vy = m * Math.sin(a);
+    }
+  }
