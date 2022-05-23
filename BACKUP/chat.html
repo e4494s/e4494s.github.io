@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <title>Lonely Chat Room ~ e4494s</title>
+    <style>
+      body, html {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        margin: 0;
+      }
+      body {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background-color: lightgray;
+        font-size: 14px;
+      }
+      
+      body, input, button {
+        font-family: monospace;
+      }
+      
+      #layout-table {
+        width: 100%;
+        height: 100%;
+        padding: 40px;
+      }
+      
+      #chat-messages-td, #typing-box-td, #chat-box-td, #profile-box-td {
+        width: 100%;
+        height: 100%;
+      }
+      
+      #chat-messages {
+        padding: 5px;
+        background-color: white;
+        border: 3px solid gray;
+        border-bottom: none;
+        border-radius: 5px 5px 0 0;
+        width: 100%;
+        height: 100%;
+        overflow-y: scroll;
+        line-height: 20px;
+      }
+      
+      #typing-box {
+        background-color: white;
+        border: 3px solid gray;
+        border-top: none;
+        padding: 5px;
+        width: 100%;
+        height: 15px;
+        font-size: 12px;
+        font-style: italic;
+      }
+      
+      #chat-box {
+        background-color: white;
+        border: 3px solid gray;
+        border-top: none;
+        border-radius: 0;
+        padding: 5px;
+        width: 100%;
+      }
+      
+      #profile-box {
+        background-color: white;
+        border: 3px solid gray;
+        border-top: none;
+        border-radius: 0 0 5px 5px;
+        padding: 5px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        width: 100%;
+      }
+      
+      #new-msg-content {
+        padding: 4px;
+        border: 2px solid rgb(50, 50, 50);
+        border-radius: 5px;
+        width: 50%;
+      }
+      #new-msg-content:focus {
+        outline: none;
+      }
+      #new-msg-content::placeholder {
+        color: rgb(150, 150, 150);
+        font-style: italic;
+      }
+      
+      #talk-btn {
+        background-color: rgb(150, 150, 255);
+        border-radius: 25px;
+        font-style: italic;
+        font-size: 12px;
+      }
+      #talk-btn:hover {
+        background-color: rgb(100, 100, 255);
+      }
+      #talk-btn:active {
+        background-color: rgb(50, 50, 255);
+      }
+      
+      #help-btn {
+        background-color: rgb(100, 255, 100);
+        border-radius: 25px;
+        font-style: italic;
+        font-size: 12px;
+      }
+      #help-btn:hover {
+        background-color: rgb(50, 200, 50);
+      }
+      #help-btn:active {
+        background-color: rgb(0, 150, 0);
+      }
+      
+      .profile-btn {
+        font-size: 11px;
+        border: 2px solid black;
+        margin-top: 10px;
+      }
+      
+      button {
+        border: 2px solid black;
+        border-radius: 5px;
+        background-color: white;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      button:hover {
+        background-color: lightgray;
+      }
+      button:active {
+        background-color: gray;
+      }
+      button:focus {
+        outline: none;
+      }
+      
+      .message {
+        display: block;
+        margin-bottom: 20px;
+        margin-top: 10px;
+      }
+      
+      .username {
+        padding: 3px;
+        margin-left: 7px;
+        margin-right: 7px;
+        font-weight: bold;
+        background-color: lightgray;
+        border-radius: 5px;
+      }
+      
+      #username-span {
+        background-color: rgb(0, 220, 220);
+      }
+      
+      .time-stamp {
+        color: rgb(150, 150, 150);
+        font-size: 12px;
+        font-style: italic;
+      }
+      
+      .little-text {
+        font-size: 11px;
+      }
+      
+      .embed {
+        background-color: #a6a6a6;
+        border: 2px solid dimgray;
+        border-radius: 5px;
+        padding: 10px;
+        margin-top: 10px;
+      }
+      
+      .embed-title {
+        font-style: italic;
+        color: #242424;
+      }
+      
+      hr {
+        border: none;
+        border-top: 1px solid black;
+      }
+    </style>
+  </head>
+<body onload = "init()">
+<table id = "layout-table" cellspacing = "0" cellpadding = "0">
+  <tr>
+    <td id = "chat-messages-td">
+      <div id = "chat-messages"></div>
+    </td>
+  </tr>
+  <tr>
+    <td id = "typing-box-td">
+      <div id = "typing-box"></div>
+    </td>
+  </tr>
+  <tr>
+    <td id = "chat-box-td">
+      <div id = "chat-box">
+        <input id = "new-msg-content" maxlength = "500" placeholder = "Type something here..." autocomplete = "off" spellcheck = "false">
+        <button id = "send-btn" onclick = "sendNewMessage()">Send</button>
+        <button id = "talk-btn" onclick = "talkForMe()">Talk for me</button>
+        <button id = "help-btn" onclick = "sendHelpMessage()">Help</button>
+      </div>
+    </td>
+  </tr>
+  <tr>
+    <td id = "profile-box-td">
+      <div id = "profile-box">
+        <i>Logged in:</i><span class = "username" id = "username-span" style = "visibility: hidden"></span>
+        <br>
+        <button class = "profile-btn" onclick = "changeUsername()">Change username</button>
+        <button class = "profile-btn" onclick = "changeUserColor()">Change color</button>
+        <br><br>
+        <div>You and <b>gary271</b> have messaged a total of <span id = "message-count">0</span> time<span id = "message-count-plural">s</span>.</div>
+      </div>
+    </td>
+  </tr>
+</table>
+<script src = "scripts/main.js"></script>
+<script>
+  let chatMessages = document.getElementById("chat-messages");
+  let typing = document.getElementById("typing-box");
+  let newMsgText = document.getElementById("new-msg-content");
+  let sendBtn = document.getElementById("send-btn");
+  let usernameSpan = document.getElementById("username-span");
+  let messageCountSpan = document.getElementById("message-count");
+  let messageCountPlural = document.getElementById("message-count-plural");
+  
+  let AIColor = "rgb(220, 220, 0)";
+  let userColor = "";
+  
+  let AIName = "gary271";
+  let username = "";
+  
+  let totalMessages = 0;
+  
+  function addMessage(username, content, isAI) {
+    content = content.trim();
+    if (content == "") return;
+    
+    let msg = document.createElement("div");
+    msg.className = "message";
+    
+    let time = document.createElement("span");
+    time.className = "time-stamp";
+    time.innerHTML = (new Date()).formatDate();
+    msg.appendChild(time);
+    
+    let name = document.createElement("span");
+    name.className = "username";
+    name.innerHTML = username;
+    name.style.backgroundColor = isAI ? AIColor : userColor;
+    msg.appendChild(name);
+    
+    let text = document.createElement("span");
+    text.innerText = content;
+    msg.appendChild(text);
+    
+    chatMessages.appendChild(msg);
+    msg.scrollIntoView();
+    
+    totalMessages++;
+    messageCountSpan.innerHTML = totalMessages;
+    if (totalMessages == 1) messageCountPlural.innerHTML = "";
+    else messageCountPlural.innerHTML = "s";
+    
+    let delay = randBetween(250, 500);
+    
+    if (!isAI) {
+      setTimeout(() => {
+        typing.innerHTML = "<b>" + AIName + "</b> is typing...";
+        respondMessage(content);
+      }, delay);
+    }
+  }
+  
+  function addEmbed(username, element, isAI) {
+    let msg = document.createElement("div");
+    msg.className = "message";
+    
+    let time = document.createElement("span");
+    time.className = "time-stamp";
+    time.innerHTML = (new Date()).formatDate();
+    msg.appendChild(time);
+    
+    let name = document.createElement("span");
+    name.className = "username";
+    name.innerHTML = username;
+    name.style.backgroundColor = isAI ? AIColor : userColor;
+    msg.appendChild(name);
+    
+    let text = document.createElement("div");
+    text.className = "embed";
+    msg.appendChild(text);
+    
+    if (typeof element === "string") text.innerHTML = element;
+    else text.appendChild(element);
+    
+    chatMessages.appendChild(msg);
+    msg.scrollIntoView();
+    
+    totalMessages++;
+    messageCountSpan.innerHTML = totalMessages;
+    if (totalMessages == 1) messageCountPlural.innerHTML = "";
+    else messageCountPlural.innerHTML = "s";
+  }
+  
+  function sendNewMessage() {
+    addMessage(username, newMsgText.value, false);
+    newMsgText.value = "";
+    newMsgText.focus();
+  }
+  
+  Date.prototype.formatDate = function() {
+    let hours = this.getHours();
+    let meridian = "am";
+    if (hours > 12) {
+      hours -= 12;
+      meridian = "pm";
+    }
+    
+    let minutes = String(this.getMinutes());
+    minutes = minutes.padStart(2, "0");
+    
+    return hours + ":" + minutes + meridian;
+  };
+  
+  function randLightColor() {
+    return `rgb(${randBetween(128, 235)}, ${randBetween(128, 235)}, ${randBetween(128, 235)})`;
+  }
+  
+  newMsgText.addEventListener("keydown", e => {
+    if (e.key == "Enter" || e.code == "Enter") sendBtn.click();
+  });
+  
+  //
+  
+  function coin() {
+    return Math.random() >= 0.5;
+  }
+  
+  let adjList = ["Lonely", "Alone", "Singular", "Solo", "Lone", "Solitary", "Single", "Lonesome", "Abandoned"];
+  let nounList = ["Dude", "Guy", "Person", "Bro", "Man", "Gentleman", "Fellow", "Chap", "Bloke", "Lad", "Mate", "Individual", "Fella"];
+  let dashList = ["", "-", "_", "."];
+  
+  function randUsername() {
+    let name = randItem(adjList) +
+      randItem(dashList) +
+      randItem(nounList) +
+      randDigits(Math.floor(Math.random() * 4));
+    if (coin()) name = coin() ? name.toLowerCase() : name.toUpperCase();
+    return name;
+  }
+  
+  function randDigits(n) {
+    let digits = "";
+    for (let i = 0; i < n; i++) digits += String(Math.floor(Math.random() * 10));
+    return digits;
+  }
+  
+  function changeUsername() {
+    username = randUsername();
+    usernameSpan.innerHTML = username;
+  }
+  function changeUserColor() {
+    userColor = `hsl(${Math.random() * 360}deg, ${Math.random() * 100}%, ${randBetween(50, 70)}%)`;
+    usernameSpan.style.backgroundColor = userColor;
+  }
+  
+  String.prototype.repeatRandom = function() {
+    return this.repeat(randBetween(1, 8));
+  };
+  String.prototype.includesArray = function(array) {
+    for (let i = 0; i < array.length; i++) {
+      if (this.includes(array[i])) return true;
+    }
+    return false;
+  };
+  
+  
+  function randItem(array) {
+    return array[Math.floor(Math.random() * array.length)];
+  }
+  
+  function talkForMe() {
+    let text = "";
+    switch (Math.floor(Math.random() * 12)) {
+      case 0: text = randItem(helloList);
+      break;
+      case 1: text = randItem(byeList);
+      break;
+      case 2: text = randItem(gibberishSentenceList);
+      break;
+      case 3: text = randItem(vagueSentenceList);
+      break;
+      case 4: text = randItem(randomColorList);
+      break;
+      case 5: text = randItem(randomStaticList);
+      break;
+      case 6: text = randItem(scrabbleScoreList) + " " + username.toLowerCase().replace(/[\W\d_]/gi, "");
+      break;
+      case 7: text = randItem(randomStringList);
+      break;
+      case 8: text = randItem(randomDiceList) + " " + Math.floor(randBetween(1, 50));
+      break;
+      case 9: text = randItem(zalgoTextList) + " " + username;
+      break;
+      case 10: text = randItem(randomSpaceList);
+      break;
+      case 11: text = randItem(randomPixelsList);
+      break;
+    }
+    newMsgText.value = text;
+    sendNewMessage();
+  }
+  
+  function sendHelpMessage() {
+    newMsgText.value = "help";
+    sendNewMessage();
+  }
+  
+  function init() {
+    addMessage(AIName, "Welcome to the lonely chat room! Type Help for a list of commands.", true);
+    changeUsername();
+    changeUserColor();
+    usernameSpan.style.visibility = "visible";
+    newMsgText.focus();
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  function respondMessage(content) {
+    let response = "";
+    let text = content.toLowerCase().replace(/[^\w\s\d]/gi, "");
+    text += " ";
+    
+    let delay = randBetween(500, 1000);
+    delay *= Math.random() * 2;
+    if (delay < 500) delay = 500;
+    
+    if (text.includesArray(helloList)) response = (randItem(helloResponseList))();
+    if (text.includesArray(byeList)) response = (randItem(byeResponseList))();
+    if (text.includesArray(areYouList)) response = (randItem(areYouResponseList))();
+    
+    
+    if (text.includesArray(gibberishSentenceList)) response = gibberishSentence();
+    if (text.includesArray(vagueSentenceList)) response = vagueSentence();
+    if (text.includesArray(randomStringList)) response = randomString();
+    if (text.includesArray(scrabbleScoreList)) response = scrabbleScore(text.replace("scrabble", ""));
+    if (text.includesArray(zalgoTextList)) response = zalgoText(content.replace("zalgo", ""));
+    if (text.includesArray(randomColorList)) {
+      drawRandomColor(delay);
+      return;
+    }
+    if (text.includesArray(randomStaticList)) {
+      drawRandomStatic(delay);
+      return;
+    }
+    if (text.includesArray(randomPixelsList)) {
+      drawRandomPixels(delay, text.replace("pixels", ""));
+      return;
+    }
+    if (text.includesArray(randomFishList)) {
+      drawRandomFish(delay);
+      return;
+    }
+    if (text.includesArray(randomSpaceList)) {
+      drawRandomSpace(delay);
+      return;
+    }
+    if (text.includesArray(randomDiceList)) {
+      drawRandomDice(delay, text.replace("dice", "").replace("d6", ""));
+      return;
+    }
+    if (text.includesArray(randomCarList)) {
+      drawRandomCar(delay);
+      return;
+    }
+    if (text.includes("help") || text.includes("command")) {
+      embedCommandList(delay);
+      return;
+    }
+    
+    if (response == "") response = "ok";
+    
+    setTimeout(() => {
+      addMessage(AIName, response, true);
+      typing.innerHTML = "";
+    }, delay);
+  }
+  
+  /**/
+  
+  let helloList = ["hi", "yo ", "hey", "hello"];
+  let helloResponseList = [() => "hi", () => "yo", () => "hey", () => "hello", () => "hi" + ("i").repeatRandom(), () => "yo" + ("o").repeatRandom(), () => "hey" + ("y").repeatRandom(), () => "hello" + ("o").repeatRandom()];
+  
+  let byeList = ["bye", "see ya", "see you", "later", "audios", "gnight", "goodnight", "good night"];
+  let byeResponseList = [() => "bye", () => "goodbye", () => "bye" + ("e").repeatRandom(), () => "see ya", () => "see you later", () => "goodbye" + ("e").repeatRandom()];
+  
+  let areYouList = ["are you", "are u", "would you", "would u", "have you", "have u", "could you", "could u", "should you", "should u", "can you", "can u", "will you", "will u"];
+  let areYouResponseList = [() => "maybe", () => "perhaps", () => "yes", () => "no", () => "sometimes", () => "no" + ("o").repeatRandom() + "...", () => "ye" + ("e").repeatRandom() + "s" + ("s").repeatRandom(), () => "yes, yes i am", () => "i dont know", () => "idk", () => "im not, are you?", () => "i am, are you?"];
+  
+  //
+  
+  let gibberishSentenceList = ["gibberish", "nonsense", "babble"];
+  
+  let vagueSentenceList = ["vague", "ambiguous", "unclear"];
+  
+  let randomColorList = ["random color", "random hex code", "random hex color"];
+  
+  let randomStaticList = ["static"];
+  
+  let randomPixelsList = ["pixels"];
+  
+  let scrabbleScoreList = ["scrabble"];
+  
+  let randomFishList = ["fish"];
+  
+  let randomStringList = ["random string", "random character", "random unicode"];
+  
+  let randomDiceList = ["dice", "d6"];
+  
+  let zalgoTextList = ["zalgo"];
+  
+  let randomSpaceList = ["space", "planets", "stars", "galaxy"];
+  
+  let randomCarList = ["car", "truck"];
+  
+  /**/
+  
+  function embedCommandList(delay) {
+    let element = document.createElement("div");
+    
+    let title = document.createElement("div");
+    title.className = "embed-title";
+    title.innerHTML = "Full Command List:";
+    element.appendChild(title);
+    
+    let div = document.createElement("div");
+    div.innerHTML = "{{ <b>Command Title:</b> <i>trigger words <u>arguments</u></i> }}<hr>"
+      + "<b>Random Fish:</b> <i>fish</i><div class = 'little-text'>Generate a random, colorful fish</div><hr>"
+      + "<b>Random Space:</b> <i>space, stars, planets, galaxy</i><div class = 'little-text'>Generate a random space background</div><hr>"
+      + "<b>Gibberish Sentence:</b> <i>gibberish, nonsense, babble</i><div class = 'little-text'>Generate a random gibberish sentence</div><hr>"
+      + "<b>Zalgo Text:</b> <i>zalgo <u>some text</u></i><div class = 'little-text'>Add Zalgo to a string of text</div><hr>"
+      + "<b>Vague Sentence:</b> <i>vague, ambiguous, unclear</i><div class = 'little-text'>Generate a random, vague-sounding sentence</div><hr>"
+      + "<b>Random Color:</b> <i>random color, random hex code, random hex color</i><div class = 'little-text'>Generate a random hex color</div><hr>"
+      + "<b>Random Static:</b> <i>static</i><div class = 'little-text'>Generate random black and white static</div><hr>"
+      + "<b>Random Pixels:</b> <i>pixels <u>grid size</u></i><div class = 'little-text'>Generate a grid of random colored pixels</div><hr>"
+      + "<b>Scrabble Score:</b> <i>scrabble <u>some word</u></i><div class = 'little-text'>Get the score in Scrabble for a word</div><hr>"
+      + "<b>Random Character String:</b> <i>random string, random character, random unicode</i><div class = 'little-text'>Generate a string of random Unicode characters</div><hr>"
+      + "<b>Dice Roll:</b> <i>dice <u>some number</u>, d6 <u>some number</u></i><div class = 'little-text'>Roll and display a number of six-sided dice</div><hr>";
+    
+    element.appendChild(div);
+    
+    setTimeout(() => {
+      addEmbed(AIName, element, true);
+      typing.innerHTML = "";
+    }, delay);
+  }
+  
+  //
+  
+  let vowelList = "aiou";
+  let consonantList = "bcdfghjklmnpqrstvwxyz";
+  let midPunctuationList = [",", ":", ";", "--"];
+  let endPunctuationList = ["?", ".", "!", "..."];
+  function gibberishSentence() {
+    let numWords = randBetween(3, 10);
+    let sentence = "";
+    for (let w = 0; w < numWords; w++) {
+      let numLetters = randBetween(3, 8);
+      let word = "";
+      for (let l = 0; l < numLetters; l++) {
+        word += l % 2 ? randItem(vowelList) : randItem(consonantList);
+      }
+      sentence += word;
+      if (Math.floor(Math.random() * 4) == 0 && w < numWords - 1) sentence += randItem(midPunctuationList);
+      sentence += " ";
+    }
+    sentence = sentence[0].toUpperCase() + sentence.slice(1);
+    sentence = sentence.trim();
+    sentence += randItem(endPunctuationList).repeat(Math.ceil(Math.random() * 4));
+    return sentence;
+  }
+  
+  //
+  
+  function vagueSentence() {
+    let sentence = "";
+    switch (Math.floor(Math.random() * 2)) {
+      case 0: sentence = `${randItem(["I", "You", "We", "She", "He"])} ${randItem(["will", "could", "should", "might", "won't", "couldn't", "shouldn't", "might not", "did", "didn't"])} do ${randItem(["that", "this", "it"])}. `;
+      break;
+      case 1: sentence = `${randItem(["But", "However", "Yet", "Although", "Even so", "Despite that", "Despite this", "Regardless", "Yes", "No", "Of course", "Obviously", "Naturally", "Logically", "Clearly", "Apparently"])}, ${randItem(["I", "you", "we", "she", "he", "they"])} did ${randItem(["that", "this", "it"])} ${randItem(["later", "earlier", "in time", "yesterday", "today", "slowly", "quickly"])}.`;
+      break;
+    }
+    return sentence;
+  }
+  
+  //
+  
+  function drawRandomColor(delay) {
+    let element = document.createElement("div");
+    
+    let color = randHexColor();
+    let title = document.createElement("div");
+    title.className = "embed-title";
+    title.innerHTML = "Random color generated.<br>" + color;
+    element.appendChild(title);
+    
+    let div = document.createElement("div");
+    div.style.width = div.style.height = "100px";
+    div.style.backgroundColor = color;
+    div.style.border = "2px solid black";
+    div.style.borderRadius  = "10px";
+    element.appendChild(div);
+    
+    setTimeout(() => {
+      addEmbed(AIName, element, true);
+      typing.innerHTML = "";
+    }, delay);
+  }
+  
+  //
+  
+  function drawRandomStatic(delay) {
+    let element = document.createElement("div");
+    
+    let title = document.createElement("div");
+    title.className = "embed-title";
+    title.innerHTML = "Random static generated.";
+    element.appendChild(title);
+    
+    let canvas = document.createElement("canvas");
+    let ctx = canvas.getContext("2d");
+    canvas.width = canvas.height = 200;
+    canvas.style.width = canvas.style.height = "200px";
+    let gridSize = 200;
+    let tileSize = canvas.width / gridSize;
+    for (let x = 0; x < canvas.width; x += tileSize) {
+      for (let y = 0; y < canvas.height; y += tileSize) {
+        ctx.fillStyle = (new HSL(0, 0, Math.random() * 100)).print();
+        ctx.fillRect(x, y, tileSize, tileSize);
+      }
+    }
+    
+    let img = document.createElement("img");
+    img.style.width = canvas.style.width;
+    img.style.height = canvas.style.height;
+    img.src = canvas.toDataURL();
+    element.appendChild(img);
+    
+    setTimeout(() => {
+      addEmbed(AIName, element, true);
+      typing.innerHTML = "";
+    }, delay);
+  }
+  
+  //
+  
+  function drawRandomPixels(delay, number) {
+    let element = document.createElement("div");
+    
+    let num = Math.abs(Math.floor(Number(number)));
+    if (Number.isNaN(num) || num == 0) num = 200;
+    num = num.clamp(1, 400);
+    
+    let title = document.createElement("div");
+    title.className = "embed-title";
+    title.innerHTML = (num * num) + " random pixels generated.";
+    element.appendChild(title);
+    
+    let canvas = document.createElement("canvas");
+    let ctx = canvas.getContext("2d");
+    canvas.width = canvas.height = num;
+    canvas.style.width = canvas.style.height = "200px";
+    let gridSize = num;
+    let tileSize = canvas.width / gridSize;
+    for (let x = 0; x < canvas.width; x += tileSize) {
+      for (let y = 0; y < canvas.height; y += tileSize) {
+        ctx.fillStyle = (new HSL()).print();
+        ctx.fillRect(x, y, tileSize, tileSize);
+      }
+    }
+    
+    let img = document.createElement("img");
+    img.style.width = canvas.style.width;
+    img.style.height = canvas.style.height;
+    img.src = canvas.toDataURL();
+    element.appendChild(img);
+    
+    setTimeout(() => {
+      addEmbed(AIName, element, true);
+      typing.innerHTML = "";
+    }, delay);
+  }
+  
+  //
+  
+  let alphabet = "abcdefghijklmnopqrstuvwxyz";
+  let scores = [1, 3, 3, 2, 1, 4, 2, 4, 1, 8, 5, 1, 3, 1, 1, 3, 10, 1, 1, 1, 1, 4, 4, 8, 4, 10];
+  
+  function scrabbleScore(text) {
+    let word = text ?? "gary";
+    word = word.toLowerCase().replace(/[\W\d_]/gi, "");
+    let wordArr = word.split("");
+    let score = (wordArr.map(i => i = scores[alphabet.indexOf(i)])).reduce((a, b) => a + b, 0);
+    return `The word "${word}" is worth ${score} points in Scrabble.`;
+  }
+  
+  //
+  
+  CanvasRenderingContext2D.prototype.drawFish = function(x, y, width, height, angle, fillStyle, facingRight) {
+    if (!facingRight) {
+      this.save();
+      this.translate(x, y);
+      this.rotate((angle * Math.PI) / 180);
+      this.beginPath();
+      this.moveTo(width / 2, 0);
+      this.quadraticCurveTo(randBetween(-width * 0.25, width * 0.25), randBetween(-height, -height * 0.75), -width / 2, 0);
+      this.quadraticCurveTo(randBetween(-width * 0.25, width * 0.25), randBetween(height, height * 0.75), width / 2, 0);
+      
+      let tailX = randBetween(30, 50);
+      let tailY = randBetween(-20, -10);
+      this.quadraticCurveTo((width / 2) + (tailX / 2) + randBetween(-5, 5), tailY + randBetween(-5, 5), (width / 2) + tailX, tailY);
+      tailX = randBetween(30, 50);
+      tailY = randBetween(10, 20);
+      this.quadraticCurveTo((width / 2) + tailX + randBetween(-5, 5), randBetween(-5, 5), (width / 2) + tailX, tailY);
+      this.quadraticCurveTo((width / 2) + (tailX / 2) + randBetween(-5, 5), tailY + randBetween(-5, 5), width / 2, 0);
+      this.fillStyle = fillStyle;
+      this.strokeStyle = "black";
+      this.lineWidth = 3;
+      this.fill();
+      this.stroke();
+      
+      let eyeX = (-width / 2) + randBetween(25, 40);
+      let eyeY =  randBetween(-10, 0);
+      let eyeR = (randBetween(135, 225) * Math.PI) / 180;
+      if (Math.floor(Math.random() * 10) == 0) eyeR = (randBetween(-60, 60) * Math.PI) / 180;    
+      let eyeSize = Math.floor(randBetween(7, 9)) * randBetween(0.85, 1.15);
+      let pupilSize = Math.floor(randBetween(eyeSize - 3, eyeSize - 1));
+      this.fillStyle = "white";
+      this.fillCircle(eyeX, eyeY, eyeSize);
+      this.lineWidth = 2;
+      this.strokeCircle(eyeX, eyeY, eyeSize);
+      this.fillStyle = "black";
+      this.fillCircle(eyeX + ((eyeSize - pupilSize) * Math.cos(eyeR)), eyeY + ((eyeSize - pupilSize) * Math.sin(eyeR)), pupilSize);
+      
+      this.restore();
+    }
+    
+    //
+    
+    else {
+      this.save();
+      this.translate(x, y);
+      this.rotate((angle * Math.PI) / 180);
+      this.beginPath();
+      this.moveTo(-width / 2, 0);
+      this.quadraticCurveTo(randBetween(-width * 0.25, width * 0.25), randBetween(-height, -height * 0.75), width / 2, 0);
+      this.quadraticCurveTo(randBetween(-width * 0.25, width * 0.25), randBetween(height, height * 0.75), -width / 2, 0);
+      
+      let tailX = randBetween(-50, -30);
+      let tailY = randBetween(-20, -10);
+      this.quadraticCurveTo((-width / 2) + (tailX / 2) + randBetween(-5, 5), tailY + randBetween(-5, 5), (-width / 2) + tailX, tailY);
+      tailX = randBetween(-50, -30);
+      tailY = randBetween(10, 20);
+      this.quadraticCurveTo((-width / 2) + tailX + randBetween(-5, 5), randBetween(-5, 5), (-width / 2) + tailX, tailY);
+      this.quadraticCurveTo((-width / 2) + (tailX / 2) + randBetween(-5, 5), tailY + randBetween(-5, 5), -width / 2, 0);
+      this.fillStyle = fillStyle;
+      this.strokeStyle = "black";
+      this.lineWidth = 3;
+      this.fill();
+      this.stroke();
+      
+      let eyeX = (width / 2) + randBetween(-40, -25);
+      let eyeY =  randBetween(-10, 0);
+      let eyeR = (randBetween(-45, 45) * Math.PI) / 180;
+      if (Math.floor(Math.random() * 10) == 0) eyeR = (randBetween(120, 240) * Math.PI) / 180;    
+      let eyeSize = Math.floor(randBetween(7, 9)) * randBetween(0.85, 1.15);
+      let pupilSize = Math.max(Math.floor(randBetween(eyeSize - 3, eyeSize - 1)), 4);
+      this.fillStyle = "white";
+      this.fillCircle(eyeX, eyeY, eyeSize);
+      this.lineWidth = 2;
+      this.strokeCircle(eyeX, eyeY, eyeSize);
+      this.fillStyle = "black";
+      this.fillCircle(eyeX + ((eyeSize - pupilSize) * Math.cos(eyeR)), eyeY + ((eyeSize - pupilSize) * Math.sin(eyeR)), pupilSize);
+      
+      this.restore();
+    }
+  };
+  
+  function drawRandomFish(delay) {
+    let element = document.createElement("div");
+    
+    let title = document.createElement("div");
+    title.className = "embed-title";
+    title.innerHTML = "Random fish generated.";
+    element.appendChild(title);
+    
+    let canvas = document.createElement("canvas");
+    let ctx = canvas.getContext("2d");
+    canvas.width = canvas.height = 200;
+    canvas.style.width = canvas.style.height = "200px";
+    ctx.lineJoin = ctx.lineCap = "round";
+    
+    let water = ctx.createLinearGradient(coin() ? 0 : 200, 0, Math.random() * 200, 200);
+    let ripples = randBetween(10, 20);
+    for (let i = 0; i < ripples; i++) {
+      water.addColorStop(i / ripples, (new HSL(randBetween(230, 250), 100, randBetween(30, 70))).print());
+    }
+    ctx.fillStyle = water;
+    ctx.fillRect(0, 0, 200, 200);
+    
+    let gravelTilt = randBetween(-25, 25);
+    let gravel = ctx.createLinearGradient(100 + gravelTilt, 0, 100 - gravelTilt, 200);
+    let gravelBands = randBetween(40, 80);
+    for (let i = 0; i < gravelBands; i++) {
+      gravel.addColorStop(i / gravelBands, (new HSL(0, 0, randBetween(35, 55))).print());
+    }
+    let gravelHeight = randBetween(30, 70);
+    ctx.beginPath();
+    ctx.moveTo(200, 200 - gravelHeight);
+    ctx.lineTo(200, 200);
+    ctx.lineTo(0, 200);
+    ctx.lineTo(0, 200 - gravelHeight);
+    ctx.quadraticCurveTo(randBetween(50, 150), randBetween(200 - (gravelHeight * 2), 200), 200, randBetween(200 - (gravelHeight * 2), 200));
+    ctx.fillStyle = gravel;
+    ctx.fill();
+    
+    let scaleHue = Math.random() * 360;
+    let scales = Math.floor(randBetween(10, 30));
+    let scaleGradient = ctx.createLinearGradient(-100, 0, 100, 0);
+    for (let i = 0; i < scales; i++) {
+      scaleGradient.addColorStop(i / scales, (new HSL(randBetween(scaleHue - 15, scaleHue + 15), randBetween(75, 100), coin() ? randBetween(55, 75) : randBetween(25, 45)).print()));
+    }
+    
+    let right = coin();
+    let sizeScale = randBetween(randBetween(0.5, 0.9), 1);
+    console.log(sizeScale);
+    
+    if (!right) {
+      ctx.drawFish(
+        randBetween(65, 85), // x
+        randBetween(70, 130), // y
+        randBetween(100, 120) * sizeScale, // width
+        randBetween(50, 70) * sizeScale, // height
+        randBetween(-25, 25), // angle
+        scaleGradient, // fillStyle
+        false // facingRight
+      );
+    }
+    
+    else {
+      ctx.drawFish(
+        randBetween(115, 135), // x
+        randBetween(70, 130), // y
+        randBetween(100, 120) * sizeScale, // width
+        randBetween(50, 70) * sizeScale, // height
+        randBetween(-25, 25), // angle
+        scaleGradient, // fillStyle
+        true // facingRight
+      );
+    }
+    
+    let bubbles = randBetween(7, 12);
+    ctx.strokeStyle = "white";
+    for (let i = 0; i < bubbles; i++) {
+      ctx.globalAlpha = randBetween(0.25, 0.5);
+      ctx.lineWidth = randBetween(1, 3);
+      ctx.strokeCircle(Math.random() * 200, Math.random() * 200, randBetween(5, 25));
+    }
+    ctx.globalAlpha = 1;
+    
+    let img = document.createElement("img");
+    img.style.width = canvas.style.width;
+    img.style.height = canvas.style.height;
+    img.src = canvas.toDataURL();
+    element.appendChild(img);
+    
+    setTimeout(() => {
+      addEmbed(AIName, element, true);
+      typing.innerHTML = "";
+    }, delay);
+  }
+  
+  //
+  
+  function randomString() {
+    let array = [];
+    for (let i = 0; i < 50; i++) array.push(Math.random() * Math.pow(2, Math.round(randBetween(9, 13))));
+    return String.fromCharCode.apply(null, array);
+  }
+  
+  //
+  
+  CanvasRenderingContext2D.prototype.strokeRoundedRect = function(x, y, width, height, cornerRadius) {
+    this.beginPath();
+    this.moveTo(x + cornerRadius[0], y);
+    this.lineTo(x + width - cornerRadius[1], y);
+    this.quadraticCurveTo(x + width, y, x + width, y + cornerRadius[1]);
+    this.lineTo(x + width, y + height - cornerRadius[2]);
+    this.quadraticCurveTo(x + width, y + height, x + width - cornerRadius[2], y + height);
+    this.lineTo(x + cornerRadius[3], y + height);
+    this.quadraticCurveTo(x, y + height, x, y + height - cornerRadius[3]);
+    this.lineTo(x, y + cornerRadius[0]);
+    this.quadraticCurveTo(x, y, x + cornerRadius[0], y);
+    this.stroke();
+  };
+  CanvasRenderingContext2D.prototype.fillRoundedRect = function(x, y, width, height, cornerRadius) {
+    this.beginPath();
+    this.moveTo(x + cornerRadius[0], y);
+    this.lineTo(x + width - cornerRadius[1], y);
+    this.quadraticCurveTo(x + width, y, x + width, y + cornerRadius[1]);
+    this.lineTo(x + width, y + height - cornerRadius[2]);
+    this.quadraticCurveTo(x + width, y + height, x + width - cornerRadius[2], y + height);
+    this.lineTo(x + cornerRadius[3], y + height);
+    this.quadraticCurveTo(x, y + height, x, y + height - cornerRadius[3]);
+    this.lineTo(x, y + cornerRadius[0]);
+    this.quadraticCurveTo(x, y, x + cornerRadius[0], y);
+    this.fill();
+  };
+  CanvasRenderingContext2D.prototype.strokeRoundedRectFromCenter = function(x, y, width, height, cornerRadius) {
+    this.strokeRoundedRect(x - (width / 2), y - (width / 2), width, height, cornerRadius);
+  };
+  CanvasRenderingContext2D.prototype.fillRoundedRectFromCenter = function(x, y, width, height, cornerRadius) {
+    this.fillRoundedRect(x - (width / 2), y - (width / 2), width, height, cornerRadius);
+  };
+  
+  function drawRandomDice(delay, number) {
+    let element = document.createElement("div");
+    
+    let num = Math.abs(Math.floor(Number(number)));
+    if (Number.isNaN(num)) num = 1;
+    num = num.clamp(1, 50);
+    
+    let title = document.createElement("div");
+    title.className = "embed-title";
+    element.appendChild(title);
+    
+    let total = 0;
+    
+    for (let i = 0; i < num; i++) {
+      let canvas = document.createElement("canvas");
+      let ctx = canvas.getContext("2d");
+      canvas.width = canvas.height = 100;
+      canvas.style.width = canvas.style.height = "35px";
+      
+      ctx.fillStyle = "white";
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 6;
+      ctx.fillRoundedRectFromCenter(canvas.width / 2, canvas.height / 2, canvas.width - 6, canvas.height - 6, [20, 20, 20, 20]);
+      ctx.strokeRoundedRectFromCenter(canvas.width / 2, canvas.height / 2, canvas.width - 6, canvas.height - 6, [20, 20, 20, 20]);
+      let roll = Math.ceil(Math.random()  * 6);
+      total += roll;
+      let pipSize = 8;
+      ctx.fillStyle = "black";
+      switch (roll) {
+        case 1:
+          ctx.fillCircle(canvas.width / 2, canvas.height / 2, pipSize);
+        break;
+        case 2:
+          ctx.fillCircle(canvas.width * 0.3, canvas.height * 0.7, pipSize);
+          ctx.fillCircle(canvas.width * 0.7, canvas.height * 0.3, pipSize);
+        break;
+        case 3:
+          ctx.fillCircle(canvas.width * 0.3, canvas.height * 0.7, pipSize);
+          ctx.fillCircle(canvas.width / 2, canvas.height / 2, pipSize);
+          ctx.fillCircle(canvas.width * 0.7, canvas.height * 0.3, pipSize);
+        break;
+        case 4:
+          ctx.fillCircle(canvas.width * 0.3, canvas.height * 0.7, pipSize);
+          ctx.fillCircle(canvas.width * 0.7, canvas.height * 0.3, pipSize);
+          ctx.fillCircle(canvas.width * 0.3, canvas.height * 0.3, pipSize);
+          ctx.fillCircle(canvas.width * 0.7, canvas.height * 0.7, pipSize);
+        break;
+        case 5:
+          ctx.fillCircle(canvas.width * 0.3, canvas.height * 0.7, pipSize);
+          ctx.fillCircle(canvas.width * 0.7, canvas.height * 0.3, pipSize);
+          ctx.fillCircle(canvas.width / 2, canvas.height / 2, pipSize);
+          ctx.fillCircle(canvas.width * 0.3, canvas.height * 0.3, pipSize);
+          ctx.fillCircle(canvas.width * 0.7, canvas.height * 0.7, pipSize);
+        break;
+        case 6:
+          ctx.fillCircle(canvas.width * 0.3, canvas.height * 0.3, pipSize);
+          ctx.fillCircle(canvas.width * 0.7, canvas.height * 0.3, pipSize);
+          ctx.fillCircle(canvas.width * 0.3, canvas.height / 2, pipSize);
+          ctx.fillCircle(canvas.width * 0.7, canvas.height / 2, pipSize);
+          ctx.fillCircle(canvas.width * 0.3, canvas.height * 0.7, pipSize);
+          ctx.fillCircle(canvas.width * 0.7, canvas.height * 0.7, pipSize);
+        break;
+      }
+      
+      let img = document.createElement("img");
+      img.style.width = canvas.style.width;
+      img.style.height = canvas.style.height;
+      img.style.margin = "2px";
+      img.src = canvas.toDataURL();
+      element.appendChild(img);
+    }
+    
+    title.innerHTML = num + " random dice generated. Total: " + total;
+    
+    setTimeout(() => {
+      addEmbed(AIName, element, true);
+      typing.innerHTML = "";
+    }, delay);
+  }
+  
+  //
+  
+  let zalgoUpList = ["\u030d",	"\u030e",	"\u0304",	"\u0305", "\u033f",	"\u0311",	"\u0306",	"\u0310", "\u0352",	"\u0357",	"\u0351", "\u0307", "\u0308", "\u030a", "\u0342",	"\u0343", "\u0344",	"\u034a",	"\u034b",	"\u034c", "\u0303",	"\u0302",	"\u030c",	"\u0350", "\u0300",	"\u0301", "\u030b",	"\u030f", "\u0312",	"\u0313",	"\u0314", "\u033d",	"\u0309",	"\u0363",	"\u0364", "\u0365",	"\u0366",	"\u0367",	"\u0368",	"\u0369",	"\u036a", "\u036b",	"\u036c",	"\u036d",	"\u036e",	"\u036f",	"\u033e",	"\u035b",	"\u0346",	"\u031a"];
+  let zalgoMidList = ["\u0315",	"\u031b",	"\u0340",	"\u0341",	"\u0358",	"\u0321",	"\u0322",	"\u0327",	"\u0328",	"\u0334",	"\u0335", "\u0336",	"\u034f", "\u035c",	"\u035d",	"\u035e",	"\u035f",	"\u0360",	"\u0362",	"\u0338",	"\u0337",	"\u0361"];
+  let zalgoDownList = ["\u0316",	"\u0317",	"\u0318",	"\u0319",	"\u031c",	"\u031d",	"\u031e",	"\u031f",	"\u0320",	"\u0324",	"\u0325", "\u0326",	"\u0329", "\u032a",	"\u032b",	"\u032c",	"\u032d",	"\u032e",	"\u032f",	"\u0330",	"\u0331",	"\u0332",	"\u0333",	"\u0339",	"\u033a",	"\u033b", "\u033c", "\u0345", "\u0347",	"\u0348", "\u0349",	"\u034d", "\u034e",	"\u0353",	"\u0354",	"\u0355",	"\u0356",	"\u0359",	"\u035a",	"\u0323"];
+  
+  Array.prototype.shuffle = function() {
+    let result = [];
+    while (this.length) {
+      result.push(this.splice(Math.floor(Math.random() * this.length), 1));
+    }
+    return result.flat(1);
+  };
+  
+  function zalgoText(text) {
+    let result = "";
+    for (let i = 0; i < text.length; i++) {
+      result += text[i];
+      let up = Math.floor(randBetween(1, 8));
+      let mid = Math.floor(Math.random() * 3);
+      let down = Math.floor(randBetween(1, 8));
+      for (let j = 0; j < up; j++) {
+        result += randItem(zalgoUpList);
+      }
+      let tempMid = zalgoMidList.map(x => x);
+      tempMid = tempMid.shuffle();
+      for (let j = 0; j < mid; j++) {
+        result += tempMid[j];
+      }
+      for (let j = 0; j < down; j++) {
+        result += randItem(zalgoDownList);
+      }
+    }
+    return result;
+  }
+  
+  //
+  
+  CanvasRenderingContext2D.prototype.drawPlanet = function(x, y, radius, angle) {
+    this.save();
+    this.translate(x, y);
+    this.rotate((angle * Math.PI) / 180);
+    
+    let size = randBetween(radius * 0.3, radius * 0.75);
+    let planetGradient = this.createRadialGradient(0, size - radius, size, 0, 0, radius);
+    let planetHue = randItem([0, 120, 240]);
+    planetGradient.addColorStop(0, `hsl(${planetHue}deg, 50%, 50%)`);
+    planetGradient.addColorStop(1, `hsl(${planetHue}deg, 50%, 70%)`);
+    this.fillStyle = planetGradient;
+    this.fillCircle(0, 0, radius);
+    /*let planetGradient1 = this.createLinearGradient(-Math.random() * radius, 0, Math.random() * radius, radius);
+    let planetHue = Math.random() * 360;
+    let stops = Math.floor(randBetween(10, 20));
+    for (let i = 0; i < stops; i++) {
+      planetGradient1.addColorStop(i / stops, (new HSL(randBetween(planetHue - 15, planetHue + 15), randBetween(15, 25), coin() ? randBetween(40, 60) : randBetween(25, 40)).print()));
+    }
+    this.fillStyle = planetGradient1;
+    this.fillCircle(0, 0, radius);
+    
+    let planetGradient2 = this.createLinearGradient(0, -Math.random() * radius, radius, Math.random() * radius);
+    stops *= randBetween(0.25, 0.5);
+    for (let i = 0; i < stops; i++) {
+      planetGradient2.addColorStop(i / stops, (new HSL(randBetween(planetHue - 15, planetHue + 15), randBetween(15, 25), coin() ? randBetween(40, 60) : randBetween(25, 40)).print()));
+    }
+    this.fillStyle = planetGradient2;
+    this.globalAlpha = 0.25;
+    this.fillCircle(0, 0, radius);
+    this.globalAlpha = 1;*/
+    this.restore();
+  };
+  
+  function drawRandomSpace(delay) {
+    let element = document.createElement("div");
+    
+    let title = document.createElement("div");
+    title.className = "embed-title";
+    title.innerHTML = "Random space generated.";
+    element.appendChild(title);
+    
+    let canvas = document.createElement("canvas");
+    let ctx = canvas.getContext("2d")
+    canvas.width = canvas.height = 400;
+    canvas.style.width = canvas.style.height = "200px";
+    
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    let stars = Math.floor(randBetween(200, 400));
+    for (let i = 0; i < stars; i++) {
+      ctx.shadowBlur = randBetween(3, 6);
+      ctx.fillStyle = ctx.shadowColor = (new HSL(randBetween(180, 240), randBetween(50, 100), 75/*85*/)).print();
+      ctx.fillCircle(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 2.5);
+    }
+    
+    let bigStars = Math.floor(randBetween(coin() ? 0 : 1, 4));
+    ctx.shadowBlur = 15;
+    for (let i = 0; i < bigStars; i++) {
+      ctx.fillStyle = ctx.shadowColor = (new HSL(undefined, randBetween(50, 100), 85)).print();
+      let starX = Math.random() * canvas.width;
+      let starY = Math.random() * canvas.height;
+      let starSize = randBetween(3, 6);
+      let starBrightness = Math.floor(randBetween(6, 10));
+      for (let j = 0; j < starBrightness; j++) ctx.fillCircle(starX, starY, starSize);
+    }
+    
+    let lightPaths = Math.floor(randBetween(coin() ? 0 : 1, 5));
+    for (let i = 0; i < lightPaths; i++) {
+      let lineCX1, lineCY1, lineCX2, lineCY2, lineX1, lineY1, lineX2, lineY2;
+      if (coin()) { // Left to right
+        lineX1 = -25;
+        lineY1 = randBetween(-25, canvas.height + 25);
+        lineX2 = canvas.width + 25;
+        lineY2 = randBetween(-25, canvas.height + 25);
+        
+        lineCX1 = randBetween(-50, canvas.width + 50);
+        lineCY1 = randBetween(-50, 50);
+        lineCX2 = randBetween(-50, canvas.width + 50);
+        lineCY2 = canvas.height + randBetween(-50, 50);
+      }
+      else { // Top to bottom
+        lineX1 = randBetween(-25, canvas.width + 25);
+        lineY1 = -25;
+        lineX2 = randBetween(-25, canvas.height + 25);
+        lineY2 = canvas.height + 25;
+        
+        lineCX1 = randBetween(-50, 50);
+        lineCY1 = randBetween(-50, canvas.height + 50);
+        lineCX2 = randBetween(-50, 50);
+        lineCY2 = randBetween(-50, canvas.height + 50);
+      }
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = randBetween(40, 60);
+      ctx.shadowBlur = ctx.lineWidth * randBetween(1.5, 2.5);
+      ctx.shadowColor = `hsla(${Math.random() * 360}deg, ${randBetween(50, 100)}%, ${randBetween(60, 85)}%, ${randBetween(0.5, 0.75)})`;
+      ctx.shadowOffsetY = canvas.height * 2;
+      ctx.beginPath();
+      ctx.moveTo(lineX1, lineY1 - ctx.shadowOffsetY);
+      ctx.bezierCurveTo(lineCX1, lineCY1 - ctx.shadowOffsetY, lineCX2, lineCY2 - ctx.shadowOffsetY, lineX2, lineY2 - ctx.shadowOffsetY);
+      ctx.stroke();
+    }
+    
+    ctx.shadowBlur = 0;
+    let planets = Math.floor(randBetween(3, 7));
+    for (let i = 0; i < planets; i++) {
+      ctx.drawPlanet(Math.random() * canvas.width, Math.random() * canvas.height, randBetween(30, 60), Math.random() * 360);
+    }
+    
+    let img = document.createElement("img");
+    img.style.width = canvas.style.width;
+    img.style.height = canvas.style.height;
+    img.src = canvas.toDataURL();
+    element.appendChild(img);
+    
+    setTimeout(() => {
+      addEmbed(AIName, element, true);
+      typing.innerHTML = "";
+    }, delay);
+  }
+  
+  //
+  
+  CanvasRenderingContext2D.prototype.drawCar = function(x, y, width, height, headlights) {
+    this.save();
+    this.translate(x, y);
+    
+    this.fillStyle = "rgba(255, 255, 0, 0.25)";
+    this.lineWidth = 3;
+    this.fillRect(-width / 2, -height, width, height);
+    
+    let wheelRadius = height * randBetween(0.2, 0.25);
+    let wheel1X = (-width / 2) + wheelRadius + randBetween(5, 10);
+    let wheel2X = (width / 2) - wheelRadius - randBetween(5, 10);
+    this.strokeStyle = "black";
+    this.fillStyle = "gray";
+    this.lineWidth = 2;
+    this.fillCircle(wheel1X, -wheelRadius, wheelRadius);
+    this.strokeCircle(wheel1X, -wheelRadius, wheelRadius);
+    this.fillCircle(wheel2X, -wheelRadius, wheelRadius);
+    this.strokeCircle(wheel2X, -wheelRadius, wheelRadius);
+    this.strokeStyle = "white";
+    this.fillStyle = (new RGB()).print();
+    let wheelGapBend = randBetween(2, 3);
+    this.beginPath();
+    this.moveTo(-width / 2, -wheelRadius);
+    this.lineTo(wheel1X - wheelRadius, -wheelRadius);
+    this.quadraticCurveTo(wheel1X, -wheelRadius * wheelGapBend, wheel1X + wheelRadius, -wheelRadius);
+    this.lineTo(wheel2X - wheelRadius, -wheelRadius);
+    this.quadraticCurveTo(wheel2X, -wheelRadius * wheelGapBend, wheel2X + wheelRadius, -wheelRadius);
+    this.lineTo(width / 2, -wheelRadius);
+    this.lineTo(width / 2, -height);
+    this.lineTo(-width / 2, -height);
+    this.lineTo(-width / 2, -wheelRadius);
+    this.fill();
+    this.stroke();
+    
+    if (headlights) {
+      this.shadowColor = "yellow";
+      this.shadowBlur = 15;
+      this.shadowOffsetY = 400;
+      this.fillStyle = "rgba(255, 255, 0, 0.4)";
+      this.beginPath();
+      this.moveTo(width / 2, -height / 2 - this.shadowOffsetY);
+      this.lineTo(200 * Math.cos((-15 * Math.PI) / 180), (200 * Math.sin((-15 * Math.PI) / 180)) - (height / 2) - this.shadowOffsetY);
+      this.lineTo(200 * Math.cos((15 * Math.PI) / 180), (200 * Math.sin((15 * Math.PI) / 180)) - (height / 2) - this.shadowOffsetY);
+      this.lineTo(width / 2, -height / 2 - this.shadowOffsetY);
+      this.fill();
+    }
+    
+    this.restore();
+  };
+  
+  function drawRandomCar(delay) {
+    let element = document.createElement("div");
+    
+    let title = document.createElement("div");
+    title.className = "embed-title";
+    title.innerHTML = "Random car generated.";
+    element.appendChild(title);
+    
+    let canvas = document.createElement("canvas");
+    let ctx = canvas.getContext("2d");
+    canvas.width = canvas.height = 200;
+    canvas.style.width = canvas.style.height = "200px";
+    
+    let darkness = coin() ? randBetween(45, 85) : randBetween(15, 45);//50 + randBetween(-25, 25);console.log(darkness);
+    ctx.fillStyle = `hsl(225deg, ${randBetween(50, 100)}%, ${darkness}%)`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.fillStyle = "#47453f";
+    ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+    ctx.save();
+    ctx.setLineDash([20, 25]);
+    ctx.lineWidth = 8;
+    ctx.strokeStyle = coin() ? "yellow" : "white";
+    ctx.beginPath();
+    ctx.moveTo(randBetween(-20, 0), canvas.height - 25);
+    ctx.lineTo(canvas.width, canvas.height - 25);
+    ctx.stroke();
+    ctx.restore();
+    
+    let carX = (canvas.width / 2) + randBetween(-35, 10);
+    let carY = (canvas.height - 25) + randBetween(-15, 15);
+    //let carWidth = randBetween(75, 115);//randBetween(100, 150);
+    //let carHeight = carWidth * randBetween(0.5, 0.65);
+    let carHeight = randBetween(35, 75);
+    let carWidth = (carHeight * 1.1) + randBetween(25, 60);
+    ctx.drawCar(carX, carY, carWidth, carHeight, darkness < 45);
+    
+    let img = document.createElement("img");
+    img.style.width = canvas.style.width;
+    img.style.height = canvas.style.height;
+    img.src = canvas.toDataURL();
+    element.appendChild(img);
+    
+    setTimeout(() => {
+      addEmbed(AIName, element, true);
+      typing.innerHTML = "";
+    }, delay);
+  }
+</script>
+</body>
+</html>
