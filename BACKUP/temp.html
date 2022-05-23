@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel = "icon"  href = "images/favicon.png" type = "image/png">
+  <link rel = "stylesheet" href = "stylesheets/main.css">
+  <title>Temp ~ e4494s</title>
+  <style>
+    canvas {
+      width: 300px;
+      height: 300px;
+      border: 2px solid black;
+    }
+    
+    hr {
+      border: 1px solid black;
+    }
+    
+    .desc {
+      background-color: silver;
+      margin: 5px;
+      padding: 5px;
+      border-radius: 5px;
+    }
+    .desc mark {
+      background-color: #ffff4d;
+    }
+  </style>
+</head>
+<body>
+<script src = "scripts/main.js"></script>
+<h1>This is a page where I edit current projects temporarily, and move them to <a href = "testbed.html" target = "_blank">testbed.html</a> or <a href = "testbed2.html" target = "_blank">testbed2.html</a> when they're finished.</h1>
+<!--
+<canvas id = "canvas0"></canvas>
+<button onclick = "startCanvas0(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>[ FPS: <span id = "fps0Txt"></span> ]</b></i></div>
+<div class = "desc"></div>
+<hr><hr>
+<script>
+  const ctx0 = canvas0.getContext("2d");
+  canvas0.width = canvas0.height = 300;
+  let canvas0Running = false;
+  
+  let lastFrame0Time = 0;
+  let lastFps0DisplayTime = 1000;
+  
+  function frame0() {
+    if (Date.now() - lastFps0DisplayTime >= 500) {
+      fps0Txt.innerHTML = (1000 / (Date.now() - lastFrame0Time)).toFixed(1);
+      lastFps0DisplayTime = Date.now();
+    }
+    lastFrame0Time = Date.now();
+    
+    ctx0.clearRect(0, 0, canvas0.width, canvas0.height);
+    
+    if (canvas0Running) requestAnimationFrame(frame0);
+  }
+  frame0();
+  
+  function startCanvas0(caller) {
+    if (canvas0Running) {
+      canvas0Running = false;
+      caller.innerHTML = "<b><i>Paused</i></b>";
+      caller.style.color = caller.style.borderColor = "red";
+    }
+    else {
+      canvas0Running = true;
+      caller.innerHTML = "<b><i>Running</i></b>";
+      caller.style.color = caller.style.borderColor = "green";
+      frame0();
+    }
+  }
+</script>
+-->
+
+<!---->
+
+<!---->
+
+
+
+</body>
+</html>
