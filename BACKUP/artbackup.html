@@ -1,0 +1,233 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <title>Art ~ e4494s</title>
+    <style>
+      canvas {
+        width: 300px;
+        height: 300px;
+        border: 2px solid black;
+      }
+    </style>
+  </head>
+<body onload = "initAll()">
+<h1>Moving Art Gallery</h1>
+<p id = "test"></p>
+<h2>Linkage</h2>
+<canvas id = "canvas0"></canvas>
+<br><br>
+<button id = "playbtn0" onclick = "playArt(0)">Play</button>
+<button onclick = "initLinkage()">Reset</button>
+<br><br><br><br>
+<h2>Quadrangular</h2>
+<canvas id = "canvas1"></canvas>
+<br><br>
+<button id = "playbtn1" onclick = "playArt(1)">Play</button>
+<button onclick = "initQuadrangular()">Reset</button>
+<br><br><br><br>
+<script src = "scripts/main.js"></script>
+<script>
+  const canvasArray = document.getElementsByTagName("canvas");
+  const ctx = [];
+  const running = [];
+  for (let i = 0; i < canvasArray.length; i++) {
+    ctx.push(canvasArray[i].getContext("2d"));
+    running.push(false);
+    canvasArray[i].width = canvasArray[i].height = 300;
+  }
+  
+  function playArt(n) {
+    for (let i = 0; i < running.length; i++) {
+      if (i != n) {
+        running[i] = false;
+        document.getElementById(`playbtn${i}`).innerHTML = "Play";
+      }
+    }
+    if (running[n]) {
+      running[n] = false;
+      document.getElementById(`playbtn${n}`).innerHTML = "Play";
+    }
+    else {
+      running[n] = true;
+      document.getElementById(`playbtn${n}`).innerHTML = "Stop";
+    }
+  }
+  playArt(0);
+  
+  //----------
+  
+  ctx[0].lineCap = "round";
+  ctx[0].lineJoin = "round";
+  
+  ctx[1].lineCap = "round";
+  ctx[1].lineJoin = "round";
+  
+  const cVar = [];
+  
+  cVar[0] = {};
+  cVar[0].nodeConnectorLength = 75;
+  cVar[0].nodeConnectorWidth = 1;
+  cVar[0].startingNodes = 50;
+  cVar[0].nodeArray = [];
+  cVar[0].backgroundLightness = 100;
+  cVar[0].backgroundLightnessSpeed = 2;
+  
+  cVar[1] = {};
+  cVar[1].nodeConnectorLength = 25;
+  cVar[1].startingNodes = 150;
+  cVar[1].rectOpacity = 1;
+  cVar[1].rectWidth = 5;
+  cVar[1].jumpiness = 10;
+  cVar[1].nodeArray = [];
+  
+  function node(x, y, angle, power, color, canvasNum) {
+    this.x = x;
+    this.y = y;
+    this.vx = power * Math.cos((angle * Math.PI) / 180);
+    this.vy = power * Math.sin((angle * Math.PI) / 180);
+    this.color = color;
+    this.render = function(n) {
+      this.x += this.vx;
+      this.y += this.vy;
+      if (this.x > canvas0.width) {
+        this.x = canvas0.width;
+        this.vx *= -1;
+      }
+      if (this.x < 0) {
+        this.x = 0;
+        this.vx *= -1;
+      }
+      if (this.y > canvas0.height) {
+        this.y = canvas0.height;
+        this.vy *= -1;
+      }
+      if (this.y < 0) {
+        this.y = 0;
+        this.vy *= -1;
+      }
+      
+      for (let i = 0; i < cVar[n].nodeArray.length; i++) {
+        if (i != cVar[n].nodeArray.indexOf(this)) {
+          let distanceToNodeX = cVar[n].nodeArray[i].x - this.x;
+          let distanceToNodeY = cVar[n].nodeArray[i].y - this.y;
+          if (Math.sqrt((distanceToNodeX * distanceToNodeX) + (distanceToNodeY * distanceToNodeY)) <= cVar[n].nodeConnectorLength) {
+            if (n == 0) {
+              ctx[n].globalAlpha = 0.5;
+              ctx[n].beginPath();
+              ctx[n].moveTo(this.x, this.y);
+              ctx[n].strokeStyle = cVar[n].nodeArray[i].color;
+              ctx[n].lineWidth = cVar[0].nodeConnectorWidth;
+              ctx[n].lineTo(cVar[n].nodeArray[i].x, cVar[n].nodeArray[i].y);
+              ctx[n].stroke();
+              ctx[n].strokeStyle = this.color;
+              ctx[n].lineTo(this.x, this.y);
+              ctx[n].stroke();
+            }
+            
+            if (n == 1) {
+              ctx[n].globalAlpha = cVar[1].rectOpacity;
+              ctx[n].strokeStyle = this.color;
+              ctx[n].lineWidth = cVar[1].rectWidth;
+              ctx[n].beginPath();
+              ctx[n].moveTo(this.x.toMultipleOf(cVar[1].jumpiness), this.y.toMultipleOf(cVar[1].jumpiness));
+              ctx[n].lineTo(cVar[n].nodeArray[i].x.toMultipleOf(cVar[1].jumpiness), this.y.toMultipleOf(cVar[1].jumpiness));
+              ctx[n].lineTo(cVar[n].nodeArray[i].x.toMultipleOf(cVar[1].jumpiness), cVar[n].nodeArray[i].y.toMultipleOf(cVar[1].jumpiness));
+              ctx[n].lineTo(this.x.toMultipleOf(cVar[1].jumpiness), cVar[n].nodeArray[i].y.toMultipleOf(cVar[1].jumpiness));
+              ctx[n].lineTo(this.x.toMultipleOf(cVar[1].jumpiness), this.y.toMultipleOf(cVar[1].jumpiness));
+              ctx[n].stroke();
+            }
+          }
+        }
+      }
+    };
+  }
+  
+  function addNode(x, y, angle, power, color, canvasNum) {
+    let newNode = new node(x, y, angle, power, color);
+    cVar[canvasNum].nodeArray.push(newNode);
+  }
+  
+  function initLinkage() {
+    ctx[0].clearRect(0, 0, canvas0.width, canvas0.height);
+    cVar[0].nodeArray = [];
+    for (let i = 0; i < cVar[0].startingNodes; i++) {
+      addNode(Math.random() * canvas0.width, Math.random() * canvas0.height, Math.random() * 360, randBetween(1, 3), (new RGB()).print(), 0);
+    }
+    for (let i = 0; i < cVar[0].nodeArray.length; i++) {
+      cVar[0].nodeArray[i].render(0);
+    }
+  }
+  
+  function initQuadrangular() {
+    ctx[1].clearRect(0, 0, canvas1.width, canvas1.height);
+    cVar[1].nodeArray = [];
+    for (let i = 0; i < cVar[1].startingNodes; i++) {
+      addNode(Math.random() * canvas1.width, Math.random() * canvas1.height, Math.random() * 360, 0.25, (new RGB()).print(), 1);
+    }
+    for (let i = 0; i < cVar[1].nodeArray.length; i++) {
+      cVar[1].nodeArray[i].render(1);
+    }
+    ctx[1].fillStyle = "black";
+    ctx[1].globalAlpha = 0.5;
+    for (let x = 0; x <= canvas1.width; x += cVar[1].jumpiness) {
+      for (let y = 0; y <= canvas1.height; y += cVar[1].jumpiness) {
+        ctx[1].fillRectFromCenter(x, y, 2, 2);
+      }
+    }
+  }
+  
+  //----------
+  
+  function initAll() {
+    initLinkage();
+    initQuadrangular();
+    
+    frame();
+  }
+  
+  function frame() {
+    if (running[0]) { // Linkage
+      //ctx[0].clearRect(0, 0, canvas0.width, canvas0.height);
+      cVar[0].backgroundLightness += cVar[0].backgroundLightnessSpeed;
+      if (cVar[0].backgroundLightness > 250) {
+        cVar[0].backgroundLightness = 250;
+        cVar[0].backgroundLightnessSpeed *= -1;
+      }
+      if (cVar[0].backgroundLightness < -150) {
+        cVar[0].backgroundLightness = -150;
+        cVar[0].backgroundLightnessSpeed *= -1;
+      }
+      
+      ctx[0].globalAlpha = 0.25;
+      ctx[0].fillStyle = `hsl(0deg, 0%, ${cVar[0].backgroundLightness}%)`;
+      ctx[0].fillRect(0, 0, canvas0.width, canvas0.height);
+      for (let i = 0; i < cVar[0].nodeArray.length; i++) {
+        cVar[0].nodeArray[i].render(0);
+      }
+    }
+    
+    else if (running[1]) { // Quadrangular
+      ctx[1].clearRect(0, 0, canvas1.width, canvas1.height);
+      for (let i = 0; i < cVar[1].nodeArray.length; i++) {
+        cVar[1].nodeArray[i].render(1);
+      }
+      ctx[1].fillStyle = "black";
+      ctx[1].globalAlpha = 0.75;
+      for (let x = 0; x <= canvas1.width; x += cVar[1].jumpiness) {
+        for (let y = 0; y <= canvas1.height; y += cVar[1].jumpiness) {
+          ctx[1].fillRectFromCenter(x, y, 3, 3);
+        }
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+  
+  Number.prototype.toMultipleOf = function(n) {
+    return Math.round(this / n) * n;
+  };
+</script>
+</body>
+</html>
