@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel = "icon"  href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <title>Ternary Block Cellular Automata ~ e4494s</title>
+    <style>
+      canvas {
+        width: 300px;
+        height: 300px;
+        border: none;
+      }
+      
+      input[type = number] {
+        border: 3px solid black;
+        border-radius: 0;
+        width: 75px;
+      }
+      
+      select {
+        border: 3px solid black;
+        border-radius: 0;
+        font-family: monospace;
+      }
+      select:focus {
+        outline: none;
+      }
+      
+      label {
+        margin-right: 10px;
+      }
+    </style>
+  </head>
+<body>
+<h1>Block Cellular Automata</h1>
+<br><br>
+<b><u>Rule:</u></b> <input id = "ruletxt" value = "225" type = "number" min = "0" max = "255" step = "1" oninput = "setRule(Number(this.value))">
+<button onclick = "setRule(Math.floor(Math.random() * MAX_RULES))">Randomize</button>
+<br>
+<b><u>Rule Presets:</u></b>
+<br>
+<select name = "rules" id = "ruleselect" oninput = "setRule(Number(this.value))">
+  <option value = "225">h</option>
+</select>
+<br><br>
+<b><u>Starting Row:</u></b>
+<br>
+<input type = "radio" id = "startingrow0radio" name = "startingrow" oninput = "startingRow = 0; reset()" CHECKED>
+<label for = "startingrow0radio">Random cells</label>
+<input type = "radio" id = "startingrow1radio" name = "startingrow" oninput = "startingRow = 1; reset()">
+<label for = "startingrow1radio">Single black cell</label>
+<input type = "radio" id = "startingrow2radio" name = "startingrow" oninput = "startingRow = 2; reset()">
+<label for = "startingrow2radio">Single white cell</label>
+<input type = "radio" id = "startingrow3radio" name = "startingrow" oninput = "startingRow = 3; reset()">
+<label for = "startingrow3radio">Full black row</label>
+<input type = "radio" id = "startingrow4radio" name = "startingrow" oninput = "startingRow = 4; reset()">
+<label for = "startingrow4radio">Full white row</label>
+<br><br>
+<b><u>Grid Size:</u></b> <span id = "gridsizetxt">100x100</span>
+<br>
+<input type = "range" id = "gridsizerange" value = "100" min = "50" max = "300" step = "50" oninput = "setGridSize(Number(this.value))">
+<br><br>
+<b><u>Rainbow:</u></b>
+<input type = "checkbox" id = "rainbowcellsbox" onchange = "rainbowCells = this.checked; reset()">
+<br><br>
+<canvas id = "canvas"></canvas>
+<button onclick = "if (!running) step()">Step</button>
+<button onclick = "reset()">Reset</button>
+<button onclick = "start()" id = "runbtn">Run</button>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 2000;
+  
+  let gridSize = 100;
+  let row = [];
+  let time = 0;
+  let running = false;
+  
+  let rule = "";
+  
+  let startingRow = 0;
+  
+  const MAX_RULES = 387420489;
+  
+  let currHue = Math.random() * 360;
+  let rainbowCells = false;
+  
+  let side = "R";
+  
+  function setRule(number) {
+    number = Math.floor(number.clamp(0, MAX_RULES - 1));
+    rule = number.toString(3);
+    while (rule.length < 18) rule = "0" + rule;
+    ruletxt.value = number;
+    reset();
+  }
+  
+  function randomizeRule() {
+    let n = "";
+    for (let i = 0; i < 10; i++) n += String(Math.round(Math.random()));
+    setRule(parseInt(n, 2));
+  }
+  
+  function setGridSize(number) {
+    gridSize = number % 2 ? number + 1 : number;
+    gridsizetxt.innerHTML = gridSize + "x" + gridSize;
+    reset();
+  }
+  
+  function step() {
+    let nextRow = [];
+    for (let i = 0; i < gridSize; i += 2) {
+      let pattern = "";
+      if (side == "R") {
+        pattern = row[i] + row[i + 1];
+        switch (pattern) {
+          case "11":
+            nextRow[i] = rule[0];
+            nextRow[i + 1] = rule[1];
+          break;
+          case "10":
+            nextRow[i] = rule[2];
+            nextRow[i + 1] = rule[3];
+          break;
+          case "01":
+            nextRow[i] = rule[4];
+            nextRow[i + 1] = rule[5];
+          break;
+          case "00":
+            nextRow[i] = rule[6];
+            nextRow[i + 1] = rule[7];
+          break;
+        }
+      }
+      else {
+        pattern = row[(i - 1 + gridSize) % gridSize] + row[i];
+        switch (pattern) {
+          case "11":
+            nextRow[(i - 1 + gridSize) % gridSize] = rule[0];
+            nextRow[i] = rule[1];
+          break;
+          case "10":
+            nextRow[(i - 1 + gridSize) % gridSize] = rule[2];
+            nextRow[i] = rule[3];
+          break;
+          case "01":
+            nextRow[(i - 1 + gridSize) % gridSize] = rule[4];
+            nextRow[i] = rule[5];
+          break;
+          case "00":
+            nextRow[(i - 1 + gridSize) % gridSize] = rule[6];
+            nextRow[i] = rule[7];
+          break;
+        }
+      }
+    }
+    row = nextRow;
+    drawRow();
+    if (side == "R") side = "L";
+    else side = "R";
+    time++;
+    if (time >= gridSize) {
+      running = false;
+      runbtn.innerHTML = "Run";
+    }
+    if (running) requestAnimationFrame(step);
+  }
+  
+  function start() {
+    if (running) {
+      running = false;
+      runbtn.innerHTML = "Run";
+    }
+    else {
+      if (time >= gridSize) reset();
+      running = true;
+      runbtn.innerHTML = "Stop";
+      step();
+    }
+  }
+  
+  function drawRow() {
+    let tileSize = canvas.width / gridSize;
+    for (let i = 0; i < gridSize; i++) {
+      if (row[i] == "0") ctx.fillStyle = "transparent";
+      else {
+        if (rainbowCells) ctx.fillStyle = `hsl(${currHue}deg, 100%, 50%)`;//(new HSL(undefined, 100, 25)).print();//"black";
+        else ctx.fillStyle = "black";
+      }
+      currHue += 360 / (gridSize * gridSize);
+      ctx.fillRect(i * tileSize, time * tileSize, tileSize, tileSize);
+    }
+  }
+  
+  function reset() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    currHue = Math.random() * 360;
+    time = 0;
+    side = "R";
+    row = [];
+    for (let i = 0; i < gridSize; i++) {
+      if (startingRow == 0) row.push(String(Math.round(Math.random())));
+      if (startingRow == 1 || startingRow == 4) row.push("0");
+      if (startingRow == 2 || startingRow == 3) row.push("1");
+    }
+    if (startingRow == 1) row[0] = "1";
+    if (startingRow == 2) row[0] = "0";
+    drawRow();
+    time++;
+  }
+  reset();
+</script>
+</body>
+</html>
