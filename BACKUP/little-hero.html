@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <title>Little Hero ~ e4494s</title>
+    <style>
+      #canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        width: 100%;
+        height: 100%;
+        border: none;
+        background-color: #d4d4d4;
+      }
+    </style>
+  </head>
+<body>
+<canvas id = "canvas"></canvas>
+<p id = "test"></p>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  
+  let gravity = 0.15;
+  let friction = 0.2;
+  let bounciness = 0.1;
+  let moveSpeed = 0.5;
+  let minVelocity = 0.15;
+  let maxVelocity = 50;
+  let keys = {
+    up: false,
+    right: false,
+    down: false,
+    left: false
+  };
+  let colors = {
+    platformColor: "#472f17",
+    grass: "#579b2b",
+    playerColor: "#8eed1a"
+  };
+  
+  
+  function Platform(x, y, width, color, thickness, isVertical) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.color = color;
+    this.thickness = thickness;
+    this.isVertical = isVertical;
+  }
+  Platform.prototype.render = function() {
+    ctx.lineCap = "round";
+    ctx.strokeStyle = this.color;
+    ctx.lineWidth = this.thickness;
+    if (this.isVertical) {
+      ctx.beginPath();
+      ctx.moveTo(this.x, this.y);
+      ctx.lineTo(this.x, this.y + this.width);
+      ctx.stroke();
+    }
+    else {
+      ctx.beginPath();
+      ctx.moveTo(this.x, this.y);
+      ctx.lineTo(this.x + this.width, this.y);
+      ctx.stroke();
+    }
+  }
+  let platformArray = [];
+  
+  const Hero = {
+    x: canvas.width / 2,
+    y: 100,
+    vx: 0.65,
+    vy: 0,
+    width: 20,
+    height: 30,
+    color: colors.playerColor,
+    airborne: true
+  };
+  Hero.render = function() {
+    if (keys.up) this.vy -= moveSpeed;
+    if (keys.right) this.vx += moveSpeed;
+    if (keys.down) this.vy += moveSpeed;
+    if (keys.left) this.vx -= moveSpeed;
+    
+    this.x += this.vx;
+    this.y += this.vy;
+    /*if (this.airborne)*/ this.vy += gravity;
+    //else this.vx *= 1 - friction;
+    
+    for (let i = 0; i < platformArray.length; i++) {
+      let plf = platformArray[i];
+      let nextX = this.x// + this.vx;
+      let nextY = this.y// + this.vy;
+      if (plf.isVertical) {
+        
+      }
+      else {
+        if (nextX + (this.width / 2) >= plf.x && nextX - (this.width / 2) <= plf.x + plf.width) {
+          if (this.y <= plf.y) {
+            if (nextY + (this.height / 2) >= plf.y) {
+              this.y = plf.y - (this.height / 2);
+              this.vy *= -bounciness;
+              this.vx *= 1 - friction;
+              //this.airborne = false;
+            }
+            else this.airborne = true;
+          }
+          else {
+            if (nextY - (this.height / 2) <= plf.y) {
+              this.y = plf.y + (this.height / 2);
+              this.vy *= -bounciness;
+              this.vx *= 1 - friction;
+              //this.airborne = false;
+            }
+            else this.airborne = true;
+          }
+        }
+      }
+    }
+    
+    if (Math.abs(this.vx) < minVelocity) this.vx = 0;
+    if (Math.abs(this.vx) > maxVelocity) this.vx = maxVelocity * Math.sign(this.vx);
+    if (Math.abs(this.vy) < minVelocity) this.vy = 0;
+    if (Math.abs(this.vy) > maxVelocity) this.vy = maxVelocity * Math.sign(this.vy);
+    
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 2;
+    ctx.fillStyle = this.color;
+    ctx.fillRectFromCenter(this.x, this.y, this.width, this.height);
+    ctx.strokeRectFromCenter(this.x, this.y, this.width, this.height);
+  };
+  
+  function frame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    for (let i = 0; i < platformArray.length; i++) {
+      platformArray[i].render();
+    }
+    
+    Hero.render();
+    
+    test.innerHTML = Hero.airborne + "<br>" + Hero.vy.toFixed(2);
+    
+    requestAnimationFrame(frame);
+  }
+  
+  
+  function init() {
+    platformArray.push(new Platform(0, canvas.height, canvas.width, "black", 2, false));
+    platformArray.push(new Platform(canvas.width / 2, canvas.height / 2, 200, colors.platformColor, 10, false));
+    
+    frame();
+  }
+  init();
+  
+  function keyDownHandler(e) {
+    if (e.code == "ArrowUp" || e.code == "KeyW") keys.up = true;
+    if (e.code == "ArrowRight" || e.code == "KeyD") keys.right = true;
+    if (e.code == "ArrowDown" || e.code == "KeyS") keys.down = true;
+    if (e.code == "ArrowLeft" || e.code == "KeyA") keys.left = true;
+  }
+  addEventListener("keydown", keyDownHandler);
+  function keyUpHandler(e) {
+    if (e.code == "ArrowUp" || e.code == "KeyW") keys.up = false;
+    if (e.code == "ArrowRight" || e.code == "KeyD") keys.right = false;
+    if (e.code == "ArrowDown" || e.code == "KeyS") keys.down = false;
+    if (e.code == "ArrowLeft" || e.code == "KeyA") keys.left = false;
+  }
+  addEventListener("keyup", keyUpHandler);
+</script>
+</body>
+</html>
