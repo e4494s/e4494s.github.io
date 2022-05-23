@@ -18,7 +18,7 @@
       }
       
       .title {
-        font-size: 25px;
+        font-size: 35px;
         font-weight: bold;
         color: #0d57bf; /* Blue */
         margin-top: 15px;
@@ -28,9 +28,9 @@
         font-style: italic;
         color: #062d63; /* Dark Blue */
         margin-bottom: 25px;
-        font-size: 12px;
-        padding-left: 30%;
-        padding-right: 30%;
+        font-size: 14px;
+        padding-left: 15%;
+        padding-right: 15%;
       }
       
       .dash {
@@ -87,6 +87,34 @@
         display: inline-block;
         background-size: 100% 100%;
       }
+      
+      .date-txt {
+        color: #d42649; /* Light red */
+        font-size: 11px;
+        font-weight: bold;
+        font-style: italic;
+      }
+      
+      .download-canvas-btn {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        border: 3px solid blue;
+        color: blue;
+        border-radius: 25px;
+        font-weight: bold;
+        font-weight: 16px;
+        font-family: monospace;
+        cursor: pointer;
+        background-color: white;
+        transition: 0.2s;
+        outline: none;
+      }
+      .download-canvas-btn:hover {
+        background-color: #ccccff;
+      }
+      .download-canvas-btn:active {
+        background-color: #9999ff;
+      }
     </style>
   </head>
 <body onload = "drawAll()">
@@ -96,151 +124,209 @@
   <div class = "subtitle">Click "Redraw" to regenerate a new random piece for each artwork.<br>The page may load really slowly at first due to how many things are running at once, but that will only be when you reload (sorry about that).<br>Some artworks are best viewed when zoomed in for a higher resolution.</div>
   <div class = "canvas-div">
     <div class = "canvas-title">Geometric Pillars</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw18()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(18)">&#11123;</button>
     <br>
     <canvas id = "canvas18"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Autumnal Growth</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw2()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(2)">&#11123;</button>
     <br>
     <canvas id = "canvas2"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Remnants of Attraction</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw3()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(3)">&#11123;</button>
     <br>
     <canvas id = "canvas3"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">A Fractured Oath</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw12()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(12)">&#11123;</button>
     <br>
     <canvas id = "canvas12"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Effervescence</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw24()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(24)">&#11123;</button>
     <br>
     <canvas id = "canvas24"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Gaze of the Divine</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw17()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(17)">&#11123;</button>
     <br>
     <canvas id = "canvas17"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Discarded Origami</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw5()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(5)">&#11123;</button>
     <br>
     <canvas id = "canvas5"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Ancient Tribal Energy</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw23()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(23)">&#11123;</button>
     <br>
     <canvas id = "canvas23"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Community and Seclusion</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw7()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(7)">&#11123;</button>
     <br>
     <canvas id = "canvas7"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Rectangular Moss</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw25()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(25)">&#11123;</button>
     <br>
     <canvas id = "canvas25"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Banded Orbs</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw20()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(20)">&#11123;</button>
     <br>
     <canvas id = "canvas20"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Lonely, Muted Mountains</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw6()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(6)">&#11123;</button>
     <br>
     <canvas id = "canvas6"></canvas>
   </div>
   <div class = "canvas-div">
+    <div class = "canvas-title">Teeming Metropolis</div>
+    <div class = "date-txt">2022</div>
+    <button class = "canvas-btn" onclick = "draw26()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(26)">&#11123;</button>
+    <br>
+    <canvas id = "canvas26"></canvas>
+  </div>
+  <div class = "canvas-div">
     <div class = "canvas-title">Earthen Canyon Walls</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw21()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(21)">&#11123;</button>
     <br>
     <canvas id = "canvas21"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Interlock</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw15()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(15)">&#11123;</button>
     <br>
     <canvas id = "canvas15"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Triformations</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw22()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(22)">&#11123;</button>
     <br>
     <canvas id = "canvas22"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Leeching Amoeba</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw8()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(8)">&#11123;</button>
     <br>
     <canvas id = "canvas8"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Euclid's Hurricane</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw19()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(19)">&#11123;</button>
     <br>
     <canvas id = "canvas19"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Recursive Descent</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw1()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(1)">&#11123;</button>
     <br>
     <canvas id = "canvas1"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Grasping Coral</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw9()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(9)">&#11123;</button>
     <br>
     <canvas id = "canvas9"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Umbral Forms</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw10()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(10)">&#11123;</button>
     <br>
     <canvas id = "canvas10"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Crystalline Mosaic</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw4()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(4)">&#11123;</button>
     <br>
     <canvas id = "canvas4"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Chromatic Smears</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw11()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(11)">&#11123;</button>
     <br>
     <canvas id = "canvas11"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Interference</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw16()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(16)">&#11123;</button>
     <br>
     <canvas id = "canvas16"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Tumultuous Terrain</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw13()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(13)">&#11123;</button>
     <br>
     <canvas id = "canvas13"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Splintered Mirror</div>
+    <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw14()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(14)">&#11123;</button>
     <br>
     <canvas id = "canvas14"></canvas>
   </div>
@@ -276,6 +362,119 @@
     draw23();
     draw24();
     draw25();
+    draw26();
+  }
+  
+  //
+  // Teeming Metropolis
+  //
+  
+  const ctx26 = canvas26.getContext("2d");
+  canvas26.width = canvas26.height = 2000;
+  
+  let canvas26Filled = false;
+  let minSquare26Size = 1;
+  let maxSquare26Size = 200;
+  let maxSquares26 = 5000;
+  let square26SizeRatio = 0.5;
+  let fillMode26 = 4; // 0: Gradient, 1: Random, 2: White, 3: Black, 4: No fill
+  let outlineMode26 = 0; // 0: Gradient, 1: Random, 2: White, 3: Black, 4: No outline
+  let hue26 = Math.random() * 360;
+  let blackBackground26 = true;
+  let lineWidth26 = 5;
+  let maxTries26 = 1000;
+  
+  function Square26() {
+    let x = Math.random() * canvas26.width;
+    let y = Math.random() * canvas26.height;
+    let tries = 0;
+    
+    while (!validatePoint26(x, y)) {
+      if (tries > maxTries26) {
+        canvas26Filled = true;
+        return;
+      }
+      x = Math.random() * canvas26.width;
+      y = Math.random() * canvas26.height;
+      tries++;
+    }
+    
+    this.x = x;
+    this.y = y;
+    this.radius = 0;
+    this.grow();
+  }
+  Square26.prototype.grow = function() {
+    let leastDist = Infinity;
+    let thisInd = square26Array.indexOf(this);
+    let len = square26Array.length;
+    for (let i = 0; i < len; i++) {
+      if (i !== thisInd) {
+        let s = square26Array[i];
+        let dx = Math.abs(this.x - s.x) - s.radius;
+        let dy = Math.abs(this.y - s.y) - s.radius;
+        let dist = Math.max(dx, dy); // Which direction is furthest away
+        if (dist < leastDist) leastDist = dist; // Find shortest distance
+      }
+    }
+    
+    let distToTop = this.y; // Check distance to edges
+    if (distToTop <= leastDist) leastDist = distToTop;
+    let distToRight = canvas26.width - this.x;
+    if (distToRight <= leastDist) leastDist = distToRight;
+    let distToBottom = canvas26.height - this.y;
+    if (distToBottom <= leastDist) leastDist = distToBottom;
+    let distToLeft = this.x;
+    if (distToLeft <= leastDist) leastDist = distToLeft;
+    
+    if (leastDist > maxSquare26Size) leastDist = maxSquare26Size; // Update size
+    this.radius = leastDist;
+    
+    this.draw();
+  };
+  Square26.prototype.draw = function() {
+    let r = this.radius * square26SizeRatio;
+    let hue = ((this.radius - minSquare26Size) / (maxSquare26Size - minSquare26Size)) * 360;
+    let colors = [
+      ctx26.fillStyle = `hsl(${hue26 + hue}deg, 100%, 40%)`, // Gradient
+      ctx26.fillStyle = `hsl(${Math.random() * 360}deg, 100%, 40%)`, // Random
+      "white", // White
+      "black", // Black
+      null // No outline
+    ];
+    
+    ctx26.fillStyle = colors[fillMode26];
+    ctx26.strokeStyle = colors[outlineMode26];
+    ctx26.lineWidth = lineWidth26;
+    ctx26.beginPath();
+    ctx26.rect(this.x - r, this.y - r, r * 2, r * 2);
+    if (fillMode26 !== 4) ctx26.fill();
+    if (outlineMode26 !== 4) ctx26.stroke();
+  };
+  let square26Array = [];
+  
+  function validatePoint26(x, y) {
+    for (let i = 0; i < square26Array.length; i++) {
+      let r = square26Array[i].radius + minSquare26Size;
+      let x1 = square26Array[i].x - r;
+      let x2 = square26Array[i].x + r;
+      let y1 = square26Array[i].y - r;
+      let y2 = square26Array[i].y + r;
+      if ((x > x1 && x < x2) && (y > y1 && y < y2)) return false; // Too close to a square
+    }
+    if (x < minSquare26Size || x > canvas26.width - minSquare26Size) return false; // Too close to left/right
+    if (y < minSquare26Size || y > canvas26.height - minSquare26Size) return false; // Too close to top/bottom
+    return true;
+  }
+  
+  function draw26() {
+    ctx26.fillStyle = blackBackground26 ? "black" : "white";
+    ctx26.fillRect(0, 0, canvas26.width, canvas26.height);
+    canvas26Filled = false;
+    hue26 = Math.random() * 360;
+    square26Array = [];
+    square26Array.push(new Square26());
+    while (!canvas26Filled && square26Array.length < maxSquares26) square26Array.push(new Square26());
   }
   
   //
@@ -2894,19 +3093,19 @@
       for (let i = 0; i < square1Array.length; i++) square1Array[i].render();
     }
   }
+  
+  //
+  // Misc
+  //
+  
+  function downloadCanvas(n) {
+    let canvas = document.getElementById("canvas" + n);
+    let link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "generative.png";
+    link.click();
+  }
 </script>
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
