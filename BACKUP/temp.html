@@ -73,7 +73,627 @@
 -->
 
 <!---->
-
+<canvas id = "canvas85"></canvas>
+<button onclick = "draw85()">Redraw</button>
+<div class = "desc"><b><i>(5/25/2022)</i></b> Generative art that is similar to <a href = "tiles.html" target = "_blank">tiles.html</a>, except that every single tile is guaranteed to connect to adjacent tiles, to create an intricate and solid structure. Today I added the first 14 tiles, I plan to have a total of 20+.</div>
+<hr><hr>
+<script>
+  const ctx85 = canvas85.getContext("2d");
+  canvas85.width = canvas85.height = 300;
+  
+  function XOR85(a, b) {
+    return a != b;
+  }
+  function XNOR85(a, b) {
+    return a == b;
+  }
+  
+  let selectedTiles85 = [14];//[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15];
+  let numTiles85 = 15;
+  let gridSize85 = 1;
+  /*
+  1: Ramp    |  2: Notch   |  3: Stripe  |  4: Dots       |  5: Quills
+  6: Arc     |  7: Gear    |  8: Bars    |  9: Paw        |  10: Sun
+  11: Slice  |  12: Wheel  |  13: Face   |  14: Squiggle  |  15: Hammer
+  */
+  
+  let colors85 = ["black", "white"]; // Tile, background
+  
+  function getAngles85(direction, i) {
+    if (!direction && i === 0) return {start: toRad(0), end: toRad(90)};
+    if (!direction && i === 1) return {start: toRad(180), end: toRad(270)};
+    if (direction && i === 0) return {start: toRad(90), end: toRad(180)};
+    if (direction && i === 1) return {start: toRad(270), end: toRad(0)};
+  }
+  
+  function drawTile85(_x, _y, size, direction, parity, type) {
+    /* Direction: (0 = false, 1 = true)
+    0-----1
+    |     |
+    |     |
+    1-----0
+    */
+    
+    /*
+    Parity
+    False = Color outside
+    True = Color inside
+    */
+    
+    let xSign, ySign, x1, y1, x2, y2;
+    if (!direction) {
+      xSign = 1;
+      ySign = 1;
+      x1 = _x;
+      y1 = _y;
+      x2 = _x + size;
+      y2 = _y + size;
+    }
+    else {
+      xSign = -1;
+      ySign = 1;
+      x1 = _x + size;
+      y1 = _y;
+      x2 = _x;
+      y2 = _y + size;
+    }
+    
+    let p = parity ? 1 : 0;
+    ctx85.fillStyle = colors85[1 - p]; // Background color
+    ctx85.fillRect(_x, _y, size, size);
+    ctx85.fillStyle = ctx85.strokeStyle = colors85[p]; // Tile color
+    
+    if (type === 1) { // Ramp
+      let x = x1;
+      let y = y1;
+      for (let i = 0; i < 2; i++) {
+        ctx85.beginPath();
+        ctx85.moveTo(x, y);
+        ctx85.lineTo(x + (size * 0.5 * xSign), y);
+        ctx85.lineTo(x, y + (size * 0.5 * ySign));
+        ctx85.lineTo(x, y);
+        ctx85.fill();
+        
+        x = x2;
+        y = y2;
+        xSign *= -1;
+        ySign *= -1;
+      }
+      
+      return;
+    }
+    
+    if (type === 2) { // Notch
+      let x = x1;
+      let y = y1;
+      for (let i = 0; i < 2; i++) {
+        ctx85.beginPath();
+        let cx = x;
+        let cy = y;
+        ctx85.moveTo(cx, cy);
+        cx += size * 0.5 * xSign;
+        ctx85.lineTo(cx, cy);
+        cx -= size * 0.1875 * xSign;
+        cy += size * 0.1875 * ySign;
+        ctx85.lineTo(cx, cy);
+        cx += size * 0.125 * xSign;
+        cy += size * 0.125 * ySign;
+        ctx85.lineTo(cx, cy);
+        cx -= size * 0.125 * xSign;
+        cy += size * 0.125 * ySign;
+        ctx85.lineTo(cx, cy);
+        cx -= size * 0.125 * xSign;
+        cy -= size * 0.125 * ySign;
+        ctx85.lineTo(cx, cy);
+        ctx85.lineTo(x, y + (size * 0.5 * ySign));
+        ctx85.lineTo(x, y);
+        ctx85.fill();
+        
+        x = x2;
+        y = y2;
+        xSign *= -1;
+        ySign *= -1;
+      }
+      
+      return;
+    }
+    
+    if (type === 3) { // Stripe
+      let x = x1;
+      let y = y1;
+      for (let i = 0; i < 2; i++) {
+        ctx85.beginPath();
+        ctx85.moveTo(x, y);
+        ctx85.lineTo(x + (size * 0.5 * xSign), y);
+        ctx85.lineTo(x, y + (size * 0.5 * ySign));
+        ctx85.lineTo(x, y);
+        ctx85.fill();
+        
+        ctx85.lineWidth = size * 0.075;
+        ctx85.lineCap = ctx85.lineJoin = "round";
+        ctx85.beginPath();
+        ctx85.moveTo(x + (size * 0.625 * xSign), y + (size * 0.125 * ySign));
+        ctx85.lineTo(x + (size * 0.125 * xSign), y + (size * 0.625 * ySign));
+        ctx85.stroke();
+        
+        x = x2;
+        y = y2;
+        xSign *= -1;
+        ySign *= -1;
+      }
+      
+      return;
+    }
+    
+    if (type === 4) { // Dots
+      let x = x1;
+      let y = y1;
+      for (let i = 0; i < 2; i++) {
+        ctx85.beginPath();
+        ctx85.moveTo(x, y);
+        ctx85.lineTo(x + (size * 0.5 * xSign), y);
+        ctx85.lineTo(x, y + (size * 0.5 * ySign));
+        ctx85.lineTo(x, y);
+        ctx85.fill();
+        
+        let radius = size * 0.05;
+        
+        ctx85.fillCircle(x + (size * 0.625 * xSign), y + (size * 0.125 * ySign), radius);
+        ctx85.fillCircle(x + (size * 0.375 * xSign), y + (size * 0.375 * ySign), radius);
+        ctx85.fillCircle(x + (size * 0.125 * xSign), y + (size * 0.625 * ySign), radius);
+        
+        x = x2;
+        y = y2;
+        xSign *= -1;
+        ySign *= -1;
+      }
+      
+      return;
+    }
+    
+    if (type === 5) { // Quills
+      let x = x1;
+      let y = y1;
+      for (let i = 0; i < 2; i++) {
+        ctx85.beginPath();
+        ctx85.moveTo(x, y);
+        ctx85.lineTo(x + (size * 0.5 * xSign), y);
+        ctx85.lineTo(x, y + (size * 0.5 * ySign));
+        ctx85.lineTo(x, y);
+        ctx85.fill();
+        
+        ctx85.lineCap = ctx85.lineJoin = "round";
+        ctx85.lineWidth = size * 0.05;
+        let cx = x + (size * 0.5 * xSign);
+        let cy = y + (size * (1 / 18) * ySign);
+        for (let i = 0; i < 5; i++) {
+          ctx85.beginPath();
+          ctx85.moveTo(cx + (size * 0.05 * xSign), cy + (size * 0.05 * ySign));
+          ctx85.lineTo(cx + (size * (1 / 6) * xSign), cy + (size * (1 / 6) * ySign));
+          ctx85.stroke();
+          cx -= size * (1 / 9) * xSign;
+          cy += size * (1 / 9) * ySign;
+        }
+        
+        x = x2;
+        y = y2;
+        xSign *= -1;
+        ySign *= -1;
+      }
+      
+      return;
+    }
+    
+    if (type === 6) { // Arc
+      let x = x1;
+      let y = y1;
+      for (let i = 0; i < 2; i++) {
+        ctx85.beginPath();
+        let angles = getAngles85(direction, i);
+        ctx85.moveTo(x, y);
+        ctx85.lineTo(x + (size * 0.5 * xSign), y);
+        ctx85.arc(x, y, size * 0.5, angles.start, angles.end);
+        ctx85.lineTo(x, y + (size * 0.5 * ySign));
+        ctx85.lineTo(x, y);
+        ctx85.fill();
+        
+        x = x2;
+        y = y2;
+        xSign *= -1;
+        ySign *= -1;
+      }
+      
+      return;
+    }
+    
+    if (type === 7) { // Gear
+      let x = x1;
+      let y = y1;
+      for (let i = 0; i < 2; i++) {
+        ctx85.beginPath();
+        let angles = getAngles85(direction, i);
+        ctx85.moveTo(x, y);
+        ctx85.lineTo(x + (size * 0.5 * xSign), y);
+        ctx85.arc(x, y, size * 0.5, angles.start, angles.end);
+        ctx85.lineTo(x, y + (size * 0.5 * ySign));
+        ctx85.lineTo(x, y);
+        ctx85.fill();
+        
+        let len = size * 0.125 * Math.SQRT2;
+        for (let j = 0; j < 2; j++) {
+          ctx85.beginPath();
+          let ca = j === 0 ? 22.5 : 67.5;
+          let cx = x + (size * 0.4 * Math.cos(toRad(ca)) * xSign);
+          let cy = y + (size * 0.4 * Math.sin(toRad(ca)) * ySign);
+          ctx85.moveTo(cx, cy);
+          ca -= 90;
+          cx += len * 0.5 * Math.cos(toRad(ca)) * xSign;
+          cy += len * 0.5 * Math.sin(toRad(ca)) * ySign;
+          ctx85.lineTo(cx, cy);
+          ca += 90;
+          cx += (len + (size * 0.1)) * Math.cos(toRad(ca)) * xSign;
+          cy += (len + (size * 0.1)) * Math.sin(toRad(ca)) * ySign;
+          ctx85.lineTo(cx, cy);
+          ca += 90;
+          cx += len * Math.cos(toRad(ca)) * xSign;
+          cy += len * Math.sin(toRad(ca)) * ySign;
+          ctx85.lineTo(cx, cy);
+          ca += 90;
+          cx += (len + (size * 0.1)) * Math.cos(toRad(ca)) * xSign;
+          cy += (len + (size * 0.1)) * Math.sin(toRad(ca)) * ySign;
+          ctx85.lineTo(cx, cy);
+          ca += 90;
+          cx += len * 0.5 * Math.cos(toRad(ca)) * xSign;
+          cy += len * 0.5 * Math.sin(toRad(ca)) * ySign;
+          ctx85.lineTo(cx, cy);
+          ctx85.fill();
+        }
+        
+        x = x2;
+        y = y2;
+        xSign *= -1;
+        ySign *= -1;
+      }
+      
+      return;
+    }
+    
+    if (type === 8) { // Bars
+      let x = x1;
+      let y = y1;
+      for (let i = 0; i < 2; i++) {
+        ctx85.beginPath();
+        let angles = getAngles85(direction, i);
+        ctx85.moveTo(x, y);
+        ctx85.lineTo(x + (size * 0.5 * xSign), y);
+        ctx85.arc(x, y, size * 0.5, angles.start, angles.end);
+        ctx85.lineTo(x, y + (size * 0.5 * ySign));
+        ctx85.lineTo(x, y);
+        ctx85.fill();
+        
+        ctx85.lineWidth = size * 0.075;
+        ctx85.lineCap = ctx85.lineJoin = "round";
+        ctx85.beginPath();
+        ctx85.arc(x, y, size * 0.625, angles.start + (toRad(8)), angles.end - toRad(45 + 8));
+        ctx85.stroke();
+        ctx85.beginPath();
+        ctx85.arc(x, y, size * 0.625, angles.start + toRad(45 + 8), angles.end - toRad(8));
+        ctx85.stroke();
+        
+        x = x2;
+        y = y2;
+        xSign *= -1;
+        ySign *= -1;
+      }
+      
+      return;
+    }
+    
+    if (type === 9) { // Paw
+      let x = x1;
+      let y = y1;
+      for (let i = 0; i < 2; i++) {
+        ctx85.beginPath();
+        let angles = getAngles85(direction, i);
+        ctx85.moveTo(x, y);
+        ctx85.lineTo(x + (size * 0.5 * xSign), y);
+        ctx85.arc(x, y, size * 0.5, angles.start, angles.end);
+        ctx85.lineTo(x, y + (size * 0.5 * ySign));
+        ctx85.lineTo(x, y);
+        ctx85.fill();
+        
+        let spacing = size * 0.625;
+        let radius = size * 0.05;
+        let angleSpacing = 22.5;
+        for (let i = 0; i < 4; i++) {
+          let a = (i * angleSpacing) + ((90 - (angleSpacing * 3)) / 2);
+          ctx85.fillCircle(x + (spacing * Math.cos(toRad(a)) * xSign), y + (spacing * Math.sin(toRad(a)) * ySign), radius);
+        }
+        
+        x = x2;
+        y = y2;
+        xSign *= -1;
+        ySign *= -1;
+      }
+      
+      return;
+    }
+    
+    if (type === 10) { // Sun
+      let x = x1;
+      let y = y1;
+      for (let i = 0; i < 2; i++) {
+        ctx85.beginPath();
+        let angles = getAngles85(direction, i);
+        ctx85.moveTo(x, y);
+        ctx85.lineTo(x + (size * 0.5 * xSign), y);
+        ctx85.arc(x, y, size * 0.5, angles.start, angles.end);
+        ctx85.lineTo(x, y + (size * 0.5 * ySign));
+        ctx85.lineTo(x, y);
+        ctx85.fill();
+        
+        ctx85.lineCap = ctx85.lineJoin = "round";
+        ctx85.lineWidth = size * 0.05;
+        let spacing = size * 0.56;
+        let dist = size * 0.1;
+        for (let j = 0; j < 5; j++) {
+          let ca = 18 * (j + 0.5);
+          let cx = x + (spacing * Math.cos(toRad(ca)) * xSign);
+          let cy = y + (spacing * Math.sin(toRad(ca)) * ySign);
+          
+          ctx85.beginPath();
+          ctx85.moveTo(cx, cy);
+          ctx85.lineTo(cx + (dist * Math.cos(toRad(ca)) * xSign), cy + (dist * Math.sin(toRad(ca)) * ySign));
+          ctx85.stroke();
+        }
+        
+        
+        x = x2;
+        y = y2;
+        xSign *= -1;
+        ySign *= -1;
+      }
+      
+      return;
+    }
+    
+    if (type === 11) { // Slice
+      let x = x1;
+      let y = y1;
+      for (let i = 0; i < 2; i++) {
+        ctx85.beginPath();
+        let angles = getAngles85(direction, i);
+        ctx85.moveTo(x, y);
+        ctx85.lineTo(x + (size * 0.5 * xSign), y);
+        ctx85.arc(x, y, size * 0.5, angles.start, angles.end);
+        ctx85.lineTo(x, y + (size * 0.5 * ySign));
+        ctx85.lineTo(x, y);
+        ctx85.fill();
+        
+        ctx85.fillStyle = colors85[1 - p];
+        ctx85.beginPath();
+        let a = angles.start + toRad(45);
+        let spacing = size * 0.2;
+        ctx85.moveTo(x + (spacing * Math.cos(a)), y + (spacing * Math.sin(a)));
+        ctx85.arc(x, y, size * 0.55, a - toRad(15), a + toRad(15));
+        ctx85.fill();
+        
+        ctx85.fillStyle = colors85[p];
+        
+        x = x2;
+        y = y2;
+        xSign *= -1;
+        ySign *= -1;
+      }
+      
+      return;
+    }
+    
+    if (type === 12) { // Wheel
+      let x = x1;
+      let y = y1;
+      for (let i = 0; i < 2; i++) {
+        ctx85.beginPath();
+        let angles = getAngles85(direction, i);
+        ctx85.moveTo(x, y);
+        ctx85.lineTo(x + (size * 0.5 * xSign), y);
+        ctx85.arc(x, y, size * 0.5, angles.start, angles.end);
+        ctx85.lineTo(x, y + (size * 0.5 * ySign));
+        ctx85.lineTo(x, y);
+        ctx85.fill();
+        
+        ctx85.fillStyle = colors85[1 - p];
+        for (let j = 0; j < 3; j++) {
+          let ca = (j * 30) + 15 + toDeg(angles.start);
+          //ctx85.fillCircle(x + (size * 0.1 * Math.cos(toRad(ca))), y + (size * 0.1 * Math.sin(toRad(ca))), size * 0.02);
+          ctx85.beginPath();
+          ctx85.moveTo(x + (size * 0.1 * Math.cos(toRad(ca))), y + (size * 0.1 * Math.sin(toRad(ca))));
+          ctx85.arc(x, y, size * 0.45, toRad(ca - 10), toRad(ca + 10));
+          ctx85.fill();
+        }
+        ctx85.fillStyle = colors85[p];
+        
+        x = x2;
+        y = y2;
+        xSign *= -1;
+        ySign *= -1;
+      }
+      
+      return;
+    }
+    
+    if (type === 13) { // Face
+      let x = x1;
+      let y = y1;
+      for (let i = 0; i < 2; i++) {
+        ctx85.beginPath();
+        let angles = getAngles85(direction, i);
+        ctx85.moveTo(x, y);
+        ctx85.lineTo(x + (size * 0.5 * xSign), y);
+        ctx85.arc(x, y, size * 0.5, angles.start, angles.end);
+        ctx85.lineTo(x, y + (size * 0.5 * ySign));
+        ctx85.lineTo(x, y);
+        ctx85.fill();
+        
+        ctx85.fillStyle = colors85[1 - p];
+        let eyeSize = size * 0.05;
+        let eyeDist = size * 0.38;
+        let a = angles.start + toRad(25);
+        let mouthDist = size * 0.22;
+        let mouthSize = size * 0.1;
+        ctx85.fillCircle(x + (eyeDist * Math.cos(a)), y + (eyeDist * Math.sin(a)), eyeSize);
+        a = angles.start + toRad(65);
+        ctx85.fillCircle(x + (eyeDist * Math.cos(a)), y + (eyeDist * Math.sin(a)), eyeSize);
+        
+        a = angles.start + toRad(45);
+        ctx85.beginPath();
+        ctx85.arc(x + (mouthDist * Math.cos(a)), y + (mouthDist * Math.sin(a)), mouthSize, angles.start - toRad(45), angles.end + toRad(45), true);
+        ctx85.fill();
+        
+        ctx85.fillStyle = colors85[p];
+        
+        x = x2;
+        y = y2;
+        xSign *= -1;
+        ySign *= -1;
+      }
+      
+      return;
+    }
+    
+    if (type === 14) { // Squiggle *UNFINISHED*
+      let x = x1;
+      let y = y1;
+      for (let i = 0; i < 2; i++) {
+        ctx85.beginPath();
+        ctx85.moveTo(x, y);
+        let cx = x + (size * 0.5 * xSign);
+        let cy = y;
+        ctx85.lineTo(cx, cy);
+        for (let j = 0; j < 4; j++) {
+          cx -= size * 0.125 * xSign;
+          cy += size * 0.125 * ySign;
+          ctx85.quadraticCurveTo(cx + (size * 0.125 * xSign), cy + (size * 0.125 * ySign), cx, cy);
+        }
+        ctx85.fill();
+        
+        x = x2;
+        y = y2;
+        xSign *= -1;
+        ySign *= -1;
+      }
+      
+      return;
+    }
+    
+    if (type === 15) { // Hammer
+      let x = x1;
+      let y = y1;
+      for (let i = 0; i < 2; i++) {
+        let angles = getAngles85(direction, i);
+        
+        ctx85.beginPath();
+        ctx85.moveTo(x, y);
+        ctx85.lineTo(x + (size * 0.5 * xSign), y);
+        ctx85.lineTo(x + (size * 0.5 * xSign), y + (size * 0.35 * ySign));
+        ctx85.lineTo(x + (size * 0.35 * xSign), y + (size * 0.5 * ySign));
+        ctx85.lineTo(x, y + (size * 0.5 * ySign));
+        ctx85.lineTo(x, y);
+        ctx85.fill();
+        
+        let len = size * 0.13;
+        let ratio = 0.075 + 0.04;
+        ctx85.beginPath();
+        ctx85.fillStyle = colors85[1 - p];
+        let ca = toDeg(angles.start) + 135;
+        let cx = x + (size * (0.425 + 0.05) * xSign);
+        let cy = y + (size * (0.425 + 0.05) * ySign);
+        ctx85.moveTo(cx, cy);
+        cx += len * 0.5 * Math.cos(toRad(ca));
+        cy += len * 0.5 * Math.sin(toRad(ca));
+        ctx85.lineTo(cx, cy);
+        ca += 90;
+        cx += (len + (size * ratio)) * Math.cos(toRad(ca));
+        cy += (len + (size * ratio)) * Math.sin(toRad(ca));
+        ctx85.lineTo(cx, cy);
+        ca -= 90;
+        cx += len * Math.cos(toRad(ca));
+        cy += len * Math.sin(toRad(ca));
+        ctx85.lineTo(cx, cy);
+        ca += 90;
+        cx += len * Math.cos(toRad(ca));
+        cy += len * Math.sin(toRad(ca));
+        ctx85.lineTo(cx, cy);
+        ca += 90;
+        cx += len * 3 * Math.cos(toRad(ca));
+        cy += len * 3 * Math.sin(toRad(ca));
+        ctx85.lineTo(cx, cy);
+        ca += 90;
+        cx += len * Math.cos(toRad(ca));
+        cy += len * Math.sin(toRad(ca));
+        ctx85.lineTo(cx, cy);
+        ca += 90;
+        cx += len * Math.cos(toRad(ca));
+        cy += len * Math.sin(toRad(ca));
+        ctx85.lineTo(cx, cy);
+        ca -= 90;
+        cx += (len + (size * ratio)) * Math.cos(toRad(ca));
+        cy += (len + (size * ratio)) * Math.sin(toRad(ca));
+        ctx85.lineTo(cx, cy);
+        ctx85.lineTo(x + (size * (0.425 + 0.05) * xSign), y + (size * (0.425 + 0.05) * ySign));
+        ctx85.fill();
+        
+        ctx85.fillStyle = colors85[p];
+        
+        x = x2;
+        y = y2;
+        xSign *= -1;
+        ySign *= -1;
+      }
+      
+      return;
+    }
+  }
+  
+  function randTile85() {
+    return selectedTiles85[Math.floor(Math.random() * selectedTiles85.length)];
+  }
+  function randBool85() {
+    return Math.random() < 0.5;
+  }
+  
+  function draw85() {
+    ctx85.clearRect(0, 0, canvas85.width, canvas85.height);
+    
+    canvas85.width = canvas85.height = gridSize85 * Math.round(1000 / gridSize85);
+    
+    let tileSize = canvas85.width / gridSize85;
+    
+    let grid = [];
+    for (let x = 0; x < gridSize85; x++) {
+      let row = [];
+      for (let y = 0; y < gridSize85; y++) {
+        row.push({});
+      }
+      grid.push(row);
+    }
+    
+    for (let x = 0; x < gridSize85; x++) {
+      for (let y = 0; y < gridSize85; y++) {
+        let lastTile;
+        if (x === 0 && y === 0) lastTile = {direction: randBool85(), parity: randBool85()};
+        else if (x === 0) lastTile = grid[x][y - 1];
+        else lastTile = grid[x - 1][y];
+        
+        let direction = randBool85();
+        
+        grid[x][y] = {direction: direction, parity: XOR85(lastTile.direction, XNOR85(lastTile.parity, direction))};
+        drawTile85(x * tileSize, y * tileSize, tileSize, grid[x][y].direction, grid[x][y].parity, randTile85());
+      }
+    }
+  }
+  draw85();
+</script>
 <!---->
 
 
