@@ -165,6 +165,7 @@
     for (let i = 1; i <= numTiles; i++) {
       if (Math.random() >= 0.5) selectedTiles.push(i);
     }
+    if (selectedTiles.length === 0) selectedTiles.push(Math.ceil(Math.random() * numTiles));
     updateSettings();
   }
   let presets = [
@@ -601,20 +602,26 @@
     }
     
     // Generate tile buttons
-    for (let i = 1; i <= numTiles; i++) {
-      let img = document.createElement("img");
-      img.className = "active-tile-img";
-      img.src = `images/tiles/tile-${i}.png`;
-      img.id = `tile-img-${i}`;
-      img.title = tileNames[i - 1];
-      img.onclick = () => toggleTile(i);
-      tilesDiv.appendChild(img);
-      
-      if (i % 4 === 0) {
-        let br = document.createElement("br");
-        tilesDiv.appendChild(br);
+    let table = document.createElement("table");
+    for (let i = 0; i < 4; i++) {
+      let tr = document.createElement("tr");
+      table.appendChild(tr);
+      for (let j = 1; j <= 4; j++) {
+        let index = (i * 4) + j;
+        let td = document.createElement("td");
+        td.style.minWidth = "0";
+        td.style.padding = "0";
+        let img = document.createElement("img");
+        img.className = "active-tile-img";
+        img.src = `images/tiles/tile-${index}.png`;
+        img.id = `tile-img-${index}`;
+        img.title = tileNames[index - 1];
+        img.onclick = () => toggleTile(index);
+        td.appendChild(img);
+        tr.appendChild(td);
       }
     }
+    tilesDiv.appendChild(table);
     
     loadPalettePreset(0);
     selectRandomTiles();
