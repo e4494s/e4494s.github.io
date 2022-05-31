@@ -56,6 +56,184 @@
   }
 </script>
 -->
+<canvas id = "canvas86" style = "width: 400px; height: 400px"></canvas>
+<button onclick = "startCanvas86(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
+<button onclick = "reset86()">Reset</button>
+<br>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>[ FPS: <span id = "fps86Txt"></span> ]</b></i></div>
+<br><br>
+<div><b><u>Shapes Drawn:</u></b> <span id = "totalSteps86Txt">2,000</span></div>
+<br><br>
+<div><b><u>Number of Locus Points:</u></b> <span id = "numLocus86Txt">15</span></div>
+<input type = "range" id = "numLocus86Range" min = "1" max = "25" step = "1" value = "15" oninput = "updateSettings86(true)">
+<br><br>
+<div><b><u>Shape:</u></b></div>
+<input type = "radio" name = "shape86Radio" id = "shape86Radio1" oninput = "updateSettings86(false)" CHECKED>
+<label for = "shape86Radio1">Circle</label>
+<br>
+<input type = "radio" name = "shape86Radio" id = "shape86Radio2" oninput = "updateSettings86(false)">
+<label for = "shape86Radio2">Square</label>
+<br>
+<input type = "radio" name = "shape86Radio" id = "shape86Radio3" oninput = "updateSettings86(false)">
+<label for = "shape86Radio3">Line</label>
+<br><br>
+<div><b><u>Selected point becomes:</u></b></div>
+<input type = "radio" name = "connectEdges86Radio" id = "connectEdges86Radio2" oninput = "updateSettings86(false)" CHECKED>
+<label for = "connectEdges86Radio2">EDGE of drawn shape</label>
+<br>
+<input type = "radio" name = "connectEdges86Radio" id = "connectEdges86Radio1" oninput = "updateSettings86(false)">
+<label for = "connectEdges86Radio1">CENTER of drawn shape</label>
+<br><br>
+<div><b><u>Shape Color:</u></b></div>
+<input type = "radio" name = "colorMode86Radio" id = "colorMode86Radio1" oninput = "updateSettings86(false)" CHECKED>
+<label for = "colorMode86Radio1">Locus-based color</label>
+<br>
+<input type = "radio" name = "colorMode86Radio" id = "colorMode86Radio2" oninput = "updateSettings86(false)">
+<label for = "colorMode86Radio2">White</label>
+<br><br>
+<input type = "checkbox" id = "roundSelected86Checkbox" oninput = "updateSettings86(false)">
+<label for = "roundSelected86Checkbox">Selected point is from 20&times;20 grid</label>
+<div class = "desc"><b><i>(5/29/2022)</i></b> An array of Locus points are created randomly on the canvas, and then every step a random point on the canvas is selected. A thin circle is drawn, with the selected point as the center of the circle, and the edge of the circle touching the nearest Locus. I also added buttons for different modes of drawing.<br><b><i>Update: (Later that night)</i></b> Changed from lots of buttons for different modes, to just different settings to change how the shapes draw.<br><b><i><mark>Actually finished! (5/30/2022)</mark> Added to <a href = "generative-art-gallery.html" target = "_blank">generative-art-gallery.html</a>.</i></b></div>
+<hr><hr>
+<script>
+  const ctx86 = canvas86.getContext("2d");
+  canvas86.width = canvas86.height = 1000;
+  let canvas86Running = false;
+  
+  let stepsPerFrame86 = 2000;
+  let totalSteps86 = 0;
+  
+  let mode86 = 1;
+  
+  let numLocus86 = 15;
+  let roundSelected86 = false;
+  let shape86 = 1; // 1: Circle  |  2: Square  |  3: Line
+  let colorMode86 = 1; // 1: Locus-based  |  2: White
+  let connectEdges86 = true;
+  
+  function updateSettings86(doReset) {
+    numLocus86 = numLocus86Txt.innerHTML = Number(numLocus86Range.value);
+    if (shape86Radio1.checked) shape86 = 1;
+    else if (shape86Radio2.checked) shape86 = 2;
+    else if (shape86Radio3.checked) shape86 = 3;
+    
+    connectEdges86 = !connectEdges86Radio1.checked;
+    
+    if (colorMode86Radio1.checked) colorMode86 = 1;
+    else if (colorMode86Radio2.checked) colorMode86 = 2;
+    
+    roundSelected86 = roundSelected86Checkbox.checked;
+    
+    if (doReset) reset86();
+  }
+  
+  let points86 = [];
+  function reset86() {
+    totalSteps86 = 0;
+    
+    points86 = [];
+    for (let i = 0; i < numLocus86; i++) points86.push({x: Math.random() * canvas86.width, y: Math.random() * canvas86.height, hue: Math.random() * 360});
+    
+    ctx86.fillStyle = "black";
+    ctx86.fillRect(0, 0, canvas86.width, canvas86.height);
+    
+    if (!canvas86Running) frame86();
+  }
+  
+  function drawCircle86() {
+    totalSteps86++;
+    
+    let x, y;
+    
+    if (!roundSelected86) {
+      x = Math.random() * canvas86.width;
+      y = Math.random() * canvas86.height;
+    }
+    else {
+      x = (Math.random().toMultipleOf(1 / 50)) * canvas86.width;
+      y = (Math.random().toMultipleOf(1 / 50)) * canvas86.height;
+    }
+    
+    let minDist = Infinity;
+    let closest;
+    for (let i = 0; i < points86.length; i++) {
+      let dx = points86[i].x - x;
+      let dy = points86[i].y - y;
+      let distSq = (dx * dx) + (dy * dy);
+      if (distSq < minDist) {
+        closest = points86[i];
+        minDist = distSq;
+      }
+    }
+    
+    if (colorMode86 === 1) ctx86.strokeStyle = `hsla(${closest.hue}deg, 100%, 60%, 0.005)`;
+    else if (colorMode86 === 2) ctx86.strokeStyle = `hsla(0deg, 0%, 100%, 0.005)`;
+    
+    ctx86.lineWidth = 1;
+    
+    if (connectEdges86) {
+      let midX = (x + closest.x) / 2;
+      let midY = (y + closest.y) / 2;
+      x = midX;
+      y = midY;
+    }
+    
+    if (shape86 === 1) {
+      let radius = Math.sqrt(minDist);
+      if (connectEdges86) radius /= 2;
+      ctx86.strokeCircle(x, y, radius);
+    }
+    else if (shape86 === 2) {
+      let dx = closest.x - x;
+      let dy = closest.y - y;
+      let size = Math.max(dx, dy);
+      ctx86.strokeRectFromCenter(x, y, size * 2, size * 2);
+    }
+    else if (shape86 === 3) {
+      let _x = (x * 2) - closest.x;
+      let _y = (y * 2) - closest.y;
+      
+      ctx86.beginPath();
+      ctx86.moveTo(_x, _y);
+      ctx86.lineTo(closest.x, closest.y);
+      ctx86.stroke();
+    }
+  }
+  
+  let lastFrame86Time = 0;
+  let lastFps86DisplayTime = 1000;
+  
+  function frame86() {
+    if (Date.now() - lastFps86DisplayTime >= 500) {
+      fps86Txt.innerHTML = (1000 / (Date.now() - lastFrame86Time)).toFixed(1);
+      lastFps86DisplayTime = Date.now();
+    }
+    lastFrame86Time = Date.now();
+    
+    for (let i = 0; i < stepsPerFrame86; i++) drawCircle86();
+    
+    totalSteps86Txt.innerHTML = totalSteps86.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    
+    if (canvas86Running) requestAnimationFrame(frame86);
+  }
+  stepsPerFrame86 = 100000;
+  reset86();
+  stepsPerFrame86 = 2000;
+  
+  function startCanvas86(caller) {
+    if (canvas86Running) {
+      canvas86Running = false;
+      caller.innerHTML = "<b><i>Paused</i></b>";
+      caller.style.color = caller.style.borderColor = "red";
+    }
+    else {
+      canvas86Running = true;
+      caller.innerHTML = "<b><i>Running</i></b>";
+      caller.style.color = caller.style.borderColor = "green";
+      frame86();
+    }
+  }
+</script>
 <canvas id = "canvas85"></canvas>
 <button onclick = "draw85()">Redraw</button>
 <div class = "desc"><b><i>(5/25/2022)</i></b> Generative art that is similar to <a href = "tiles.html" target = "_blank">tiles.html</a>, except that every single tile is guaranteed to connect to adjacent tiles, to create an intricate and solid structure. Today I added the first 14 tiles, I plan to have a total of 20+.<br><b><i>(5/26/2022)</i></b> Finally added the final tiles, now I have a full 20, and everything connects exactly like I imagined it would.<br><b><i><mark>Actually finished! (5/27/2022)</mark> Moved to <a href = "connectivity.html" target = "_blank">connectivity.html</a>.</i></b></div>
