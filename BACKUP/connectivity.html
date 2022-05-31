@@ -62,7 +62,17 @@
 <body onload = "init()">
 <a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
 <h1>&mdash;&mdash; Connectivity &mdash;&mdash;</h1>
-<p id = "how-it-works"><b><i>How It Works:</i></b> A grid will be generated and filled randomly with the selected blocks. Each block will be colored so that it connects with surrounding blocks, no matter which direction it is facing.<br>Every generated grid with an even <span class = "setting">Grid Size</span> will connect to its own edges, so you can create a repeating pattern made up of one grid.<br>Click the blocks under <span class = "setting">Selected Blocks</span> to toggle which blocks will be used.<br>Changing <span class = "setting">Block Pattern</span> will affect how blocks are oriented, instead of orientation being random.<br></p>
+<p id = "how-it-works">
+  <b><i>How It Works:</i></b> A grid will be generated and filled randomly with the selected blocks. Each block will be colored so that it connects with surrounding blocks, no matter which direction it is facing.
+  <br><br>
+  Every generated grid with an even <span class = "setting">Grid Size</span> will connect to its own edges, so you can create a repeating pattern made up of one grid.
+  <br><br>
+  Click the blocks under <span class = "setting">Selected Blocks</span> to toggle which blocks will be used.
+  <br><br>
+  Changing <span class = "setting">Block Pattern</span> will affect how blocks are oriented, instead of orientation being random.
+  <br><br>
+  If <span class = "setting">Allow Corner Mixing</span> is checked, then a single block can have different types of corners, instead of both corners always being the same.
+</p>
 <hr>
 <div><b>Block Presets:</b></div>
 <div id = "presets-div"></div>
@@ -89,6 +99,9 @@
     <td>
       <div><b><u>Grid Size:</u></b> <span id = "grid-size-txt">10&times;10</span></div>
       <input type = "range" min = "1" max = "20" step = "1" value = "10" id = "grid-size-range" oninput = "updateSettings()">
+      <hr>
+      <label for = "tile-mixing-checkbox"><b><u>Allow Corner Mixing:</u></b></label>
+      <input type = "checkbox" id = "tile-mixing-checkbox" oninput = "updateSettings()" CHECKED>
       <hr>
       <div><b><u>Block Pattern:</u></b></div>
       <input type = "radio" name = "block-pattern-radio" id = "block-pattern-radio-1" oninput = "updateSettings()" CHECKED>
@@ -132,6 +145,7 @@
   let backgroundColorDiv = document.getElementById("background-color-div");
   let selectedBlockColor = document.getElementById("selected-block-color");
   let selectedBackgroundColor = document.getElementById("selected-background-color");
+  let tileMixingCheckbox = document.getElementById("tile-mixing-checkbox");
   
   function XOR(a, b) {
     return a != b;
@@ -144,13 +158,14 @@
   let numTiles = 20;
   let gridSize = 10;
   let blockPattern = 1;
+  let tileMixing = true;
   /*
   1: Ramp    |  2: Notch   |  3: Stripe   |  4: Dots     |  5: Quills
-  6: Arc     |  7: Gear    |  8: Bars     |  9: Paw      |  10: Sun
+  6: Arc     |  7: Gear    |  8: Bars     |  9: Spots    |  10: Sun
   11: Slice  |  12: Wheel  |  13: Layers  |  14: Face    |  15: Bumps
-  16: Stair  |  17: Slab   |  18: Joint   |  19: Hammer  |  20: Spikes
+  16: Stair  |  17: Slab   |  18: Joint   |  19: Pillar  |  20: Spikes
   */
-  let tileNames = ["Ramp", "Notch", "Stripe", "Dots", "Quills", "Arc", "Gear", "Bars", "Paw", "Sun", "Slice", "Wheel", "Layers", "Face", "Bumps", "Stair", "Slab", "Joint", "Hammer", "Spikes"];
+  let tileNames = ["Ramp", "Notch", "Stripe", "Dots", "Quills", "Arc", "Gear", "Bars", "Spots", "Sun", "Slice", "Wheel", "Layers", "Face", "Bumps", "Stair", "Slab", "Joint", "Pillar", "Spikes"];
   
   let colors = ["black", "white"]; // Tile, background
   
@@ -223,6 +238,11 @@
       changeColor: false
     },
     {
+      name: "Urban Map",
+      tiles: [1, 17, 19],
+      changeColor: false
+    },
+    {
       name: "Industrial",
       tiles: [4, 7, 12, 18, 17],
       changeColor: true,
@@ -266,7 +286,7 @@
     if (direction && i === 1) return {start: toRad(270), end: toRad(0)};
   }
   
-  function drawTile(_x, _y, size, direction, parity, type) {
+  function drawTile(_x, _y, size, direction, parity, type, i) {
     /* Direction: (0 = false, 1 = true)
     0-----1
     |     |
@@ -299,686 +319,513 @@
     }
     
     let p = parity ? 1 : 0;
-    ctx.fillStyle = colors[1 - p]; // Background color
-    ctx.fillRect(_x, _y, size, size);
     ctx.fillStyle = ctx.strokeStyle = colors[p]; // Tile color
     
+    let x = i === 0 ? x1 : x2;
+    let y = i === 0 ? y1 : y2;
+    if (i === 1) {
+      xSign *= -1;
+      ySign *= -1;
+    }
+    
     if (type === 1) { // Ramp
-      let x = x1;
-      let y = y1;
-      for (let i = 0; i < 2; i++) {
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + (size * 0.5 * xSign), y);
-        ctx.lineTo(x, y + (size * 0.5 * ySign));
-        ctx.lineTo(x, y);
-        ctx.fill();
-        
-        x = x2;
-        y = y2;
-        xSign *= -1;
-        ySign *= -1;
-      }
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (size * 0.5 * xSign), y);
+      ctx.lineTo(x, y + (size * 0.5 * ySign));
+      ctx.lineTo(x, y);
+      ctx.fill();
       
       return;
     }
     
     if (type === 2) { // Notch
-      let x = x1;
-      let y = y1;
-      for (let i = 0; i < 2; i++) {
-        ctx.beginPath();
-        let cx = x;
-        let cy = y;
-        ctx.moveTo(cx, cy);
-        cx += size * 0.5 * xSign;
-        ctx.lineTo(cx, cy);
-        cx -= size * 0.1875 * xSign;
-        cy += size * 0.1875 * ySign;
-        ctx.lineTo(cx, cy);
-        cx += size * 0.125 * xSign;
-        cy += size * 0.125 * ySign;
-        ctx.lineTo(cx, cy);
-        cx -= size * 0.125 * xSign;
-        cy += size * 0.125 * ySign;
-        ctx.lineTo(cx, cy);
-        cx -= size * 0.125 * xSign;
-        cy -= size * 0.125 * ySign;
-        ctx.lineTo(cx, cy);
-        ctx.lineTo(x, y + (size * 0.5 * ySign));
-        ctx.lineTo(x, y);
-        ctx.fill();
-        
-        x = x2;
-        y = y2;
-        xSign *= -1;
-        ySign *= -1;
-      }
+      ctx.beginPath();
+      let cx = x;
+      let cy = y;
+      ctx.moveTo(cx, cy);
+      cx += size * 0.5 * xSign;
+      ctx.lineTo(cx, cy);
+      cx -= size * 0.1875 * xSign;
+      cy += size * 0.1875 * ySign;
+      ctx.lineTo(cx, cy);
+      cx += size * 0.125 * xSign;
+      cy += size * 0.125 * ySign;
+      ctx.lineTo(cx, cy);
+      cx -= size * 0.125 * xSign;
+      cy += size * 0.125 * ySign;
+      ctx.lineTo(cx, cy);
+      cx -= size * 0.125 * xSign;
+      cy -= size * 0.125 * ySign;
+      ctx.lineTo(cx, cy);
+      ctx.lineTo(x, y + (size * 0.5 * ySign));
+      ctx.lineTo(x, y);
+      ctx.fill();
       
       return;
     }
     
     if (type === 3) { // Stripe
-      let x = x1;
-      let y = y1;
-      for (let i = 0; i < 2; i++) {
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + (size * 0.5 * xSign), y);
-        ctx.lineTo(x, y + (size * 0.5 * ySign));
-        ctx.lineTo(x, y);
-        ctx.fill();
-        
-        ctx.lineWidth = size * 0.075;
-        ctx.lineCap = ctx.lineJoin = "round";
-        ctx.beginPath();
-        ctx.moveTo(x + (size * 0.625 * xSign), y + (size * 0.125 * ySign));
-        ctx.lineTo(x + (size * 0.125 * xSign), y + (size * 0.625 * ySign));
-        ctx.stroke();
-        
-        x = x2;
-        y = y2;
-        xSign *= -1;
-        ySign *= -1;
-      }
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (size * 0.5 * xSign), y);
+      ctx.lineTo(x, y + (size * 0.5 * ySign));
+      ctx.lineTo(x, y);
+      ctx.fill();
+      
+      ctx.lineWidth = size * 0.075;
+      ctx.lineCap = ctx.lineJoin = "round";
+      ctx.beginPath();
+      ctx.moveTo(x + (size * 0.625 * xSign), y + (size * 0.125 * ySign));
+      ctx.lineTo(x + (size * 0.125 * xSign), y + (size * 0.625 * ySign));
+      ctx.stroke();
       
       return;
     }
     
     if (type === 4) { // Dots
-      let x = x1;
-      let y = y1;
-      for (let i = 0; i < 2; i++) {
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + (size * 0.5 * xSign), y);
-        ctx.lineTo(x, y + (size * 0.5 * ySign));
-        ctx.lineTo(x, y);
-        ctx.fill();
-        
-        let radius = size * 0.05;
-        
-        ctx.fillCircle(x + (size * 0.625 * xSign), y + (size * 0.125 * ySign), radius);
-        ctx.fillCircle(x + (size * 0.375 * xSign), y + (size * 0.375 * ySign), radius);
-        ctx.fillCircle(x + (size * 0.125 * xSign), y + (size * 0.625 * ySign), radius);
-        
-        x = x2;
-        y = y2;
-        xSign *= -1;
-        ySign *= -1;
-      }
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (size * 0.5 * xSign), y);
+      ctx.lineTo(x, y + (size * 0.5 * ySign));
+      ctx.lineTo(x, y);
+      ctx.fill();
+      
+      let radius = size * 0.05;
+      
+      ctx.fillCircle(x + (size * 0.625 * xSign), y + (size * 0.125 * ySign), radius);
+      ctx.fillCircle(x + (size * 0.375 * xSign), y + (size * 0.375 * ySign), radius);
+      ctx.fillCircle(x + (size * 0.125 * xSign), y + (size * 0.625 * ySign), radius);
       
       return;
     }
     
     if (type === 5) { // Quills
-      let x = x1;
-      let y = y1;
-      for (let i = 0; i < 2; i++) {
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (size * 0.5 * xSign), y);
+      ctx.lineTo(x, y + (size * 0.5 * ySign));
+      ctx.lineTo(x, y);
+      ctx.fill();
+      
+      ctx.lineCap = ctx.lineJoin = "round";
+      ctx.lineWidth = size * 0.05;
+      let cx = x + (size * 0.5 * xSign);
+      let cy = y + (size * (1 / 18) * ySign);
+      for (let i = 0; i < 5; i++) {
         ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + (size * 0.5 * xSign), y);
-        ctx.lineTo(x, y + (size * 0.5 * ySign));
-        ctx.lineTo(x, y);
-        ctx.fill();
-        
-        ctx.lineCap = ctx.lineJoin = "round";
-        ctx.lineWidth = size * 0.05;
-        let cx = x + (size * 0.5 * xSign);
-        let cy = y + (size * (1 / 18) * ySign);
-        for (let i = 0; i < 5; i++) {
-          ctx.beginPath();
-          ctx.moveTo(cx + (size * 0.05 * xSign), cy + (size * 0.05 * ySign));
-          ctx.lineTo(cx + (size * (1 / 6) * xSign), cy + (size * (1 / 6) * ySign));
-          ctx.stroke();
-          cx -= size * (1 / 9) * xSign;
-          cy += size * (1 / 9) * ySign;
-        }
-        
-        x = x2;
-        y = y2;
-        xSign *= -1;
-        ySign *= -1;
+        ctx.moveTo(cx + (size * 0.05 * xSign), cy + (size * 0.05 * ySign));
+        ctx.lineTo(cx + (size * (1 / 6) * xSign), cy + (size * (1 / 6) * ySign));
+        ctx.stroke();
+        cx -= size * (1 / 9) * xSign;
+        cy += size * (1 / 9) * ySign;
       }
       
       return;
     }
     
     if (type === 6) { // Arc
-      let x = x1;
-      let y = y1;
-      for (let i = 0; i < 2; i++) {
-        ctx.beginPath();
-        let angles = getAngles(direction, i);
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + (size * 0.5 * xSign), y);
-        ctx.arc(x, y, size * 0.5, angles.start, angles.end);
-        ctx.lineTo(x, y + (size * 0.5 * ySign));
-        ctx.lineTo(x, y);
-        ctx.fill();
-        
-        x = x2;
-        y = y2;
-        xSign *= -1;
-        ySign *= -1;
-      }
+      ctx.beginPath();
+      let angles = getAngles(direction, i);
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (size * 0.5 * xSign), y);
+      ctx.arc(x, y, size * 0.5, angles.start, angles.end);
+      ctx.lineTo(x, y + (size * 0.5 * ySign));
+      ctx.lineTo(x, y);
+      ctx.fill();
       
       return;
     }
     
     if (type === 7) { // Gear
-      let x = x1;
-      let y = y1;
-      for (let i = 0; i < 2; i++) {
+      ctx.beginPath();
+      let angles = getAngles(direction, i);
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (size * 0.5 * xSign), y);
+      ctx.arc(x, y, size * 0.5, angles.start, angles.end);
+      ctx.lineTo(x, y + (size * 0.5 * ySign));
+      ctx.lineTo(x, y);
+      ctx.fill();
+      
+      let len = size * 0.125 * Math.SQRT2;
+      for (let j = 0; j < 2; j++) {
         ctx.beginPath();
-        let angles = getAngles(direction, i);
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + (size * 0.5 * xSign), y);
-        ctx.arc(x, y, size * 0.5, angles.start, angles.end);
-        ctx.lineTo(x, y + (size * 0.5 * ySign));
-        ctx.lineTo(x, y);
+        let ca = j === 0 ? 22.5 : 67.5;
+        let cx = x + (size * 0.4 * Math.cos(toRad(ca)) * xSign);
+        let cy = y + (size * 0.4 * Math.sin(toRad(ca)) * ySign);
+        ctx.moveTo(cx, cy);
+        ca -= 90;
+        cx += len * 0.5 * Math.cos(toRad(ca)) * xSign;
+        cy += len * 0.5 * Math.sin(toRad(ca)) * ySign;
+        ctx.lineTo(cx, cy);
+        ca += 90;
+        cx += (len + (size * 0.1)) * Math.cos(toRad(ca)) * xSign;
+        cy += (len + (size * 0.1)) * Math.sin(toRad(ca)) * ySign;
+        ctx.lineTo(cx, cy);
+        ca += 90;
+        cx += len * Math.cos(toRad(ca)) * xSign;
+        cy += len * Math.sin(toRad(ca)) * ySign;
+        ctx.lineTo(cx, cy);
+        ca += 90;
+        cx += (len + (size * 0.1)) * Math.cos(toRad(ca)) * xSign;
+        cy += (len + (size * 0.1)) * Math.sin(toRad(ca)) * ySign;
+        ctx.lineTo(cx, cy);
+        ca += 90;
+        cx += len * 0.5 * Math.cos(toRad(ca)) * xSign;
+        cy += len * 0.5 * Math.sin(toRad(ca)) * ySign;
+        ctx.lineTo(cx, cy);
         ctx.fill();
-        
-        let len = size * 0.125 * Math.SQRT2;
-        for (let j = 0; j < 2; j++) {
-          ctx.beginPath();
-          let ca = j === 0 ? 22.5 : 67.5;
-          let cx = x + (size * 0.4 * Math.cos(toRad(ca)) * xSign);
-          let cy = y + (size * 0.4 * Math.sin(toRad(ca)) * ySign);
-          ctx.moveTo(cx, cy);
-          ca -= 90;
-          cx += len * 0.5 * Math.cos(toRad(ca)) * xSign;
-          cy += len * 0.5 * Math.sin(toRad(ca)) * ySign;
-          ctx.lineTo(cx, cy);
-          ca += 90;
-          cx += (len + (size * 0.1)) * Math.cos(toRad(ca)) * xSign;
-          cy += (len + (size * 0.1)) * Math.sin(toRad(ca)) * ySign;
-          ctx.lineTo(cx, cy);
-          ca += 90;
-          cx += len * Math.cos(toRad(ca)) * xSign;
-          cy += len * Math.sin(toRad(ca)) * ySign;
-          ctx.lineTo(cx, cy);
-          ca += 90;
-          cx += (len + (size * 0.1)) * Math.cos(toRad(ca)) * xSign;
-          cy += (len + (size * 0.1)) * Math.sin(toRad(ca)) * ySign;
-          ctx.lineTo(cx, cy);
-          ca += 90;
-          cx += len * 0.5 * Math.cos(toRad(ca)) * xSign;
-          cy += len * 0.5 * Math.sin(toRad(ca)) * ySign;
-          ctx.lineTo(cx, cy);
-          ctx.fill();
-        }
-        
-        x = x2;
-        y = y2;
-        xSign *= -1;
-        ySign *= -1;
       }
       
       return;
     }
     
     if (type === 8) { // Bars
-      let x = x1;
-      let y = y1;
-      for (let i = 0; i < 2; i++) {
-        ctx.beginPath();
-        let angles = getAngles(direction, i);
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + (size * 0.5 * xSign), y);
-        ctx.arc(x, y, size * 0.5, angles.start, angles.end);
-        ctx.lineTo(x, y + (size * 0.5 * ySign));
-        ctx.lineTo(x, y);
-        ctx.fill();
-        
-        ctx.lineWidth = size * 0.075;
-        ctx.lineCap = ctx.lineJoin = "round";
-        ctx.beginPath();
-        ctx.arc(x, y, size * 0.625, angles.start + (toRad(8)), angles.end - toRad(45 + 8));
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(x, y, size * 0.625, angles.start + toRad(45 + 8), angles.end - toRad(8));
-        ctx.stroke();
-        
-        x = x2;
-        y = y2;
-        xSign *= -1;
-        ySign *= -1;
-      }
+      ctx.beginPath();
+      let angles = getAngles(direction, i);
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (size * 0.5 * xSign), y);
+      ctx.arc(x, y, size * 0.5, angles.start, angles.end);
+      ctx.lineTo(x, y + (size * 0.5 * ySign));
+      ctx.lineTo(x, y);
+      ctx.fill();
+      
+      ctx.lineWidth = size * 0.075;
+      ctx.lineCap = ctx.lineJoin = "round";
+      ctx.beginPath();
+      ctx.arc(x, y, size * 0.625, angles.start + (toRad(8)), angles.end - toRad(45 + 8));
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x, y, size * 0.625, angles.start + toRad(45 + 8), angles.end - toRad(8));
+      ctx.stroke();
       
       return;
     }
     
-    if (type === 9) { // Paw
-      let x = x1;
-      let y = y1;
-      for (let i = 0; i < 2; i++) {
-        ctx.beginPath();
-        let angles = getAngles(direction, i);
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + (size * 0.5 * xSign), y);
-        ctx.arc(x, y, size * 0.5, angles.start, angles.end);
-        ctx.lineTo(x, y + (size * 0.5 * ySign));
-        ctx.lineTo(x, y);
-        ctx.fill();
-        
-        let spacing = size * 0.625;
-        let radius = size * 0.05;
-        let angleSpacing = 22.5;
-        for (let i = 0; i < 4; i++) {
-          let a = (i * angleSpacing) + ((90 - (angleSpacing * 3)) / 2);
-          ctx.fillCircle(x + (spacing * Math.cos(toRad(a)) * xSign), y + (spacing * Math.sin(toRad(a)) * ySign), radius);
-        }
-        
-        x = x2;
-        y = y2;
-        xSign *= -1;
-        ySign *= -1;
+    if (type === 9) { // Spots
+      ctx.beginPath();
+      let angles = getAngles(direction, i);
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (size * 0.5 * xSign), y);
+      ctx.arc(x, y, size * 0.5, angles.start, angles.end);
+      ctx.lineTo(x, y + (size * 0.5 * ySign));
+      ctx.lineTo(x, y);
+      ctx.fill();
+      
+      let spacing = size * 0.625;
+      let radius = size * 0.05;
+      let angleSpacing = 22.5;
+      for (let i = 0; i < 4; i++) {
+        let a = (i * angleSpacing) + ((90 - (angleSpacing * 3)) / 2);
+        ctx.fillCircle(x + (spacing * Math.cos(toRad(a)) * xSign), y + (spacing * Math.sin(toRad(a)) * ySign), radius);
       }
       
       return;
     }
     
     if (type === 10) { // Sun
-      let x = x1;
-      let y = y1;
-      for (let i = 0; i < 2; i++) {
+      ctx.beginPath();
+      let angles = getAngles(direction, i);
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (size * 0.5 * xSign), y);
+      ctx.arc(x, y, size * 0.5, angles.start, angles.end);
+      ctx.lineTo(x, y + (size * 0.5 * ySign));
+      ctx.lineTo(x, y);
+      ctx.fill();
+      
+      ctx.lineCap = ctx.lineJoin = "round";
+      ctx.lineWidth = size * 0.05;
+      let spacing = size * 0.56;
+      let dist = size * 0.1;
+      for (let j = 0; j < 5; j++) {
+        let ca = 18 * (j + 0.5);
+        let cx = x + (spacing * Math.cos(toRad(ca)) * xSign);
+        let cy = y + (spacing * Math.sin(toRad(ca)) * ySign);
+        
         ctx.beginPath();
-        let angles = getAngles(direction, i);
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + (size * 0.5 * xSign), y);
-        ctx.arc(x, y, size * 0.5, angles.start, angles.end);
-        ctx.lineTo(x, y + (size * 0.5 * ySign));
-        ctx.lineTo(x, y);
-        ctx.fill();
-        
-        ctx.lineCap = ctx.lineJoin = "round";
-        ctx.lineWidth = size * 0.05;
-        let spacing = size * 0.56;
-        let dist = size * 0.1;
-        for (let j = 0; j < 5; j++) {
-          let ca = 18 * (j + 0.5);
-          let cx = x + (spacing * Math.cos(toRad(ca)) * xSign);
-          let cy = y + (spacing * Math.sin(toRad(ca)) * ySign);
-          
-          ctx.beginPath();
-          ctx.moveTo(cx, cy);
-          ctx.lineTo(cx + (dist * Math.cos(toRad(ca)) * xSign), cy + (dist * Math.sin(toRad(ca)) * ySign));
-          ctx.stroke();
-        }
-        
-        
-        x = x2;
-        y = y2;
-        xSign *= -1;
-        ySign *= -1;
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + (dist * Math.cos(toRad(ca)) * xSign), cy + (dist * Math.sin(toRad(ca)) * ySign));
+        ctx.stroke();
       }
       
       return;
     }
     
     if (type === 11) { // Slice
-      let x = x1;
-      let y = y1;
-      for (let i = 0; i < 2; i++) {
-        ctx.beginPath();
-        let angles = getAngles(direction, i);
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + (size * 0.5 * xSign), y);
-        ctx.arc(x, y, size * 0.5, angles.start, angles.end);
-        ctx.lineTo(x, y + (size * 0.5 * ySign));
-        ctx.lineTo(x, y);
-        ctx.fill();
-        
-        ctx.fillStyle = colors[1 - p];
-        ctx.beginPath();
-        let a = angles.start + toRad(45);
-        let spacing = size * 0.2;
-        ctx.moveTo(x + (spacing * Math.cos(a)), y + (spacing * Math.sin(a)));
-        ctx.arc(x, y, size * 0.55, a - toRad(15), a + toRad(15));
-        ctx.fill();
-        
-        ctx.fillStyle = colors[p];
-        
-        x = x2;
-        y = y2;
-        xSign *= -1;
-        ySign *= -1;
-      }
+      ctx.beginPath();
+      let angles = getAngles(direction, i);
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (size * 0.5 * xSign), y);
+      ctx.arc(x, y, size * 0.5, angles.start, angles.end);
+      ctx.lineTo(x, y + (size * 0.5 * ySign));
+      ctx.lineTo(x, y);
+      ctx.fill();
+      
+      ctx.fillStyle = colors[1 - p];
+      ctx.beginPath();
+      let a = angles.start + toRad(45);
+      let spacing = size * 0.2;
+      ctx.moveTo(x + (spacing * Math.cos(a)), y + (spacing * Math.sin(a)));
+      ctx.arc(x, y, size * 0.55, a - toRad(15), a + toRad(15));
+      ctx.fill();
+      
+      ctx.fillStyle = colors[p];
       
       return;
     }
     
     if (type === 12) { // Wheel
-      let x = x1;
-      let y = y1;
-      for (let i = 0; i < 2; i++) {
+      ctx.beginPath();
+      let angles = getAngles(direction, i);
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (size * 0.5 * xSign), y);
+      ctx.arc(x, y, size * 0.5, angles.start, angles.end);
+      ctx.lineTo(x, y + (size * 0.5 * ySign));
+      ctx.lineTo(x, y);
+      ctx.fill();
+      
+      ctx.fillStyle = colors[1 - p];
+      for (let j = 0; j < 3; j++) {
+        let ca = (j * 30) + 15 + toDeg(angles.start);
         ctx.beginPath();
-        let angles = getAngles(direction, i);
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + (size * 0.5 * xSign), y);
-        ctx.arc(x, y, size * 0.5, angles.start, angles.end);
-        ctx.lineTo(x, y + (size * 0.5 * ySign));
-        ctx.lineTo(x, y);
+        ctx.moveTo(x + (size * 0.1 * Math.cos(toRad(ca))), y + (size * 0.1 * Math.sin(toRad(ca))));
+        ctx.arc(x, y, size * 0.45, toRad(ca - 10), toRad(ca + 10));
         ctx.fill();
-        
-        ctx.fillStyle = colors[1 - p];
-        for (let j = 0; j < 3; j++) {
-          let ca = (j * 30) + 15 + toDeg(angles.start);
-          ctx.beginPath();
-          ctx.moveTo(x + (size * 0.1 * Math.cos(toRad(ca))), y + (size * 0.1 * Math.sin(toRad(ca))));
-          ctx.arc(x, y, size * 0.45, toRad(ca - 10), toRad(ca + 10));
-          ctx.fill();
-        }
-        ctx.fillStyle = colors[p];
-        
-        x = x2;
-        y = y2;
-        xSign *= -1;
-        ySign *= -1;
       }
+      ctx.fillStyle = colors[p];
       
       return;
     }
     
     if (type === 13) { // Layers
-      let x = x1;
-      let y = y1;
-      for (let i = 0; i < 2; i++) {
-        ctx.beginPath();
-        let angles = getAngles(direction, i);
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + (size * 0.5 * xSign), y);
-        ctx.arc(x, y, size * 0.5, angles.start, angles.end);
-        ctx.lineTo(x, y + (size * 0.5 * ySign));
-        ctx.lineTo(x, y);
-        ctx.fill();
-        
-        let dist = size * 0.5 * (1 / 7);
-        ctx.fillStyle = colors[1 - p];
-        ctx.beginPath();
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.arc(x, y, dist * 2, angles.end, angles.start, true);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(x, y, dist * 3, angles.start, angles.end);
-        ctx.arc(x, y, dist * 4, angles.end, angles.start, true);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(x, y, dist * 5, angles.start, angles.end);
-        ctx.arc(x, y, dist * 6, angles.end, angles.start, true);
-        ctx.fill();
-        
-        ctx.fillStyle = colors[p];
-        let thickness = 0.25 * (1 / 7);
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + (size * 0.45 * xSign), y);
-        ctx.lineTo(x + (size * 0.45 * xSign), y + (size * thickness * ySign));
-        ctx.lineTo(x + (size * thickness * xSign), y + (size * thickness * ySign));
-        ctx.lineTo(x + (size * thickness * xSign), y + (size * 0.45 * ySign));
-        ctx.lineTo(x, y + (size * 0.45 * ySign));
-        ctx.lineTo(x, y);
-        ctx.fill();
-        
-        x = x2;
-        y = y2;
-        xSign *= -1;
-        ySign *= -1;
-      }
+      ctx.beginPath();
+      let angles = getAngles(direction, i);
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (size * 0.5 * xSign), y);
+      ctx.arc(x, y, size * 0.5, angles.start, angles.end);
+      ctx.lineTo(x, y + (size * 0.5 * ySign));
+      ctx.lineTo(x, y);
+      ctx.fill();
+      
+      let dist = size * 0.5 * (1 / 7);
+      ctx.fillStyle = colors[1 - p];
+      ctx.beginPath();
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.arc(x, y, dist * 2, angles.end, angles.start, true);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(x, y, dist * 3, angles.start, angles.end);
+      ctx.arc(x, y, dist * 4, angles.end, angles.start, true);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(x, y, dist * 5, angles.start, angles.end);
+      ctx.arc(x, y, dist * 6, angles.end, angles.start, true);
+      ctx.fill();
+      
+      ctx.fillStyle = colors[p];
+      let thickness = 0.25 * (1 / 7);
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (size * 0.45 * xSign), y);
+      ctx.lineTo(x + (size * 0.45 * xSign), y + (size * thickness * ySign));
+      ctx.lineTo(x + (size * thickness * xSign), y + (size * thickness * ySign));
+      ctx.lineTo(x + (size * thickness * xSign), y + (size * 0.45 * ySign));
+      ctx.lineTo(x, y + (size * 0.45 * ySign));
+      ctx.lineTo(x, y);
+      ctx.fill();
       
       return;
     }
     
     if (type === 14) { // Face
-      let x = x1;
-      let y = y1;
-      for (let i = 0; i < 2; i++) {
-        ctx.beginPath();
-        let angles = getAngles(direction, i);
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + (size * 0.5 * xSign), y);
-        ctx.arc(x, y, size * 0.5, angles.start, angles.end);
-        ctx.lineTo(x, y + (size * 0.5 * ySign));
-        ctx.lineTo(x, y);
-        ctx.fill();
-        
-        ctx.fillStyle = colors[1 - p];
-        let eyeSize = size * 0.05;
-        let eyeDist = size * 0.38;
-        let a = angles.start + toRad(25);
-        let mouthDist = size * 0.22;
-        let mouthSize = size * 0.1;
-        ctx.fillCircle(x + (eyeDist * Math.cos(a)), y + (eyeDist * Math.sin(a)), eyeSize);
-        a = angles.start + toRad(65);
-        ctx.fillCircle(x + (eyeDist * Math.cos(a)), y + (eyeDist * Math.sin(a)), eyeSize);
-        
-        a = angles.start + toRad(45);
-        ctx.beginPath();
-        ctx.arc(x + (mouthDist * Math.cos(a)), y + (mouthDist * Math.sin(a)), mouthSize, angles.start - toRad(45), angles.end + toRad(45), true);
-        ctx.fill();
-        
-        ctx.fillStyle = colors[p];
-        
-        x = x2;
-        y = y2;
-        xSign *= -1;
-        ySign *= -1;
-      }
+      ctx.beginPath();
+      let angles = getAngles(direction, i);
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (size * 0.5 * xSign), y);
+      ctx.arc(x, y, size * 0.5, angles.start, angles.end);
+      ctx.lineTo(x, y + (size * 0.5 * ySign));
+      ctx.lineTo(x, y);
+      ctx.fill();
+      
+      ctx.fillStyle = colors[1 - p];
+      let eyeSize = size * 0.05;
+      let eyeDist = size * 0.38;
+      let a = angles.start + toRad(25);
+      let mouthDist = size * 0.22;
+      let mouthSize = size * 0.1;
+      ctx.fillCircle(x + (eyeDist * Math.cos(a)), y + (eyeDist * Math.sin(a)), eyeSize);
+      a = angles.start + toRad(65);
+      ctx.fillCircle(x + (eyeDist * Math.cos(a)), y + (eyeDist * Math.sin(a)), eyeSize);
+      
+      a = angles.start + toRad(45);
+      ctx.beginPath();
+      ctx.arc(x + (mouthDist * Math.cos(a)), y + (mouthDist * Math.sin(a)), mouthSize, angles.start - toRad(45), angles.end + toRad(45), true);
+      ctx.fill();
+      
+      ctx.fillStyle = colors[p];
       
       return;
     }
     
     if (type === 15) { // Bumps
-      let x = x1;
-      let y = y1;
-      for (let i = 0; i < 2; i++) {
-        let angles = getAngles(direction, i);
-        
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        let cx = x + (size * 0.5 * xSign);
-        let cy = y;
-        ctx.lineTo(cx, cy);
-        for (let j = 0; j < 3; j++) {
-          cx -= size * (1 / 6) * xSign;
-          cy += size * (1 / 6) * ySign;
-          let controlX = cx + (size * (1 / 6) * 0.5 * xSign) + (size * 0.3 * Math.cos(angles.start + toRad(45)));
-          let controlY = cy - (size * (1 / 6) * 0.5 * ySign) + (size * 0.3 * Math.sin(angles.start + toRad(45)));
-          ctx.quadraticCurveTo(controlX, controlY, cx, cy);
-        }
-        ctx.lineTo(x, y + (size * 0.5 * ySign));
-        ctx.lineTo(x, y);
-        ctx.fill();
-        
-        x = x2;
-        y = y2;
-        xSign *= -1;
-        ySign *= -1;
+      let angles = getAngles(direction, i);
+      
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      let cx = x + (size * 0.5 * xSign);
+      let cy = y;
+      ctx.lineTo(cx, cy);
+      for (let j = 0; j < 3; j++) {
+        cx -= size * (1 / 6) * xSign;
+        cy += size * (1 / 6) * ySign;
+        let controlX = cx + (size * (1 / 6) * 0.5 * xSign) + (size * 0.3 * Math.cos(angles.start + toRad(45)));
+        let controlY = cy - (size * (1 / 6) * 0.5 * ySign) + (size * 0.3 * Math.sin(angles.start + toRad(45)));
+        ctx.quadraticCurveTo(controlX, controlY, cx, cy);
       }
+      ctx.lineTo(x, y + (size * 0.5 * ySign));
+      ctx.lineTo(x, y);
+      ctx.fill();
       
       return;
     }
     
     if (type === 16) { // Stair
-      let x = x1;
-      let y = y1;
-      for (let i = 0; i < 2; i++) {
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        let cx = x + (size * 0.5 * xSign);
-        let cy = y;
-        ctx.lineTo(cx, cy);
-        cy += size * 0.25 * ySign;
-        ctx.lineTo(cx, cy);
-        cx -= size * 0.25 * xSign;
-        ctx.lineTo(cx, cy);
-        cy += size * 0.25 * ySign;
-        ctx.lineTo(cx, cy);
-        cx -= size * 0.25 * xSign;
-        ctx.lineTo(cx, cy);
-        ctx.lineTo(x, y);
-        ctx.fill();
-        
-        x = x2;
-        y = y2;
-        xSign *= -1;
-        ySign *= -1;
-      }
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      let cx = x + (size * 0.5 * xSign);
+      let cy = y;
+      ctx.lineTo(cx, cy);
+      cy += size * 0.25 * ySign;
+      ctx.lineTo(cx, cy);
+      cx -= size * 0.25 * xSign;
+      ctx.lineTo(cx, cy);
+      cy += size * 0.25 * ySign;
+      ctx.lineTo(cx, cy);
+      cx -= size * 0.25 * xSign;
+      ctx.lineTo(cx, cy);
+      ctx.lineTo(x, y);
+      ctx.fill();
       
       return;
     }
     
     if (type === 17) { // Slab
-      let x = x1;
-      let y = y1;
-      for (let i = 0; i < 2; i++) {
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + (size * 0.5 * xSign), y);
-        ctx.lineTo(x + (size * (5 / 8) * xSign), y + (size * (1 / 8) * ySign));
-        ctx.lineTo(x + (size * (1 / 8) * xSign), y + (size * (5 / 8) * ySign));
-        ctx.lineTo(x, y + (size * 0.5 * ySign));
-        ctx.lineTo(x, y);
-        ctx.fill();
-        
-        x = x2;
-        y = y2;
-        xSign *= -1;
-        ySign *= -1;
-      }
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (size * 0.5 * xSign), y);
+      ctx.lineTo(x + (size * (5 / 8) * xSign), y + (size * (1 / 8) * ySign));
+      ctx.lineTo(x + (size * (1 / 8) * xSign), y + (size * (5 / 8) * ySign));
+      ctx.lineTo(x, y + (size * 0.5 * ySign));
+      ctx.lineTo(x, y);
+      ctx.fill();
       
       return;
     }
     
     if (type === 18) { // Joint
-      let x = x1;
-      let y = y1;
-      for (let i = 0; i < 2; i++) {
-        let thickness = 0.075;
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + (size * 0.5 * xSign), y);
-        ctx.lineTo(x + (size * 0.5 * xSign), y + (size * thickness * ySign));
-        ctx.lineTo(x + (size * thickness * xSign), y + (size * thickness * ySign));
-        ctx.lineTo(x + (size * thickness * xSign), y + (size * 0.5 * ySign));
-        ctx.lineTo(x, y + (size * 0.5 * ySign));
-        ctx.lineTo(x, y);
-        ctx.fill();
-        
-        ctx.beginPath();
-        ctx.moveTo(x + (size * (0.4 + (thickness * Math.SQRT1_2)) * xSign), y);
-        ctx.lineTo(x, y + (size * (0.4 + (thickness * Math.SQRT1_2)) * ySign));
-        ctx.lineTo(x, y + (size * (0.4 - (thickness * Math.SQRT1_2)) * ySign));
-        ctx.lineTo(x + (size * (0.4 - (thickness * Math.SQRT1_2)) * xSign), y);
-        ctx.fill();
-        
-        x = x2;
-        y = y2;
-        xSign *= -1;
-        ySign *= -1;
-      }
+      let thickness = 0.075;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (size * 0.5 * xSign), y);
+      ctx.lineTo(x + (size * 0.5 * xSign), y + (size * thickness * ySign));
+      ctx.lineTo(x + (size * thickness * xSign), y + (size * thickness * ySign));
+      ctx.lineTo(x + (size * thickness * xSign), y + (size * 0.5 * ySign));
+      ctx.lineTo(x, y + (size * 0.5 * ySign));
+      ctx.lineTo(x, y);
+      ctx.fill();
+      
+      ctx.beginPath();
+      ctx.moveTo(x + (size * (0.4 + (thickness * Math.SQRT1_2)) * xSign), y);
+      ctx.lineTo(x, y + (size * (0.4 + (thickness * Math.SQRT1_2)) * ySign));
+      ctx.lineTo(x, y + (size * (0.4 - (thickness * Math.SQRT1_2)) * ySign));
+      ctx.lineTo(x + (size * (0.4 - (thickness * Math.SQRT1_2)) * xSign), y);
+      ctx.fill();
       
       return;
     }
     
-    if (type === 19) { // Hammer
-      let x = x1;
-      let y = y1;
-      for (let i = 0; i < 2; i++) {
-        let angles = getAngles(direction, i);
-        
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + (size * 0.5 * xSign), y);
-        ctx.lineTo(x + (size * 0.5 * xSign), y + (size * 0.35 * ySign));
-        ctx.lineTo(x + (size * 0.35 * xSign), y + (size * 0.5 * ySign));
-        ctx.lineTo(x, y + (size * 0.5 * ySign));
-        ctx.lineTo(x, y);
-        ctx.fill();
-        
-        let len = size * 0.13;
-        let ratio = 0.075 + 0.04;
-        ctx.beginPath();
-        ctx.fillStyle = colors[1 - p];
-        let ca = toDeg(angles.start) + 135;
-        let cx = x + (size * (0.425 + 0.05) * xSign);
-        let cy = y + (size * (0.425 + 0.05) * ySign);
-        ctx.moveTo(cx, cy);
-        cx += len * 0.5 * Math.cos(toRad(ca));
-        cy += len * 0.5 * Math.sin(toRad(ca));
-        ctx.lineTo(cx, cy);
-        ca += 90;
-        cx += (len + (size * ratio)) * Math.cos(toRad(ca));
-        cy += (len + (size * ratio)) * Math.sin(toRad(ca));
-        ctx.lineTo(cx, cy);
-        ca -= 90;
-        cx += len * Math.cos(toRad(ca));
-        cy += len * Math.sin(toRad(ca));
-        ctx.lineTo(cx, cy);
-        ca += 90;
-        cx += len * Math.cos(toRad(ca));
-        cy += len * Math.sin(toRad(ca));
-        ctx.lineTo(cx, cy);
-        ca += 90;
-        cx += len * 3 * Math.cos(toRad(ca));
-        cy += len * 3 * Math.sin(toRad(ca));
-        ctx.lineTo(cx, cy);
-        ca += 90;
-        cx += len * Math.cos(toRad(ca));
-        cy += len * Math.sin(toRad(ca));
-        ctx.lineTo(cx, cy);
-        ca += 90;
-        cx += len * Math.cos(toRad(ca));
-        cy += len * Math.sin(toRad(ca));
-        ctx.lineTo(cx, cy);
-        ca -= 90;
-        cx += (len + (size * ratio)) * Math.cos(toRad(ca));
-        cy += (len + (size * ratio)) * Math.sin(toRad(ca));
-        ctx.lineTo(cx, cy);
-        ctx.lineTo(x + (size * (0.425 + 0.05) * xSign), y + (size * (0.425 + 0.05) * ySign));
-        ctx.fill();
-        
-        ctx.fillStyle = colors[p];
-        
-        x = x2;
-        y = y2;
-        xSign *= -1;
-        ySign *= -1;
-      }
+    if (type === 19) { // Pillar
+      let angles = getAngles(direction, i);
+      
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (size * 0.5 * xSign), y);
+      ctx.lineTo(x + (size * 0.5 * xSign), y + (size * 0.25 * ySign));
+      ctx.lineTo(x + (size * 0.25 * xSign), y + (size * 0.5 * ySign));
+      ctx.lineTo(x, y + (size * 0.5 * ySign));
+      ctx.lineTo(x, y);
+      ctx.fill();
       
       return;
+      
+      // Uncomment to use old design for Hammer Tile, which I wasn't a huge fan of (also chance 0.25 to 0.35 in above lines)
+      /*let len = size * 0.13;
+      let ratio = 0.075 + 0.04;
+      ctx.beginPath();
+      ctx.fillStyle = colors[1 - p];
+      let ca = toDeg(angles.start) + 135;
+      let cx = x + (size * (0.425 + 0.05) * xSign);
+      let cy = y + (size * (0.425 + 0.05) * ySign);
+      ctx.moveTo(cx, cy);
+      cx += len * 0.5 * Math.cos(toRad(ca));
+      cy += len * 0.5 * Math.sin(toRad(ca));
+      ctx.lineTo(cx, cy);
+      ca += 90;
+      cx += (len + (size * ratio)) * Math.cos(toRad(ca));
+      cy += (len + (size * ratio)) * Math.sin(toRad(ca));
+      ctx.lineTo(cx, cy);
+      ca -= 90;
+      cx += len * Math.cos(toRad(ca));
+      cy += len * Math.sin(toRad(ca));
+      ctx.lineTo(cx, cy);
+      ca += 90;
+      cx += len * Math.cos(toRad(ca));
+      cy += len * Math.sin(toRad(ca));
+      ctx.lineTo(cx, cy);
+      ca += 90;
+      cx += len * 3 * Math.cos(toRad(ca));
+      cy += len * 3 * Math.sin(toRad(ca));
+      ctx.lineTo(cx, cy);
+      ca += 90;
+      cx += len * Math.cos(toRad(ca));
+      cy += len * Math.sin(toRad(ca));
+      ctx.lineTo(cx, cy);
+      ca += 90;
+      cx += len * Math.cos(toRad(ca));
+      cy += len * Math.sin(toRad(ca));
+      ctx.lineTo(cx, cy);
+      ca -= 90;
+      cx += (len + (size * ratio)) * Math.cos(toRad(ca));
+      cy += (len + (size * ratio)) * Math.sin(toRad(ca));
+      ctx.lineTo(cx, cy);
+      ctx.lineTo(x + (size * (0.425 + 0.05) * xSign), y + (size * (0.425 + 0.05) * ySign));
+      ctx.fill();
+      
+      ctx.fillStyle = colors[p];
+      
+      return;*/
     }
     
     if (type === 20) { // Spikes
-      let x = x1;
-      let y = y1;
-      for (let i = 0; i < 2; i++) {
-        let angles = getAngles(direction, i);
-        
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        let cx = x + (size * 0.5 * xSign);
-        let cy = y;
+      let angles = getAngles(direction, i);
+      
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      let cx = x + (size * 0.5 * xSign);
+      let cy = y;
+      ctx.lineTo(cx, cy);
+      for (let j = 0; j < 4; j++) {
+        cx -= size * 0.125 * xSign;
+        cy += size * 0.125 * ySign;
+        let controlX = cx + (size * 0.125 * 0.5 * xSign) + (size * 0.25 * Math.cos(angles.start + toRad(45)));
+        let controlY = cy - (size * 0.125 * 0.5 * ySign) + (size * 0.25 * Math.sin(angles.start + toRad(45)));
+        ctx.lineTo(controlX, controlY);
         ctx.lineTo(cx, cy);
-        for (let j = 0; j < 4; j++) {
-          cx -= size * 0.125 * xSign;
-          cy += size * 0.125 * ySign;
-          let controlX = cx + (size * 0.125 * 0.5 * xSign) + (size * 0.25 * Math.cos(angles.start + toRad(45)));
-          let controlY = cy - (size * 0.125 * 0.5 * ySign) + (size * 0.25 * Math.sin(angles.start + toRad(45)));
-          ctx.lineTo(controlX, controlY);
-          ctx.lineTo(cx, cy);
-        }
-        ctx.lineTo(x, y + (size * 0.5 * ySign));
-        ctx.lineTo(x, y);
-        ctx.fill();
-        
-        x = x2;
-        y = y2;
-        xSign *= -1;
-        ySign *= -1;
       }
+      ctx.lineTo(x, y + (size * 0.5 * ySign));
+      ctx.lineTo(x, y);
+      ctx.fill();
       
       return;
     }
@@ -1023,7 +870,15 @@
         else direction = x % 2 === 0 ? (y % 2 === 0 ? parity : !parity) : !(y % 2 === 0 ? parity : !parity);
         
         grid[x][y] = {direction: direction, parity: XOR(lastTile.direction, XNOR(lastTile.parity, direction))};
-        drawTile(x * tileSize, y * tileSize, tileSize, grid[x][y].direction, grid[x][y].parity, randTile());
+        
+        let p = grid[x][y].parity ? 1 : 0;
+        ctx.fillStyle = colors[1 - p]; // Background color
+        ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+        
+        let tile = randTile();
+        
+        drawTile(x * tileSize, y * tileSize, tileSize, grid[x][y].direction, grid[x][y].parity, tile, 0);
+        drawTile(x * tileSize, y * tileSize, tileSize, grid[x][y].direction, grid[x][y].parity, tileMixing ? randTile() : tile, 1);
       }
     }
   }
@@ -1036,6 +891,8 @@
     else if (blockPatternRadio2.checked) blockPattern = 2;
     else if (blockPatternRadio3.checked) blockPattern = 3;
     else if (blockPatternRadio4.checked) blockPattern = 4;
+    
+    tileMixing = tileMixingCheckbox.checked;
     
     canvas.width = canvas.height = gridSize * Math.round(1000 / gridSize);
     
@@ -1096,7 +953,7 @@
         td.className = "tile-img-td";
         let img = document.createElement("img");
         img.className = "active-tile-img";
-        img.src = `images/connectivity/block-${index}.png`;
+        img.src = `images/connectivity/block${index}.png`;
         img.id = `tile-img-${index}`;
         td.title = `Toggle ${tileNames[index - 1]} Block`;
         
