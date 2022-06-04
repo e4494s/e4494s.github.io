@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>Mandelbrot Viewer ~ e4494s</title>
+    <style>
+      #canvas-div {
+        position: relative;
+      }
+      
+      #canvas {
+        z-index: -1;
+        border: none;
+      }
+      #top-canvas {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 1;
+        width: 400px;
+        height: 400px;
+        border: none;
+      }
+      
+      #rendering-div {
+        width: 250px;
+        background-color: rgb(170, 170, 170);
+        border-radius: 10px;
+        padding: 8px;
+      }
+    </style>
+  </head>
+<body>
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; Mandelbrot Viewer &mdash;&mdash;</h1>
+<p id = "how-it-works">
+  <b><i>How It Works:</i></b>
+  The famous <a href = "https://en.wikipedia.org/wiki/Mandelbrot_set" target = "_blank">Mandelbrot Set</a> fractal slowly generates on the canvas, getting more detailed over time.
+  <br><br>
+  <b>Click and drag</b> to pan, and click <span class = "setting">Zoom In</span> or <span class = "setting">Zoom Out</span> to magnify on the center of the canvas.
+  <br><br>
+  <span class = "setting">Fractal Hue</span> will change the way the fractal is colored when it is rendered.
+  <br><br>
+  If <span class = "setting">Intensified Coloring</span> is checked, then the fractal's colors will be rendered more vibrantly. However, <b>at deeper zooms this may cause the fractal to become whitewashed and less colorful</b>.
+</p>
+<table>
+  <tr>
+    <td style = "text-align: center">
+      <button onclick = "multScale(0.5)" style = "margin-right: 20px">Zoom In</button>
+      <button onclick = "multScale(2)" style = "margin-left: 20px">Zoom Out</button>
+      <br><br>
+      <div id = "canvas-div">
+        <canvas id = "canvas"></canvas>
+        <canvas id = "top-canvas"></canvas>
+      </div>
+      <button class = "download-canvas-btn" onclick = "downloadCanvas()">Download Canvas</button>
+    </td>
+    <td valign = "top">
+      <br><br><br><br>
+      <div id = "rendering-div">
+        <div><b><i>Rendering... <span id = "total-rendered-txt">0.00%.</span></i></b></div>
+        <br>
+        <div><b><i>Rendered <span id = "num-passes-txt">0/5</span> passes.</i></b></div>
+      </div>
+      <hr>
+      <div><b><u>Fractal Hue:</u></b> <span id = "hue-txt">300</span>&deg;</div>
+      <input type = "range" min = "0" max = "360" step = "10" value = "300" id = "hue-range" oninput = "updateSettings()">
+      <br><br>
+      <input type = "checkbox" id = "intense-coloring-checkbox" oninput = "updateSettings()" CHECKED>
+      <label for = "intense-coloring-checkbox">Intensified Coloring</label>
+    </td>
+  </tr>
+</table>
+<br>
+<div id = "fps-body">FPS: <span id = "fps-txt"></span></div>
+<script src = "scripts/main.js"></script>
+<script>
+  let topCanvas = document.getElementById("top-canvas");
+  const ctx = canvas.getContext("2d");
+  const tctx = topCanvas.getContext("2d");
+  canvas.width = canvas.height = topCanvas.width = topCanvas.height = 500;
+  let canvasRunning = true;
+  let canvasRect = canvas.getBoundingClientRect();
+  let canvasRatio = canvas.width / 400;
+  
+  let fpsTxt = document.getElementById("fps-txt");
+  let totalRenderedTxt = document.getElementById("total-rendered-txt");
+  let numPassesTxt = document.getElementById("num-passes-txt");
+  let hueTxt = document.getElementById("hue-txt");
+  let hueRange = document.getElementById("hue-range");
+  let intenseColoringCheckbox = document.getElementById("intense-coloring-checkbox");
+  
+  let startTime = 0;
+  let endTime = 0;
+  let rendered = false;
+  
+  function inMandelbrot(re, im) {
+  	let a = 0;
+    let b = fractalMode === 2 ? 1 : 0;
+    
+    if ((a + a) * (b + b) > 4) return 1;
+    
+    for (let i = 0; i < maxIterations; i++) {
+    	let _a = (a * a) - (b * b);
+      let _b = 2 * a * b;
+      a = _a + re;
+      b = _b + im;
+      
+      if ((a * a) + (b * b) > 4) return i / maxIterations;
+    }
+    
+    return 0;
+  }
+  function inCosFractal(re, im) { // z_n+1 = cos(z_n) + c
+  	let a = re;
+    let b = im;
+    
+    for (let i = 0; i < maxIterations; i++) {
+    	let eB = Math.exp(b); // e^b
+      let eNegB = 1 / eB; // e^-b
+      let c = Math.cos(a);
+      let s = Math.sin(a);
+      
+      let _a = (c * (eB + eNegB)) / (fractalMode === 4 ? 1 : 2);
+      let _b = (s * (eNegB - eB)) / (fractalMode === 4 ? 1 : 2);
+      a = _a + re;
+      b = _b + im;
+      
+      if (a * b > 5) return i / maxIterations;
+    }
+    
+    return 0;
+  }
+  
+  let panX = -0.23;
+  let panY = 0;
+  let hue = 300;
+  let scale = 2;
+  let fractalMode = 1;
+  let intenseColoring = true;
+  
+  let Mouse = {
+  	down: false,
+    downX: 0,
+    downY: 0,
+    willRedraw: false,
+    x: 0,
+    y: 0
+  };
+  
+  /*
+    1: Mandelbrot
+    2: Mandelbrot with z_0 = i
+    3: Cosine Fractal
+    4: Two-Cosine Fractal
+  */
+  
+  let scaleArray = [
+  	2, // Mandelbrot
+    1, // Mindlebrit
+    4, // Cosine Fractal
+    1 // Two-Cosine Fractal
+  ];
+  let panXArray = [
+  	-0.23, // Mandelbrot
+    0, // Mindlebrit
+    0.39, // Cosine Fractal
+    -0.5 // Two-Cosine Fractal
+  ];
+  let panYArray = [
+  	0, // Mandelbrot
+    -0.5, // Mindlebrit
+    0, // Cosine Fractal
+    0 // Two-Cosine Fractal
+  ];
+  
+  function plotPoint(x, y) {
+  	let _x = x - (canvas.width / 2);
+    let _y = y - (canvas.height / 2);
+    _x /= canvas.width;
+    _y /= canvas.height;
+    _x += panX;
+    _y += panY;
+    _x *= scale;
+    _y *= scale;
+    
+  	let escape = 0;
+    if (fractalMode === 1 || fractalMode === 2) escape = inMandelbrot(_x, _y);
+    else if (fractalMode === 3 || fractalMode === 4) escape = inCosFractal(_x, _y);
+    if (intenseColoring) escape *= (maxIterations / iterationsPerPass);
+    let brightness = escape * 100;
+    let h = hue + (180 * escape);
+    
+    ctx.fillStyle = `hsl(${h}deg, 100%, ${brightness}%)`;
+    ctx.fillRect(x, y, 1, 1);
+  }
+  
+  function plotFractal() {
+  	ctx.fillStyle = "white";
+  	ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    for (let x = 0; x < canvas.width; x++) {
+    	for (let y = 0; y < canvas.height; y++) {
+      	plotPoint(x, y);
+      }
+    }
+  }
+  
+  let currPixel = 0;
+  let numPasses = 0;
+  let maxIterations = 200;
+  let iterationsPerPass = 200;
+  let maxPasses = 5;
+  let stepsPerFrame = 4000;
+  
+  let lastFrameTime = 0;
+  let lastFpsDisplayTime = 1000;
+  function frame() {
+    if (Date.now() - lastFpsDisplayTime >= 500) {
+      fpsTxt.innerHTML = (1000 / (Date.now() - lastFrameTime)).toFixed(1);
+      lastFpsDisplayTime = Date.now();
+    }
+    lastFrameTime = Date.now();
+    
+    for (let i = 0; i < stepsPerFrame; i++) {
+    	if (numPasses < maxPasses) {
+    		let x = Math.floor(currPixel / 2) % canvas.width;
+      	let y = Math.floor(Math.floor(currPixel / 2) / canvas.width);
+      	if (currPixel % 2 === 0) {
+        	y += canvas.height / 2;
+      	}
+      	else {
+      		y = (canvas.height / 2) - y;
+        	y--;
+      	}
+      	
+    		plotPoint(x, y);
+      	
+      	currPixel++;
+      	
+      	if (currPixel > canvas.width * canvas.height) {
+      		currPixel = 0;
+        	numPasses++;
+        	maxIterations = (numPasses + 1) * iterationsPerPass;
+      	}
+      }
+    }
+    
+    if (numPasses === maxPasses && !rendered) {
+      rendered = true;
+      endTime = Date.now();
+    }
+    
+    let passRendered = currPixel / (canvas.width * canvas.height);
+    
+    let percentRendered = (((numPasses + passRendered) / maxPasses) * 100).toFixed(2);
+    
+    if (percentRendered > 99.9) {
+      let renderTime = ((endTime - startTime) / 1000).toFixed(2);
+      totalRenderedTxt.innerHTML = "Completed in " + renderTime + " seconds.";
+    }
+    else totalRenderedTxt.innerHTML = percentRendered + "%.<br><br>";
+    
+    numPassesTxt.innerHTML = numPasses + "/" + maxPasses;
+    
+    tctx.clearRect(0, 0, topCanvas.width, topCanvas.height);
+    if (Mouse.down) drawPanIcon(Mouse.downX, Mouse.downY);
+    
+    if (canvasRunning) requestAnimationFrame(frame);
+  }
+  
+  function resetDrawing() {
+  	ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    currPixel = 0;
+    numPasses = 0;
+    maxIterations = iterationsPerPass;
+    
+    startTime = Date.now();
+    rendered = false;
+  }
+  function redrawLastPass() {
+  	currPixel = 0;
+  	numPasses--;
+   	numPasses = Math.max(0, numPasses);
+    maxIterations = (numPasses + 1) * iterationsPerPass;
+  }
+  
+  function updateSettings() {
+  	intenseColoring = intenseColoringCheckbox.checked;
+    hue = hueTxt.innerHTML = Number(hueRange.value);
+    
+    redrawLastPass();
+  }
+  
+  function resetFractal() {
+  	scale = scaleArray[fractalMode - 1];
+  	panX = panXArray[fractalMode - 1];
+  	panY = panYArray[fractalMode - 1];
+    
+    resetDrawing();
+  }
+  resetFractal();
+  frame();
+  
+  function multScale(factor) {
+  	scale *= factor;
+    
+    panX /= factor;
+    panY /= factor;
+    
+    resetDrawing();
+  }
+  function setFractalMode(n) {
+  	fractalMode = n;
+    let btns = document.getElementsByClassName("fractalModeBtns");
+    for (let i = 0; i < btns.length; i++) btns[i].style.backgroundColor = "white";
+    
+    document.getElementById("fractalModeBtn" + n).style.backgroundColor = "gray";
+    
+    resetFractal();
+  }
+  
+  function drawPanIcon() {
+  	tctx.lineCap = tctx.lineJoin = "round";
+  	tctx.beginPath();
+  	tctx.moveTo(Mouse.downX, Mouse.downY);
+  	tctx.lineTo(Mouse.x, Mouse.y);
+  	tctx.strokeStyle = "white";
+  	tctx.lineWidth = 4;
+  	tctx.stroke();
+  	tctx.strokeStyle = "black";
+  	tctx.lineWidth = 2;
+  	tctx.stroke();
+  	
+  	tctx.fillStyle = "white";
+  	tctx.strokeStyle = "black";
+  	tctx.lineWidth = 2;
+  	tctx.fillCircle(Mouse.downX, Mouse.downY, 6);
+  	tctx.strokeCircle(Mouse.downX, Mouse.downY, 6);
+  	tctx.fillCircle(Mouse.x, Mouse.y, 4);
+  	tctx.strokeCircle(Mouse.x, Mouse.y, 4);
+  	
+  	return;
+  	let size = 15;
+    let s3 = size / 3;
+    
+    ctx.fillStyle = "white";
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 2;
+    
+    let cx = x - (s3 / 2);
+    let cy = y - (s3 * 1.5);
+    
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    cx += s3;
+    ctx.lineTo(cx, cy);
+    cy += s3;
+    ctx.lineTo(cx, cy);
+    cx += s3;
+    ctx.lineTo(cx, cy);
+    cy += s3;
+    ctx.lineTo(cx, cy);
+    cx -= s3;
+    ctx.lineTo(cx, cy);
+    cy += s3;
+    ctx.lineTo(cx, cy);
+    cx -= s3;
+    ctx.lineTo(cx, cy);
+    cy -= s3;
+    ctx.lineTo(cx, cy);
+    cx -= s3;
+    ctx.lineTo(cx, cy);
+    cy -= s3;
+    ctx.lineTo(cx, cy);
+    cx += s3;
+    ctx.lineTo(cx, cy);
+    cy -= s3;
+    ctx.lineTo(cx, cy);
+    
+    ctx.fill();
+    ctx.stroke();
+  }
+  
+  topCanvas.addEventListener("mousedown", e => {
+ 		canvasRect = canvas.getBoundingClientRect();
+    
+  	e.preventDefault();
+    
+    Mouse.down = true;
+    Mouse.downX = Mouse.x = (e.clientX - canvasRect.left) * canvasRatio;
+    Mouse.downY = Mouse.y = (e.clientY - canvasRect.top) * canvasRatio;
+  });
+  window.addEventListener("mouseup", e => {
+  	Mouse.down = false;
+    if (Mouse.willRedraw) {
+    	canvasRect = canvas.getBoundingClientRect();
+      
+      let mX = (e.clientX - canvasRect.left) * canvasRatio;
+    	let mY = (e.clientY - canvasRect.top) * canvasRatio;
+  		
+    	panX -= (mX - Mouse.downX) / canvas.width;
+    	panY -= (mY - Mouse.downY) / canvas.height;
+      
+      resetDrawing();
+    }
+    Mouse.willRedraw = false;
+  });
+  window.addEventListener("mousemove", e => {
+  	if (!Mouse.down) return;
+  	
+  	Mouse.willRedraw = true;
+    
+    canvasRect = canvas.getBoundingClientRect();
+    
+  	e.preventDefault();
+    
+    Mouse.down = true;
+    Mouse.x = (e.clientX - canvasRect.left) * canvasRatio;
+    Mouse.y = (e.clientY - canvasRect.top) * canvasRatio;
+  });
+  
+  function downloadCanvas() {
+    let link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "mandelbrot.png";
+    link.click();
+  }
+</script>
+</body>
+</html>
