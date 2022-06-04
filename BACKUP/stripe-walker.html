@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>Random Stripe Walker ~ e4494s</title>
+  </head>
+<body>
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; Random Stripe Walker &mdash;&mdash;</h1>
+<p id = "how-it-works">
+  <b><i>How It Works:</i></b> A walker moves randomly on a grid across the canvas, drawing rectangular stripes in the direction it is moving (e.g., draw a vertical stripe when moving up/down, and draw a horizontal stripe when moving left/right).
+  <br><br>
+  <span class = "setting">Max Stripes</span> will limit how many stripes can be drawn at once before resetting. Use this setting to keep the canvas from getting overly covered with certain settings.
+  <br><br>
+  <span class = "setting">Turn Rate</span> is the average number of steps the walker will take before choosing a new random direction. Higher values will make the walker tend towards straight lines instead of random wandering.
+  <br><br>
+  Change <span class = "setting">Stripe Length</span> and <span class = "setting">Stripe Thickness</span> to affect the shape of the stripes that are drawn every step.
+  <br><br>
+  <span class = "setting">Draw Chance</span> is the probability that the walker will draw a stripe at any given step. The walker will still move every step, but this setting changes whether or not it will draw a stripe every step.
+</p>
+<hr>
+<div><b>Settings Presets:</b></div>
+<div id = "presets-div"></div>
+<hr>
+<table>
+  <tr valign = "top">
+    <td>
+      <button id = "start-stop-btn" onclick = "startStop()">Pause</button>
+      <button onclick = "reset()">Reset</button>
+      <br><br>
+      <canvas id = "canvas">If you're seeing this text, your browser does not support the canvas element.</canvas>
+      <br>
+      <button class = "download-canvas-btn" onclick = "downloadCanvas()">Download Canvas</button>
+    </td>
+    <td>
+      <button onclick = "loadPreset(0)">Reset Settings</button>
+      <br><br>
+      <button onclick = "randomizeSettings()">Randomize All Settings</button>
+      <hr>
+      <div><i><b>Stripes Drawn:</b> <span id = "total-drawn-txt">0</span></i></div>
+      <br><br>
+      <div><b><u>Max Stripes:</u></b> <span id = "max-drawn-txt">No Limit</span></div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "max-drawn-range" oninput = "updateSettings(false)">
+      <hr>
+      <div><b><u>Grid Size:</u></b> <span id = "grid-size-txt">100&times;100</span></div>
+      <input type = "range" min = "25" max = "200" step = "25" value = "100" id = "grid-size-range" oninput = "updateSettings(true)">
+      <hr>
+      <div><b><u>Turn Rate:</u></b> ~<span id = "turn-age-txt">1</span> step<span id = "plural-txt-1"></span></div>
+      <input type = "range" min = "1" max = "20" step = "1" value = "1" id = "turn-age-range" oninput = "updateSettings(false)">
+      <hr>
+      <div><b><u>Stripe Length:</u></b> <span id = "line-length-txt">400</span>%</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "line-length-range" oninput = "updateSettings(false)">
+      <br><br>
+      <div><b><u>Stripe Thickness:</u></b> <span id = "line-thickness-txt">100</span>%</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "line-thickness-range" oninput = "updateSettings(false)">
+    </td>
+    <td>
+      <label for = "black-background-checkbox"><b><u>Black Background:</u></b></label>
+      <input type = "checkbox" id = "black-background-checkbox" oninput = "updateSettings(true)" CHECKED>
+      <hr>
+      <div><b><u>Draw Chance:</u></b> <span id = "draw-chance-txt">100</span>%</div>
+      <input type = "range" min = "5" max = "100" step = "5" value = "100" id = "draw-chance-range" oninput = "updateSettings(false)">
+      <hr>
+      <div><b><u>Stripe Brightness:</u></b> <span id = "line-brightness-txt">70</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "10" value = "70" id = "line-brightness-range" oninput = "updateSettings(false)">
+      <br><br>
+      <div><b><u>Stripe Opacity:</u></b> <span id = "line-opacity-txt">5</span>%</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "line-opacity-range" oninput = "updateSettings(false)">
+      <br><br>
+      <div><b><u>Stripe Color Variation:</u></b> <span id = "hue-variation-txt">0.5</span>%</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "hue-variation-range" oninput = "updateSettings(false)">
+    </td>
+  </tr>
+</table>
+<br>
+<div id = "fps-body">FPS: <span id = "fps-txt"></span></div>
+<script src = "scripts/main.js"></script>
+<script>
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 1000;
+  let canvasRunning = true;
+  
+  let presetsDiv = document.getElementById("presets-div");
+  let fpsTxt = document.getElementById("fps-txt");
+  let startStopBtn = document.getElementById("start-stop-btn");
+  let gridSizeTxt = document.getElementById("grid-size-txt");
+  let gridSizeRange = document.getElementById("grid-size-range");
+  let totalDrawnTxt = document.getElementById("total-drawn-txt");
+  let blackBackgroundCheckbox = document.getElementById("black-background-checkbox");
+  let turnAgeTxt = document.getElementById("turn-age-txt");
+  let pluralTxt1 = document.getElementById("plural-txt-1");
+  let turnAgeRange = document.getElementById("turn-age-range");
+  let drawChanceTxt = document.getElementById("draw-chance-txt");
+  let drawChanceRange = document.getElementById("draw-chance-range");
+  let lineLengthTxt = document.getElementById("line-length-txt");
+  let lineLengthRange = document.getElementById("line-length-range");
+  let lineThicknessTxt = document.getElementById("line-thickness-txt");
+  let lineThicknessRange = document.getElementById("line-thickness-range");
+  let lineBrightnessTxt = document.getElementById("line-brightness-txt");
+  let lineBrightnessRange = document.getElementById("line-brightness-range");
+  let lineOpacityTxt = document.getElementById("line-opacity-txt");
+  let lineOpacityRange = document.getElementById("line-opacity-range");
+  let hueVariationTxt = document.getElementById("hue-variation-txt");
+  let hueVariationRange = document.getElementById("hue-variation-range");
+  let maxDrawnTxt = document.getElementById("max-drawn-txt");
+  let maxDrawnRange = document.getElementById("max-drawn-range");
+  
+  let gridSize = 100;
+  canvas.width = canvas.height = gridSize * Math.round(1000 / gridSize);
+  let tileSize = canvas.width / gridSize;
+  let stepsPerFrame = 100;
+  let lineOpacity = 0.05;
+  let lineLength = 4;
+  let lineThickness = 1;
+  let lineBrightness = 70;
+  let blackBackground = true;
+  let hueVariation = 0.005;
+  let drawChance = 1;
+  let turnAge = 1;
+  let totalDrawn = 0;
+  let maxDrawn = Infinity;
+  
+  let presets = [
+    {
+      name: "Default",
+      gridSize: 100,
+      lineOpacity: 5,
+      lineLength: 400,
+      lineThickness: 100,
+      lineBrightness: 70,
+      blackBackground: true,
+      hueVariation: 0.5,
+      turnAge: 1,
+      drawChance: 100,
+      maxDrawn: Infinity
+    },
+    {
+      name: "Pluses and Minuses",
+      gridSize: 50,
+      lineOpacity: 100,
+      lineLength: 80,
+      lineThickness: 15,
+      lineBrightness: 70,
+      blackBackground: true,
+      hueVariation: 2,
+      turnAge: 1,
+      drawChance: 100,
+      maxDrawn: 5000
+    },
+    {
+      name: "Thin Quills",
+      gridSize: 100,
+      lineOpacity: 3,
+      lineLength: 800,
+      lineThickness: 30,
+      lineBrightness: 70,
+      blackBackground: true,
+      hueVariation: 1,
+      turnAge: 1,
+      drawChance: 100,
+      maxDrawn: Infinity
+    },
+    {
+      name: "Vibrant Smoke",
+      gridSize: 100,
+      lineOpacity: 10,
+      lineLength: 100,
+      lineThickness: 100,
+      lineBrightness: 50,
+      blackBackground: true,
+      hueVariation: 0.5,
+      turnAge: 1,
+      drawChance: 100,
+      maxDrawn: Infinity
+    },
+    {
+      name: "Pixelated Designs",
+      gridSize: 100,
+      lineOpacity: 10,
+      lineLength: 70,
+      lineThickness: 70,
+      lineBrightness: 50,
+      blackBackground: true,
+      hueVariation: 1,
+      turnAge: 1,
+      drawChance: 100,
+      maxDrawn: Infinity
+    },
+    {
+      name: "Ink Stains",
+      gridSize: 100,
+      lineOpacity: 2,
+      lineLength: 400,
+      lineThickness: 400,
+      lineBrightness: 0,
+      blackBackground: false,
+      hueVariation: 0.5,
+      turnAge: 1,
+      drawChance: 100,
+      maxDrawn: Infinity
+    },
+    {
+      name: "Rainbow Tunnels",
+      gridSize: 100,
+      lineOpacity: 100,
+      lineLength: 400,
+      lineThickness: 400,
+      lineBrightness: 40,
+      blackBackground: true,
+      hueVariation: 3,
+      turnAge: 1,
+      drawChance: 100,
+      maxDrawn: Infinity
+    },
+    {
+      name: "Stained Glass Stitching",
+      gridSize: 50,
+      lineOpacity: 10,
+      lineLength: 100,
+      lineThickness: 50,
+      lineBrightness: 50,
+      blackBackground: true,
+      hueVariation: 5,
+      turnAge: 1,
+      drawChance: 100,
+      maxDrawn: 10000
+    },
+    {
+      name: "Overhead Forest",
+      gridSize: 100,
+      lineOpacity: 25,
+      lineLength: 100,
+      lineThickness: 100,
+      lineBrightness: 50,
+      blackBackground: true,
+      hueVariation: 1,
+      turnAge: 1,
+      drawChance: 25,
+      maxDrawn: Infinity
+    },
+    {
+      name: "Intricate Pipelines",
+      gridSize: 100,
+      lineOpacity: 100,
+      lineLength: 100,
+      lineThickness: 30,
+      lineBrightness: 50,
+      blackBackground: true,
+      hueVariation: 0.25,
+      turnAge: 5,
+      drawChance: 100,
+      maxDrawn: 10000
+    },
+    {
+      name: "Alien Hieroglyphs",
+      gridSize: 50,
+      lineOpacity: 100,
+      lineLength: 40,
+      lineThickness: 200,
+      lineBrightness: 70,
+      blackBackground: true,
+      hueVariation: 2,
+      turnAge: 5,
+      drawChance: 60,
+      maxDrawn: 1000
+    },
+    {
+      name: "Banded Roads",
+      gridSize: 100,
+      lineOpacity: 100,
+      lineLength: 10,
+      lineThickness: 200,
+      lineBrightness: 70,
+      blackBackground: true,
+      hueVariation: 2,
+      turnAge: 20,
+      drawChance: 100,
+      maxDrawn: 3000
+    }
+  ];
+  function loadPreset(n) {
+    let p = presets[n];
+    gridSizeRange.value = p.gridSize;
+    lineOpacityRange.value = lineOpacityRangeArray.indexOf(p.lineOpacity);
+    lineLengthRange.value = lineRangeArray.indexOf(p.lineLength);
+    lineThicknessRange.value = lineRangeArray.indexOf(p.lineThickness);
+    lineBrightnessRange.value = p.lineBrightness;
+    blackBackgroundCheckbox.checked = p.blackBackground;
+    hueVariationRange.value = hueVariationRangeArray.indexOf(p.hueVariation);
+    turnAgeRange.value = p.turnAge;
+    drawChanceRange.value = p.drawChance;
+    maxDrawnRange.value = maxDrawnRangeArray.indexOf(p.maxDrawn);
+    
+    updateSettings(true);
+  }
+  
+  let Walker = {
+    x: 0,
+    y: 0,
+    hue: 0,
+    dir: 0,
+    age: 0,
+    turnAge: 0
+  };
+  Walker.walk = function() {
+    if (totalDrawn >= maxDrawn) return;
+    
+    if (this.age >= this.turnAge) {
+      this.dir = Math.floor(Math.random() * 4);
+      this.turnAge = Math.round(turnAge * randBetween(0.5, 1));
+      this.age = 0;
+    }
+    this.age++;
+    if (this.dir === 0) this.y--; // Top
+    else if (this.dir === 1) this.x++; // Right
+    else if (this.dir === 2) this.y++; // Bottom
+    else this.x--; // Left
+    this.x = (this.x + gridSize) % gridSize;
+    this.y = (this.y + gridSize) % gridSize;
+    
+    if (Math.random() >= drawChance) return; // Don't draw
+    
+    totalDrawn++;
+    
+    this.hue += Math.random() * randSign() * hueVariation * 360;
+    ctx.fillStyle = `hsla(${this.hue}deg, 100%, ${lineBrightness}%, ${lineOpacity})`;
+    let _x = this.x + 0.5;
+    let _y = this.y + 0.5;
+    if (this.dir === 0 || this.dir === 2) {
+      ctx.fillRectFromCenter(_x * tileSize, _y * tileSize, tileSize * lineThickness, tileSize * lineLength);
+    }
+    else {
+      ctx.fillRectFromCenter(_x * tileSize, _y * tileSize, tileSize * lineLength, tileSize * lineThickness);
+    }
+  };
+  
+  function reset() {
+    canvas.width = canvas.height = gridSize * Math.round(1000 / gridSize);
+    
+    ctx.fillStyle = blackBackground ? "black" : "white";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    tileSize = canvas.width / gridSize;
+    Walker.x = Math.floor(Math.random() * gridSize);
+    Walker.y = Math.floor(Math.random() * gridSize);
+    Walker.hue = Math.random() * 360;
+    Walker.dir = Math.floor(Math.random() * 4);
+    Walker.age = 0;
+    Walker.turnAge = Math.round(Math.random() * turnAge);
+    
+    totalDrawn = 0;
+    
+    totalDrawnTxt.innerHTML = totalDrawn.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+  reset();
+  
+  let lastFrameTime = 0;
+  let lastFpsDisplayTime = 1000;
+  
+  function frame() {
+    if (Date.now() - lastFpsDisplayTime >= 500) {
+      fpsTxt.innerHTML = (1000 / (Date.now() - lastFrameTime)).toFixed(1);
+      lastFpsDisplayTime = Date.now();
+    }
+    lastFrameTime = Date.now();
+    
+    for (let i = 0; i < stepsPerFrame; i++) Walker.walk();
+    
+    totalDrawnTxt.innerHTML = totalDrawn.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    
+    if (canvasRunning) requestAnimationFrame(frame);
+  }
+  frame();
+  
+  function startStop() {
+    if (canvasRunning) {
+      canvasRunning = false;
+      startStopBtn.innerHTML = "Play";
+    }
+    else {
+      canvasRunning = true;
+      frame();
+      startStopBtn.innerHTML = "Pause";
+    }
+  }
+  
+  let lineRangeArray = [10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 125, 150, 175, 200, 300, 400, 500, 600, 800, 1000, 1500, 2000];
+  lineLengthRange.max = lineRangeArray.length - 1;
+  lineLengthRange.value = lineRangeArray.indexOf(800);
+  lineThicknessRange.max = lineRangeArray.length - 1;
+  lineThicknessRange.value = lineRangeArray.indexOf(100);
+  
+  let lineOpacityRangeArray = [1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 80, 90, 100];
+  lineOpacityRange.max = lineOpacityRangeArray.length - 1;
+  lineOpacityRange.value = lineOpacityRangeArray.indexOf(5);
+  
+  let hueVariationRangeArray = [0, 0.25, 0.5, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100];
+  hueVariationRange.max = hueVariationRangeArray.length - 1;
+  hueVariationRange.value = hueVariationRangeArray.indexOf(0.5);
+  
+  let maxDrawnRangeArray = [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 7500, 10000, 15000, 20000, Infinity];
+  let maxDrawnTxtArray = ["500", "1,000", "1,500", "2,000", "2,500", "3,000", "3,500", "4,000", "4,500", "5,000", "7,500", "10,000", "15,000", "20,000", "No Limit"];
+  maxDrawnRange.max = maxDrawnRangeArray.length - 1;
+  maxDrawnRange.value = maxDrawnRangeArray.indexOf(Infinity);
+  
+  function updateSettings(doReset) {
+    gridSize = Number(gridSizeRange.value);
+    gridSizeTxt.innerHTML = gridSize + "&times;" + gridSize;
+    
+    maxDrawnTxt.innerHTML = maxDrawnTxtArray[Number(maxDrawnRange.value)];
+    maxDrawn = maxDrawnRangeArray[Number(maxDrawnRange.value)];
+    
+    lineLength = lineRangeArray[Number(lineLengthRange.value)] / 100;
+    lineLengthTxt.innerHTML = lineRangeArray[Number(lineLengthRange.value)];
+    
+    lineThickness = lineRangeArray[Number(lineThicknessRange.value)] / 100;
+    lineThicknessTxt.innerHTML = lineRangeArray[Number(lineThicknessRange.value)];
+    
+    blackBackground = blackBackgroundCheckbox.checked;
+    
+    lineBrightness = lineBrightnessTxt.innerHTML = Number(lineBrightnessRange.value);
+    
+    lineOpacity = lineOpacityRangeArray[Number(lineOpacityRange.value)] / 100;
+    lineOpacityTxt.innerHTML = lineOpacityRangeArray[Number(lineOpacityRange.value)];
+    
+    hueVariation = hueVariationRangeArray[Number(hueVariationRange.value)] / 100;
+    hueVariationTxt.innerHTML = hueVariationRangeArray[Number(hueVariationRange.value)];
+    
+    turnAge = turnAgeTxt.innerHTML = Number(turnAgeRange.value);
+    pluralTxt1.innerHTML = turnAge === 1 ? "" : "s";
+    
+    drawChance = Number(drawChanceRange.value)  / 100;
+    drawChanceTxt.innerHTML = drawChanceRange.value;
+    
+    if (doReset) reset();
+  }
+  
+  for (let i = 1; i < presets.length; i++) {
+    let btn = document.createElement("button");
+    btn.innerHTML = presets[i].name;
+    btn.className = "preset-btn";
+    btn.onclick = () => loadPreset(i);
+    presetsDiv.appendChild(btn);
+  }
+  
+  function downloadCanvas() {
+    let link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "stripe-walker.png";
+    link.click();
+  }
+</script>
+</body>
+</html>
