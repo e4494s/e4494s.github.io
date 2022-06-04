@@ -7,6 +7,11 @@
     <link rel = "stylesheet" href = "stylesheets/main.css">
     <link rel = "stylesheet" href = "stylesheets/page.css">
     <title>Dots ~ e4494s</title>
+    <style>
+      #canvas {
+        background-color: black;
+      }
+    </style>
   </head>
 <body>
 <a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
@@ -21,6 +26,8 @@
   Turning on <span class = "setting">Show Wireframe</span> will connect adjacent dots to create a complete, dynamic path around the canvas.
   <br><br>
   Clicking <span class = "setting">Randomize Geometry Settings</span> will randomize every setting, except the settings that are purely visual. Use this if you want a new set of settings with the same visual style.
+  <br><br>
+  <span id = "screensaver-txt"><a href = "dots-screensaver.html" target = "_blank">Check out the screensaver!</a> Every setting is randomized every 5 seconds, creating infinite unique designs.</span>
 </p>
 <hr>
 <div><b>Settings Presets:</b></div>
@@ -28,7 +35,7 @@
 <hr>
 <table>
   <tr valign = "top">
-    <td rowspan = "2">
+    <td>
       <button id = "start-stop-btn" onclick = "startStop()">Pause</button>
       <button onclick = "clearCanvas()">Clear Canvas</button>
       <br><br>
@@ -108,8 +115,6 @@
 </table>
 <br>
 <div id = "fps-body">FPS: <span id = "fps-txt"></span></div>
-<br>
-<span id = "screensaver-txt"><a href = "dots-screensaver.html" target = "_blank">Check out the screensaver!</a> Every setting is randomized every 5 seconds, creating infinite unique designs.</span>
 <script src = "scripts/main.js"></script>
 <script>
   let canvas = document.getElementById("canvas");
