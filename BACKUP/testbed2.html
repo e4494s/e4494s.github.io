@@ -56,6 +56,420 @@
   }
 </script>
 -->
+<canvas id = "canvas88" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "startCanvas88(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
+<button onclick = "reset88()">Reset</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>[ FPS: <span id = "fps88Txt"></span> ]</b></i></div>
+<div class = "desc"><b><i>(6/3/2022)</i></b> Bouncing simulation, except that the bouncing objects have no size and instead draw an arrow on their position showing their current velocity, with size indicating speed. Click and drag to add arrows.</div>
+<hr><hr>
+<script>
+  const ctx88 = canvas88.getContext("2d");
+  canvas88.width = canvas88.height = 1000;
+  let canvas88Rect = canvas88.getBoundingClientRect();
+  let canvas88Ratio = canvas88.width / 500;
+  let canvas88Running = false;
+  
+  let gravity88 = 0.5;
+  let bounciness88 = 0.85;
+  let friction88 = 0;
+  let maxThickness88 = 20;
+  let maxBounces88 = 10;
+  let outlineSize88 = 6;
+  let maxArrows88 = 150;
+  let minSize88 = 0;
+  let clearOpacity88 = 0.3;
+  let timeBetweenSpawns88 = 100;
+  let lastSpawnTime88 = 0;
+  let arrowScale88 = 10;
+  
+  function drawArrow88(x, y, angle, scale, color) {
+    scale = Math.max(scale, minSize88);
+    
+    ctx88.lineCap = ctx88.lineJoin = "round";
+    
+    ctx88.beginPath();
+    
+    ctx88.moveTo(x - (scale * 0.5 * Math.cos(angle)), y - (scale * 0.5 * Math.sin(angle)));
+    let endX = x + (scale * 0.5 * Math.cos(angle));
+    let endY = y + (scale * 0.5 * Math.sin(angle));
+    ctx88.lineTo(endX, endY);
+    
+    ctx88.moveTo(endX + (scale * 0.25 * Math.cos(angle + toRad(-135))), endY + (scale * 0.25 * Math.sin(angle + toRad(-135))));
+    ctx88.lineTo(endX, endY);
+    
+    ctx88.moveTo(endX + (scale * 0.25 * Math.cos(angle + toRad(135))), endY + (scale * 0.25 * Math.sin(angle + toRad(135))));
+    ctx88.lineTo(endX, endY);
+    
+    if (outlineSize88 !== 0) {
+      ctx88.lineWidth = Math.min(scale / 10, maxThickness88) + outlineSize88;
+      ctx88.strokeStyle = "black";
+      ctx88.stroke();
+    }
+    
+    ctx88.lineWidth = Math.min(scale / 10, maxThickness88);
+    ctx88.strokeStyle = color;
+    ctx88.stroke();
+  }
+  
+  function Arrow88(x, y) {
+    this.x = x;
+    this.y = y;
+    let a = Math.random() * Math.PI * 2;
+    let v = randBetween(1, 10);
+    this.vx = v * Math.cos(a);
+    this.vy = v * Math.sin(a);
+    
+    this.bounces = 0;
+    
+    this.color = `hsl(${Math.random() * 360}deg, ${randBetween(50, 100)}%, ${randBetween(30, 70)}%)`;
+    
+    this.dead = false;
+  }
+  Arrow88.prototype.update = function() {
+    if (this.dead) return;
+    
+    this.x += this.vx;
+    this.y += this.vy;
+    this.vy += gravity88;
+    
+    if (this.x > canvas88.width) { // Bounce off right
+      this.x = canvas88.width;
+      this.vx *= -bounciness88;
+    }
+    if (this.x < 0) { // Bounce off left
+      this.x = 0;
+      this.vx *= -bounciness88;
+    }
+    if (this.y > canvas88.height) { // Bounce off bottom
+      this.y = canvas88.height;
+      this.vy *= -bounciness88;
+      
+      this.bounces++;
+      
+      if (this.bounces >= maxBounces88) this.dead = true;
+    }
+    if (this.y < 0) { // Bounce off top
+      this.y = 0;
+      this.vy *= -bounciness88;
+    }
+  };
+  Arrow88.prototype.draw = function() {
+    if (this.dead) return;
+    
+    let angle = Math.atan2(this.vy, this.vx);
+    let velocity = Math.sqrt((this.vx * this.vx) + (this.vy * this.vy));
+    
+    drawArrow88(this.x, this.y, angle, velocity * arrowScale88, this.color);
+  };
+  let arrow88Array = [];
+  
+  function addArrow88(x, y, bypassCooldown) {
+    if (!bypassCooldown) {
+      let now = Date.now();
+      
+      if (now - lastSpawnTime88 >= timeBetweenSpawns88) lastSpawnTime88 = now;
+      else return;
+    }
+    
+    arrow88Array.push(new Arrow88(x, y));
+    while (arrow88Array.length > maxArrows88) arrow88Array.splice(0, 1);
+  }
+  
+  let lastFrame88Time = 0;
+  let lastFps88DisplayTime = 1000;
+  function frame88() {
+    if (Date.now() - lastFps88DisplayTime >= 500) {
+      fps88Txt.innerHTML = (1000 / (Date.now() - lastFrame88Time)).toFixed(1);
+      lastFps88DisplayTime = Date.now();
+    }
+    lastFrame88Time = Date.now();
+    
+    ctx88.globalAlpha = clearOpacity88;
+    ctx88.fillStyle = "white";
+    ctx88.fillRect(0, 0, canvas88.width, canvas88.height);
+    ctx88.globalAlpha = 1;
+    
+    for (let i = 0; i < arrow88Array.length; i++) {
+      arrow88Array[i].update();
+      arrow88Array[i].draw();
+      
+      if (arrow88Array[i].dead) {
+        arrow88Array.splice(i, 1);
+        i--;
+      }
+    }
+    
+    if (canvas88Running) requestAnimationFrame(frame88);
+  }
+  
+  function reset88() {
+    ctx88.fillStyle = "white";
+    ctx88.fillRect(0, 0, canvas88.width, canvas88.height);
+    
+    arrow88Array = [];
+    for (let i = 0; i < 10; i++) addArrow88(canvas88.width / 2, canvas88.height / 2, true);
+    
+    if (!canvas88Running) {
+      let _clearOpacity88 = clearOpacity88;
+      clearOpacity88 = 0.1;
+      
+      for (let i = 0; i < 20; i++) frame88();
+      
+      clearOpacity88 = _clearOpacity88;
+    }
+  }
+  reset88();
+  
+  let mouseDown88 = false;
+  
+  canvas88.addEventListener("mousedown", e => {
+    if (!canvas88Running) return;
+    
+    e.preventDefault();
+    
+    mouseDown88 = true;
+    
+    canvas88Rect = canvas88.getBoundingClientRect();
+    
+    let eX = (e.clientX - canvas88Rect.left) * canvas88Ratio;
+    let eY = (e.clientY - canvas88Rect.top) * canvas88Ratio;
+    
+    addArrow88(eX, eY, false);
+  });
+  canvas88.addEventListener("mousemove", e => {
+    if (!canvas88Running || !mouseDown88) return;
+    
+    e.preventDefault();
+    
+    canvas88Rect = canvas88.getBoundingClientRect();
+    
+    let eX = (e.clientX - canvas88Rect.left) * canvas88Ratio;
+    let eY = (e.clientY - canvas88Rect.top) * canvas88Ratio;
+    
+    addArrow88(eX, eY, false);
+  });
+  window.addEventListener("mouseup", e => {
+    mouseDown88 = false;
+  });
+  
+  function startCanvas88(caller) {
+    if (canvas88Running) {
+      canvas88Running = false;
+      caller.innerHTML = "<b><i>Paused</i></b>";
+      caller.style.color = caller.style.borderColor = "red";
+    }
+    else {
+      canvas88Running = true;
+      caller.innerHTML = "<b><i>Running</i></b>";
+      caller.style.color = caller.style.borderColor = "green";
+      frame88();
+    }
+  }
+</script>
+<canvas id = "canvas87" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "draw87()">Redraw</button>
+<br>
+<table>
+  <tr>
+    <td style = "width: 200px">
+      <div><b><u>Grid Size:</u></b> <span id = "gridSize87Txt">50&times;50</span></div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "gridSize87Range" oninput = "updateSettings87()">
+      <br><br>
+      <div><b><u>Max Square Size:</u></b> <span id = "maxSize87Txt">30</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "5" value = "30" id = "maxSize87Range" oninput = "updateSettings87()">
+      <br><br>
+      <div><b><u>Draw Chance:</u></b> <span id = "drawChance87Txt">100</span>%</div>
+      <input type = "range" min = "5" max = "100" step = "5" value = "100" id = "drawChance87Range" oninput = "updateSettings87()">
+      <br><br>
+      <div><b><u>Shape:</u></b></div>
+      <input type = "radio" name = "shape87Radio" id = "shape87Radio1" oninput = "updateSettings87()" CHECKED>
+      <label for = "shape87Radio1">Square</label>
+      <br>
+      <input type = "radio" name = "shape87Radio" id = "shape87Radio2" oninput = "updateSettings87()">
+      <label for = "shape87Radio2">Circle</label>
+      <br>
+      <input type = "radio" name = "shape87Radio" id = "shape87Radio3" oninput = "updateSettings87()">
+      <label for = "shape87Radio3">Mixed</label>
+    </td>
+    <td>
+      <div><b><u>Contrast:</u></b> <span id = "contrast87Txt">70</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "10" value = "70" id = "contrast87Range" oninput = "updateSettings87()">
+      <br><br>
+      <div><b><u>Saturation:</u></b> <span id = "saturation87Txt">50</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "10" value = "50" id = "saturation87Range" oninput = "updateSettings87()">
+      <br><br>
+      <div><b><u>Outline Width:</u></b> <span id = "lineWidth87Txt">30</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "5" value = "30" id = "lineWidth87Range" oninput = "updateSettings87()">
+      <div><b><u>Coloring Mode:</u></b></div>
+      <input type = "radio" name = "rainbow87Radio" id = "rainbow87Radio1" oninput = "updateSettings87()" CHECKED>
+      <label for = "rainbow87Radio1">Size-based color</label>
+      <br>
+      <input type = "radio" name = "rainbow87Radio" id = "rainbow87Radio2" oninput = "updateSettings87()">
+      <label for = "rainbow87Radio2">Random color</label>
+    </td>
+  </tr>
+</table>
+<div class = "desc"><b><i>(6/1/2022)</i></b> Square packing on a grid. This is <i>similar</i> to the other square packing project on this page, except that it's aligned to a grid instead of randomly across the canvas.<br><b><i>Update: (Later that day)</i></b> Added lots of settings and sliders for everything.</div>
+<hr><hr>
+<script>
+  const ctx87 = canvas87.getContext("2d");
+  canvas87.width = canvas87.height = 1000;
+  
+  let gridSize87 = 50;
+  canvas87.width = canvas87.height = gridSize87 * Math.round(1000 / gridSize87);
+  let tileSize87 = canvas87.width / gridSize87;
+  let maxSize87 = 0.3;
+  let shape87 = 1; // 1: Square  |  2: Circle  |  3: Mixed
+  let hue87 = 0;
+  let lineWidth87 = 0.3;
+  let drawChance87 = 1;
+  let rainbow87 = false;
+  let filledCells87 = 0;
+  let contrast87 = 0.7;
+  let saturation87 = 50;
+  
+  let grid87 = [];
+  
+  function color87(size) {
+    let max = Math.max(Math.round(maxSize87 * gridSize87), 1);
+    let hue = ((size / max) * 360) + hue87;
+    if (rainbow87) hue = Math.random() * 360;
+    let brightness = 50 + (Math.random() * contrast87 * 50 * (Math.random() < 0.5 ? 1 : -1));
+    return `hsl(${hue}deg, ${randBetween(saturation87, Math.min(saturation87 + 50, 100))}%, ${brightness}%)`;
+  }
+  
+  function validateSquare87(_x, _y, size) {
+    let x = _x - Math.floor(size / 2);
+    let y = _y - Math.floor(size / 2);
+    let offTop = y < 0;
+    let offBottom = (y + size) > gridSize87;
+    let offLeft = x < 0;
+    let offRight = (x + size) > gridSize87;
+    if (offTop || offBottom || offLeft || offRight) return false; // Square goes outside canvas
+    
+    for (let i = 0; i < size; i++) {
+      for (let j = 0; j < size; j++) {
+        if (grid87[x + i][y + j].filled) return false; // Square does not fit
+      }
+    }
+    
+    return true; // Square fits
+  }
+  
+  function drawSquare87() {
+    let x, y;
+    do {
+      x = Math.floor(Math.random() * gridSize87);
+      y = Math.floor(Math.random() * gridSize87);
+    }
+    while (grid87[x][y].filled);
+    
+    let fits = false;
+    
+    let max = Math.max(Math.round(maxSize87 * gridSize87), 1);
+    
+    let size = 1;
+    do {
+      size++;
+      fits = validateSquare87(x, y, size);
+      if (size > max) fits = false;
+    }
+    while (fits);
+    
+    size--;
+    
+    let _x = x - Math.floor(size / 2);
+    let _y = y - Math.floor(size / 2);
+    
+    for (let i = 0; i < size; i++) {
+      for (let j = 0; j < size; j++) {
+        grid87[_x + i][_y + j].filled = true; // Mark this square's touched cells as filled
+        filledCells87++;
+      }
+    }
+    
+    let cx = _x + (size / 2);
+    let cy = _y + (size / 2);
+    
+    if (Math.random() >= drawChance87) return;
+    
+    ctx87.strokeStyle = "black";
+    ctx87.lineWidth = lineWidth87 * tileSize87;
+    let stroke = lineWidth87 !== 0;
+    
+    let shape = shape87;
+    
+    if (shape87 === 3) shape = Math.random() < 0.5 ? 1 : 2;
+    
+    ctx87.fillStyle = color87(size);
+    if (shape === 1) {
+      ctx87.fillRectFromCenter(cx * tileSize87, cy * tileSize87, size * tileSize87, size * tileSize87);
+      if (stroke) ctx87.strokeRectFromCenter(cx * tileSize87, cy * tileSize87, size * tileSize87, size * tileSize87);
+    }
+    else if (shape === 2) {
+      ctx87.fillCircle(cx * tileSize87, cy * tileSize87, size * tileSize87 * 0.5);
+      if (stroke) ctx87.strokeCircle(cx * tileSize87, cy * tileSize87, size * tileSize87 * 0.5);
+    }
+  }
+  
+  function draw87() {
+    canvas87.width = canvas87.height = gridSize87 * Math.round(1000 / gridSize87);
+    tileSize87 = Math.max(canvas87.width / gridSize87, 10);
+    canvas87.width = canvas87.height = tileSize87 * gridSize87;
+    
+    ctx87.fillStyle = "black";
+    ctx87.fillRect(0, 0, canvas87.width, canvas87.height);
+    
+    hue87 = Math.random() * 360;
+    
+    filledCells87 = 0;
+    
+    grid87 = [];
+    for (let x = 0; x < gridSize87; x++) {
+      let column = [];
+      for (let y = 0; y < gridSize87; y++) {
+        column.push({filled: false});
+      }
+      grid87.push(column);
+    }
+    
+    while (filledCells87 < gridSize87 * gridSize87) drawSquare87(); // Draw squares every grid cell is filled
+  }
+  draw87();
+  
+  let gridSize87RangeArray = [2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 50, 75, 100, 150, 200, 300];
+  gridSize87Range.max = gridSize87RangeArray.length - 1;
+  gridSize87Range.value = gridSize87RangeArray.indexOf(50);
+  
+  function updateSettings87() {
+    gridSize87 = gridSize87RangeArray[Number(gridSize87Range.value)];
+    gridSize87Txt.innerHTML = `${gridSize87}&times;${gridSize87}`;
+    
+    maxSize87Txt.innerHTML = maxSize87Range.value;
+    maxSize87 = Number(maxSize87Range.value) / 100;
+    
+    drawChance87Txt.innerHTML = drawChance87Range.value;
+    drawChance87 = Number(drawChance87Range.value) / 100;
+    
+    contrast87Txt.innerHTML = contrast87Range.value;
+    contrast87 = Number(contrast87Range.value) / 100;
+    
+    saturation87Txt.innerHTML = saturation87Range.value;
+    saturation87 = Number(saturation87Range.value);
+    
+    lineWidth87Txt.innerHTML = lineWidth87Range.value;
+    lineWidth87 = Number(lineWidth87Range.value) / 100;
+    
+    if (shape87Radio1.checked) shape87 = 1;
+    else if (shape87Radio2.checked) shape87 = 2;
+    else if (shape87Radio3.checked) shape87 = 3;
+    
+    if (rainbow87Radio1.checked) rainbow87 = false;
+    else if (rainbow87Radio2.checked) rainbow87 = true;
+    
+    draw87();
+  }
+</script>
 <canvas id = "canvas86" style = "width: 400px; height: 400px"></canvas>
 <button onclick = "startCanvas86(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
 <button onclick = "reset86()">Reset</button>
@@ -8737,7 +9151,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     </td>
   </tr>
 </table>
-<div class = "desc"><b><i>(11/28/2021)</i></b> Generative art made by a random walker, each step it moves either left/right/up/down, and draws a rectangle in the direction it moved, with a set thickness and length and opacity. The hue changes some per step as well, and it creates interesting intricate patterns.<br><b><i>Update: (Later that day)</i></b> Added more settings and sliders, and added settings presets.<br><b><i>(11/29/2021)</i></b> Added draw chance and turn rate settings and sliders, and more presets.</div>
+<div class = "desc"><b><i>(11/28/2021)</i></b> Generative art made by a random walker, each step it moves either left/right/up/down, and draws a rectangle in the direction it moved, with a set thickness and length and opacity. The hue changes some per step as well, and it creates interesting intricate patterns.<br><b><i>Update: (Later that day)</i></b> Added more settings and sliders, and added settings presets.<br><b><i>(11/29/2021)</i></b> Added draw chance and turn rate settings and sliders, and more presets.<br><b><i><mark>Actually finished! (6/2/2022)</mark> Moved to <a href = "stripe-walker.html" target = "_blank">stripe-walker.html</a>.</i></b></div>
 <hr><hr>
 <script>
   const ctx32 = canvas32.getContext("2d");
