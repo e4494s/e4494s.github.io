@@ -1,3 +1,4 @@
+
 #top-title {
   height: 50px;
   width: 168px;
@@ -36,7 +37,6 @@ h1 {
 #canvas {
   width: 400px;
   height: 400px;
-  background-color: black;
   border: 2px solid #ff9500; /* Accent color */
 }
 
@@ -93,3 +93,17 @@ button:active {
   margin: 5px;
   border-radius: 12px;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+      
+      
