@@ -355,6 +355,34 @@
     }
   }
   
+  let canvas27 = document.getElementById("canvas27");
+  let canvas26 = document.getElementById("canvas26");
+  let canvas25 = document.getElementById("canvas25");
+  let canvas24 = document.getElementById("canvas24");
+  let canvas23 = document.getElementById("canvas23");
+  let canvas22 = document.getElementById("canvas22");
+  let canvas21 = document.getElementById("canvas21");
+  let canvas20 = document.getElementById("canvas20");
+  let canvas19 = document.getElementById("canvas19");
+  let canvas18 = document.getElementById("canvas18");
+  let canvas17 = document.getElementById("canvas17");
+  let canvas16 = document.getElementById("canvas16");
+  let canvas15 = document.getElementById("canvas15");
+  let canvas14 = document.getElementById("canvas14");
+  let canvas13 = document.getElementById("canvas13");
+  let canvas12 = document.getElementById("canvas12");
+  let canvas11 = document.getElementById("canvas11");
+  let canvas10 = document.getElementById("canvas10");
+  let canvas9 = document.getElementById("canvas9");
+  let canvas8 = document.getElementById("canvas8");
+  let canvas7 = document.getElementById("canvas7");
+  let canvas6 = document.getElementById("canvas6");
+  let canvas5 = document.getElementById("canvas5");
+  let canvas4 = document.getElementById("canvas4");
+  let canvas3 = document.getElementById("canvas3");
+  let canvas2 = document.getElementById("canvas2");
+  let canvas1 = document.getElementById("canvas1");
+  
   //
   // Reemergence
   //
@@ -410,8 +438,8 @@
     if (side27) ratio = 1 - ratio;
     shape27 = ratio < 0.5 ? 1 : 2;
     
-    if (colorMode27 === 1) ctx27.strokeStyle = `hsla(${closest.hue}deg, 100%, 60%, 0.005)`;
-    else if (colorMode27 === 2) ctx27.strokeStyle = `hsla(0deg, 0%, 100%, 0.005)`;
+    if (colorMode27 === 1) ctx27.strokeStyle = `hsla(${closest.hue}deg, 100%, 60%, 0.01)`;
+    else if (colorMode27 === 2) ctx27.strokeStyle = `hsla(0deg, 0%, 100%, 0.01)`;
     
     ctx27.lineWidth = 1;
     
@@ -451,9 +479,9 @@
     side27 = Math.random() < 0.5;
     
     colorMode27 = 1;
-    for (let i = 0; i < 150000; i++) drawCircle27();
+    for (let i = 0; i < 60000; i++) drawCircle27();
     colorMode27 = 2;
-    for (let i = 0; i < 50000; i++) drawCircle27();
+    for (let i = 0; i < 20000; i++) drawCircle27();
   }
   
   //
