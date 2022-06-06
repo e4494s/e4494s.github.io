@@ -7,6 +7,11 @@
     <link rel = "stylesheet" href = "stylesheets/main.css">
     <link rel = "stylesheet" href = "stylesheets/page.css">
     <title>Bands ~ e4494s</title>
+    <style>
+      #canvas {
+        background-color: black;
+      }
+    </style>
   </head>
 <body>
 <a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
@@ -95,6 +100,7 @@
 </table>
 <script src = "scripts/main.js"></script>
 <script>
+  let canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
   canvas.width = canvas.height = 1000;
   
