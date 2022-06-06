@@ -56,6 +56,298 @@
   }
 </script>
 -->
+<canvas id = "canvas89" style = "width: 450px; height: 300px"></canvas>
+<button onclick = "startCanvas89(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>[ FPS: <span id = "fps89Txt"></span> ]</b></i></div>
+<br>
+<label for = "noodleLimbs89Checkbox"><b><u>Noodle Limbs:</u></b></label>
+<input type = "checkbox" id = "noodleLimbs89Checkbox" oninput = "updateSettings89()">
+<div class = "desc"><b><i>(6/4/2022)</i></b> Another experiment with FABRIK chains, this time with a guy that "runs" towards the cursor by repeatedly choosing new points for his FABRIK legs to step towards. His name is Hezekiah and for some reason he moonwalks a lot. For best results, move the cursor slowly and near the top of the canvas.<br><b><i>(6/6/2022)</i></b> Added a failsafe so that Hezekiah's legs can no longer get stuck in the same position as each other, making him a hopping one-legged person.<br><b><i>Update: (Later that day)</i></b> I added FABRIK arms to him that reach towards the wall if he's close enough to a wall, and droop downwards if he isn't. I also added an option to give Hezekiah noodle limbs, where his arms and legs have 50 segments instead of 2.</div>
+<hr><hr>
+<script>
+  const ctx89 = canvas89.getContext("2d");
+  canvas89.width = 1500;
+  canvas89.height = 1000;
+  let canvas89Running = false;
+  
+  let canvas89Rect = canvas89.getBoundingClientRect();
+  let canvas89Ratio = canvas89.width / 450;
+  
+  function lerp89(x1, y1, x2, y2, t) {
+    return {x: x1 + ((x2 - x1) * t), y: y1 + ((y2 - y1) * t)};
+  }
+  
+  // Add FABRIK chains for arms, make them ease towards the wall if close enough (left to left wall, right to right wall) (y = Man89.y + Man89.headRadius)
+  // If not close enough to a wall, arms ease towards   x = Man89.x (+/-) Man89.targetOffset    y = canvas89.height    so they droop down again
+  let Man89 = {};
+  let Mouse89 = {};
+  Man89.reset = function(noodle) {
+    this.lineWidth = 8;
+    this.headRadius = 70;
+    this.torsoLength = 300;
+    this.armLength = 300;
+    this.legLength = 375;
+    this.x = canvas89.width / 2;
+    this.y = canvas89.height / 2;
+    this.moveLerpRatio = 0.1;
+    this.legLerpRatio = 0.2;
+    this.armLerpRatio = 0.2;
+    this.legLinks = noodle ? 51 : 3;
+    this.armLinks = noodle ? 51 : 3;
+    this.legSpeed = 10;
+    this.armSpeed = 10;
+    this.smoothLegs = true;
+    
+    this.minY = canvas89.height - (this.torsoLength + (Math.cos(toRad(15)) * this.legLength));
+    this.y = this.minY;
+    this.maxY = this.minY + (this.legLength * 0.6);
+    this.targetOffset = Math.sin(toRad(15)) * this.legLength * 2;
+    this.armOffset = Math.sin(toRad(25)) * this.armLength;
+    this.armReachDist = this.armLength;
+    this.targetRerollDistance = this.targetOffset * 2; // Distance to choose a new leg target
+    this.targetLeft = this.x - this.targetOffset;
+    this.targetRight = this.x + this.targetOffset;
+    this.legChainLeft = [];
+    for (let i = 0; i < this.legLinks; i++) {
+      this.legChainLeft.push({
+        x: this.x - (i * (this.legLength / (this.legLinks - 1))),
+        y: this.y + this.headRadius + this.torsoLength,
+        segmentLength: this.legLength / (this.legLinks - 1)
+      });
+    }
+    this.legChainRight = [];
+    for (let i = 0; i < this.legLinks; i++) {
+      this.legChainRight.push({
+        x: this.x + (i * (this.legLength / (this.legLinks - 1))),
+        y: this.y + this.headRadius + this.torsoLength,
+        segmentLength: this.legLength / (this.legLinks - 1)
+      });
+    }
+    this.armChainLeft = [];
+    for (let i = 0; i < this.armLinks; i++) {
+      this.armChainLeft.push({
+        x: this.x - (i * (this.armLength / (this.armLinks - 1))),
+        y: this.y + this.headRadius,
+        segmentLength: this.armLength / (this.armLinks - 1)
+      });
+    }
+    this.armChainRight = [];
+    for (let i = 0; i < this.armLinks; i++) {
+      this.armChainRight.push({
+        x: this.x + (i * (this.armLength / (this.armLinks - 1))),
+        y: this.y + this.headRadius,
+        segmentLength: this.armLength / (this.armLinks - 1)
+      });
+    }
+    
+    Mouse89.x = this.x;
+    Mouse89.y = this.y;
+  };
+  Man89.reset(false);
+  Man89.updateChain = function(chain, oldX, oldY, newX, newY) {
+    let dx = newX - oldX;
+    let dy = newY - oldY;
+    for (let i = 0; i < chain.length; i++) {
+      chain[i].x += dx;
+      chain[i].y += dy;
+    }
+  };
+  Man89.update = function() {
+    let newPos = lerp89(this.x, this.y, Mouse89.x, Mouse89.y, this.moveLerpRatio); // Ease towards cursor
+    newPos.y = Math.min(Math.max(newPos.y, this.minY), this.maxY);
+    
+    let xSign = Math.sign(newPos.x - this.x);
+    
+    this.updateChain(this.legChainLeft, this.x, this.y, newPos.x, newPos.y);
+    this.updateChain(this.legChainRight, this.x, this.y, newPos.x, newPos.y);
+    
+    this.updateChain(this.armChainLeft, this.x, this.y, newPos.x, newPos.y);
+    this.updateChain(this.armChainRight, this.x, this.y, newPos.x, newPos.y);
+    
+    if (this.x <= this.armReachDist) { // Reach to left wall if close enough
+      this.easeToPoint(this.armChainLeft, 0, this.y + (this.headRadius * 2), this.armLerpRatio);
+    }
+    else { // Else drop arm downwards
+      this.easeToPoint(this.armChainLeft, this.x - this.armOffset, canvas89.height, this.armLerpRatio * 0.3);
+    }
+    
+    if (canvas89.width - this.x <= this.armReachDist) { // Reach to right wall if close enough
+      this.easeToPoint(this.armChainRight, canvas89.width, this.y + (this.headRadius * 2), this.armLerpRatio);
+    }
+    else { // Else drop arm downwards
+      this.easeToPoint(this.armChainRight, this.x + this.armOffset, canvas89.height, this.armLerpRatio * 0.3);
+    }
+    
+    let newTargetLeft = newPos.x - this.targetOffset; // Get new leg targets
+    let newTargetRight = newPos.x + this.targetOffset;
+    
+    if (Math.abs(this.x - this.targetLeft) >= this.targetRerollDistance) {
+      //this.targetLeft = newTargetLeft; // If new targets is far enough away, set leg target to that point
+      this.targetLeft = newPos.x + (this.targetOffset * xSign);
+      if (Math.abs(this.targetLeft - this.targetRight) < this.targetOffset / 2) this.targetRight = newPos.x - (this.targetOffset * xSign);
+    }
+    else if (Math.abs(this.x - this.targetRight) >= this.targetRerollDistance) {
+      //this.targetRight = newTargetRight;
+      this.targetRight = newPos.x + (this.targetOffset * xSign);
+      if (Math.abs(this.targetLeft - this.targetRight) < this.targetOffset / 2) this.targetLeft = newPos.x - (this.targetOffset * xSign);
+    }
+    
+    this.easeToPoint(this.legChainLeft, this.targetLeft, canvas89.height, this.legLerpRatio);
+    this.easeToPoint(this.legChainRight, this.targetRight, canvas89.height, this.legLerpRatio);
+    
+    this.x = newPos.x;
+    this.y = newPos.y;
+  };
+  Man89.drawChain = function(chain) {
+    ctx89.fillStyle = ctx89.strokeStyle = "black";
+    
+    for (let i = 0; i < chain.length; i++) {
+      //ctx89.fillCircle(chain[i].x, chain[i].y, 10);
+      if (i !== chain.length - 1) {
+        ctx89.beginPath();
+        ctx89.moveTo(chain[i].x, chain[i].y);
+        ctx89.lineTo(chain[i + 1].x, chain[i + 1].y);
+        ctx89.stroke();
+      }
+    }
+    //ctx89.fillCircle(chain[chain.length - 1].x, chain[chain.length - 1].y, 10);
+  };
+  Man89.fabrikToPoint = function(chain, x, y) {
+    let oX = chain[0].x;
+    let oY = chain[0].y;
+    let endX = x;
+    let endY = y;
+    for (let i = chain.length - 1; i >= 0; i--) {
+      chain[i].x = endX;
+      chain[i].y = endY;
+      if (i !== 0) {
+        let dx = chain[i - 1].x - endX;
+        let dy = chain[i - 1].y - endY;
+        let angle = Math.atan2(dy, dx);
+        endX += chain[i].segmentLength * Math.cos(angle);
+        endY += chain[i].segmentLength * Math.sin(angle);
+      }
+    }
+    
+    endX = oX;
+    endY = oY;
+    
+    for (let i = 0; i < chain.length; i++) {
+      chain[i].x = endX;
+      chain[i].y = endY;
+      if (i !== chain.length - 1) {
+        let dx = chain[i + 1].x - endX;
+        let dy = chain[i + 1].y - endY;
+        let angle = Math.atan2(dy, dx);
+        endX += chain[i].segmentLength * Math.cos(angle);
+        endY += chain[i].segmentLength * Math.sin(angle);
+      }
+    }
+  };
+  Man89.easeToPoint = function(chain, x, y, t) {
+    if (!this.smoothLegs) {
+      let last = chain[chain.length - 1];
+      let dx = x - last.x;
+      let dy = y - last.y;
+      let distSq = (dx * dx) + (dy * dy);
+      if (distSq <= this.legSpeed * this.legSpeed) this.fabrikToPoint(chain, x, y);
+      else {
+        let dist = Math.sqrt(distSq);
+        this.fabrikToPoint(chain, last.x + (this.legSpeed * (dx / dist)), last.y + (this.legSpeed * (dy / dist)));
+      }
+    }
+    else {
+      let last = chain[chain.length - 1];
+      let p = lerp89(last.x, last.y, x, y, t);
+      this.fabrikToPoint(chain, p.x, p.y);
+    }
+  };
+  Man89.draw = function() {
+    ctx89.lineWidth = this.lineWidth;
+    ctx89.lineCap = ctx89.lineJoin = "round";
+    
+    let cx = this.x;
+    let cy = this.y;
+    ctx89.strokeCircle(cx, cy, this.headRadius);
+    
+    ctx89.beginPath();
+    
+    cy += this.headRadius;
+    ctx89.moveTo(cx, cy);
+    cy += this.torsoLength;
+    ctx89.lineTo(cx, cy);
+    
+    ctx89.stroke();
+    
+    this.drawChain(this.armChainLeft);
+    this.drawChain(this.armChainRight);
+    
+    this.drawChain(this.legChainLeft);
+    this.drawChain(this.legChainRight);
+    
+    // Eyes
+    //ctx89.fillCircle(this.x - (this.headRadius * 0.45), this.y - (this.headRadius * 0.1), 10);
+    //ctx89.fillCircle(this.x + (this.headRadius * 0.45), this.y - (this.headRadius * 0.1), 10);
+    
+    // Target point debug
+    //ctx89.fillStyle = "red";
+    //ctx89.fillCircle(this.targetLeft, canvas89.height, 10);
+    //ctx89.fillCircle(this.targetRight, canvas89.height, 10);
+  };
+  
+  let lastFrame89Time = 0;
+  let lastFps89DisplayTime = 1000;
+  
+  function frame89() {
+    if (Date.now() - lastFps89DisplayTime >= 500) {
+      fps89Txt.innerHTML = (1000 / (Date.now() - lastFrame89Time)).toFixed(1);
+      lastFps89DisplayTime = Date.now();
+    }
+    lastFrame89Time = Date.now();
+    
+    ctx89.clearRect(0, 0, canvas89.width, canvas89.height);
+    
+    Man89.update();
+    Man89.draw();
+    
+    if (canvas89Running) requestAnimationFrame(frame89);
+  }
+  Man89.fabrikToPoint(Man89.legChainLeft, Man89.targetLeft, canvas89.height);
+  Man89.fabrikToPoint(Man89.legChainRight, Man89.targetRight, canvas89.height);
+  Man89.fabrikToPoint(Man89.armChainLeft, Man89.x - Man89.armOffset, canvas89.height);
+  Man89.fabrikToPoint(Man89.armChainRight, Man89.x + Man89.armOffset, canvas89.height);
+  frame89();
+  
+  function updateSettings89() {
+    Man89.reset(noodleLimbs89Checkbox.checked);
+  }
+  
+  canvas89.addEventListener("mousemove", e => {
+    if (!canvas89Running) return;
+    
+    canvas89Rect = canvas89.getBoundingClientRect();
+    
+    let eX = (e.clientX - canvas89Rect.left) * canvas89Ratio;
+    let eY = (e.clientY - canvas89Rect.top) * canvas89Ratio;
+    
+    Mouse89.x = eX;
+    Mouse89.y = eY;
+  });
+  
+  function startCanvas89(caller) {
+    if (canvas89Running) {
+      canvas89Running = false;
+      caller.innerHTML = "<b><i>Paused</i></b>";
+      caller.style.color = caller.style.borderColor = "red";
+    }
+    else {
+      canvas89Running = true;
+      caller.innerHTML = "<b><i>Running</i></b>";
+      caller.style.color = caller.style.borderColor = "green";
+      frame89();
+    }
+  }
+</script>
 <canvas id = "canvas88" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "startCanvas88(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
 <button onclick = "reset88()">Reset</button>
@@ -140,18 +432,18 @@
       this.x = 0;
       this.vx *= -bounciness88;
     }
-    if (this.y > canvas88.height) { // Bounce off bottom
+    if (this.y > canvas88.height && this.bounces < maxBounces88) { // Bounce off bottom
       this.y = canvas88.height;
       this.vy *= -bounciness88;
       
       this.bounces++;
-      
-      if (this.bounces >= maxBounces88) this.dead = true;
     }
     if (this.y < 0) { // Bounce off top
       this.y = 0;
       this.vy *= -bounciness88;
     }
+    
+    if (this.bounces >= maxBounces88 && this.y >= canvas88.height * 2) this.dead = true;
   };
   Arrow88.prototype.draw = function() {
     if (this.dead) return;
@@ -2528,7 +2820,7 @@ The <b>Cosine Fractal</b> is generated similar to the Mandelbrot, except instead
 <br><br>
 The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 times cosine each step.
 </p>
-<div class = "desc"><b><i>(3/30/2022)</i></b> I tried making a faster Mandelbrot set visualizer than the <a href = "https://e4494s.neocities.org/mandelbrot.html">old one</a> I had, but it's not much faster. I did add dragging and zooming though, which was really difficult to get working properly. It still loses a lot of detail at higher zoom levels, but I'm not sure how to fix that without waiting like 30 seconds for it to render. I also made it where the escape iterations for each point also affect the hue, not just the brightness, which creates a really interesting effect.<br><b><i>(3/31/2022)</i></b> Added buttons for different fractal modes.<br><b><i>(3/31/2022)</i></b> I significantly improved runtime and performance by adding an update frame function instead of just rendering the fractal all at once, one time. It instead now passes down the screen, rendering as it goes. Each time it reaches the bottom of the screen, it does another pass with higher iterations. (Deeper zooms will take longer to render as they have a higher iteration escape period).<br><b><i>Update: (Later that day)</i></b> I made the rendering passes happen twice at once, moving from the center of the screen, and also added a setting to intensify the coloring, which means the intensity is multiplied based on the maximum iterations (as the higher the max iterations are, the less intense the colors typically are). I added it as an optional setting since sometimes it looks whitewashed with intense colors on.</div>
+<div class = "desc"><b><i>(3/30/2022)</i></b> I tried making a faster Mandelbrot set visualizer than the <a href = "https://e4494s.neocities.org/mandelbrot.html">old one</a> I had, but it's not much faster. I did add dragging and zooming though, which was really difficult to get working properly. It still loses a lot of detail at higher zoom levels, but I'm not sure how to fix that without waiting like 30 seconds for it to render. I also made it where the escape iterations for each point also affect the hue, not just the brightness, which creates a really interesting effect.<br><b><i>(3/31/2022)</i></b> Added buttons for different fractal modes.<br><b><i>(3/31/2022)</i></b> I significantly improved runtime and performance by adding an update frame function instead of just rendering the fractal all at once, one time. It instead now passes down the screen, rendering as it goes. Each time it reaches the bottom of the screen, it does another pass with higher iterations. (Deeper zooms will take longer to render as they have a higher iteration escape period).<br><b><i>Update: (Later that day)</i></b> I made the rendering passes happen twice at once, moving from the center of the screen, and also added a setting to intensify the coloring, which means the intensity is multiplied based on the maximum iterations (as the higher the max iterations are, the less intense the colors typically are). I added it as an optional setting since sometimes it looks whitewashed with intense colors on.<br><b><i><mark>Actually finished! (6/3/2022)</mark> Moved to <a href = "mandelbrot-viewer.html" target = "_blank">mandelbrot-viewer.html</a>.</i></b></div>
 <hr><hr>
 <script>
   const ctx78 = canvas78.getContext("2d");
