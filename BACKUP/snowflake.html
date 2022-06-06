@@ -17,6 +17,10 @@
         font-weight: bold;
         border-radius: 7px;
       }
+      
+      #canvas {
+        background-color: black;
+      }
     </style>
   </head>
 <body>
@@ -36,6 +40,8 @@
   Turning on <span class = "setting">Pinch Snowflake Edges</span> will make particles toward the edge of the snowflake smaller, to create a more natural edge to the flake.
   <br><br>
   Clicking <span class = "setting">Randomize Geometry Settings</span> will randomize every setting, except the settings that are purely visual. Use this if you want a new set of settings with the same visual style.
+  <br><br>
+  <span id = "screensaver-txt"><a href = "snowflake-screensaver.html" target = "_blank">Check out the screensaver!</a> Every setting is randomized every 5 seconds, creating infinite unique designs.</span>
 </p>
 <hr>
 <div><b>Settings Presets:</b></div>
@@ -104,9 +110,9 @@
 <br>
 <div id = "fps-body">FPS: <span id = "fps-txt"></span></div>
 <br>
-<span id = "screensaver-txt"><a href = "snowflake-screensaver.html" target = "_blank">Check out the screensaver!</a> Every setting is randomized every 5 seconds, creating infinite unique designs.</span>
 <script src = "scripts/main.js"></script>
 <script>
+  let canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
   canvas.width = canvas.height = 1000;
   let canvasRunning = true;
