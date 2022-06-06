@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>**TITLE** ~ e4494s</title>
+  </head>
+<body>
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; **TITLE** &mdash;&mdash;</h1>
+<p id = "how-it-works">
+  <b><i>How It Works:</i></b> Describe how the thing works in here.
+  <br><br>
+  <span class = "setting">This Setting</span> does something.
+</p>
+<hr>
+<div><b>Settings Presets:</b></div>
+<div id = "presets-div"></div>
+<hr>
+<table>
+  <tr valign = "top">
+    <td>
+      <button onclick = "draw()">Redraw</button>
+      <br><br>
+      <canvas id = "canvas">If you're seeing this text, your browser does not support the canvas element.</canvas>
+      <br>
+      <button class = "download-canvas-btn" onclick = "downloadCanvas()">Download</button>
+    </td>
+    <td>
+      <div><b><u>Settings/Buttons Go Here:</u></b></div>
+    </td>
+  </tr>
+</table>
+<script src = "scripts/main.js"></script>
+<script>
+  let canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 1000;
+  
+  // Change all **TITLE** to actual title, don't forget this
+  
+  let presetsDiv = document.getElementById("presets-div");
+  
+  let presets = [
+    {
+      name: "Default"
+      // Put default settings here for resetting
+    }
+  ];
+  function loadPreset(n) {
+    let p = presets[n];
+    
+    // Set sliders to p's values
+    // Update settings
+  }
+  
+  function draw() {
+    // Draw the thing here
+  }
+  draw();
+  
+  function startStop() {
+    if (canvasRunning) {
+      canvasRunning = false;
+      startStopBtn.innerHTML = "Play";
+    }
+    else {
+      canvasRunning = true;
+      frame();
+      startStopBtn.innerHTML = "Pause";
+    }
+  }
+  
+  function downloadCanvas() {
+    let link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "**TITLE**.png";
+    link.click();
+  }
+  
+  for (let i = 1; i < presets.length; i++) {
+    let btn = document.createElement("button");
+    btn.innerHTML = presets[i].name;
+    btn.className = "preset-btn";
+    btn.onclick = () => loadPreset(i);
+    presetsDiv.appendChild(btn);
+  }
+</script>
+</body>
+</html>
