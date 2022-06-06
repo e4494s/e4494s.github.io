@@ -98,6 +98,9 @@
 <br><br>
 <div>Click on a profile picture to download it with its username.</div>
 <hr>
+<input type = "checkbox" id = "add-numbers-checkbox" oninput = "updateSettings()" CHECKED>
+<label for = "add-numbers-checkbox">Add Numbers to Username</label>
+<br><br>
 <button onclick = "rerollAll()">Reroll All</button>
 <button class = "download-canvas-btn" onclick = "downloadAll()">Download All</button>
 <div id = "canvas-div"></div>
@@ -106,6 +109,13 @@
   let numCanvases = 5;
   let C = [];
   let profilePictureResolution = 250;
+  
+  let addNumbers = true;
+  let addNumbersCheckbox = document.getElementById("add-numbers-checkbox");
+  
+  function updateSettings() {
+    addNumbers = addNumbersCheckbox.checked;
+  }
   
   let possibleUsernames = 0;
   
@@ -248,7 +258,7 @@
     return nouns[Math.floor(Math.random() * nouns.length)];
   }
   function randNums() {
-    return String(Math.floor(Math.random() * 10)) + String(Math.floor(Math.random() * 10));
+    return addNumbers ? String(Math.floor(Math.random() * 10)) + String(Math.floor(Math.random() * 10)) : "";
   }
   function randConnector() {
     return connectors[Math.floor(Math.random() * connectors.length)];
