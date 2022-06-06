@@ -7,6 +7,11 @@
     <link rel = "stylesheet" href = "stylesheets/main.css">
     <link rel = "stylesheet" href = "stylesheets/page.css">
     <title>Brownian Tree ~ e4494s</title>
+    <style>
+      #canvas {
+        background-color: black;
+      }
+    </style>
   </head>
 <body>
 <a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
@@ -89,6 +94,7 @@
 <div id = "fps-body">FPS: <span id = "fps-txt"></span></div>
 <script src = "scripts/main.js"></script>
 <script>
+  let canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
   canvas.width = canvas.height = 1000;
   let canvasRatio = canvas.width / 400;
