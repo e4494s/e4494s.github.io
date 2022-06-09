@@ -43,7 +43,7 @@
         width: 35px;
         height: 35px;
         opacity: 100%;
-        vertical-align: top;
+        vertical-align: middle;
       }
       .reroll-btn, .reroll-btn:hover, .reroll-btn:active {
         background-size: 100% 100%;
@@ -58,8 +58,11 @@
       
       .picture-div {
         display: inline-block;
-        vertical-align: top;
-        margin: 5px;
+        vertical-align: middle;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        margin-left: 10px;
+        margin-right: 10px;
         border: none;
         width: 40px;
       }
@@ -78,28 +81,120 @@
         display: inline-block;
         vertical-align: middle;
         margin-left: 5px;
+        font-size: 16px;
+        font-weight: bold;
+      }
+      
+      .example-td {
+        padding: 10px;
+      }
+      
+      .checkbox-label {
+        background-color: transparent;
+        margin: 0;
+        padding: 8px;
+        cursor: pointer;
+      }
+      .checkbox-label:hover {
+        background-color: #ffff80; /* Very light yellow */
+      }
+      .checkbox-label:active {
+        background-color: #ffff33; /* Light yellow */
       }
     </style>
   </head>
 <body onload = "init()">
 <a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
 <h1>&mdash;&mdash; Profile Generator &mdash;&mdash;</h1>
-<div>
-  Generate a group of random usernames and profile pictures, free to use as your profile anywhere.<br>Click these buttons by each profile to change what you want to reroll:
+<div id = "how-it-works">
+  <b><i>How It Works:</i></b> Generate a group of random usernames and profile pictures, free to use as your profile or username anywhere.<br>Click these buttons by each profile to change what you want to reroll on that one profile:
   <br><br>
-  <img class = "reroll-btn-example" src = "images/reroll-both-icon.png"> <span class = "reroll-btn-example-txt"><i>Reroll Picture <b><u>and</u></b> Username</i></span>
+  <table>
+    <tr>
+      <td class = "example-td">
+        <img class = "reroll-btn-example" src = "images/reroll-both-icon.png"> <span class = "reroll-btn-example-txt"><i>Reroll Picture <b><u>and</u></b> Username</i></span>
+      </td>
+    </tr>
+    <tr>
+      <td class = "example-td">
+        <img class = "reroll-btn-example" src = "images/reroll-picture-icon.png"> <span class = "reroll-btn-example-txt"><i>Reroll Profile Picture</i></span>
+      </td>
+      <td class = "example-td">
+        <img class = "reroll-btn-example" src = "images/similar-picture-icon.png"> <span class = "reroll-btn-example-txt"><i>Reroll <b><u>Similar</u></b> Profile Picture</i></span>
+      </td>
+    </tr>
+    <tr>
+      <td class = "example-td">
+        <img class = "reroll-btn-example" src = "images/reroll-username-icon.png"> <span class = "reroll-btn-example-txt"><i>Reroll Username</i></span>
+      </td>
+      <td class = "example-td">
+        <img class = "reroll-btn-example" src = "images/similar-username-icon.png"> <span class = "reroll-btn-example-txt"><i>Reroll <b><u>Similar</u></b> Username</i></span>
+      </td>
+    </tr>
+  </table>
   <br><br>
-  <img class = "reroll-btn-example" src = "images/reroll-picture-icon.png"> <span class = "reroll-btn-example-txt"><i>Reroll Profile Picture</i></span>
+  Click on a profile picture to download it with its username.
   <br><br>
-  <img class = "reroll-btn-example" src = "images/similar-picture-icon.png"> <span class = "reroll-btn-example-txt"><i>Reroll <b><u>Similar</u></b> Profile Picture</i></span>
+  Selecting <span class = "setting">Add Numbers to Name</span> will add 2 random digits to the end of every username.
   <br><br>
-  <img class = "reroll-btn-example" src = "images/reroll-username-icon.png"> <span class = "reroll-btn-example-txt"><i>Reroll Username</i></span>
+  Selecting <span class = "setting">Add Prefix to Name</span> will add a prefix like "The" or "Very" to the beginning of every username.
+  <br><br>
+  Select different <span class = "setting">Username Types</span> to choose what different styles each username can be in.
 </div>
-<br><br>
-<div>Click on a profile picture to download it with its username.</div>
 <hr>
-<input type = "checkbox" id = "add-numbers-checkbox" oninput = "updateSettings()" CHECKED>
-<label for = "add-numbers-checkbox">Add Numbers to Username</label>
+<br>
+<table>
+  <tr>
+    <td style = "padding: 15px" valign = "top">
+      <div style = "font-size: 15px"><b><u>Username Modifiers:</u></b></div>
+      <br>
+      <label for = "add-numbers-checkbox" class = "checkbox-label">
+        <input type = "checkbox" id = "add-numbers-checkbox" oninput = "updateSettings(this, true)" CHECKED>
+        <span>Add Numbers to Name</span>
+      </label>
+      <br><br>
+      <label for = "add-prefix-checkbox" class = "checkbox-label">
+        <input type = "checkbox" id = "add-prefix-checkbox" oninput = "updateSettings(this, true)" CHECKED>
+        <span>Add Prefix to Name</span>
+      </label>
+      <br><br>
+      <div><i>(The, Very, Really, etc.)</i></div>
+    </td>
+    <td style = "padding: 15px" valign = "top">
+      <div style = "font-size: 15px"><b><u>Username Types:</u></b></div>
+      <br>
+      <label for = "mode-0-checkbox" class = "checkbox-label">
+        <input type = "checkbox" id = "mode-0-checkbox" oninput = "updateSettings(this, false)" CHECKED>
+        <span><u>Adjective</u> + <u>Noun</u> <i>(Enchanted_Pumpkin)</i></span>
+      </label>
+      <br><br>
+      <label for = "mode-1-checkbox" class = "checkbox-label">
+        <input type = "checkbox" id = "mode-1-checkbox" oninput = "updateSettings(this, false)" CHECKED>
+        <span><u>Noun</u> + <u>Noun</u> <i>(Gravy_Butterfly)</i></span>
+      </label>
+      <br><br>
+      <label for = "mode-2-checkbox" class = "checkbox-label">
+        <input type = "checkbox" id = "mode-2-checkbox" oninput = "updateSettings(this, false)" CHECKED>
+        <span><u>Noun</u> of <u>Noun</u> <i>(Tortoise_Of_Fear)</i></span>
+      </label>
+      <br><br>
+      <label for = "mode-3-checkbox" class = "checkbox-label">
+        <input type = "checkbox" id = "mode-3-checkbox" oninput = "updateSettings(this, false)" CHECKED>
+        <span><u>Title</u> + <u>Noun/Adjective</u> <i>(Dr_Trumpet)</i></span>
+      </label>
+      <br><br>
+      <label for = "mode-4-checkbox" class = "checkbox-label">
+        <input type = "checkbox" id = "mode-4-checkbox" oninput = "updateSettings(this, false)" CHECKED>
+        <span><u>Noun</u> + <u>Transitive Verb</u> <i>(Biscuit_Summoner)</i></span>
+      </label>
+      <br><br>
+      <label for = "mode-5-checkbox" class = "checkbox-label">
+        <input type = "checkbox" id = "mode-5-checkbox" oninput = "updateSettings(this, false)" CHECKED>
+        <span><u>Gibberish Name</u> the <u>Adjective/Transitive Verb</u> <i>(Throg_The_Hopeful)</i></span>
+      </label>
+    </td>
+  </tr>
+</table>
 <br><br>
 <button onclick = "rerollAll()">Reroll All</button>
 <button class = "download-canvas-btn" onclick = "downloadAll()">Download All</button>
@@ -111,31 +206,112 @@
   let profilePictureResolution = 250;
   
   let addNumbers = true;
-  let addNumbersCheckbox = document.getElementById("add-numbers-checkbox");
+  let addPrefix = true;
   
-  function updateSettings() {
+  let addNumbersCheckbox = document.getElementById("add-numbers-checkbox");
+  let addPrefixCheckbox = document.getElementById("add-prefix-checkbox");
+  let mode0Checkbox = document.getElementById("mode-0-checkbox");
+  let mode1Checkbox = document.getElementById("mode-1-checkbox");
+  let mode2Checkbox = document.getElementById("mode-2-checkbox");
+  let mode3Checkbox = document.getElementById("mode-3-checkbox");
+  let mode4Checkbox = document.getElementById("mode-4-checkbox");
+  let mode5Checkbox = document.getElementById("mode-5-checkbox");
+  
+  let mode0 = true;
+  let mode1 = true;
+  let mode2 = true;
+  let mode3 = true;
+  let mode4 = true;
+  let mode5 = true;
+  
+  function updateSettings(caller, updateNames) {
     addNumbers = addNumbersCheckbox.checked;
+    addPrefix = addPrefixCheckbox.checked;
+    
+    mode0 = mode0Checkbox.checked;
+    mode1 = mode1Checkbox.checked;
+    mode2 = mode2Checkbox.checked;
+    mode3 = mode3Checkbox.checked;
+    mode4 = mode4Checkbox.checked;
+    mode5 = mode5Checkbox.checked;
+    
+    if (!mode0 && !mode1 && !mode2 && !mode3 && !mode4 && !mode5) {
+      caller.checked = true;
+      updateSettings(caller);
+    }
+    
+    if (updateNames) updateAllNames();
   }
   
   let possibleUsernames = 0;
+  let possibleMode0 = 0;
+  let possibleMode1 = 0;
+  let possibleMode2 = 0;
+  let possibleMode3 = 0;
+  let possibleMode4 = 0;
+  let possibleMode5 = 0;
   
   let canvasDiv = document.getElementById("canvas-div");
   
   function init() {
-    possibleUsernames = ((articles.length + 1) * connectors.length * adjectives.length * nouns.length * 300) + (nouns.length * nouns.length * connectors.length * 600);
+    // Get rough estimates of how many possible usernames there are
+    // I know this isn't perfectly accurate, but it'll be in the right order of magnitude to give a sense of how many names there are
+    // (it doesn't account for failsafes like not allowing THESOURDOG, only THE-SOUR-DOG, etc., but it would be very overcomplicated to account for that, if it's even possible without going case by case)
+    
+    possibleMode0 = (articles.length + 1) * connectors.length * adjectives.length * countableNouns.length * 300;
+    possibleMode1 = countableNouns.length * countableNouns.length * connectors.length * 600;
+    possibleMode2 = countableNouns.length * uncountableNouns.length * connectors.length * 600;
+    possibleMode3 = titles.length * nounsAndAdjectives.length * connectors.length * 300;
+    possibleMode4 = countableNouns.length * transitiveVerbs.length * connectors.length * 600;
+    possibleMode5 = (vowels.length + digraphs.length + endDigraphs.length) * (anywhereConsonants.length + nonEndConsonants.length + nonStartConsonants.length) * adjectivesAndTransitiveVerbs.length * 300;
+    
+    possibleUsernames = possibleMode0 + possibleMode1 + possibleMode2 + possibleMode3 + possibleMode4 + possibleMode5;
+    console.log("Total possible usernames: " + possibleUsernames.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
     /*
+    MODE 0:
     Possible articles (including no article), times
     possible connectors (including no connector), times
     possible adjectives, times
-    possible nouns, times
+    possible countable nouns, times
     possible text cases (3), times
     possible ending digits (100)
-    PLUS
-    possible articles (only "" and "the"), times
-    possible nouns, times
-    possible nouns, times
+    
+    MODE 1:
+    possible articles ("" and "the") (2), times
+    possible countable nouns, times
+    possible countable nouns, times
     possible connectors (including no connector), times
     possible text cases (3), times
+    possible ending digits (100)
+    
+    MODE 2:
+    possible articles ("" and "the") (2), times
+    possible countable nouns, times
+    possible uncountable nouns, times
+    possible connectors (including no connector), times
+    possible text cases (3), times
+    possible ending digits (100)
+    
+    MODE 3:
+    possible titles, times
+    possible nouns AND adjectives, times
+    possible connectors (including no connector), times
+    possible text cases (3), times
+    possible ending digits (100)
+    
+    MODE 4:
+    possible articles ("" and "the") (2), times
+    possible countable nouns, times
+    possible transitive verbs, times
+    possible connectors (including no connector), times
+    possible text cases (3), times
+    possible ending digits (100)
+    
+    MODE 5: (this OVERWHELMINGLY underestimates how many possible gibberish names there are, but I didn't know how to accurately estimate it without being like 100x off, so I went way under intentionally)
+    possible vowels (including digraphs like "ai"), times
+    possible consonants (including clusters like "str"), times
+    possible adjectives and transitive verbs,
+    times possible text cases (3), times
     possible ending digits (100)
     */
     
@@ -170,13 +346,6 @@
       let btnDiv = document.createElement("div");
       btnDiv.style = "display: inline-block; margin: auto; padding: 5px; vertical-align: middle";
       
-      let btn3 = document.createElement("button");
-      btn3.title = "Reroll Picture and Username";
-      btn3.className = "reroll-btn";
-      btn3.onclick = () => rerollBoth(obj);
-      btn3.style.backgroundImage = "url('images/reroll-both-icon.png')";
-      btnDiv.appendChild(btn3);
-      
       let pictureDiv = document.createElement("div");
       pictureDiv.className = "picture-div";
       
@@ -198,12 +367,34 @@
       
       btnDiv.appendChild(pictureDiv);
       
+      let pictureDiv2 = document.createElement("div");
+      pictureDiv2.className = "picture-div";
+      
       let btn1 = document.createElement("button");
       btn1.title = "Reroll Username";
       btn1.className = "reroll-btn";
+      btn1.style.margin = "0";
       btn1.onclick = () => rerollUsername(obj);
       btn1.style.backgroundImage = "url('images/reroll-username-icon.png')";
-      btnDiv.appendChild(btn1);
+      pictureDiv2.appendChild(btn1);
+      pictureDiv2.appendChild(document.createElement("br"));
+      let btn5 = document.createElement("button");
+      btn5.title = "Reroll Similar Username";
+      btn5.className = "reroll-btn";
+      btn5.style.margin = "0";
+      btn5.onclick = () => rerollSimilarUsername(obj);
+      btn5.style.backgroundImage = "url('images/similar-username-icon.png')";
+      pictureDiv2.appendChild(btn5);
+      
+      btnDiv.appendChild(pictureDiv2);
+      
+      let btn3 = document.createElement("button");
+      btn3.title = "Reroll Picture and Username";
+      btn3.className = "reroll-btn";
+      btn3.style.width = btn3.style.height = "45px";
+      btn3.onclick = () => rerollBoth(obj);
+      btn3.style.backgroundImage = "url('images/reroll-both-icon.png')";
+      btnDiv.appendChild(btn3);
       
       td2.appendChild(btnDiv);
       
@@ -238,30 +429,147 @@
   
   let adjectives = [];
   let adjectivesA = ["happy", "sad", "ecstatic", "depressed", "lonely", "outgoing", "fuzzy", "fluffy", "shiny", "red", "yellow", "green", "blue", "purple", "indigo", "black", "white", "gray", "cyan", "skinny", "fat", "tall", "short", "beautiful", "adorable", "stunning", "pointy", "sharp", "edible", "incredible", "amazing", "weird", "smart", "fancy", "loud", "quiet", "silent", "soaked", "squishy", "exterior", "interior", "flying", "dead", "undead", "young", "old", "spiky", "cold", "hot", "frozen", "melted", "burnt", "broken", "lost", "brittle", "crazy", "insane", "unstable", "stable", "stealthy", "obvious", "common", "uncommon", "rare", "epic", "legendary", "mythical", "first", "second", "third", "fourth", "fifth", "unbelievable", "ridiculous", "ancient", "modern", "contemporary", "rusty", "rusted", "rotten", "shattered", "dusty", "forgotten", "worn", "smiling", "laughing", "crying", "smirking", "gasping", "scared", "brave", "cowardly", "inventive", "petty", "quick", "speedy", "slow", "unstoppable", "charged", "drained", "jumpy", "clumsy", "massive", "big", "huge", "tiny", "little", "small", "average", "extraordinary", "ordinary", "blossoming", "blooming", "sunny", "cloudy", "dry", "wet", "aquatic", "friendly", "accelerated", "boring", "exciting", "flaming", "icy", "earthen", "muddy", "salty", "sweet", "sour", "bitter", "smooth", "rough", "unexpected", "cool", "awesome", "lame", "blind", "deaf", "mute", "aggressive", "calm", "confident", "overconfident", "insecure", "slippery", "slimy", "sticky", "picky", "bratty", "chilly", "sideways", "clean", "soapy", "boiling", "foreign", "torn", "scratchy", "sparky", "circular", "rectangular", "hexagonal", "pentagonal", "elliptic", "round", "square", "triangular", "spherical", "cubic", "odorless", "connected", "disconnected", "fizzy", "carbonated", "sugary", "caffeinated", "soft", "baby", "elderly", "spinning", "rotating", "revolving", "disposable", "timed", "obscure", "fiery", "flat", "artistic", "famous", "infamous", "invisible", "visible", "stuffed", "sandy", "carpeted", "empty", "abandoned", "derelict", "deserted", "overloaded", "nautical", "alluring", "attractive", "merciful", "gracious", "kind", "loving", "magnificent", "malevolent", "evil", "dark", "despicable", "popular", "unpopular", "distant", "safe", "dangerous", "unknown", "anonymous", "faulty", "operational", "rich", "poor", "wealthy", "clever", "fragile", "sturdy", "funny", "funky", "musical", "strange", "sneaky", "kingly", "royal", "stone", "gold", "silver", "bronze", "metallic", "nostalgic", "sickly", "healthy", "eerie", "mysterious", "electric", "heavy", "light", "disguised", "hidden", "covert", "armed", "deadly", "fatal", "toxic", "poisonous", "venomous", "carnivorous", "pacifist", "furious", "inferior", "superior", "glossy", "savory", "unamused", "immovable", "constant", "comatose", "brainy", "handsome", "scalding", "pretty", "cute", "charming", "rude", "mean", "harsh", "extroverted", "introverted", "charismatic", "hostile", "comfortable", "uncomfortable", "cozy", "snuggly", "drunk", "drunken", "high", "low", "large", "medium", "beloved", "respectable", "respected", "influential", "efficient", "inefficient", "effective", "ineffective", "bothersome", "trashy", "rejected", "desolate", "hopeless", "hopeful", "sarcastic", "ironic", "competent", "incompetent", "sleepy", "sleeping", "unconscious", "lucid", "joyous", "glorious", "exalted", "cyclic", "advanced", "backwards", "honest", "tricky", "lying", "last", "final", "ultimate", "highest", "lowest", "glorified", "stupendous", "bony", "lean", "slim", "stout", "severe", "strict", "curvy", "narrow", "obtuse", "dense", "obese", "giant", "puny", "wide", "deep", "odd", "shy", "ill", "tan", "new", "fun", "neat", "foul", "fine", "damp", "wary", "nice", "dull", "numb", "bold", "dyed", "grim", "nosy", "easy", "pale", "icky", "ripe", "vile", "buff", "tough", "strong", "muscular", "fond", "open", "weak", "late", "sore", "edgy", "unfunny", "mild", "tidy", "hurt", "injured", "sprained", "fractured", "wise", "true", "boxy", "fake"];
-  let adjectivesB = ["tame", "docile", "real", "full", "lacy", "firm", "dear", "racy", "glad", "drab", "mini", "used", "zany", "found", "faithful", "witty", "silly", "vivid", "vague", "specific", "proud", "dizzy", "timid", "scary", "super", "local", "cruel", "shaky", "stern", "civil", "rapid", "lumpy", "pagan", "arrogant", "bloody", "creepy", "crowded", "defiant", "petrified", "fossilized", "doubtful", "fair", "fierce", "gentle", "jolly", "misty", "nutty", "plain", "prickly", "puzzled", "splendid", "spotless", "talented", "tender", "sensitive", "thoughtful", "troubled", "uptight", "vast", "omniscent", "omnipotent", "holy", "divine", "righteous", "wicked", "zealous", "shrunken", "cheerful", "horrific", "athletic", "blinding", "obedient", "abstract", "personal", "generous", "textured", "sensible", "negative", "positive", "imaginary", "critical", "haunting", "sinister", "colorful", "rainbow", "muted", "reckless", "thankful", "detailed", "animated", "cartoon", "normal", "abnormal", "forceful", "barbaric", "modest", "helpless", "handheld", "hesitant", "likeable", "resolute", "secret", "cautious", "glowing", "romantic", "gorgeous", "wasteful", "stretchy", "special", "quilted", "ghostly", "origami", "paper", "stitched", "starved", "trained", "masterful", "wishful", "stained", "corrupt", "shrimpy", "durable", "magical", "enchanted", "pensive", "spotted", "striped", "blessed", "compact", "beastly", "evasive", "ominous", "angelic", "extreme", "festive", "serious", "panicky", "twisted", "violent", "eternal", "missing", "immortal", "mortal", "godly", "rounded", "classic", "crimson", "shaded", "sketchy", "sincere", "stylish", "deadpan", "grizzly", "capable", "revered", "spoiled", "crooked", "demonic", "careful", "unusual", "playful", "idiotic", "ungodly", "unholy", "mutated", "uncanny", "jealous", "moonlit", "immense", "folded", "handmade", "homemade", "crafted", "crafty", "sly", "drugged", "ghastly", "melodic", "guarded", "painful", "elegant", "spastic", "dynamic", "frantic", "explosive", "volatile", "thirsty", "hungry", "expert", "quirky", "social", "luxury", "sporty", "single", "chubby", "unique", "custom", "limber", "hybrid", "iconic", "moronic", "solemn", "psycho", "dreamy", "velvet", "trendy", "savage", "rugged", "robust", "wobbly", "buried", "lovely", "pink", "exotic", "floaty", "ashy", "gifted", "mellow", "serene", "lively", "candid", "mature", "unsure", "greasy", "floral", "banded", "greedy", "quaint", "cheesy", "somber", "hushed", "excellent", "mashed", "smushed", "squashed", "winged", "camo", "minty", "fresh", "watchful", "sluggish", "soupy"];
+  let adjectivesB = ["tame", "docile", "real", "full", "lacy", "firm", "dear", "racy", "glad", "drab", "mini", "used", "zany", "found", "faithful", "witty", "silly", "vivid", "vague", "specific", "proud", "dizzy", "timid", "scary", "super", "local", "cruel", "shaky", "stern", "civil", "rapid", "lumpy", "pagan", "arrogant", "bloody", "creepy", "crowded", "defiant", "petrified", "fossilized", "doubtful", "fair", "fierce", "gentle", "jolly", "misty", "nutty", "plain", "prickly", "puzzled", "splendid", "spotless", "talented", "tender", "sensitive", "thoughtful", "troubled", "uptight", "vast", "omniscent", "omnipotent", "holy", "divine", "righteous", "wicked", "zealous", "shrunken", "cheerful", "horrific", "athletic", "blinding", "obedient", "abstract", "personal", "generous", "textured", "sensible", "negative", "positive", "imaginary", "critical", "haunting", "sinister", "colorful", "rainbow", "muted", "reckless", "thankful", "detailed", "animated", "cartoon", "normal", "abnormal", "forceful", "barbaric", "modest", "helpless", "handheld", "hesitant", "likeable", "resolute", "secret", "cautious", "glowing", "romantic", "gorgeous", "wasteful", "stretchy", "special", "quilted", "ghostly", "origami", "paper", "stitched", "starved", "trained", "masterful", "wishful", "stained", "corrupt", "shrimpy", "durable", "magical", "enchanted", "pensive", "spotted", "striped", "blessed", "compact", "beastly", "evasive", "ominous", "angelic", "extreme", "festive", "serious", "panicky", "twisted", "violent", "eternal", "missing", "immortal", "mortal", "godly", "rounded", "classic", "crimson", "shaded", "sketchy", "sincere", "stylish", "deadpan", "grizzly", "capable", "revered", "spoiled", "crooked", "demonic", "careful", "unusual", "playful", "idiotic", "ungodly", "unholy", "mutated", "uncanny", "jealous", "moonlit", "immense", "folded", "handmade", "homemade", "crafted", "crafty", "sly", "drugged", "ghastly", "melodic", "guarded", "painful", "elegant", "spastic", "dynamic", "frantic", "explosive", "volatile", "thirsty", "hungry", "expert", "quirky", "social", "sporty", "single", "chubby", "unique", "custom", "limber", "hybrid", "iconic", "moronic", "solemn", "psycho", "dreamy", "velvet", "trendy", "savage", "rugged", "robust", "wobbly", "buried", "lovely", "pink", "exotic", "floaty", "ashy", "gifted", "mellow", "serene", "lively", "candid", "mature", "unsure", "greasy", "floral", "banded", "greedy", "quaint", "cheesy", "somber", "hushed", "excellent", "mashed", "smushed", "squashed", "winged", "camo", "minty", "fresh", "watchful", "sluggish", "soupy", "great", "mighty", "fearsome", ];
   adjectives = adjectivesA.concat(adjectivesB);
   
-  let nouns = [];
-  let nounsA = ["chair", "table", "duck", "dog", "cat", "person", "human", "napkin", "donut", "burrito", "taco", "plate", "bone", "pants", "tuxedo", "pizza", "bird", "eagle", "bottle", "horse", "tree", "bush", "plant", "animal", "grass", "shrub", "galaxy", "planet", "moon", "sun", "curtain", "carpet", "pole", "candy", "lollipop", "chocolate", "butter", "peanut", "almond", "pistachio", "walnut", "cashew", "fruit", "apple", "lemon", "pear", "avocado", "guacamole", "cereal", "hat", "cowboy", "lawyer", "plum", "peach", "asparagus", "pepper", "carrot", "cake", "cupcake", "brownie", "cookie", "beef", "pork", "meat", "student", "teacher", "flag", "paper", "laptop", "computer", "keyboard", "typewriter", "architect", "engineer", "scientist", "chemist", "biologist", "business", "phone", "bench", "novel", "calzone", "restaurant", "cannon", "fire", "ice", "water", "sniper", "soldier", "gun", "bullet", "eyeball", "nose", "ear", "arm", "leg", "hand", "finger", "elbow", "shoulder", "knee", "foot", "toe", "door", "window", "doorknob", "thing", "item", "character", "pencil", "pen", "marker", "store", "wallet", "money", "glasses", "hair", "food", "drawer", "bread", "loaf", "juice", "bowl", "floor", "wall", "fence", "principal", "astronaut", "astronomer", "astrologer", "artist", "plumber", "welder", "diver", "swimmer", "fish", "shark", "dolphin", "deer", "buck", "platypus", "bear", "parrot", "dynamite", "bomb", "crown", "king", "queen", "prince", "princess", "assistant", "merchant", "pirate", "ninja", "samurai", "sword", "crossbow", "arrow", "letter", "axe", "mace", "spear", "shield", "fortress", "castle", "house", "building", "kingdom", "catapult", "trebuchet", "loser", "winner", "witch", "broom", "monster", "alien", "sailor", "boat", "ship", "warrior", "nation", "country", "state", "ocean", "lake", "stream", "river", "pond", "puddle", "storm", "lightning", "mountain", "hill", "valley", "dragon", "beast", "key", "fridge", "freezer", "microwave", "oven", "toaster", "shower", "bathtub", "cord", "lamp", "cactus", "flower", "stem", "leaf", "acorn", "seed", "crab", "seashell", "shell", "tail", "car", "truck", "minivan", "scooter", "tricycle", "bicycle", "skateboard", "sandal", "clover", "rug", "cube", "square", "rectangle", "triangle", "pyramid", "sphere", "circle", "hexagon", "pentagon", "dollar", "chip", "potato", "fry", "kid", "child", "adult", "teen", "teenager", "youngling", "senior", "junior", "sophomore", "freshman", "pea", "couch", "armchair", "board", "plank", "scythe", "sunglasses", "disguise", "pearl", "eyepatch", "jeans", "blanket", "quilt", "bonfire", "campfire", "ant", "anteater", "wasp", "bee", "butterfly", "moth", "hornet", "ketchup", "mustard", "mayo", "burger", "scarecrow", "crow", "raven", "poet", "dreamer", "girl", "boy", "guy", "dude", "chick", "man", "woman", "lady", "female", "male", "month", "week", "day", "hour", "minute", "year", "decade", "century", "life", "coffee", "latte", "steam", "beard", "puppy", "kitten", "backpack", "school", "eraser", "caterpillar", "tissue", "towel", "beetle", "tooth", "brush", "assassin", "killer", "murderer", "staircase", "hero", "savior", "dictator", "president", "politician", "word", "superhero", "villain", "pot", "toy", "dress", "tie", "wig", "pain", "death", "card", "candle", "rock", "stone", "pebble", "boulder", "cliff", "tower", "panda", "worm", "snake", "cobra", "harmonica", "piano", "guitar", "drum", "flute", "kazoo", "brick", "fireplace", "cork", "shard", "slice", "tuba", "trumpet", "saxophone", "disciple", "apostle", "follower", "leader", "chief", "commander", "captain", "colonel", "hunter", "bandit", "thief", "burglar", "robot", "android", "machine", "golem", "bot", "mercenary", "vigilante", "fork"];
-  let nounsB = ["knife", "chopstick", "belt", "band", "mug", "cup", "tea", "bag", "box", "podium", "feather", "talon", "quill", "blaster", "tiger", "lion", "prodigy", "shelter", "foundation", "corn", "seafood", "pastor", "preacher", "blood", "creep", "weirdo", "youth", "nomad", "vagrant", "titan", "god", "goddess", "demigod", "puzzle", "piece", "cardboard", "image", "picture", "camera", "film", "movie", "show", "projector", "cartoon", "friend", "girlfriend", "boyfriend", "wife", "husband", "spouse", "brother", "sister", "cousin", "aunt", "uncle", "grandpa", "grandma", "grandfather", "grandmother", "son", "daughter", "nephew", "niece", "origami", "rookie", "pro", "master", "apprentice", "boss", "crook", "demon", "angel", "mutation", "psycho", "gardener", "wolf", "gator", "cricket", "frog", "toad", "tadpole", "eel", "ostrich", "jacket", "coat", "block", "pie", "jam", "sea", "tub", "bath", "fly", "law", "owl", "eye", "map", "cap", "air", "bun", "pet", "ponytail", "pony", "mother", "father", "oil", "pig", "sky", "cinnamon", "wax", "tax", "paycheck", "lamb", "vest", "chin", "bowtie", "turtle", "tortoise", "yarn", "desk", "note", "bulb", "comb", "tape", "nail", "wine", "pump", "knot", "rice", "sushi", "ham", "hamburger", "pasta", "spaghetti", "locker", "gown", "haircut", "gravy", "biscuit", "oat", "snack", "salmon", "cod", "catfish", "chicken", "roll", "squash", "pumpkin", "cucumber", "pickle", "tile", "whip", "wire", "wing", "hood", "club", "room", "mouse", "dime", "bull", "quarter", "nickel", "penny", "coin", "camp", "sink", "glue", "sand", "coal", "doll", "edge", "mint", "actor", "actress", "stew", "muffin", "pipe", "wish", "piper", "pianist", "guitarist", "conductor", "composer", "kite", "sugar", "salad", "ranch", "cream", "scarf", "honey", "error", "judge", "witness", "shirt", "paint", "crowd", "laser", "dagger", "blade", "katana", "jewel", "hyena", "guide", "grain", "voice", "coach", "player", "thumb", "noise", "field", "straw", "toast", "crime", "sandwich", "crush", "berry", "watch", "snail", "sponge", "wrench", "turkey", "feast", "meal", "breakfast", "lunch", "dinner", "supper", "brunch", "circus", "engine", "poison", "memory", "battle", "basket", "monkey", "marble", "cow", "star", "milk", "bean", "tank", "wind", "rifle", "island", "cloud", "egg", "pillow", "fang", "soup", "claw", "fan", "medicine", "pill", "lid", "grill", "skillet", "pancake", "waffle", "syrup", "batter", "crowbar", "syringe", "lizard", "crystal", "tractor", "rabbit", "bunny", "hare", "shovel", "spade", "heart", "brain", "kidney", "liver", "disease", "orange", "notepad", "lasagna", "balloon", "ball", "baseball", "basketball", "football", "visitor", "shotgun", "popcorn", "fireman", "cop", "gorilla", "ladybug", "whistle", "mailbox", "library", "kitchen", "kennel", "cage", "mirror", "corpse", "goblin", "zombie", "wizard", "warlock", "potion", "pistol", "harbor", "anchor", "rope", "chain", "yogurt", "bakery", "painting", "plane", "writer", "nurse", "record", "thread", "harp", "melody", "throat", "barrel", "train", "canvas", "button", "crayon", "cobweb", "bubble", "kettle", "muscle", "weight", "log", "doctor", "skeleton", "skull", "pocket", "bridge", "violin", "bat", "grenade", "rocket", "missile", "torpedo", "nuke"];
-  nouns = nounsA.concat(nounsB);
+  let countableNouns = [];
+  let countableNounsA = ["chair", "table", "duck", "dog", "cat", "person", "human", "napkin", "donut", "burrito", "taco", "plate", "bone", "pants", "tuxedo", "pizza", "bird", "eagle", "bottle", "horse", "tree", "bush", "plant", "animal", "grass", "shrub", "galaxy", "planet", "moon", "sun", "curtain", "carpet", "pole", "candy", "lollipop", "chocolate", "butter", "peanut", "almond", "pistachio", "walnut", "cashew", "fruit", "apple", "lemon", "pear", "avocado", "guacamole", "cereal", "hat", "cowboy", "lawyer", "plum", "peach", "asparagus", "pepper", "carrot", "cake", "cupcake", "brownie", "cookie", "beef", "pork", "meat", "student", "teacher", "flag", "paper", "laptop", "computer", "keyboard", "typewriter", "architect", "engineer", "scientist", "chemist", "biologist", "business", "phone", "bench", "novel", "calzone", "restaurant", "cannon", "water", "sniper", "soldier", "gun", "bullet", "eyeball", "nose", "ear", "arm", "leg", "hand", "finger", "elbow", "shoulder", "knee", "foot", "toe", "door", "window", "doorknob", "thing", "item", "character", "pencil", "pen", "marker", "store", "wallet", "money", "glasses", "hair", "food", "drawer", "bread", "loaf", "juice", "bowl", "floor", "wall", "fence", "principal", "astronaut", "astronomer", "astrologer", "artist", "plumber", "welder", "diver", "swimmer", "fish", "shark", "dolphin", "deer", "buck", "platypus", "bear", "parrot", "dynamite", "bomb", "crown", "king", "queen", "prince", "princess", "assistant", "merchant", "pirate", "ninja", "samurai", "sword", "crossbow", "arrow", "letter", "axe", "mace", "spear", "shield", "fortress", "castle", "house", "building", "kingdom", "catapult", "trebuchet", "loser", "winner", "witch", "broom", "monster", "alien", "sailor", "boat", "ship", "warrior", "nation", "country", "state", "ocean", "lake", "stream", "river", "pond", "puddle", "storm", "lightning", "mountain", "hill", "valley", "dragon", "beast", "key", "fridge", "freezer", "microwave", "oven", "toaster", "shower", "bathtub", "cord", "lamp", "cactus", "flower", "stem", "leaf", "acorn", "seed", "crab", "seashell", "shell", "tail", "car", "truck", "minivan", "scooter", "tricycle", "bicycle", "skateboard", "sandal", "clover", "rug", "cube", "square", "rectangle", "triangle", "pyramid", "sphere", "circle", "hexagon", "pentagon", "dollar", "chip", "potato", "fry", "kid", "child", "adult", "teen", "teenager", "youngling", "senior", "junior", "sophomore", "freshman", "pea", "couch", "armchair", "board", "plank", "scythe", "sunglasses", "disguise", "pearl", "eyepatch", "jeans", "blanket", "quilt", "bonfire", "campfire", "ant", "anteater", "wasp", "bee", "butterfly", "moth", "hornet", "ketchup", "mustard", "mayo", "burger", "scarecrow", "crow", "raven", "poet", "dreamer", "girl", "boy", "guy", "dude", "chick", "man", "woman", "lady", "female", "male", "month", "week", "day", "hour", "minute", "year", "decade", "century", "coffee", "latte", "steam", "beard", "puppy", "kitten", "backpack", "school", "eraser", "caterpillar", "tissue", "towel", "beetle", "tooth", "brush", "assassin", "killer", "murderer", "staircase", "hero", "savior", "dictator", "president", "politician", "word", "superhero", "villain", "pot", "toy", "dress", "tie", "wig", "card", "candle", "rock", "stone", "pebble", "boulder", "cliff", "tower", "panda", "worm", "snake", "cobra", "harmonica", "piano", "guitar", "drum", "flute", "kazoo", "brick", "fireplace", "cork", "shard", "slice", "tuba", "trumpet", "saxophone", "disciple", "apostle", "follower", "leader", "chief", "commander", "captain", "colonel", "hunter", "bandit", "thief", "burglar", "robot", "android", "machine", "golem", "bot", "mercenary", "vigilante", "fork"];
+  let countableNounsB = ["knife", "chopstick", "belt", "band", "mug", "cup", "tea", "bag", "box", "podium", "feather", "talon", "quill", "blaster", "tiger", "lion", "prodigy", "shelter", "foundation", "corn", "seafood", "pastor", "preacher", "blood", "creep", "weirdo", "youth", "nomad", "vagrant", "titan", "god", "goddess", "demigod", "puzzle", "piece", "cardboard", "image", "picture", "camera", "film", "movie", "show", "projector", "cartoon", "friend", "girlfriend", "boyfriend", "wife", "husband", "spouse", "brother", "sister", "cousin", "aunt", "uncle", "grandpa", "grandma", "grandfather", "grandmother", "son", "daughter", "nephew", "niece", "origami", "rookie", "pro", "master", "apprentice", "boss", "crook", "demon", "angel", "mutation", "psycho", "gardener", "wolf", "gator", "cricket", "frog", "toad", "tadpole", "eel", "ostrich", "jacket", "coat", "block", "pie", "jam", "sea", "tub", "bath", "fly", "owl", "eye", "map", "cap", "air", "bun", "pet", "ponytail", "pony", "mother", "father", "oil", "pig", "sky", "cinnamon", "wax", "tax", "paycheck", "lamb", "vest", "chin", "bowtie", "turtle", "tortoise", "yarn", "desk", "note", "bulb", "comb", "tape", "nail", "wine", "pump", "knot", "rice", "sushi", "ham", "hamburger", "pasta", "spaghetti", "locker", "gown", "haircut", "gravy", "biscuit", "oat", "snack", "salmon", "cod", "catfish", "chicken", "roll", "squash", "pumpkin", "cucumber", "pickle", "tile", "whip", "wire", "wing", "hood", "club", "room", "mouse", "dime", "bull", "quarter", "nickel", "penny", "coin", "camp", "sink", "glue", "sand", "coal", "doll", "edge", "mint", "actor", "actress", "stew", "muffin", "pipe", "wish", "piper", "pianist", "guitarist", "conductor", "composer", "kite", "sugar", "salad", "ranch", "cream", "scarf", "honey", "error", "judge", "witness", "shirt", "paint", "crowd", "laser", "dagger", "blade", "katana", "jewel", "hyena", "guide", "grain", "voice", "coach", "player", "thumb", "noise", "field", "straw", "toast", "sandwich", "crush", "berry", "watch", "snail", "sponge", "wrench", "turkey", "feast", "meal", "breakfast", "lunch", "dinner", "supper", "brunch", "circus", "engine", "poison", "memory", "battle", "basket", "monkey", "marble", "cow", "star", "milk", "bean", "tank", "wind", "rifle", "island", "cloud", "egg", "pillow", "fang", "soup", "claw", "fan", "medicine", "pill", "lid", "grill", "skillet", "pancake", "waffle", "syrup", "batter", "crowbar", "syringe", "lizard", "crystal", "tractor", "rabbit", "bunny", "hare", "shovel", "spade", "heart", "brain", "kidney", "liver", "disease", "orange", "notepad", "lasagna", "balloon", "ball", "baseball", "basketball", "football", "visitor", "shotgun", "popcorn", "fireman", "cop", "gorilla", "ladybug", "whistle", "mailbox", "library", "kitchen", "kennel", "cage", "mirror", "corpse", "goblin", "zombie", "wizard", "warlock", "potion", "pistol", "harbor", "anchor", "rope", "chain", "yogurt", "bakery", "painting", "plane", "writer", "nurse", "record", "thread", "harp", "melody", "throat", "barrel", "train", "canvas", "button", "crayon", "cobweb", "bubble", "kettle", "muscle", "weight", "log", "doctor", "skeleton", "skull", "pocket", "bridge", "violin", "bat", "grenade", "rocket", "missile", "torpedo", "nuke", "monocle", "eyebrow", "office", "hydra", "wyvern", "chimera", "mammoth", "colossus", "leviathan", "behemoth", "monstrosity", "brute", "fiend", "serpent","traitor", "trickster", "joker", "jester", "clown", "ogre", "devil", "donkey", "mule", "steed", "savage", "swine", "rascal", "imp", "wretch", "hermit", "rogue", "freak", "centaur", "mutant", "phoenix", "mermaid", "werewolf", "unicorn", "fairy", "sphinx", "temple", "altar", "native"];
+  let countableNounsC = ["sacrifice", "hound", "griffin", "yeti", "leprechaun", "gnome", "pegasus", "cyclops", "ghoul", "spirit", "troll", "manticore", "pixie", "manatee", "minotaur", "banshee", "siren", "vampire", "scorpion", "spider", "arachnid", "harpy", "elf", "dwarf", "hobbit", "crumb", "particle", "atom", "proton", "neutron", "electron", "quark", "scepter", "companion", "traveller", "pal", "buddy", "twin", "comrade", "sidekick", "enemy", "opponent", "champion", "foe", "rival", "terrorist", "spy", "rebel", "conqueror", "critic", "hellhound", "veggie", ];
+  countableNouns = countableNounsA.concat(countableNounsB).concat(countableNounsC);
+  
+  let uncountableNouns = ["awesomeness", "despair", "doom", "justice", "goodness", "evil", "fate", "intelligence", "truth", "knowledge", "beauty", "anger", "fear", "courage", "power", "might", "bravery", "chaos", "confusion", "danger", "happiness", "sadness", "depression", "fury", "rage", "hunger", "dignity", "failure", "success", "faith", "fun", "fame", "freedom", "friendship", "guilt", "health", "hatred", "love", "humor", "honesty", "irony", "sarcasm", "crime", "jealousy", "joy", "kindness", "compassion", "laughter", "luck", "logic", "magic", "nonsense", "peace", "pride", "purity", "pain", "quality", "revenge", "safety", "speed", "slowness", "stupidity", "shame", "silence", "time", "trouble", "violence", "warmth", "fire", "ice", "metal", "insanity", "integrity", "maturity", "loyalty", "sharpness", "fortune", "misfortune", "hope", "patience", "sanity", "sensitivity", "weakness", "wisdom", "wit", "strength", "talent", "sympathy", "anxiety", "delight", "grief", "misery", "relief", "romance", "sorrow", "surprise", "fragility", "liberty", "death", "life", "luxury", "mercy", "wealth", "reality", "artistry", "comfort", "deceit", "dexterity", "energy", "mass", "force", "grace", "darkness", "light", "gold", "envy", "greed", "wrath", "humility", "charity", "virtue", "gratitude", "respect", "trust"];
+  
+  let nouns = countableNouns.concat(uncountableNouns);
+  
+  let nounsAndAdjectives = nouns.concat(adjectives);
+  
+  let titles = ["dr", "mr", "ms", "mrs", "mister", "miss", "doctor", "lord", "professor"];
+  
+  let transitiveVerbs = ["hitter", "eater", "washer", "reader", "giver", "maker", "beater", "brusher", "builder", "catcher", "chaser", "cleaner", "loader", "collecter", "destroyer", "breaker", "smasher", "dropper", "grabber", "gatherer", "helper", "inspector", "keeper", "knocker", "slapper", "smacker", "wiper", "tickler", "striker", "getter", "buyer", "lender", "payer", "refuser", "puncher", "shooter", "stabber", "slicer", "insulter", "complimenter", "lover", "stealer", "finder", "admirer", "adorer", "adviser", "attracter", "avoider", "bender", "bouncer", "thrower", "chooser", "counter", "cutter", "denier", "disliker", "enjoyer", "feeder", "tearer", "fixer", "repairer", "generator", "grower", "hanger", "hater", "hugger", "holder", "ignorer", "impresser", "informer", "kisser", "licker", "kicker", "lifter", "melter", "neglecter", "observer", "biter", "stalker", "painter", "sketcher", "designer", "trapper", "annihilator", "stopper", "flattener", "crusher", "stomper", "poker", "ripper", "taker", "summoner", "squisher", "squeezer", "seller", "pusher", "puller", "watcher", "scraper", "scrapper", "burner", "igniter", "demolisher", "wrecker", "ruiner", "shatterer", "exploder", "injurer", "harmer", "devastator", "damager", "waster", "ender", "preventer", "restorer", "raiser", "healer", "eraser", "eliminator", "decimator", "assister", "improver", "preserver", "saver", "inhaler", "impaler", "patter", "petter", "strangler", "abductor", "kidnapper", "twister", "compressor", "squasher", "trampler", "toppler", "carrier"];
+  
+  
+  let adjectivesAndTransitiveVerbs = adjectives.concat(transitiveVerbs);
+  function randAdjectiveOrTransitiveVerb() {
+    return adjectivesAndTransitiveVerbs[Math.floor(Math.random() * adjectivesAndTransitiveVerbs.length)];
+  }
+  
+  let anywhereConsonants = ["b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "r", "s", "t", "v", "w", "y", "z", "sh", "ch", "th"];
+  let nonStartConsonants = ["nk", "rb", "rc", "rd", "rf", "rg", "rk", "rm", "rn", "rp", "rs", "rt", "rx", "ft", "rv", "nch", "rch", "rsh", "rth", "x", "ll", "ld", "lb", "lk", "nd"];
+  let nonEndConsonants = ["bl", "cl", "fl", "gl", "kl", "pl", "sl", "sm", "sc", "sk", "sn", "sp", "st", "br", "cr", "fr", "gr", "pr", "tr", "scr", "spl", "spr", "shr", "thr", "str", "sw", "dr"];
+  
+  let startConsonants = anywhereConsonants.concat(nonEndConsonants);
+  let middleConsonants = anywhereConsonants.concat(nonStartConsonants).concat(nonEndConsonants);
+  let endConsonants = anywhereConsonants.concat(nonStartConsonants);
+  
+  let vowels = ["a", "e", "i", "o", "u"];
+  let digraphs = ["oo", "ee"];
+  let endVowels = ["a", "e", "i", "o", "u"];
+  let endDigraphs = ["oo", "ee", "ai", "ao", "au", "oi", "ou", "oy", "ay", "ey"];
+  
+  function randAnywhereConsonant() {
+    return anywhereConsonants[Math.floor(Math.random() * anywhereConsonants.length)];
+  }
+  function randStartConsonant() {
+    if (Math.random() < 0.5) return randAnywhereConsonant(); // 50% chance to be a more "normal" consonant
+    return startConsonants[Math.floor(Math.random() * startConsonants.length)];
+  }
+  function randMiddleConsonant() {
+    if (Math.random() < 0.5) return randAnywhereConsonant(); // 50% chance to be a more "normal" consonant
+    return middleConsonants[Math.floor(Math.random() * middleConsonants.length)];
+  }
+  function randEndConsonant() {
+    if (Math.random() < 0.5) return randAnywhereConsonant(); // 50% chance to be a more "normal" consonant
+    return endConsonants[Math.floor(Math.random() * endConsonants.length)];
+  }
+  function randVowel() {
+    let array = vowels;
+    if (Math.random() < 0.5) array = array.concat(digraphs); // 50% chance to allow digraphs, so they're less common
+    return array[Math.floor(Math.random() * array.length)];
+  }
+  function randEndVowel() {
+    let array = endVowels;
+    if (Math.random() < 0.5) array = array.concat(endDigraphs); // 50% chance to allow digraphs, so they're less common
+    return array[Math.floor(Math.random() * array.length)];
+  }
+  
+  function gibberishName() {
+    let syllables = Math.floor(Math.random() * 3) + 1;//Math.random() < 0.5 ? 2 : Math.floor(Math.random() * Math.random() * 3) + 1;
+    
+    let name = "";
+    
+    if (syllables === 1) {
+      let startWithVowel = Math.random() < 0.5; // 50% chance to start with a vowel
+      let endWithConsonant = Math.random() < 0.5; // 50% chance to end with consonant
+      
+      let start = (startWithVowel ? "" : randStartConsonant()) + (!startWithVowel && !endWithConsonant ? randEndVowel() : randVowel()); // If not ending with a consonant or starting with a vowel, allow ending vowels like "ai" and "ou"
+      let end = startWithVowel ? randEndConsonant() : (endWithConsonant ? randEndConsonant() : "");
+      
+      name = start + end;
+    }
+    else {
+      let startWithVowel = Math.random() < 0.5; // 50% chance to start with a vowel
+      let endWithConsonant = Math.random() < 0.5; // 50% chance to end with consonant
+      
+      let start = (startWithVowel ? "" : randStartConsonant()) + randVowel();
+      
+      let middle = "";
+      for (let i = 0; i < syllables - 1; i++) {
+        let lastIteration = i === syllables - 2;
+        middle += randMiddleConsonant() + ((lastIteration && !endWithConsonant) ? randEndVowel() : randVowel()); // If not ending with a consonant, allow ending vowels like "ai" and "ou"
+      }
+      
+      let end = endWithConsonant ? randEndConsonant() : "";
+      
+      name = start + middle + end;
+    }
+    
+    if (name.length < 3) return gibberishName();
+    return name;
+  }
   
   let connectors = ["", "-", "_"];
   
   function randArticle() {
-    return Math.random() < 0.5 ? "" : articles[Math.floor(Math.random() * Math.random() * articles.length)];
+    return articles[Math.floor(Math.random() * articles.length)];
   }
   function randAdjective() {
     return adjectives[Math.floor(Math.random() * adjectives.length)];
   }
+  function randCountableNoun() {
+    return countableNouns[Math.floor(Math.random() * countableNouns.length)];
+  }
+  function randUncountableNoun() {
+    return uncountableNouns[Math.floor(Math.random() * uncountableNouns.length)];
+  }
   function randNoun() {
     return nouns[Math.floor(Math.random() * nouns.length)];
   }
+  function randNounOrAdjective() {
+    return nounsAndAdjectives[Math.floor(Math.random() * nounsAndAdjectives.length)];
+  }
+  function randTransitiveVerb() {
+    return transitiveVerbs[Math.floor(Math.random() * transitiveVerbs.length)];
+  }
+  function randTitle() {
+    return titles[Math.floor(Math.random() * titles.length)];
+  }
   function randNums() {
-    return addNumbers ? String(Math.floor(Math.random() * 10)) + String(Math.floor(Math.random() * 10)) : "";
+    return String(Math.floor(Math.random() * 10)) + String(Math.floor(Math.random() * 10));
   }
   function randConnector() {
     return connectors[Math.floor(Math.random() * connectors.length)];
+  }
+  function randMode() {
+    let modes = [];
+    if (mode0) modes.push(0);
+    if (mode1) modes.push(1);
+    if (mode2) modes.push(2);
+    if (mode3) modes.push(3);
+    if (mode4) modes.push(4);
+    if (mode5) modes.push(5);
+    
+    return modes[Math.floor(Math.random() * modes.length)];
   }
   function capitalize(string, mode) {
     if (mode === 0) return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase(); // Titlecase
@@ -312,7 +620,7 @@
     drawRoundedRect(context, x - (width / 2), y - (width / 2), width, height, cornerRadius);
   }
   
-  function longestUsername() {
+  /*function longestUsername() {
     let longest = 0;
     let article = "";
     for (let i = 0; i < articles.length; i++) {
@@ -341,49 +649,97 @@
     }
     
     return capitalize(article + "_" + adjective + "_" + noun + "99", 0);
-  }
+  }*/
   
   function User() {
-    this.setUsername();
+    this.setUsername("rand");
   }
-  User.prototype.setUsername = function() {
+  User.prototype.setUsername = function(nameMode) {
     let textCase = Math.floor(Math.random() * Math.random() * 3);
     
     let connector = randConnector();
     
     if ((textCase === 1 || textCase === 2) && connector === "") {
-      // if username is in the style of "thesourdog" or "THESOURDOG," reroll connector to make that less likely (and easier to read)
-      connector = randConnector();
+      // if username is in the style of "thesourdog" or "THESOURDOG," choose either - or _ for a connector instead of a blank connector
+      connector = Math.random() < 0.5 ? "-" : "_";
     }
     
-    if (Math.random() < 0.66) { // 66% chance to be article + adjective + noun
-      let article = capitalize(randArticle(), textCase);
-      let start = "";
-      if (article !== "") start = article + connector;
+    let mode = nameMode === "rand" ? randMode() : nameMode;
+    this.nameMode = mode;
+    
+    if (mode === 0) { // article + adjective + countable noun
+      this.start = capitalize(randArticle(), textCase) + connector;
       
       let adjective = capitalize(randAdjective(), textCase);
       
-      let noun = capitalize(randNoun(), textCase);
+      let noun = capitalize(randCountableNoun(), textCase);
       
-      this.username = start + adjective + connector + noun + randNums();
+      this.middle = adjective + connector + noun;
+      
+      this.end = connector + randNums();
     }
-    else { // 33% chance to be noun + noun
-      let article = Math.random() < 0.5 ? capitalize("the", textCase) : "";
-      let start = "";
-      if (article !== "") start = article + connector;
+    else if (mode === 1) { // countable noun + countable noun
+      this.start = capitalize("the", textCase) + connector;
       
-      let noun1 = capitalize(randNoun(), textCase);
-      let noun2 = capitalize(randNoun(), textCase);
+      let noun1 = capitalize(randCountableNoun(), textCase);
+      let noun2 = capitalize(randCountableNoun(), textCase);
       
-      this.username = start + noun1 + connector + noun2 + randNums();
+      this.middle = noun1 + connector + noun2;
+      
+      this.end = connector + randNums();
+    }
+    else if (mode === 2) { // the + countable noun + of + uncountable noun
+      this.start = capitalize("the", textCase) + connector;
+      
+      let _of = capitalize("of", textCase);
+      
+      let noun1 = capitalize(randCountableNoun(), textCase);
+      let noun2 = capitalize(randUncountableNoun(), textCase);
+      
+      this.middle = noun1 + connector + _of + connector + noun2;
+      
+      this.end = connector + randNums();
+    }
+    else if (mode === 3) { // title + noun/adjective
+      this.start = "";
+      
+      let title = capitalize(randTitle(), textCase);
+      let nounOrAdjective = capitalize(randNounOrAdjective(), textCase);
+      
+      this.middle = title + connector + nounOrAdjective;
+      
+      this.end = connector + randNums();
+    }
+    else if (mode === 4) { // the + countable noun + transitive verb
+      this.start = capitalize("the", textCase) + connector;
+      
+      let noun = capitalize(randCountableNoun(), textCase);
+      let verb = capitalize(randTransitiveVerb(), textCase);
+      
+      this.middle = noun + connector + verb;
+      
+      this.end = connector + randNums();
+    }
+    else if (mode === 5) { // gibberish name + the + (transitive verb / adjective)
+      connector = Math.random() < 0.5 ? "-" : "_"; // Don't allow "" as a connector with this mode to make it easier to read
+      
+      this.start = "";
+      
+      let name = capitalize(gibberishName(), textCase);
+      let the = capitalize("the", textCase);
+      let title = capitalize(randAdjectiveOrTransitiveVerb(), textCase);
+      
+      this.middle = name + connector + the + connector + title;
+      
+      this.end = connector + randNums();
     }
     
-    if (this.username.length > 30) {
-      console.log(this.username + " was too long.");
-      this.setUsername();
-    }
+    this.updateUsername();
     //this.username = longestUsername();
     // Uncomment the above line for an example of longest possible username to make sure nothing ever overflows
+  };
+  User.prototype.updateUsername = function() {
+    this.username = (addPrefix ? this.start : "") + this.middle + (addNumbers ? this.end : "");
   };
   User.prototype.setProfilePicture = function(size, picMode) {
     let _canvas = document.createElement("canvas");
@@ -665,7 +1021,12 @@
     this.profilePicture = _ctx.getImageData(0, 0, _canvas.width, _canvas.height);
   };
   
+  function updateAllNames() {
+    for (let i = 0; i < C.length; i++) displayUser(C[i]);
+  }
+  
   function displayUser(canvas) {
+    canvas.user.updateUsername();
     canvas.usernameTxt.innerHTML = canvas.user.username;
     canvas.ctx.clearRect(0, 0, canvas.canvas.width, canvas.canvas.height);
     canvas.ctx.putImageData(canvas.user.profilePicture, 0, 0);
@@ -673,7 +1034,7 @@
     canvas.downloadLink.download = canvas.user.username + ".png";
   }
   function rerollUsername(canvas) {
-    canvas.user.setUsername();
+    canvas.user.setUsername("rand");
     displayUser(canvas);
   }
   function rerollPicture(canvas) {
@@ -686,6 +1047,10 @@
   }
   function rerollSimilarPicture(canvas) {
     canvas.user.setProfilePicture(profilePictureResolution, canvas.user.picMode);
+    displayUser(canvas);
+  }
+  function rerollSimilarUsername(canvas) {
+    canvas.user.setUsername(canvas.user.nameMode);
     displayUser(canvas);
   }
   function rerollAll() {
@@ -711,7 +1076,7 @@
       }
     }
     
-    return duplicates;
+    return duplicates.length === 0 ? false : duplicates;
   }
   
   function averageRandTries(x, numRepeats) {
