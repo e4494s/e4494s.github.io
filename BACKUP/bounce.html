@@ -391,6 +391,7 @@
 </table>
 <canvas id = 'canvas'>Your browser does not support the canvas element.</canvas>
 <script>
+  let canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d');
   let menu_rect = menus.getBoundingClientRect();
   canvas.width = window.innerWidth;
