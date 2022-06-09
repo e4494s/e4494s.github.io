@@ -1,806 +1,1098 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel = "icon"  href = "images/favicon.png" type = "image/png"/>
-    <title>e4494s</title>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>Profile Generator ~ e4494s</title>
     <style>
-      :root {
-        --textShadow: 0 0 14px white, 0 0 14px white;
-      }
-      
-      html {
-        min-height: 100%;
-        position: relative;
-      }
-      
-      html, body {
-        font-family: monospace;
-        font-size: 14px;
-      }
-      
-      h1 {
-        font-weight: bold;
-        font-size: 45px;
-        text-align: center;
-      }
-      
-      h2 {
-        font-size: 25px;
-        text-align: center;
-        text-decoration: underline;
-      }
-      
-      .big-link {
-        color: blue;
-        background-color: rgba(50, 50, 255, 0.4);
-        font-size: 20px;
-        padding: 2px;
-        border-radius: 5px;
-        text-decoration: none;
-      }
-      .big-link:hover {
-        background-color: rgba(50, 50, 255, 0.55);
-      }
-      .big-link:active {
-        background-color: rgba(50, 50, 255, 0.7);
-      }
-      
-      #email-link {
-        font-size: 16px;
-        color: black;
-        font-style: normal;
-      }
-      
-      .links {
-        line-height: 25px;
-      }
-      
-      .wip {
-        color: red;
-        font-weight: bold;
-        font-style: italic;
-      }
-      
-      #current {
-        border: 3px dashed blue;
-        width: 250px;
-        padding: 5px;
-      }
-      
-      .desc {
-        padding: 10px;
-        text-align: center;
-        font-style: italic;
-        font-weight: bold;
-        background: rgba(0, 0, 0, 0.33);
-        border-radius: 10px;
-        border: 2px solid rgba(0, 0, 0, 0.15);
-      }
-      
-      .gallery {
-        padding: 20px;
-        font-size: 20px;
-        text-decoration: none;
-        width: 200px;
-        border: 4px solid blue;
-        color: white;
-        border-radius: 15px;
-        text-align: center;
-        font-style: italic;
-        vertical-align: middle;
-        font-weight: bold;
-        background: linear-gradient(to bottom, rgba(0, 0, 255, 0.5), rgba(100, 100, 255, 0.5));
-        display: inline-block;
-      }
-      
-      .section {
-        border: 4px solid rgba(0, 0, 0, 0.75);
-        padding: 10px;
-        border-radius: 25px;
-        padding-bottom: 15px;
-        display: none;
-      }
-      
-      .gallery-link {
-        width: 150px;
-        height: 150px;
-        display: inline-block;
-        margin-left: 2px;
-        margin-right: 2px;
-        margin-bottom: 0;
-        margin-top: 4px;
-        border-radius: 15px;
-        border: 2px solid #01017a; /* Dark Blue */
-        background-size: 100% 100%;
-        opacity: 100%;
-        padding: 0;
-        cursor: pointer;
-      }
-      .gallery-link:hover {
-        opacity: 75%;
-      }
-      .gallery-link:active {
-        opacity: 50%;
-      }
-      
-      #secret-btn {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 20px;
-        height: 20px;
-        cursor: pointer;
+      canvas {
+        width: 70px;
+        height: 70px;
+        display: block;
         border: none;
-        border-radius: 0;
+        background-color: yellow;
+        margin-right: 15px;
+        cursor: pointer;
+      }
+      
+      .username-txt {
+        font-weight: bold;
+        font-size: 20px;
+      }
+      
+      .user-table {
+        margin-top: 20px;
+        margin-bottom: 20px;
+      }
+      
+      td, tr {
+        min-width: 0;
+        padding: 0;
+        margin: 0;
+        white-space: nowrap;
+        /*border: 1px solid black;*/
+      }
+      
+      .reroll-btn {
+        display: inline-block;
+        margin: 5px;
+        border: none;
+        width: 35px;
+        height: 35px;
+        opacity: 100%;
+        vertical-align: middle;
+      }
+      .reroll-btn, .reroll-btn:hover, .reroll-btn:active {
+        background-size: 100% 100%;
         background-color: transparent;
       }
+      .reroll-btn:hover {
+        opacity: 50%;
+      }
+      .reroll-btn:active {
+        opacity: 25%;
+      }
       
-      .section-btn, .section-btn-selected {
-        margin: 3px;
+      .picture-div {
+        display: inline-block;
+        vertical-align: middle;
         margin-top: 5px;
         margin-bottom: 5px;
-        border-radius: 10px;
-        font-family: monospace;
-        font-weight: bold;
-        background-color: rgb(255, 255, 100);
-        border: 3px solid black;
-        cursor: pointer;
-        vertical-align: middle;
-      }
-      .section-btn:hover {
-        background-color: rgb(150, 150, 50);
-      }
-      .section-btn:active {
-        background-color: rgb(110, 110, 0);
-      }
-      
-      .section-btn-selected, .section-btn-selected:hover, .section-btn-selected:active {
-        background-color: rgb(110, 110, 0);
-      }
-      
-      #section-btn-11, #section-btn-12, #section-btn-14 {
-        background-color: white;
-        font-style: italic;
-      }
-      #section-btn-11:hover, #section-btn-12:hover, #section-btn-14:hover {
-        background-color: rgb(135, 135, 135); /* Light Gray */
-      }
-      #section-btn-11:active, #section-btn-11.section-btn-selected, #section-btn-11.section-btn-selected:hover, #section-btn-11.section-btn-selected:active, #section-btn-12:active, #section-btn-12.section-btn-selected, #section-btn-12.section-btn-selected:hover, #section-btn-12.section-btn-selected:active, #section-btn-14:active, #section-btn-14.section-btn-selected, #section-btn-14.section-btn-selected:hover, #section-btn-14.section-btn-selected:active {
-        background-color: rgb(100, 100, 100); /* Dark Gray */
-      }
-      
-      .btn-divider-left {
-        margin: 3px;
-        margin-left: 5px;
-        margin-right: -2px;
-        border-radius: 10px;
-        background-color: black;
-        display: inline-block;
-        height: 30px;
-        vertical-align: middle;
-        cursor: default;
-        width: 3px;
-      }
-      .btn-divider-right {
-        margin: 3px;
-        margin-left: -2px;
-        margin-right: 5px;
-        border-radius: 10px;
-        background-color: black;
-        display: inline-block;
-        height: 30px;
-        vertical-align: middle;
-        cursor: default;
-        width: 3px;
-      }
-      
-      #section-button-div {
-        text-align: center;
-        background-color: rgba(255, 255, 255, 0.4);
-        border: 2px solid rgba(0, 0, 0, 0.4);
-        border-radius: 10px;
-        padding: 10px;
-        cursor: default;
-        width: 100%;
-      }
-      
-      .date-span {
-        font-weight: bold;
-        font-style: italic;
-        font-size: 12px;
-        color: #01017a; /* Dark Blue */
-      }
-      
-      .section-title {
-        font-weight: bold;
-        font-style: italic;
-        padding-top: 10px;
-        padding-bottom: 5px;
-        border-left: 2px solid black;
-        border-right: 2px solid black;
-        color: #01017a; /* Dark Blue */
-        font-size: 16px;
-        border-bottom: 2px dashed black;
-      }
-      .section-buttons {
-        padding-top: 5px;
-        padding-bottom: 10px;
-        border-left: 2px solid black;
-        border-right: 2px solid black;
-      }
-      #cell-left-top, #cell-left-bottom {
-        border-left: none;
-      }
-      #cell-right-top, #cell-right-bottom {
-        border-right: none;
-        border-bottom: none;
-      }
-      
-      h2 {
-        color: #01017a; /* Dark Blue */
-        text-decoration: none;
-        font-weight: bold;
-        font-style: italic;
-      }
-      
-      .section-desc {
-        font-style: italic;
-        color: #01017a; /* Dark Blue */
-        background-color: rgba(255, 255, 255, 0.4);
-        border: 2px solid rgba(0, 0, 0, 0.4);
-        border-radius: 10px;
-        padding: 10px; 
-      }
-      
-      #about-txt {
-        padding-left: 15%;
-        padding-right: 15%;
-      }
-      
-      #about-table {
-        width: 100%;
-      }
-      #about-table td {
-        text-align: center;
-        border: 1px solid black;
-      }
-      
-      hr {
-        margin-top: 25px;
-        margin-bottom: 25px;
+        margin-left: 10px;
+        margin-right: 10px;
         border: none;
-        border-top: 3px solid #01017a; /* Dark Blue */
-        border-radius: 0;
+        width: 40px;
+      }
+      
+      .reroll-btn-example {
+        width: 40px;
+        height: 40px;
+        margin: 5px;
+        border: none;
+        background-size: 100% 100%;
+        background-color: transparent;
+        display: inline-block;
+        vertical-align: middle;
+      }
+      .reroll-btn-example-txt {
+        display: inline-block;
+        vertical-align: middle;
+        margin-left: 5px;
+        font-size: 16px;
+        font-weight: bold;
+      }
+      
+      .example-td {
+        padding: 10px;
+      }
+      
+      .checkbox-label {
+        background-color: transparent;
+        margin: 0;
+        padding: 8px;
+        cursor: pointer;
+      }
+      .checkbox-label:hover {
+        background-color: #ffff80; /* Very light yellow */
+      }
+      .checkbox-label:active {
+        background-color: #ffff33; /* Light yellow */
       }
     </style>
   </head>
-<body>
-<!--<button id = "secret-btn" onclick = "secretFunction()"></button>-->
-<!--<h1 id = "title-txt">e4494s</h1>-->
-<div style = "text-align: center">
-  <img src = "images/e4494s-top-title.png" style = "height: 120px">
+<body onload = "init()">
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; Profile Generator &mdash;&mdash;</h1>
+<div id = "how-it-works">
+  <b><i>How It Works:</i></b> Generate a group of random usernames and profile pictures, free to use as your profile or username anywhere.<br>Click these buttons by each profile to change what you want to reroll on that one profile:
+  <br><br>
+  <table>
+    <tr>
+      <td class = "example-td">
+        <img class = "reroll-btn-example" src = "images/reroll-both-icon.png"> <span class = "reroll-btn-example-txt"><i>Reroll Picture <b><u>and</u></b> Username</i></span>
+      </td>
+    </tr>
+    <tr>
+      <td class = "example-td">
+        <img class = "reroll-btn-example" src = "images/reroll-picture-icon.png"> <span class = "reroll-btn-example-txt"><i>Reroll Profile Picture</i></span>
+      </td>
+      <td class = "example-td">
+        <img class = "reroll-btn-example" src = "images/similar-picture-icon.png"> <span class = "reroll-btn-example-txt"><i>Reroll <b><u>Similar</u></b> Profile Picture</i></span>
+      </td>
+    </tr>
+    <tr>
+      <td class = "example-td">
+        <img class = "reroll-btn-example" src = "images/reroll-username-icon.png"> <span class = "reroll-btn-example-txt"><i>Reroll Username</i></span>
+      </td>
+      <td class = "example-td">
+        <img class = "reroll-btn-example" src = "images/similar-username-icon.png"> <span class = "reroll-btn-example-txt"><i>Reroll <b><u>Similar</u></b> Username</i></span>
+      </td>
+    </tr>
+  </table>
+  <br><br>
+  Click on a profile picture to download it with its username.
+  <br><br>
+  Selecting <span class = "setting">Add Numbers to Name</span> will add 2 random digits to the end of every username.
+  <br><br>
+  Selecting <span class = "setting">Add Prefix to Name</span> will add a prefix like "The" or "Very" to the beginning of every username.
+  <br><br>
+  Select different <span class = "setting">Username Types</span> to choose what different styles each username can be in.
 </div>
+<hr>
 <br>
-<div class = "desc">This is where I make art, games, generators, simulations, and other random things to waste time on. Sometimes I make kinda cool stuff.</div>
-<!--<div id = "current">
-  <b><u>My Current Project:</u></b>
-  <div class = "links">
-    <a class = "big-link" target = "_blank" href = "art.html">Living Art Gallery</a> &mdash; an abstract, moving art gallery
-  </div>
-</div>-->
-<br>
-<table cellspacing = "0" id = "section-button-div">
+<table>
   <tr>
-    <td class = "section-title" id = "cell-left-top">Generative Art</td>
-    <td class = "section-title">Games</td>
-    <td class = "section-title">Math-Related</td>
-    <td class = "section-title">Miscellaneous</td>
-    <td class = "section-title" id = "cell-right-top" rowspan = "2" valign = "top">
-      <button class = "section-btn" onclick = "showSection(14)" id = "section-btn-14">Old Projects</button>
+    <td style = "padding: 15px" valign = "top">
+      <div style = "font-size: 15px"><b><u>Username Modifiers:</u></b></div>
       <br>
-      <button class = "section-btn" onclick = "showSection(11)" id = "section-btn-11">Similar Websites</button>
-      <br>
-      <button class = "section-btn" onclick = "showSection(12)" id = "section-btn-12">About e4494s</button>
+      <label for = "add-numbers-checkbox" class = "checkbox-label">
+        <input type = "checkbox" id = "add-numbers-checkbox" oninput = "updateSettings(this, true)" CHECKED>
+        <span>Add Numbers to Name</span>
+      </label>
+      <br><br>
+      <label for = "add-prefix-checkbox" class = "checkbox-label">
+        <input type = "checkbox" id = "add-prefix-checkbox" oninput = "updateSettings(this, true)" CHECKED>
+        <span>Add Prefix to Name</span>
+      </label>
+      <br><br>
+      <div><i>(The, Very, Really, etc.)</i></div>
     </td>
-  </tr>
-  <tr valign = "top">
-    <td class = "section-buttons" id = "cell-left-bottom">
-      <button class = "section-btn" onclick = "showSection(13)" id = "section-btn-13">Static Art</button>
+    <td style = "padding: 15px" valign = "top">
+      <div style = "font-size: 15px"><b><u>Username Types:</u></b></div>
       <br>
-      <button class = "section-btn" onclick = "showSection(1)" id = "section-btn-1">Dynamic Art</button>
-      <br>
-      <button class = "section-btn" onclick = "showSection(2)" id = "section-btn-2">Natural Art</button>
-    </td>
-    <td class = "section-buttons">
-      <button class = "section-btn" onclick = "showSection(3)" id = "section-btn-3">Physics Games</button>
-      <br>
-      <button class = "section-btn" onclick = "showSection(4)" id = "section-btn-4">Other Games</button>
-    </td>
-    <td class = "section-buttons">
-      <button class = "section-btn" onclick = "showSection(6)" id = "section-btn-6">Fractals</button>
-      <br>
-      <button class = "section-btn" onclick = "showSection(7)" id = "section-btn-7">Cellular Automata</button>
-      <br>
-      <button class = "section-btn" onclick = "showSection(8)" id = "section-btn-8">Random Math</button>
-    </td>
-    <td class = "section-buttons">
-      <button class = "section-btn" onclick = "showSection(5)" id = "section-btn-5">Generators</button>
-      <br>
-      <button class = "section-btn" onclick = "showSection(9)" id = "section-btn-9">Lonely Chat Room</button>
-      <br>
-      <button class = "section-btn" onclick = "showSection(10)" id = "section-btn-10">Islands of Misfit Code</button>
+      <label for = "mode-0-checkbox" class = "checkbox-label">
+        <input type = "checkbox" id = "mode-0-checkbox" oninput = "updateSettings(this, false)" CHECKED>
+        <span><u>Adjective</u> + <u>Noun</u> <i>(Enchanted_Pumpkin)</i></span>
+      </label>
+      <br><br>
+      <label for = "mode-1-checkbox" class = "checkbox-label">
+        <input type = "checkbox" id = "mode-1-checkbox" oninput = "updateSettings(this, false)" CHECKED>
+        <span><u>Noun</u> + <u>Noun</u> <i>(Gravy_Butterfly)</i></span>
+      </label>
+      <br><br>
+      <label for = "mode-2-checkbox" class = "checkbox-label">
+        <input type = "checkbox" id = "mode-2-checkbox" oninput = "updateSettings(this, false)" CHECKED>
+        <span><u>Noun</u> of <u>Noun</u> <i>(Tortoise_Of_Fear)</i></span>
+      </label>
+      <br><br>
+      <label for = "mode-3-checkbox" class = "checkbox-label">
+        <input type = "checkbox" id = "mode-3-checkbox" oninput = "updateSettings(this, false)" CHECKED>
+        <span><u>Title</u> + <u>Noun/Adjective</u> <i>(Dr_Trumpet)</i></span>
+      </label>
+      <br><br>
+      <label for = "mode-4-checkbox" class = "checkbox-label">
+        <input type = "checkbox" id = "mode-4-checkbox" oninput = "updateSettings(this, false)" CHECKED>
+        <span><u>Noun</u> + <u>Transitive Verb</u> <i>(Biscuit_Summoner)</i></span>
+      </label>
+      <br><br>
+      <label for = "mode-5-checkbox" class = "checkbox-label">
+        <input type = "checkbox" id = "mode-5-checkbox" oninput = "updateSettings(this, false)" CHECKED>
+        <span><u>Gibberish Name</u> the <u>Adjective/Transitive Verb</u> <i>(Throg_The_Hopeful)</i></span>
+      </label>
     </td>
   </tr>
 </table>
-<br>
-
-<!---->
-
-<div class = "section" id = "section13" style = "display: block">
-  <h2>&mdash; Static Generative Art &mdash;</h2>
-  <div class = "links">
-    <div class = "section-desc">Generative art that produces a still image that doesn't move, but is randomized every time it's generated</div>
-    <br><br>
-    <a class = "big-link" target = "_blank" href = "what-is-generative-art.html">What is Generative Art?</a> &mdash; An interactive article that gives an overview of what exactly generative art is, and explains key concepts behind it. <span class = "date-span">(2022)</span>
-    <hr>
-    <a class = "big-link" target = "_blank" href = "generative-art-gallery.html">Generative Art Gallery</a> &mdash; A diverse collection of generative artworks I've created. Every piece will look completely different every time you redraw it, allowing for infinite unique designs and artworks. <span class = "date-span">(2022)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('generative-art-gallery.html')" src = "images/gallery/generative-art-gallery1.png">
-    <img class = "gallery-link" onclick = "openLink('generative-art-gallery.html')" src = "images/gallery/generative-art-gallery2.png">
-    <img class = "gallery-link" onclick = "openLink('generative-art-gallery.html')" src = "images/gallery/generative-art-gallery3.png">
-    <img class = "gallery-link" onclick = "openLink('generative-art-gallery.html')" src = "images/gallery/generative-art-gallery4.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "connectivity.html">Connectivity</a> &mdash; Generate grids filled with random blocks that all connect to make continuous shapes, selecting up to 20 different types of unique blocks. <span class = "date-span">(2022)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('connectivity.html')" src = "images/gallery/connectivity.png">
-    <img class = "gallery-link" onclick = "openLink('connectivity.html')" src = "images/gallery/connectivity2.png">
-    <img class = "gallery-link" onclick = "openLink('connectivity.html')" src = "images/gallery/connectivity3.png">
-    <img class = "gallery-link" onclick = "openLink('connectivity.html')" src = "images/gallery/connectivity4.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "bands.html">Bands</a> &mdash; Generative designs formed by colorful interlocking bands make interesting patterns resembling machinery or spirals. <span class = "date-span">(2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('bands.html')" src = "images/gallery/bands.png">
-    <img class = "gallery-link" onclick = "openLink('bands.html')" src = "images/gallery/bands2.png">
-    <img class = "gallery-link" onclick = "openLink('bands.html')" src = "images/gallery/bands3.png">
-    <img class = "gallery-link" onclick = "openLink('bands.html')" src = "images/gallery/bands4.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "tiles.html">Tiles</a> &mdash; Generate a random colorful grid of up to 16 different types of tiles, with endless combinations and palettes. <span class = "date-span">(2022)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('tiles.html')" src = "images/gallery/tiles.png">
-    <img class = "gallery-link" onclick = "openLink('tiles.html')" src = "images/gallery/tiles2.png">
-    <img class = "gallery-link" onclick = "openLink('tiles.html')" src = "images/gallery/tiles3.png">
-    <img class = "gallery-link" onclick = "openLink('tiles.html')" src = "images/gallery/tiles4.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "walker.html">Random Walker Shading</a> &mdash; A plane is shaded and colored based on the movements of a random walker through thousands of steps, creating colorful and intricate designs resembling galaxies or clouds. <span class = "date-span">(2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('walker.html')" src = "images/gallery/walker.png">
-    <img class = "gallery-link" onclick = "openLink('walker.html')" src = "images/gallery/walker2.png">
-    <img class = "gallery-link" onclick = "openLink('walker.html')" src = "images/gallery/walker4.png">
-    <img class = "gallery-link" onclick = "openLink('walker.html')" src = "images/gallery/walker3.png">
-  </div>
-</div>
-
-<!---->
-
-<div class = "section" id = "section1">
-  <h2>&mdash; Dynamic Generative Art &mdash;</h2>
-  <div class = "links">
-    <div class = "section-desc">Generative art that moves and changes over time, constantly shifting and updating</div>
-    <br><br>
-    <a class = "big-link" target = "_blank" href = "generative-sketch.html">Generative Art Sketchpad</a> &mdash; Draw abstract designs using different brushes that each have their own unique style and design. <span class = "date-span">(2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('generative-sketch.html')" src = "images/gallery/generative-sketch.png">
-    <img class = "gallery-link" onclick = "openLink('generative-sketch.html')" src = "images/gallery/generative-sketch4.png">
-    <img class = "gallery-link" onclick = "openLink('generative-sketch.html')" src = "images/gallery/generative-sketch2.png">
-    <img class = "gallery-link" onclick = "openLink('generative-sketch.html')" src = "images/gallery/generative-sketch3.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "branching.html">Branching</a> &mdash; Create lots of intricate patterns with colorful, branching trails. <span class = "date-span">(2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('branching.html')" src = "images/gallery/branching.png">
-    <img class = "gallery-link" onclick = "openLink('branching.html')" src = "images/gallery/branching4.png">
-    <img class = "gallery-link" onclick = "openLink('branching.html')" src = "images/gallery/branching2.png">
-    <img class = "gallery-link" onclick = "openLink('branching.html')" src = "images/gallery/branching3.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "dots.html">Dots</a> &mdash; Create spirograph-like patterns by changing how colored dots move around in ellipse paths. <span class = "date-span">(2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('dots.html')" src = "images/gallery/dots.png">
-    <img class = "gallery-link" onclick = "openLink('dots.html')" src = "images/gallery/dots4.png">
-    <img class = "gallery-link" onclick = "openLink('dots.html')" src = "images/gallery/dots2.png">
-    <img class = "gallery-link" onclick = "openLink('dots.html')" src = "images/gallery/dots3.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "servo.html">Servo</a> &mdash; Control how synchronized jointed arms rotate around each other, creating mesmerizing motions and designs. <span class = "date-span">(2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('servo.html')" src = "images/gallery/servo.png">
-    <img class = "gallery-link" onclick = "openLink('servo.html')" src = "images/gallery/servo4.png">
-    <img class = "gallery-link" onclick = "openLink('servo.html')" src = "images/gallery/servo2.png">
-    <img class = "gallery-link" onclick = "openLink('servo.html')" src = "images/gallery/servo3.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "stripe-walker.html">Random Stripe Walker</a> &mdash; A walker moves randomly across the canvas, drawing rectangular stripes in the direction it moves, forming interconnected paths and trails. <span class = "date-span">(2022)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('stripe-walker.html')" src = "images/gallery/stripe-walker1.png">
-    <img class = "gallery-link" onclick = "openLink('stripe-walker.html')" src = "images/gallery/stripe-walker2.png">
-    <img class = "gallery-link" onclick = "openLink('stripe-walker.html')" src = "images/gallery/stripe-walker3.png">
-    <img class = "gallery-link" onclick = "openLink('stripe-walker.html')" src = "images/gallery/stripe-walker4.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "art.html">Living Art Gallery</a> &mdash; An abstract, moving art gallery. <span class = "date-span">(2021)</span><!--or earlier-->
-    <br>
-    <img class = "gallery-link" onclick = "openLink('art.html')" src = "images/gallery/art.png">
-    <img class = "gallery-link" onclick = "openLink('art.html')" src = "images/gallery/art2.png">
-    <img class = "gallery-link" onclick = "openLink('art.html')" src = "images/gallery/art3.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "metaballs.html">Metaballs</a> &mdash; Watch as colorful, blobby metaballs float and squish around the screen in a lava lamp-like way. <span class = "date-span">(2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('metaballs.html')" src = "images/gallery/metaballs.png">
-    <img class = "gallery-link" onclick = "openLink('metaballs.html')" src = "images/gallery/metaballs2.png">
-    <img class = "gallery-link" onclick = "openLink('metaballs.html')" src = "images/gallery/metaballs3.png">
-    <img class = "gallery-link" onclick = "openLink('metaballs.html')" src = "images/gallery/metaballs4.png">
-  </div>
-</div>
-
-<!---->
-
-<div class = "section" id = "section2">
-  <h2>&mdash; Natural Generative Art &mdash;</h2>
-  <div class = "links">
-    <div class = "section-desc">Generative art that replicates and stylizes different processes that can be found in nature</div>
-    <br><br>
-    <a class = "big-link" target = "_blank" href = "brownian-tree.html">Brownian Tree</a> &mdash; Generate and customize colorful tree-like growths made out of dots generated by Brownian motion, which mimics the natural phenomenon of <a href = "https://en.wikipedia.org/wiki/Diffusion-limited_aggregation" target = "_blank">Diffusion-Limited Aggregation</a>. <span class = "date-span">(2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('brownian-tree.html')" src = "images/gallery/brownian-tree.png">
-    <img class = "gallery-link" onclick = "openLink('brownian-tree.html')" src = "images/gallery/brownian-tree2.png">
-    <img class = "gallery-link" onclick = "openLink('brownian-tree.html')" src = "images/gallery/brownian-tree3.png">
-    <img class = "gallery-link" onclick = "openLink('brownian-tree.html')" src = "images/gallery/brownian-tree4.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "snowflake.html">Brownian Snowflake</a> &mdash; Generate icy, colorful snowflakes using symmetrical Brownian motion, which reflects how snowflakes form in the real world. <span class = "date-span">(2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('snowflake.html')" src = "images/gallery/snowflake.png">
-    <img class = "gallery-link" onclick = "openLink('snowflake.html')" src = "images/gallery/snowflake2.png">
-    <img class = "gallery-link" onclick = "openLink('snowflake.html')" src = "images/gallery/snowflake4.png">
-    <img class = "gallery-link" onclick = "openLink('snowflake.html')" src = "images/gallery/snowflake3.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "gravity-wells.html">Gravity Wells</a> &mdash; Thousands of points leave glowing trails as they float towards a number of gravity wells around the canvas, leaving flowing patterns in their wake. <span class = "date-span">(2022)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('gravity-wells.html')" src = "images/gallery/gravity-wells.png">
-    <img class = "gallery-link" onclick = "openLink('gravity-wells.html')" src = "images/gallery/gravity-wells2.png">
-    <img class = "gallery-link" onclick = "openLink('gravity-wells.html')" src = "images/gallery/gravity-wells3.png">
-    <img class = "gallery-link" onclick = "openLink('gravity-wells.html')" src = "images/gallery/gravity-wells4.png">
-  </div>
-</div>
-
-<!---->
-
-<div class = "section" id = "section3">
-  <h2>&mdash; Physics Games &mdash;</h2>
-  <div class = "links">
-    <div class = "section-desc">Games or simulations that demonstrate physics-based interactions and processes</div>
-    <br><br>
-    <a class = "big-link" target = "_blank" href = "neon-pendulum.html">Neon Double Pendulum</a> &mdash; An interactive physics simulation of a colorful, chaotic double pendulum. <span class = "date-span">(2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('neon-pendulum.html')" src = "images/gallery/neon-pendulum.png">
-    <img class = "gallery-link" onclick = "openLink('neon-pendulum.html')" src = "images/gallery/neon-pendulum2.png">
-    <img class = "gallery-link" onclick = "openLink('neon-pendulum.html')" src = "images/gallery/neon-pendulum3.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "bounce.html">Bounce</a> &mdash; A physics simulation about bouncing spheres with lots of customization. This is the first full project I ever created on this website. <span class = "date-span">(2020)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('bounce.html')" src = "images/gallery/bounce.png">
-    <img class = "gallery-link" onclick = "openLink('bounce.html')" src = "images/gallery/bounce2.png">
-    <img class = "gallery-link" onclick = "openLink('bounce.html')" src = "images/gallery/bounce3.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "space-spheres.html">Space Spheres</a> &mdash; Create spheres that bounce around a circular boundary, and gravitate towards a draggable black hole. <span class = "date-span">(2022)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('space-spheres.html')" src = "images/gallery/space-spheres.png">
-    <img class = "gallery-link" onclick = "openLink('space-spheres.html')" src = "images/gallery/space-spheres2.png">
-    <img class = "gallery-link" onclick = "openLink('space-spheres.html')" src = "images/gallery/space-spheres3.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "circles.html">Colliding Circles</a> &mdash; A physics simulation about colliding spheres with different customization and collision modes. <span class = "date-span">(2021)</span><!--or earlier-->
-    <br>
-    <img class = "gallery-link" onclick = "openLink('circles.html')" src = "images/gallery/circles.png">
-    <img class = "gallery-link" onclick = "openLink('circles.html')" src = "images/gallery/circles2.png">
-  </div>
-</div>
-
-<!---->
-
-<div class = "section" id = "section4">
-  <h2>&mdash; Other Games &mdash;</h2>
-  <div class = "links">
-    <a class = "big-link" target = "_blank" href = "jetpack.html">Jetpack Blob</a> &mdash; A side-scroller game where your goal is to collect coins and avoid spikes. <span class = "date-span">(2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('jetpack.html')" src = "images/gallery/jetpack.png" title = "Jetpack Joyride? Never heard of it.">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "pinball.html">Procedural Pinball</a> &mdash; A procedural generation physics game where you navigate a ball to a portal, avoiding large colorful blocks in the way. <span class = "date-span">(2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('pinball.html')" src = "images/gallery/pinball.png">
-  </div>
-</div>
-
-<!---->
-
-<div class = "section" id = "section5">
-  <h2>&mdash; Generators &mdash;</h2>
-  <div class = "links">
-    <a class = "big-link" target = "_blank" href = "profile-generator.html">Profile Generator</a> &mdash; Generates endless possible profile pictures and usernames. If you need ideas for a username, use this to generate random usernames and profile pictures for you to use anywhere. <span class = "date-span">(2022)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('profile-generator.html')" src = "images/gallery/profile-generator3.png">
-    <img class = "gallery-link" onclick = "openLink('profile-generator.html')" src = "images/gallery/profile-generator2.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "image-bleeding.html">Image Bleeding</a> &mdash; Bleed colors from images or shapes together to create random, colorful results, mixing different parts of the image together. <span class = "date-span">(2021)</span><!--or earlier-->
-    <br>
-    <img class = "gallery-link" onclick = "openLink('image-bleeding.html')" src = "images/gallery/image-bleeding.png">
-    <img class = "gallery-link" onclick = "openLink('image-bleeding.html')" src = "images/gallery/image-bleeding2.png">
-    <img class = "gallery-link" onclick = "openLink('image-bleeding.html')" src = "images/gallery/image-bleeding3.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "gradient.html">Gradient Generator</a> &mdash; A customizable color gradient generator, with CSS snippets to use the gradients on a website. <span class = "date-span">(2020)</span>
-    <hr>
-    <a class = "big-link" target = "_blank" href = "cipher.html">Cipher Generator</a> &mdash; A tool to encode and decode messages using various ciphers. <span class = "wip">(work in progress)</span> <span class = "date-span">(2021)</span><!--or earlier-->
-  </div>
-</div>
-
-<!---->
-
-<div class = "section" id = "section6">
-  <h2>&mdash; Fractals &mdash;</h2>
-  <div class = "links">
-    <a class = "big-link" target = "_blank" href = "fractalization.html">Fractalization</a> &mdash; Turn simple grid designs into colorful and intricate fractals, with endless possibilities. <span class = "date-span">(2020)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('fractalization.html')" src = "images/gallery/fractalization.png">
-    <img class = "gallery-link" onclick = "openLink('fractalization.html')" src = "images/gallery/fractalization2.png">
-    <img class = "gallery-link" onclick = "openLink('fractalization.html')" src = "images/gallery/fractalization3.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "fractal-tree.html">Fractal Tree</a> &mdash; A colorful fractal tree generator with lots of settings to control the tree's growth in varying natural ways. <span class = "date-span">(2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('fractal-tree.html')" src = "images/gallery/fractal-tree.png">
-    <img class = "gallery-link" onclick = "openLink('fractal-tree.html')" src = "images/gallery/fractal-tree4.png">
-    <img class = "gallery-link" onclick = "openLink('fractal-tree.html')" src = "images/gallery/fractal-tree2.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "mandelbrot-viewer.html">Mandelbrot Viewer</a> &mdash; A colorful visualization of the famous <a href = "https://en.wikipedia.org/wiki/Mandelbrot_set" target = "_blank">Mandelbrot Set</a>, which you can pan and zoom infinitely into. The fractal loads through several rendering passes which make it more detailed every time. <span class = "date-span">(2022)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('mandelbrot-viewer.html')" src = "images/gallery/mandelbrot-viewer1.png">
-    <img class = "gallery-link" onclick = "openLink('mandelbrot-viewer.html')" src = "images/gallery/mandelbrot-viewer2.png">
-    <img class = "gallery-link" onclick = "openLink('mandelbrot-viewer.html')" src = "images/gallery/mandelbrot-viewer3.png">
-  </div>
-</div>
-
-<!---->
-
-<div class = "section" id = "section7">
-  <h2>&mdash; Cellular Automata &mdash;</h2>
-  <div class = "links">
-    <div class = "section-desc">Cellular automata are simulations where cells are arranged in a grid or line and have simple rules applied to them over time, so that each cell changes state as a function of time</div>
-    <br><br>
-    <a class = "big-link" target = "_blank" href = "life.html">Conway's Game of Life</a> &mdash; A customizable 2D cellular automaton simulation based in simple rules that creates complex and chaotic results. <span class = "date-span">(2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('life.html')" src = "images/gallery/life.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "elementary.html">Elementary Cellular Automaton</a> &mdash; A simple, two-state 1D cellular automaton simulation with 256 selectable rules. <span class = "date-span">(2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('elementary.html')" src = "images/gallery/elementary.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "ternary-elementary.html">Ternary Elementary Cellular Automaton</a> &mdash; A colorful, complex, three-state 1D cellular automaton simulation with over 7 trillion selectable rules. <span class = "date-span">(2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('ternary-elementary.html')" src = "images/gallery/ternary-elementary.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "totalistic.html">Totalistic Cellular Automaton</a> &mdash; A four-state 1D cellular automaton with a over 1 million simple rules that result in interesting outputs. <span class = "date-span">(2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('totalistic.html')" src = "images/gallery/totalistic.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "block.html">Block Cellular Automaton</a> &mdash; A basic two-state, 1D block-neighborhood cellular automaton with 256 selectable rules. <span class = "date-span">(2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('block.html')" src = "images/gallery/block.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "continuous.html">Continuous Cellular Automaton</a> &mdash; A cellular automaton where each cell can range from 0% to 100% brightness, creating complex gradient patterns. <span class = "date-span">(2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('continuous.html')" src = "images/gallery/continuous.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "ant.html">Langton's Ant</a> &mdash; A customizable 2D cellular automaton simulation involving simple ants. <span class = "wip">(work in progress)</span> <span class = "date-span">(2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('ant.html')" src = "images/gallery/ant.png">
-  </div>
-</div>
-
-<!---->
-
-<div class = "section" id = "section8">
-  <h2>&mdash; Random Math &mdash;</h2>
-  <div class = "links">
-    <a class = "big-link" target = "_blank" href = "googolplex.html">How Big is a Googolplex?</a> &mdash; An article explaining the absolutely massive size of a Googolplex, 10^10^100. <span class = "date-span">(circa 2020)</span>
-    <hr>
-    <a class = "big-link" target = "_blank" href = "misc-math.html">Misc Math</a> &mdash; This is just a page where I have random math-related things and numbers that were calculated and compiled. <span class = "date-span">(2022)</span>
-  </div>
-</div>
-
-<!---->
-
-<div class = "section" id = "section9">
-  <h2>&mdash; Lonely Chat Room &mdash;</h2>
-  <div class = "links">
-    <a class = "big-link" target = "_blank" href = "chat.html">Lonely Chat Room</a> &mdash; Chat alone in a chat room with gary271. Because you're lonely. <span class = "date-span">(2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('chat.html')" src = "images/gallery/chat.png">
-  </div>
-</div>
-
-<!---->
-
-<div class = "section" id = "section10">
-  <h2>&mdash; Islands of Misfit Code &mdash;</h2>
-  <div class = "links">
-    <div class = "section-desc">This is where I put everything I'm working on that hasn't been given its own page yet, from game ideas to random projects. Most of them are unfinished or not working, or just random mini projects that I never dedicated a page to.</div>
-    <br><br>
-    <a class = "big-link" target = "_blank" href = "testbed.html">Test Bed 1</a> &mdash; <b><i>June 30, 2021</i></b> to <b><i>October 17, 2021</i></b>
-    <hr>
-    <a class = "big-link" target = "_blank" href = "testbed2.html">Test Bed 2</a> &mdash; <b><i>October 17, 2021</i></b> to <b><i>present</i></b>
-  </div>
-</div>
-
-<!---->
-
-<div class = "section" id = "section11">
-  <h2>&mdash; Similar Websites &mdash;</h2>
-  <div class = "links">
-    <div class = "section-desc">If you like this website, here's some other sites I'd highly recommend checking out. These are my personal favorite websites that have a similar style to mine, and I've sometimes gotten inspiration from them in the past.</div>
-    <br><br>
-    <a class = "big-link" target = "_blank" href = "https://bicornum.neocities.org">Bicornum</a> &mdash; Lots of unique and interesting stand-alone projects, ranging from 3D fractals to algorithm visualizations to pattern generators.
-    <br>
-    <img class = "gallery-link" onclick = "openLink('https://bicornum.neocities.org/Ranking/Ranking.html')" src = "images/gallery/bicornum.png">
-    <img class = "gallery-link" onclick = "openLink('https://bicornum.neocities.org/SierpinskiPyramid/SierpinskiPyramid.html')" src = "images/gallery/bicornum2.png">
-    <img class = "gallery-link" onclick = "openLink('https://bicornum.neocities.org/emerge/emerge.html')" src = "images/gallery/bicornum3.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "https://geozone.neocities.org">Geozone</a> &mdash; A collection of some extremely satisfying and aesthetic animations and art generators, many mathematically based.
-    <br>
-    <img class = "gallery-link" onclick = "openLink('https://geozone.neocities.org/trianglesplit.html')" src = "images/gallery/geozone.png">
-    <img class = "gallery-link" onclick = "openLink('https://geozone.neocities.org/incirclezone.html')" src = "images/gallery/geozone3.png">
-    <img class = "gallery-link" onclick = "openLink('https://geozone.neocities.org/sierpinskiwhirlpool.html')" src = "images/gallery/geozone2.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "https://williamhoza.com/misc">William Hoza</a> &mdash; William Hoza is a postdoctoral researcher at UC Berkeley and has a collection of fun miscellaneous projects that encourage procrastination.
-    <br>
-    <img class = "gallery-link" onclick = "openLink('https://williamhoza.com/sproing')" src = "images/gallery/williamhoza2.png">
-    <img class = "gallery-link" onclick = "openLink('https://williamhoza.com/volleyball')" src = "images/gallery/williamhoza3.png">
-    <img class = "gallery-link" onclick = "openLink('https://williamhoza.com/text')" src = "images/gallery/williamhoza.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "https://www.dwitter.net">Dwitter</a> &mdash; A website where coders are challenged to create amazing projects, animations, or works of art using JavaScript -- except the source code has to be short enough to fit in a Tweet, so every project is limited to 140 total characters of code.
-    <br>
-    <img class = "gallery-link" onclick = "openLink('https://www.dwitter.net/d/10534')" src = "images/gallery/dwitter.png">
-    <img class = "gallery-link" onclick = "openLink('https://www.dwitter.net/d/547')" src = "images/gallery/dwitter2.png">
-    <img class = "gallery-link" onclick = "openLink('https://www.dwitter.net/d/18461')" src = "images/gallery/dwitter3.png">
-    <img class = "gallery-link" onclick = "openLink('https://www.dwitter.net/d/16091')" src = "images/gallery/dwitter4.png">
-    <img class = "gallery-link" onclick = "openLink('https://www.dwitter.net/d/6724')" src = "images/gallery/dwitter5.png">
-  </div>
-</div>
-
-<!---->
-
-<div class = "section" id = "section12">
-  <h2>&mdash; About e4494s &mdash;</h2>
-  <div class = "links" id = "about-txt">
-    <ul>
-      <li>The name "e4494s" comes from taking the word "error" (which is a username I've used for years), and swapping the letters "rror" with the numbers that are above them on a keyboard, so "rror" becomes "4494," and then adding an S to make "e4494s."</li>
-      <br>
-      <li>I'm an 18-year-old programmer who codes random things in his free time. I started learning JavaScript during Spring Break 2020 using the website <a href = "https://s2js.com" target = "_blank">S2JS</a>, an intro to JavaScript which I highly recommend.</li>
-      <br>
-      <li>Huge shoutout to Mrs. Evans, who was my amazing computer science teacher in high school. She's the reason I ever got interested in computer science in the first place, which I'm now majoring in.</li>
-      <br>
-      <li>This site is actually technically my second website. My first one (<a href = "https://wrandom.neocities.org" target = "_blank">wrandom.neocities.org</a>) was made back in 2017 before I knew how to program; it initially consisted of a few bullet points talking about my favorite numbers or something. But soon after I made it, I replaced everything with the source code for Cookie Clicker, which I thought would give me my own clone of the game. It sadly didn't remotely work, and I abandoned the site.</li>
-    </ul>
-  </div>
-  <!--<hr>
-    <h2>&mdash; Other Places You Can Find Me &mdash;</h2>
-    <table id = "about-table">
-      <tr>
-        <td>
-          GitHub: <a href = "https://github.com/e4494s" target = "_blank">e4494s</a>
-        </td>
-        <td>
-          YouTube: <a href = "https://www.youtube.com/channel/UCGYjOjt5nXn0vNVbYkXO4zg" target = "_blank">ERROR</a>
-        </td>
-        <td>
-          Scratch
-        </td>
-      </tr>
-    </table>-->
-</div>
-
-<!---->
-
-<div class = "section" id = "section14">
-  <h2>&mdash; Old Projects &mdash;</h2>
-  <div class = "links">
-    <div class = "section-desc">A collection of older projects I've created over the years, which are either not polished enough to be given a proper page, or they were replaced by a more updated version of themselves at some point.</div>
-    <br><br>
-    <a class = "big-link" target = "_blank" href = "mandelbrot.html">Mandelbrot Set</a> <span class = "date-span">(old version of <a href = "mandelbrot-viewer.html" target = "_blank">Mandelbrot Viewer</a>)</span> &mdash; A colorful and rudimentary Mandelbrot set visualizer. <span class = "date-span">(2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('mandelbrot.html')" src = "images/gallery/mandelbrot.png">
-    <img class = "gallery-link" onclick = "openLink('mandelbrot.html')" src = "images/gallery/mandelbrot2.png">
-    <img class = "gallery-link" onclick = "openLink('mandelbrot.html')" src = "images/gallery/mandelbrot3.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "pendulum.html">Double Pendulum</a> <span class = "date-span">(old version of <a href = "neon-pendulum.html" target = "_blank">Neon Double Pendulum</a>)</span> &mdash; The chaos of a double pendulum creates intricate and seemingly random line designs. <span class = "date-span">(2021)</span><!--or earlier-->
-    <br>
-    <img class = "gallery-link" onclick = "openLink('pendulum.html')" src = "images/gallery/pendulum.png">
-    <img class = "gallery-link" onclick = "openLink('pendulum.html')" src = "images/gallery/pendulum2.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "manipulation.html">Image Manipulation</a> &mdash; Select an image or copy an image link, and view different edits of that image. This was originally going to have a lot more to it, but I never got around to doing much more with it. The "Kajfik" section is a reference to the profile picture of the mobile developer for the game <a href = "https://ivark.github.io" target = "_blank">Antimatter Dimensions</a>. <span class = "date-span">(circa 2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('manipulation.html')" src = "images/gallery/manipulation.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "profile.html">Profile Picture Generator</a> <span class = "date-span">(old version of <a href = "profile-generator.html" target = "_blank">Profile Generator</a>)</span> &mdash; Very simple profile picture generator I made but didn't fully fleshed out because I was never a huge fan of the output. You can generate random profile pictures, with 3 different modes. <span class = "date-span">(circa 2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('profile.html')" src = "images/gallery/profile.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "cards.html">Cards</a> &mdash; A project where you click and drag to create cards that bounce and trail around the screen. I was inspired by a <a href = "https://mrdoob.com/lab/javascript/effects/solitaire" target = "_blank">Mr. Doob</a> page and decided to try to recreate it. <span class = "date-span">(circa 2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('cards.html')" src = "images/gallery/cards.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "M.html">M</a> &mdash; M. <span class = "date-span">(circa 2021)</span>
-    <hr>
-    <a class = "big-link" target = "_blank" href = "sketch.html">Sketchpad</a> &mdash; A work-in-progress sketchpad that I never got fully worked out. The main problem was that I wanted to have layers so you could undo an action, but that also meant lots of arrays of points that slowed down the program the more you drew. <span class = "date-span">(circa 2021)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('sketch.html')" src = "images/gallery/sketch.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "bottles.html">100 Bottles of Beer on the Wall</a> &mdash; Another extremely basic project I made back when I was first learning JavaScript. You type in a number, and the program spits out the lyrics to 100 Bottles of Beer, beginning with the number you inputted. I coded this in like 30 minutes on my phone one day to show one of my friends what I'd learned. <span class = "date-span">(circa 2020)</span>
-    <hr>
-    <a class = "big-link" target = "_blank" href = "purplepeople.html">Purple People</a> &mdash; A simple simulation of little pixely people wandering around the screen. Click to add more people. I originally wanted to give the purple people AI movement and interactions, but I never got around to implementing it, so they just move randomly. <span class = "date-span">(2020)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('purplepeople.html')" src = "images/gallery/purplepeople.png">
-    <hr>
-    <a class = "big-link" target = "_blank" href = "dvd.html">DVD on a TV</a> &mdash; A super basic project I made back when I was first learning JavaScript. It's literally just a DVD on a TV, like the name suggests. Will it ever hit the corner? <span class = "date-span">(2020)</span>
-    <hr>
-    <a class = "big-link" target = "_blank" href = "catcher.html">Catcher</a> &mdash; A very simple game I made from following one of the lesson tutorials from <a href = "https://s2js.com" target = "_blank">S2JS</a>, and one of the first projects I made for this website. Use the arrow keys to move the bug and catch the falling watermelon. <span class = "date-span">(2020)</span>
-    <br>
-    <img class = "gallery-link" onclick = "openLink('catcher.html')" src = "images/gallery/catcher.png">
-  </div>
-</div>
-
-<!---->
-
-
-<br>
-<div class = "desc">If you find yourself wanting to contact me for a bug report, a suggestion, or any other reason, you can reach me at <a class = "big-link" target = "_blank" href = "mailto: e4494s@gmail.com" id = "email-link">e4494s@gmail.com</a>.</div>
+<br><br>
+<button onclick = "rerollAll()">Reroll All</button>
+<button class = "download-canvas-btn" onclick = "downloadAll()">Download All</button>
+<div id = "canvas-div"></div>
+<script src = "scripts/main.js"></script>
 <script>
-  function openLink(url) {
-    let link = document.createElement("a");
-    link.href = url;
-    link.target = "_blank";
-    link.click();
+  let numCanvases = 5;
+  let C = [];
+  let profilePictureResolution = 250;
+  
+  let addNumbers = true;
+  let addPrefix = true;
+  
+  let addNumbersCheckbox = document.getElementById("add-numbers-checkbox");
+  let addPrefixCheckbox = document.getElementById("add-prefix-checkbox");
+  let mode0Checkbox = document.getElementById("mode-0-checkbox");
+  let mode1Checkbox = document.getElementById("mode-1-checkbox");
+  let mode2Checkbox = document.getElementById("mode-2-checkbox");
+  let mode3Checkbox = document.getElementById("mode-3-checkbox");
+  let mode4Checkbox = document.getElementById("mode-4-checkbox");
+  let mode5Checkbox = document.getElementById("mode-5-checkbox");
+  
+  let mode0 = true;
+  let mode1 = true;
+  let mode2 = true;
+  let mode3 = true;
+  let mode4 = true;
+  let mode5 = true;
+  
+  function updateSettings(caller, updateNames) {
+    addNumbers = addNumbersCheckbox.checked;
+    addPrefix = addPrefixCheckbox.checked;
+    
+    mode0 = mode0Checkbox.checked;
+    mode1 = mode1Checkbox.checked;
+    mode2 = mode2Checkbox.checked;
+    mode3 = mode3Checkbox.checked;
+    mode4 = mode4Checkbox.checked;
+    mode5 = mode5Checkbox.checked;
+    
+    if (!mode0 && !mode1 && !mode2 && !mode3 && !mode4 && !mode5) {
+      caller.checked = true;
+      updateSettings(caller);
+    }
+    
+    if (updateNames) updateAllNames();
   }
   
-  function showSection(n) {
-    for (let i = 1; i <= 14; i++) {
-      document.getElementById("section" + i).style.display = "none";
-      document.getElementById("section-btn-" + i).className = "section-btn";
-    }
-    document.getElementById("section" + n).style.display = "block";
-    document.getElementById("section-btn-" + n).className = "section-btn-selected";
-  }
+  let possibleUsernames = 0;
+  let possibleMode0 = 0;
+  let possibleMode1 = 0;
+  let possibleMode2 = 0;
+  let possibleMode3 = 0;
+  let possibleMode4 = 0;
+  let possibleMode5 = 0;
+  
+  let canvasDiv = document.getElementById("canvas-div");
   
   function init() {
-    showSection(13);
+    // Get rough estimates of how many possible usernames there are
+    // I know this isn't perfectly accurate, but it'll be in the right order of magnitude to give a sense of how many names there are
+    // (it doesn't account for failsafes like not allowing THESOURDOG, only THE-SOUR-DOG, etc., but it would be very overcomplicated to account for that, if it's even possible without going case by case)
     
-    let colors = "";
-    for (let i = 0; i < 200; i++) {
-      colors += `,hsl(60deg, 100%, ${randBetween(50, 100)}%)`;
-      //colors += `,rgb(255,255,${Math.random() * 255})`;
+    possibleMode0 = (articles.length + 1) * connectors.length * adjectives.length * countableNouns.length * 300;
+    possibleMode1 = countableNouns.length * countableNouns.length * connectors.length * 600;
+    possibleMode2 = countableNouns.length * uncountableNouns.length * connectors.length * 600;
+    possibleMode3 = titles.length * nounsAndAdjectives.length * connectors.length * 300;
+    possibleMode4 = countableNouns.length * transitiveVerbs.length * connectors.length * 600;
+    possibleMode5 = (vowels.length + digraphs.length + endDigraphs.length) * (anywhereConsonants.length + nonEndConsonants.length + nonStartConsonants.length) * adjectivesAndTransitiveVerbs.length * 300;
+    
+    possibleUsernames = possibleMode0 + possibleMode1 + possibleMode2 + possibleMode3 + possibleMode4 + possibleMode5;
+    console.log("Total possible usernames: " + possibleUsernames.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+    /*
+    MODE 0:
+    Possible articles (including no article), times
+    possible connectors (including no connector), times
+    possible adjectives, times
+    possible countable nouns, times
+    possible text cases (3), times
+    possible ending digits (100)
+    
+    MODE 1:
+    possible articles ("" and "the") (2), times
+    possible countable nouns, times
+    possible countable nouns, times
+    possible connectors (including no connector), times
+    possible text cases (3), times
+    possible ending digits (100)
+    
+    MODE 2:
+    possible articles ("" and "the") (2), times
+    possible countable nouns, times
+    possible uncountable nouns, times
+    possible connectors (including no connector), times
+    possible text cases (3), times
+    possible ending digits (100)
+    
+    MODE 3:
+    possible titles, times
+    possible nouns AND adjectives, times
+    possible connectors (including no connector), times
+    possible text cases (3), times
+    possible ending digits (100)
+    
+    MODE 4:
+    possible articles ("" and "the") (2), times
+    possible countable nouns, times
+    possible transitive verbs, times
+    possible connectors (including no connector), times
+    possible text cases (3), times
+    possible ending digits (100)
+    
+    MODE 5: (this OVERWHELMINGLY underestimates how many possible gibberish names there are, but I didn't know how to accurately estimate it without being like 100x off, so I went way under intentionally)
+    possible vowels (including digraphs like "ai"), times
+    possible consonants (including clusters like "str"), times
+    possible adjectives and transitive verbs,
+    times possible text cases (3), times
+    possible ending digits (100)
+    */
+    
+    for (let i = 0; i < numCanvases; i++) {
+      let obj = {};
+      
+      obj.canvas = document.createElement("canvas");
+      obj.canvas.width = profilePictureResolution;
+      obj.canvas.height = profilePictureResolution;
+      obj.canvas.title = "Click to download";
+      
+      obj.downloadLink = document.createElement("a");
+      obj.downloadLink.href = "";
+      obj.downloadLink.download = "";
+      obj.downloadLink.style.width = obj.downloadLink.style.width = profilePictureResolution;
+      
+      obj.canvas.onclick = () => obj.downloadLink.click();
+      
+      obj.ctx = obj.canvas.getContext("2d");
+      
+      obj.user = new User();
+      obj.user.setProfilePicture(profilePictureResolution, "rand");
+      
+      obj.table = document.createElement("table");
+      obj.table.className = "user-table";
+      let tr = document.createElement("tr");
+      obj.table.appendChild(tr);
+      let td2 = document.createElement("td");
+      td2.vAlign = "middle";
+      td2.style.verticalAlign = "middle";
+      
+      let btnDiv = document.createElement("div");
+      btnDiv.style = "display: inline-block; margin: auto; padding: 5px; vertical-align: middle";
+      
+      let pictureDiv = document.createElement("div");
+      pictureDiv.className = "picture-div";
+      
+      let btn2 = document.createElement("button");
+      btn2.title = "Reroll Picture";
+      btn2.className = "reroll-btn";
+      btn2.style.margin = "0";
+      btn2.onclick = () => rerollPicture(obj);
+      btn2.style.backgroundImage = "url('images/reroll-picture-icon.png')";
+      pictureDiv.appendChild(btn2);
+      pictureDiv.appendChild(document.createElement("br"));
+      let btn4 = document.createElement("button");
+      btn4.title = "Reroll Similar Picture";
+      btn4.className = "reroll-btn";
+      btn4.style.margin = "0";
+      btn4.onclick = () => rerollSimilarPicture(obj);
+      btn4.style.backgroundImage = "url('images/similar-picture-icon.png')";
+      pictureDiv.appendChild(btn4);
+      
+      btnDiv.appendChild(pictureDiv);
+      
+      let pictureDiv2 = document.createElement("div");
+      pictureDiv2.className = "picture-div";
+      
+      let btn1 = document.createElement("button");
+      btn1.title = "Reroll Username";
+      btn1.className = "reroll-btn";
+      btn1.style.margin = "0";
+      btn1.onclick = () => rerollUsername(obj);
+      btn1.style.backgroundImage = "url('images/reroll-username-icon.png')";
+      pictureDiv2.appendChild(btn1);
+      pictureDiv2.appendChild(document.createElement("br"));
+      let btn5 = document.createElement("button");
+      btn5.title = "Reroll Similar Username";
+      btn5.className = "reroll-btn";
+      btn5.style.margin = "0";
+      btn5.onclick = () => rerollSimilarUsername(obj);
+      btn5.style.backgroundImage = "url('images/similar-username-icon.png')";
+      pictureDiv2.appendChild(btn5);
+      
+      btnDiv.appendChild(pictureDiv2);
+      
+      let btn3 = document.createElement("button");
+      btn3.title = "Reroll Picture and Username";
+      btn3.className = "reroll-btn";
+      btn3.style.width = btn3.style.height = "45px";
+      btn3.onclick = () => rerollBoth(obj);
+      btn3.style.backgroundImage = "url('images/reroll-both-icon.png')";
+      btnDiv.appendChild(btn3);
+      
+      td2.appendChild(btnDiv);
+      
+      tr.appendChild(td2);
+      
+      let td = document.createElement("td");
+      td.vAlign = "middle";
+      td.style.verticalAlign = "middle";
+      td.appendChild(obj.canvas);
+      tr.appendChild(td);
+      
+      let td3 = document.createElement("td");
+      td3.className = "username-td";
+      td3.vAlign = "middle";
+      td3.style.verticalAlign = "middle";
+      obj.usernameTxt = document.createElement("span");
+      obj.usernameTxt.className = "username-txt";
+      obj.usernameTxt.innerHTML = obj.user.username;
+      td3.appendChild(obj.usernameTxt);
+      tr.appendChild(td3);
+      
+      canvasDiv.appendChild(obj.table);
+      C.push(obj);
+      
+      displayUser(obj);
     }
-    document.body.style.backgroundImage = `radial-gradient(ellipse farthest-corner at -5% -5%${colors})`;
   }
   
-  init();
+  const RATIOA = Math.sqrt(3) / 3;
   
-  function randBetween(min, max) {
-    return (Math.random() * (max - min)) + min;
+  let articles = ["the", "very", "really", "some"];
+  
+  let adjectives = [];
+  let adjectivesA = ["happy", "sad", "ecstatic", "depressed", "lonely", "outgoing", "fuzzy", "fluffy", "shiny", "red", "yellow", "green", "blue", "purple", "indigo", "black", "white", "gray", "cyan", "skinny", "fat", "tall", "short", "beautiful", "adorable", "stunning", "pointy", "sharp", "edible", "incredible", "amazing", "weird", "smart", "fancy", "loud", "quiet", "silent", "soaked", "squishy", "exterior", "interior", "flying", "dead", "undead", "young", "old", "spiky", "cold", "hot", "frozen", "melted", "burnt", "broken", "lost", "brittle", "crazy", "insane", "unstable", "stable", "stealthy", "obvious", "common", "uncommon", "rare", "epic", "legendary", "mythical", "first", "second", "third", "fourth", "fifth", "unbelievable", "ridiculous", "ancient", "modern", "contemporary", "rusty", "rusted", "rotten", "shattered", "dusty", "forgotten", "worn", "smiling", "laughing", "crying", "smirking", "gasping", "scared", "brave", "cowardly", "inventive", "petty", "quick", "speedy", "slow", "unstoppable", "charged", "drained", "jumpy", "clumsy", "massive", "big", "huge", "tiny", "little", "small", "average", "extraordinary", "ordinary", "blossoming", "blooming", "sunny", "cloudy", "dry", "wet", "aquatic", "friendly", "accelerated", "boring", "exciting", "flaming", "icy", "earthen", "muddy", "salty", "sweet", "sour", "bitter", "smooth", "rough", "unexpected", "cool", "awesome", "lame", "blind", "deaf", "mute", "aggressive", "calm", "confident", "overconfident", "insecure", "slippery", "slimy", "sticky", "picky", "bratty", "chilly", "sideways", "clean", "soapy", "boiling", "foreign", "torn", "scratchy", "sparky", "circular", "rectangular", "hexagonal", "pentagonal", "elliptic", "round", "square", "triangular", "spherical", "cubic", "odorless", "connected", "disconnected", "fizzy", "carbonated", "sugary", "caffeinated", "soft", "baby", "elderly", "spinning", "rotating", "revolving", "disposable", "timed", "obscure", "fiery", "flat", "artistic", "famous", "infamous", "invisible", "visible", "stuffed", "sandy", "carpeted", "empty", "abandoned", "derelict", "deserted", "overloaded", "nautical", "alluring", "attractive", "merciful", "gracious", "kind", "loving", "magnificent", "malevolent", "evil", "dark", "despicable", "popular", "unpopular", "distant", "safe", "dangerous", "unknown", "anonymous", "faulty", "operational", "rich", "poor", "wealthy", "clever", "fragile", "sturdy", "funny", "funky", "musical", "strange", "sneaky", "kingly", "royal", "stone", "gold", "silver", "bronze", "metallic", "nostalgic", "sickly", "healthy", "eerie", "mysterious", "electric", "heavy", "light", "disguised", "hidden", "covert", "armed", "deadly", "fatal", "toxic", "poisonous", "venomous", "carnivorous", "pacifist", "furious", "inferior", "superior", "glossy", "savory", "unamused", "immovable", "constant", "comatose", "brainy", "handsome", "scalding", "pretty", "cute", "charming", "rude", "mean", "harsh", "extroverted", "introverted", "charismatic", "hostile", "comfortable", "uncomfortable", "cozy", "snuggly", "drunk", "drunken", "high", "low", "large", "medium", "beloved", "respectable", "respected", "influential", "efficient", "inefficient", "effective", "ineffective", "bothersome", "trashy", "rejected", "desolate", "hopeless", "hopeful", "sarcastic", "ironic", "competent", "incompetent", "sleepy", "sleeping", "unconscious", "lucid", "joyous", "glorious", "exalted", "cyclic", "advanced", "backwards", "honest", "tricky", "lying", "last", "final", "ultimate", "highest", "lowest", "glorified", "stupendous", "bony", "lean", "slim", "stout", "severe", "strict", "curvy", "narrow", "obtuse", "dense", "obese", "giant", "puny", "wide", "deep", "odd", "shy", "ill", "tan", "new", "fun", "neat", "foul", "fine", "damp", "wary", "nice", "dull", "numb", "bold", "dyed", "grim", "nosy", "easy", "pale", "icky", "ripe", "vile", "buff", "tough", "strong", "muscular", "fond", "open", "weak", "late", "sore", "edgy", "unfunny", "mild", "tidy", "hurt", "injured", "sprained", "fractured", "wise", "true", "boxy", "fake"];
+  let adjectivesB = ["tame", "docile", "real", "full", "lacy", "firm", "dear", "racy", "glad", "drab", "mini", "used", "zany", "found", "faithful", "witty", "silly", "vivid", "vague", "specific", "proud", "dizzy", "timid", "scary", "super", "local", "cruel", "shaky", "stern", "civil", "rapid", "lumpy", "pagan", "arrogant", "bloody", "creepy", "crowded", "defiant", "petrified", "fossilized", "doubtful", "fair", "fierce", "gentle", "jolly", "misty", "nutty", "plain", "prickly", "puzzled", "splendid", "spotless", "talented", "tender", "sensitive", "thoughtful", "troubled", "uptight", "vast", "omniscent", "omnipotent", "holy", "divine", "righteous", "wicked", "zealous", "shrunken", "cheerful", "horrific", "athletic", "blinding", "obedient", "abstract", "personal", "generous", "textured", "sensible", "negative", "positive", "imaginary", "critical", "haunting", "sinister", "colorful", "rainbow", "muted", "reckless", "thankful", "detailed", "animated", "cartoon", "normal", "abnormal", "forceful", "barbaric", "modest", "helpless", "handheld", "hesitant", "likeable", "resolute", "secret", "cautious", "glowing", "romantic", "gorgeous", "wasteful", "stretchy", "special", "quilted", "ghostly", "origami", "paper", "stitched", "starved", "trained", "masterful", "wishful", "stained", "corrupt", "shrimpy", "durable", "magical", "enchanted", "pensive", "spotted", "striped", "blessed", "compact", "beastly", "evasive", "ominous", "angelic", "extreme", "festive", "serious", "panicky", "twisted", "violent", "eternal", "missing", "immortal", "mortal", "godly", "rounded", "classic", "crimson", "shaded", "sketchy", "sincere", "stylish", "deadpan", "grizzly", "capable", "revered", "spoiled", "crooked", "demonic", "careful", "unusual", "playful", "idiotic", "ungodly", "unholy", "mutated", "uncanny", "jealous", "moonlit", "immense", "folded", "handmade", "homemade", "crafted", "crafty", "sly", "drugged", "ghastly", "melodic", "guarded", "painful", "elegant", "spastic", "dynamic", "frantic", "explosive", "volatile", "thirsty", "hungry", "expert", "quirky", "social", "sporty", "single", "chubby", "unique", "custom", "limber", "hybrid", "iconic", "moronic", "solemn", "psycho", "dreamy", "velvet", "trendy", "savage", "rugged", "robust", "wobbly", "buried", "lovely", "pink", "exotic", "floaty", "ashy", "gifted", "mellow", "serene", "lively", "candid", "mature", "unsure", "greasy", "floral", "banded", "greedy", "quaint", "cheesy", "somber", "hushed", "excellent", "mashed", "smushed", "squashed", "winged", "camo", "minty", "fresh", "watchful", "sluggish", "soupy", "great", "mighty", "fearsome", ];
+  adjectives = adjectivesA.concat(adjectivesB);
+  
+  let countableNouns = [];
+  let countableNounsA = ["chair", "table", "duck", "dog", "cat", "person", "human", "napkin", "donut", "burrito", "taco", "plate", "bone", "pants", "tuxedo", "pizza", "bird", "eagle", "bottle", "horse", "tree", "bush", "plant", "animal", "grass", "shrub", "galaxy", "planet", "moon", "sun", "curtain", "carpet", "pole", "candy", "lollipop", "chocolate", "butter", "peanut", "almond", "pistachio", "walnut", "cashew", "fruit", "apple", "lemon", "pear", "avocado", "guacamole", "cereal", "hat", "cowboy", "lawyer", "plum", "peach", "asparagus", "pepper", "carrot", "cake", "cupcake", "brownie", "cookie", "beef", "pork", "meat", "student", "teacher", "flag", "paper", "laptop", "computer", "keyboard", "typewriter", "architect", "engineer", "scientist", "chemist", "biologist", "business", "phone", "bench", "novel", "calzone", "restaurant", "cannon", "water", "sniper", "soldier", "gun", "bullet", "eyeball", "nose", "ear", "arm", "leg", "hand", "finger", "elbow", "shoulder", "knee", "foot", "toe", "door", "window", "doorknob", "thing", "item", "character", "pencil", "pen", "marker", "store", "wallet", "money", "glasses", "hair", "food", "drawer", "bread", "loaf", "juice", "bowl", "floor", "wall", "fence", "principal", "astronaut", "astronomer", "astrologer", "artist", "plumber", "welder", "diver", "swimmer", "fish", "shark", "dolphin", "deer", "buck", "platypus", "bear", "parrot", "dynamite", "bomb", "crown", "king", "queen", "prince", "princess", "assistant", "merchant", "pirate", "ninja", "samurai", "sword", "crossbow", "arrow", "letter", "axe", "mace", "spear", "shield", "fortress", "castle", "house", "building", "kingdom", "catapult", "trebuchet", "loser", "winner", "witch", "broom", "monster", "alien", "sailor", "boat", "ship", "warrior", "nation", "country", "state", "ocean", "lake", "stream", "river", "pond", "puddle", "storm", "lightning", "mountain", "hill", "valley", "dragon", "beast", "key", "fridge", "freezer", "microwave", "oven", "toaster", "shower", "bathtub", "cord", "lamp", "cactus", "flower", "stem", "leaf", "acorn", "seed", "crab", "seashell", "shell", "tail", "car", "truck", "minivan", "scooter", "tricycle", "bicycle", "skateboard", "sandal", "clover", "rug", "cube", "square", "rectangle", "triangle", "pyramid", "sphere", "circle", "hexagon", "pentagon", "dollar", "chip", "potato", "fry", "kid", "child", "adult", "teen", "teenager", "youngling", "senior", "junior", "sophomore", "freshman", "pea", "couch", "armchair", "board", "plank", "scythe", "sunglasses", "disguise", "pearl", "eyepatch", "jeans", "blanket", "quilt", "bonfire", "campfire", "ant", "anteater", "wasp", "bee", "butterfly", "moth", "hornet", "ketchup", "mustard", "mayo", "burger", "scarecrow", "crow", "raven", "poet", "dreamer", "girl", "boy", "guy", "dude", "chick", "man", "woman", "lady", "female", "male", "month", "week", "day", "hour", "minute", "year", "decade", "century", "coffee", "latte", "steam", "beard", "puppy", "kitten", "backpack", "school", "eraser", "caterpillar", "tissue", "towel", "beetle", "tooth", "brush", "assassin", "killer", "murderer", "staircase", "hero", "savior", "dictator", "president", "politician", "word", "superhero", "villain", "pot", "toy", "dress", "tie", "wig", "card", "candle", "rock", "stone", "pebble", "boulder", "cliff", "tower", "panda", "worm", "snake", "cobra", "harmonica", "piano", "guitar", "drum", "flute", "kazoo", "brick", "fireplace", "cork", "shard", "slice", "tuba", "trumpet", "saxophone", "disciple", "apostle", "follower", "leader", "chief", "commander", "captain", "colonel", "hunter", "bandit", "thief", "burglar", "robot", "android", "machine", "golem", "bot", "mercenary", "vigilante", "fork"];
+  let countableNounsB = ["knife", "chopstick", "belt", "band", "mug", "cup", "tea", "bag", "box", "podium", "feather", "talon", "quill", "blaster", "tiger", "lion", "prodigy", "shelter", "foundation", "corn", "seafood", "pastor", "preacher", "blood", "creep", "weirdo", "youth", "nomad", "vagrant", "titan", "god", "goddess", "demigod", "puzzle", "piece", "cardboard", "image", "picture", "camera", "film", "movie", "show", "projector", "cartoon", "friend", "girlfriend", "boyfriend", "wife", "husband", "spouse", "brother", "sister", "cousin", "aunt", "uncle", "grandpa", "grandma", "grandfather", "grandmother", "son", "daughter", "nephew", "niece", "origami", "rookie", "pro", "master", "apprentice", "boss", "crook", "demon", "angel", "mutation", "psycho", "gardener", "wolf", "gator", "cricket", "frog", "toad", "tadpole", "eel", "ostrich", "jacket", "coat", "block", "pie", "jam", "sea", "tub", "bath", "fly", "owl", "eye", "map", "cap", "air", "bun", "pet", "ponytail", "pony", "mother", "father", "oil", "pig", "sky", "cinnamon", "wax", "tax", "paycheck", "lamb", "vest", "chin", "bowtie", "turtle", "tortoise", "yarn", "desk", "note", "bulb", "comb", "tape", "nail", "wine", "pump", "knot", "rice", "sushi", "ham", "hamburger", "pasta", "spaghetti", "locker", "gown", "haircut", "gravy", "biscuit", "oat", "snack", "salmon", "cod", "catfish", "chicken", "roll", "squash", "pumpkin", "cucumber", "pickle", "tile", "whip", "wire", "wing", "hood", "club", "room", "mouse", "dime", "bull", "quarter", "nickel", "penny", "coin", "camp", "sink", "glue", "sand", "coal", "doll", "edge", "mint", "actor", "actress", "stew", "muffin", "pipe", "wish", "piper", "pianist", "guitarist", "conductor", "composer", "kite", "sugar", "salad", "ranch", "cream", "scarf", "honey", "error", "judge", "witness", "shirt", "paint", "crowd", "laser", "dagger", "blade", "katana", "jewel", "hyena", "guide", "grain", "voice", "coach", "player", "thumb", "noise", "field", "straw", "toast", "sandwich", "crush", "berry", "watch", "snail", "sponge", "wrench", "turkey", "feast", "meal", "breakfast", "lunch", "dinner", "supper", "brunch", "circus", "engine", "poison", "memory", "battle", "basket", "monkey", "marble", "cow", "star", "milk", "bean", "tank", "wind", "rifle", "island", "cloud", "egg", "pillow", "fang", "soup", "claw", "fan", "medicine", "pill", "lid", "grill", "skillet", "pancake", "waffle", "syrup", "batter", "crowbar", "syringe", "lizard", "crystal", "tractor", "rabbit", "bunny", "hare", "shovel", "spade", "heart", "brain", "kidney", "liver", "disease", "orange", "notepad", "lasagna", "balloon", "ball", "baseball", "basketball", "football", "visitor", "shotgun", "popcorn", "fireman", "cop", "gorilla", "ladybug", "whistle", "mailbox", "library", "kitchen", "kennel", "cage", "mirror", "corpse", "goblin", "zombie", "wizard", "warlock", "potion", "pistol", "harbor", "anchor", "rope", "chain", "yogurt", "bakery", "painting", "plane", "writer", "nurse", "record", "thread", "harp", "melody", "throat", "barrel", "train", "canvas", "button", "crayon", "cobweb", "bubble", "kettle", "muscle", "weight", "log", "doctor", "skeleton", "skull", "pocket", "bridge", "violin", "bat", "grenade", "rocket", "missile", "torpedo", "nuke", "monocle", "eyebrow", "office", "hydra", "wyvern", "chimera", "mammoth", "colossus", "leviathan", "behemoth", "monstrosity", "brute", "fiend", "serpent","traitor", "trickster", "joker", "jester", "clown", "ogre", "devil", "donkey", "mule", "steed", "savage", "swine", "rascal", "imp", "wretch", "hermit", "rogue", "freak", "centaur", "mutant", "phoenix", "mermaid", "werewolf", "unicorn", "fairy", "sphinx", "temple", "altar", "native"];
+  let countableNounsC = ["sacrifice", "hound", "griffin", "yeti", "leprechaun", "gnome", "pegasus", "cyclops", "ghoul", "spirit", "troll", "manticore", "pixie", "manatee", "minotaur", "banshee", "siren", "vampire", "scorpion", "spider", "arachnid", "harpy", "elf", "dwarf", "hobbit", "crumb", "particle", "atom", "proton", "neutron", "electron", "quark", "scepter", "companion", "traveller", "pal", "buddy", "twin", "comrade", "sidekick", "enemy", "opponent", "champion", "foe", "rival", "terrorist", "spy", "rebel", "conqueror", "critic", "hellhound", "veggie", ];
+  countableNouns = countableNounsA.concat(countableNounsB).concat(countableNounsC);
+  
+  let uncountableNouns = ["awesomeness", "despair", "doom", "justice", "goodness", "evil", "fate", "intelligence", "truth", "knowledge", "beauty", "anger", "fear", "courage", "power", "might", "bravery", "chaos", "confusion", "danger", "happiness", "sadness", "depression", "fury", "rage", "hunger", "dignity", "failure", "success", "faith", "fun", "fame", "freedom", "friendship", "guilt", "health", "hatred", "love", "humor", "honesty", "irony", "sarcasm", "crime", "jealousy", "joy", "kindness", "compassion", "laughter", "luck", "logic", "magic", "nonsense", "peace", "pride", "purity", "pain", "quality", "revenge", "safety", "speed", "slowness", "stupidity", "shame", "silence", "time", "trouble", "violence", "warmth", "fire", "ice", "metal", "insanity", "integrity", "maturity", "loyalty", "sharpness", "fortune", "misfortune", "hope", "patience", "sanity", "sensitivity", "weakness", "wisdom", "wit", "strength", "talent", "sympathy", "anxiety", "delight", "grief", "misery", "relief", "romance", "sorrow", "surprise", "fragility", "liberty", "death", "life", "luxury", "mercy", "wealth", "reality", "artistry", "comfort", "deceit", "dexterity", "energy", "mass", "force", "grace", "darkness", "light", "gold", "envy", "greed", "wrath", "humility", "charity", "virtue", "gratitude", "respect", "trust"];
+  
+  let nouns = countableNouns.concat(uncountableNouns);
+  
+  let nounsAndAdjectives = nouns.concat(adjectives);
+  
+  let titles = ["dr", "mr", "ms", "mrs", "mister", "miss", "doctor", "lord", "professor"];
+  
+  let transitiveVerbs = ["hitter", "eater", "washer", "reader", "giver", "maker", "beater", "brusher", "builder", "catcher", "chaser", "cleaner", "loader", "collecter", "destroyer", "breaker", "smasher", "dropper", "grabber", "gatherer", "helper", "inspector", "keeper", "knocker", "slapper", "smacker", "wiper", "tickler", "striker", "getter", "buyer", "lender", "payer", "refuser", "puncher", "shooter", "stabber", "slicer", "insulter", "complimenter", "lover", "stealer", "finder", "admirer", "adorer", "adviser", "attracter", "avoider", "bender", "bouncer", "thrower", "chooser", "counter", "cutter", "denier", "disliker", "enjoyer", "feeder", "tearer", "fixer", "repairer", "generator", "grower", "hanger", "hater", "hugger", "holder", "ignorer", "impresser", "informer", "kisser", "licker", "kicker", "lifter", "melter", "neglecter", "observer", "biter", "stalker", "painter", "sketcher", "designer", "trapper", "annihilator", "stopper", "flattener", "crusher", "stomper", "poker", "ripper", "taker", "summoner", "squisher", "squeezer", "seller", "pusher", "puller", "watcher", "scraper", "scrapper", "burner", "igniter", "demolisher", "wrecker", "ruiner", "shatterer", "exploder", "injurer", "harmer", "devastator", "damager", "waster", "ender", "preventer", "restorer", "raiser", "healer", "eraser", "eliminator", "decimator", "assister", "improver", "preserver", "saver", "inhaler", "impaler", "patter", "petter", "strangler", "abductor", "kidnapper", "twister", "compressor", "squasher", "trampler", "toppler", "carrier"];
+  
+  
+  let adjectivesAndTransitiveVerbs = adjectives.concat(transitiveVerbs);
+  function randAdjectiveOrTransitiveVerb() {
+    return adjectivesAndTransitiveVerbs[Math.floor(Math.random() * adjectivesAndTransitiveVerbs.length)];
   }
   
-  let titleTxt = document.getElementById("title-txt");
-  let secretBtn = document.getElementById("secret-btn");
+  let anywhereConsonants = ["b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "r", "s", "t", "v", "w", "y", "z", "sh", "ch", "th"];
+  let nonStartConsonants = ["nk", "rb", "rc", "rd", "rf", "rg", "rk", "rm", "rn", "rp", "rs", "rt", "rx", "ft", "rv", "nch", "rch", "rsh", "rth", "x", "ll", "ld", "lb", "lk", "nd"];
+  let nonEndConsonants = ["bl", "cl", "fl", "gl", "kl", "pl", "sl", "sm", "sc", "sk", "sn", "sp", "st", "br", "cr", "fr", "gr", "pr", "tr", "scr", "spl", "spr", "shr", "thr", "str", "sw", "dr"];
   
-  /*function secretFunction() {
-    secretBtn.style.backgroundColor = "red";
-    secretBtn.style.borderRadius = "50%";
-    secretBtn.style.border = "2px solid black";
-    let div = document.createElement("div");
-    div.style.padding = "25px";
-    div.innerHTML = "Congrats! You clicked the secret button! Here's a link to the page where I put all my unfinished projects, never before seen by the world: <a href = 'testbed.html' target = '_blank'>Test Bed</a>";
-    document.body.insertBefore(div, titleTxt);
+  let startConsonants = anywhereConsonants.concat(nonEndConsonants);
+  let middleConsonants = anywhereConsonants.concat(nonStartConsonants).concat(nonEndConsonants);
+  let endConsonants = anywhereConsonants.concat(nonStartConsonants);
+  
+  let vowels = ["a", "e", "i", "o", "u"];
+  let digraphs = ["oo", "ee"];
+  let endVowels = ["a", "e", "i", "o", "u"];
+  let endDigraphs = ["oo", "ee", "ai", "ao", "au", "oi", "ou", "oy", "ay", "ey"];
+  
+  function randAnywhereConsonant() {
+    return anywhereConsonants[Math.floor(Math.random() * anywhereConsonants.length)];
+  }
+  function randStartConsonant() {
+    if (Math.random() < 0.5) return randAnywhereConsonant(); // 50% chance to be a more "normal" consonant
+    return startConsonants[Math.floor(Math.random() * startConsonants.length)];
+  }
+  function randMiddleConsonant() {
+    if (Math.random() < 0.5) return randAnywhereConsonant(); // 50% chance to be a more "normal" consonant
+    return middleConsonants[Math.floor(Math.random() * middleConsonants.length)];
+  }
+  function randEndConsonant() {
+    if (Math.random() < 0.5) return randAnywhereConsonant(); // 50% chance to be a more "normal" consonant
+    return endConsonants[Math.floor(Math.random() * endConsonants.length)];
+  }
+  function randVowel() {
+    let array = vowels;
+    if (Math.random() < 0.5) array = array.concat(digraphs); // 50% chance to allow digraphs, so they're less common
+    return array[Math.floor(Math.random() * array.length)];
+  }
+  function randEndVowel() {
+    let array = endVowels;
+    if (Math.random() < 0.5) array = array.concat(endDigraphs); // 50% chance to allow digraphs, so they're less common
+    return array[Math.floor(Math.random() * array.length)];
+  }
+  
+  function gibberishName() {
+    let syllables = Math.floor(Math.random() * 3) + 1;//Math.random() < 0.5 ? 2 : Math.floor(Math.random() * Math.random() * 3) + 1;
+    
+    let name = "";
+    
+    if (syllables === 1) {
+      let startWithVowel = Math.random() < 0.5; // 50% chance to start with a vowel
+      let endWithConsonant = Math.random() < 0.5; // 50% chance to end with consonant
+      
+      let start = (startWithVowel ? "" : randStartConsonant()) + (!startWithVowel && !endWithConsonant ? randEndVowel() : randVowel()); // If not ending with a consonant or starting with a vowel, allow ending vowels like "ai" and "ou"
+      let end = startWithVowel ? randEndConsonant() : (endWithConsonant ? randEndConsonant() : "");
+      
+      name = start + end;
+    }
+    else {
+      let startWithVowel = Math.random() < 0.5; // 50% chance to start with a vowel
+      let endWithConsonant = Math.random() < 0.5; // 50% chance to end with consonant
+      
+      let start = (startWithVowel ? "" : randStartConsonant()) + randVowel();
+      
+      let middle = "";
+      for (let i = 0; i < syllables - 1; i++) {
+        let lastIteration = i === syllables - 2;
+        middle += randMiddleConsonant() + ((lastIteration && !endWithConsonant) ? randEndVowel() : randVowel()); // If not ending with a consonant, allow ending vowels like "ai" and "ou"
+      }
+      
+      let end = endWithConsonant ? randEndConsonant() : "";
+      
+      name = start + middle + end;
+    }
+    
+    if (name.length < 3) return gibberishName();
+    return name;
+  }
+  
+  let connectors = ["", "-", "_"];
+  
+  function randArticle() {
+    return articles[Math.floor(Math.random() * articles.length)];
+  }
+  function randAdjective() {
+    return adjectives[Math.floor(Math.random() * adjectives.length)];
+  }
+  function randCountableNoun() {
+    return countableNouns[Math.floor(Math.random() * countableNouns.length)];
+  }
+  function randUncountableNoun() {
+    return uncountableNouns[Math.floor(Math.random() * uncountableNouns.length)];
+  }
+  function randNoun() {
+    return nouns[Math.floor(Math.random() * nouns.length)];
+  }
+  function randNounOrAdjective() {
+    return nounsAndAdjectives[Math.floor(Math.random() * nounsAndAdjectives.length)];
+  }
+  function randTransitiveVerb() {
+    return transitiveVerbs[Math.floor(Math.random() * transitiveVerbs.length)];
+  }
+  function randTitle() {
+    return titles[Math.floor(Math.random() * titles.length)];
+  }
+  function randNums() {
+    return String(Math.floor(Math.random() * 10)) + String(Math.floor(Math.random() * 10));
+  }
+  function randConnector() {
+    return connectors[Math.floor(Math.random() * connectors.length)];
+  }
+  function randMode() {
+    let modes = [];
+    if (mode0) modes.push(0);
+    if (mode1) modes.push(1);
+    if (mode2) modes.push(2);
+    if (mode3) modes.push(3);
+    if (mode4) modes.push(4);
+    if (mode5) modes.push(5);
+    
+    return modes[Math.floor(Math.random() * modes.length)];
+  }
+  function capitalize(string, mode) {
+    if (mode === 0) return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase(); // Titlecase
+    if (mode === 1) return string.toLowerCase(); // lowercase
+    if (mode === 2) return string.toUpperCase(); // UPPERCASE
+  }
+  
+  function drawPolygon(context, x, y, radius, sides) {
+    let a = (Math.PI * 2) / sides;
+    
+    context.beginPath();
+    
+    context.moveTo(x, y - radius);
+    
+    for (let i = 0; i <= sides + 1; i++) {
+      context.lineTo(x + (radius * Math.cos((a * i) - (Math.PI / 2))), y + (radius * Math.sin((a * i) - (Math.PI / 2))));
+    }
+  }
+  function drawStar(context, x, y, outRadius, inRadius, points) {
+    let a = (Math.PI * 2) / points;
+    
+    context.beginPath();
+    
+    context.moveTo(x, y - outRadius);
+    context.lineTo(x + (inRadius * Math.cos((a / 2) - (Math.PI / 2))), y + (inRadius * Math.sin((a / 2) - (Math.PI / 2))));
+    
+    for (let i = 0; i <= points + 2; i++) {
+      context.lineTo(x + (outRadius * Math.cos((a * i) - (Math.PI / 2))), y + (outRadius * Math.sin((a * i) - (Math.PI / 2))));
+      context.lineTo(x + (inRadius * Math.cos((a * (i + 0.5)) - (Math.PI / 2))), y + (inRadius * Math.sin((a * (i + 0.5)) - (Math.PI / 2))));
+    }
+  }
+  
+  function drawRoundedRect(context, x, y, width, height, cornerRadius) {
+    if (typeof cornerRadius === "number") cornerRadius = [cornerRadius, cornerRadius, cornerRadius, cornerRadius];
+    
+    context.beginPath();
+    context.moveTo(x + cornerRadius[0], y);
+    context.lineTo(x + width - cornerRadius[1], y);
+    context.quadraticCurveTo(x + width, y, x + width, y + cornerRadius[1]);
+    context.lineTo(x + width, y + height - cornerRadius[2]);
+    context.quadraticCurveTo(x + width, y + height, x + width - cornerRadius[2], y + height);
+    context.lineTo(x + cornerRadius[3], y + height);
+    context.quadraticCurveTo(x, y + height, x, y + height - cornerRadius[3]);
+    context.lineTo(x, y + cornerRadius[0]);
+    context.quadraticCurveTo(x, y, x + cornerRadius[0], y);
+  }
+  function drawRoundedRectFromCenter(context, x, y, width, height, cornerRadius) {
+    drawRoundedRect(context, x - (width / 2), y - (width / 2), width, height, cornerRadius);
+  }
+  
+  /*function longestUsername() {
+    let longest = 0;
+    let article = "";
+    for (let i = 0; i < articles.length; i++) {
+      if (articles[i].length > longest) {
+        longest = articles[i].length;
+        article = articles[i];
+      }
+    }
+    
+    longest = 0;
+    let adjective = "";
+    for (let i = 0; i < adjectives.length; i++) {
+      if (adjectives[i].length > longest) {
+        longest = adjectives[i].length;
+        adjective = adjectives[i];
+      }
+    }
+    
+    longest = 0;
+    let noun = "";
+    for (let i = 0; i < nouns.length; i++) {
+      if (nouns[i].length > longest) {
+        longest = nouns[i].length;
+        noun = nouns[i];
+      }
+    }
+    
+    return capitalize(article + "_" + adjective + "_" + noun + "99", 0);
   }*/
+  
+  function User() {
+    this.setUsername("rand");
+  }
+  User.prototype.setUsername = function(nameMode) {
+    let textCase = Math.floor(Math.random() * Math.random() * 3);
+    
+    let connector = randConnector();
+    
+    if ((textCase === 1 || textCase === 2) && connector === "") {
+      // if username is in the style of "thesourdog" or "THESOURDOG," choose either - or _ for a connector instead of a blank connector
+      connector = Math.random() < 0.5 ? "-" : "_";
+    }
+    
+    let mode = nameMode === "rand" ? randMode() : nameMode;
+    this.nameMode = mode;
+    
+    if (mode === 0) { // article + adjective + countable noun
+      this.start = capitalize(randArticle(), textCase) + connector;
+      
+      let adjective = capitalize(randAdjective(), textCase);
+      
+      let noun = capitalize(randCountableNoun(), textCase);
+      
+      this.middle = adjective + connector + noun;
+      
+      this.end = connector + randNums();
+    }
+    else if (mode === 1) { // countable noun + countable noun
+      this.start = capitalize("the", textCase) + connector;
+      
+      let noun1 = capitalize(randCountableNoun(), textCase);
+      let noun2 = capitalize(randCountableNoun(), textCase);
+      
+      this.middle = noun1 + connector + noun2;
+      
+      this.end = connector + randNums();
+    }
+    else if (mode === 2) { // the + countable noun + of + uncountable noun
+      this.start = capitalize("the", textCase) + connector;
+      
+      let _of = capitalize("of", textCase);
+      
+      let noun1 = capitalize(randCountableNoun(), textCase);
+      let noun2 = capitalize(randUncountableNoun(), textCase);
+      
+      this.middle = noun1 + connector + _of + connector + noun2;
+      
+      this.end = connector + randNums();
+    }
+    else if (mode === 3) { // title + noun/adjective
+      this.start = "";
+      
+      let title = capitalize(randTitle(), textCase);
+      let nounOrAdjective = capitalize(randNounOrAdjective(), textCase);
+      
+      this.middle = title + connector + nounOrAdjective;
+      
+      this.end = connector + randNums();
+    }
+    else if (mode === 4) { // the + countable noun + transitive verb
+      this.start = capitalize("the", textCase) + connector;
+      
+      let noun = capitalize(randCountableNoun(), textCase);
+      let verb = capitalize(randTransitiveVerb(), textCase);
+      
+      this.middle = noun + connector + verb;
+      
+      this.end = connector + randNums();
+    }
+    else if (mode === 5) { // gibberish name + the + (transitive verb / adjective)
+      connector = Math.random() < 0.5 ? "-" : "_"; // Don't allow "" as a connector with this mode to make it easier to read
+      
+      this.start = "";
+      
+      let name = capitalize(gibberishName(), textCase);
+      let the = capitalize("the", textCase);
+      let title = capitalize(randAdjectiveOrTransitiveVerb(), textCase);
+      
+      this.middle = name + connector + the + connector + title;
+      
+      this.end = connector + randNums();
+    }
+    
+    this.updateUsername();
+    //this.username = longestUsername();
+    // Uncomment the above line for an example of longest possible username to make sure nothing ever overflows
+  };
+  User.prototype.updateUsername = function() {
+    this.username = (addPrefix ? this.start : "") + this.middle + (addNumbers ? this.end : "");
+  };
+  User.prototype.setProfilePicture = function(size, picMode) {
+    let _canvas = document.createElement("canvas");
+    let _ctx = _canvas.getContext("2d");
+    _canvas.width = _canvas.height = size;
+    
+    _ctx.lineCap = _ctx.lineJoin = "round";
+    
+    let mode = picMode === "rand" ? Math.floor(Math.random() * 6) : picMode;
+    this.picMode = mode// = 6;
+    
+    let hue1 = Math.random() * 360;
+    let color1 = `hsl(${hue1}deg, ${randBetween(50, 100)}%, ${randBetween(30, 70)}%)`;
+    let hue2 = hue1 + 180 + randBetween(-15, 15);
+    let color2 = `hsl(${hue2}deg, ${randBetween(80, 100)}%, ${randBetween(30, 70)}%)`;
+    let lightAccentColor = `hsl(${hue2}deg, ${randBetween(80, 100)}%, ${randBetween(60, 80)}%)`;
+    let darkAccentColor = `hsl(${hue2}deg, ${randBetween(80, 100)}%, ${randBetween(20, 40)}%)`;
+    
+    // Draw background
+    
+    _ctx.fillStyle = color1;
+    _ctx.fillRect(0, 0, _canvas.width, _canvas.height);
+    
+    if (mode === 0) { // Mirrored random pixels
+      _ctx.fillStyle = color2;
+      let staticOn = Math.random() < 0.5; // If this is on, then the mirrored pixels will be random colors instead of all the same color
+      
+      let gridSize = 10;
+      let tileSize = _canvas.width / gridSize;
+      for (let y = 0; y < gridSize / 2; y++) {
+        for (let x = 0; x < gridSize / 2; x++) {
+          if (staticOn) _ctx.fillStyle = `hsl(${hue1 + 180 + randBetween(-15, 15)}deg, ${randBetween(80, 100)}%, ${randBetween(20, 80)}%)`;
+          else _ctx.fillStyle = color2;
+          let odds = staticOn ? 1 : 0.5;
+          
+          if (Math.random() < odds) {
+            let xM = gridSize - x - 1; // Mirrored x
+            let yM = gridSize - y - 1; // Mirored y
+            _ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+            _ctx.fillRect(xM * tileSize, y * tileSize, tileSize, tileSize);
+            _ctx.fillRect(x * tileSize, yM * tileSize, tileSize, tileSize);
+            _ctx.fillRect(xM * tileSize, yM * tileSize, tileSize, tileSize);
+          }
+        }
+      }
+    }
+    
+    else if (mode === 1) { // Random polygon / star
+      _ctx.fillStyle = lightAccentColor;
+      _ctx.strokeStyle = darkAccentColor;
+      _ctx.lineWidth = _canvas.width * randBetween(0.04, 0.08);
+      
+      let sides = Math.round(randBetween(3, 8));
+      let isPolygon = Math.random() < 0.5;
+      
+      if (isPolygon) {
+        if (sides === 3) drawPolygon(_ctx, _canvas.width / 2, _canvas.height * RATIOA, _canvas.width * 0.4, sides);
+        else drawPolygon(_ctx, _canvas.width / 2, _canvas.height / 2, _canvas.width * 0.4, sides);
+        _ctx.fill();
+        _ctx.stroke();
+      }
+      else {
+        if (sides === 3) drawStar(_ctx, _canvas.width / 2, _canvas.height * RATIOA, _canvas.width * 0.4, _canvas.width * 0.1, sides);
+        else drawStar(_ctx, _canvas.width / 2, _canvas.height / 2, _canvas.width * 0.4, _canvas.width * 0.2, sides);
+        _ctx.fill();
+        _ctx.stroke();
+      }
+    }
+    
+    else if (mode === 2) { // Random dice roll
+      color2 = `hsl(${Math.random() * 360}deg, ${randBetween(80, 100)}%, ${randBetween(30, 50)}%)`;
+      
+      _ctx.fillStyle = "white";
+      _ctx.strokeStyle = darkAccentColor;
+      _ctx.lineWidth = _canvas.width * 0.05;
+      
+      let pipSize = _canvas.width * 0.06;
+      
+      drawRoundedRectFromCenter(_ctx, _canvas.width / 2, _canvas.height / 2, _canvas.width * 0.8, _canvas.height * 0.8, _canvas.width * 0.15);
+      _ctx.fill();
+      _ctx.stroke();
+      
+      _ctx.fillStyle = darkAccentColor;
+      let roll = Math.ceil(Math.random() * 6);
+      switch (roll) {
+        case 1:
+          _ctx.fillCircle(_canvas.width / 2, _canvas.height / 2, pipSize);
+        break;
+        case 2:
+          _ctx.fillCircle(_canvas.width * 0.3, _canvas.height * 0.7, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.7, _canvas.height * 0.3, pipSize);
+        break;
+        case 3:
+          _ctx.fillCircle(_canvas.width * 0.3, _canvas.height * 0.7, pipSize);
+          _ctx.fillCircle(_canvas.width / 2, _canvas.height / 2, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.7, _canvas.height * 0.3, pipSize);
+        break;
+        case 4:
+          _ctx.fillCircle(_canvas.width * 0.3, _canvas.height * 0.7, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.7, _canvas.height * 0.3, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.3, _canvas.height * 0.3, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.7, _canvas.height * 0.7, pipSize);
+        break;
+        case 5:
+          _ctx.fillCircle(_canvas.width * 0.3, _canvas.height * 0.7, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.7, _canvas.height * 0.3, pipSize);
+          _ctx.fillCircle(_canvas.width / 2, _canvas.height / 2, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.3, _canvas.height * 0.3, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.7, _canvas.height * 0.7, pipSize);
+        break;
+        case 6:
+          _ctx.fillCircle(_canvas.width * 0.3, _canvas.height * 0.3, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.7, _canvas.height * 0.3, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.3, _canvas.height / 2, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.7, _canvas.height / 2, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.3, _canvas.height * 0.7, pipSize);
+          _ctx.fillCircle(_canvas.width * 0.7, _canvas.height * 0.7, pipSize);
+        break;
+      }
+    }
+    
+    else if (mode === 3) { // Silhouette default profile picture
+      let hatColor = `hsl(${Math.random() * 360}deg, ${Math.random() * 100}%, ${Math.random() * 20}%)`;
+      
+      // Body and head
+      _ctx.fillStyle = color2;
+      _ctx.fillCircle(_canvas.width / 2, _canvas.height, _canvas.width * 0.4);
+      _ctx.fillCircle(_canvas.width / 2, _canvas.height * 0.3, _canvas.width * 0.2);
+      
+      // Eyes
+      let eyeRadius = _canvas.width * 0.06;
+      let eyeY = _canvas.height * 0.3;
+      let leftEyeX = _canvas.width * 0.4;
+      let rightEyeX = _canvas.width * 0.6;
+      
+      _ctx.fillStyle = "white";
+      _ctx.fillCircle(leftEyeX, eyeY, eyeRadius);
+      _ctx.fillCircle(rightEyeX, eyeY, eyeRadius);
+      
+      let pupilRadius = _canvas.width * randBetween(0.02, 0.045);
+      let pupilOffset = eyeRadius - pupilRadius;
+      let pupilAngle = Math.random() * Math.PI * 2;
+      
+      _ctx.fillStyle = "black";
+      
+      _ctx.fillCircle(leftEyeX + (pupilOffset * Math.cos(pupilAngle)), eyeY + (pupilOffset * Math.sin(pupilAngle)), pupilRadius);
+      
+      if (Math.random() < 0.25) pupilAngle = Math.random() * Math.PI * 2; // 25% chance to have eyes looking in different directions
+      
+      _ctx.fillCircle(rightEyeX + (pupilOffset * Math.cos(pupilAngle)), eyeY + (pupilOffset * Math.sin(pupilAngle)), pupilRadius);
+      
+      // Mouth
+      if (Math.random() < 0.75) { // 75% chance to have a mouth
+        _ctx.fillStyle = "black";
+        let mouthY = _canvas.height * 0.42;
+        
+        let mouthType = Math.floor(Math.random() * 2);
+        
+        if (mouthType === 0) _ctx.fillCircle(_canvas.width / 2, mouthY, _canvas.width * randBetween(0.02, 0.04)); // Open mouth
+        if (mouthType === 1) _ctx.fillRectFromCenter(_canvas.width / 2, mouthY, _canvas.width * randBetween(0.05, 0.1), _canvas.height * 0.02); // Closed mouth
+      }
+      
+      // Hat
+      if (Math.random() < 0.5) { // 50% chance to have a hat
+        let hatHeight = _canvas.height * randBetween(0.08, 0.25);
+        let hatWidth = _canvas.width * randBetween(0.2, 0.3);
+        let hatLength = _canvas.width * randBetween(0.4, 0.6);
+        let hatY = _canvas.height * 0.16;
+        
+        _ctx.fillStyle = hatColor;
+        _ctx.fillRect((_canvas.width / 2) - (hatWidth / 2), hatY - hatHeight, hatWidth, hatHeight);
+        _ctx.fillRectFromCenter(_canvas.width / 2, hatY, hatLength, _canvas.height * 0.05);
+      }
+      
+      // Tie
+      if (Math.random() < 0.5) { // 50% chance to have a tie
+        let knotSize = _canvas.width * 0.04;
+        let tieY = (_canvas.height * 0.6) + knotSize;
+        let tieLength = _canvas.height * randBetween(0.22, 0.33);
+        let tieWidth = _canvas.width * randBetween(0.08, 0.13);
+        let tieRatio = randBetween(0.6, 0.8);
+        
+        _ctx.fillColor = hatColor;
+        _ctx.fillCircle(_canvas.width / 2, tieY, knotSize);
+        
+        _ctx.beginPath();
+        _ctx.moveTo(_canvas.width * (0.5 - 0.015), tieY);
+        _ctx.lineTo((_canvas.width / 2) - (tieWidth / 2), tieY + (tieLength * tieRatio));
+        _ctx.lineTo(_canvas.width / 2, tieY + tieLength);
+        _ctx.lineTo((_canvas.width / 2) + (tieWidth / 2), tieY + (tieLength * tieRatio));
+        _ctx.lineTo(_canvas.width * (0.5 + 0.015), tieY);
+        _ctx.fill();
+      }
+    }
+    
+    else if (mode === 4) { // Network
+      let numPoints = Math.round(randBetween(4, 8));
+      _ctx.fillStyle = _ctx.strokeStyle = color2;
+      _ctx.lineWidth = _canvas.width * 0.015;
+      
+      let networkRadius = _canvas.width * 0.4;
+      let nodeRadius = _canvas.width * 0.05;
+      let drawChance = 1//0.25;
+      
+      for (let i = 0; i < numPoints; i++) {
+        let iA = (i / numPoints) * Math.PI * 2;
+        let iX = (_canvas.width / 2) + (networkRadius * Math.cos(iA - (Math.PI / 2)));
+        let iY = (_canvas.height / 2) + (networkRadius * Math.sin(iA - (Math.PI / 2)));
+        _ctx.fillCircle(iX, iY, nodeRadius);
+        for (let j = 0; j < numPoints; j++) {
+          if (i !== j && Math.random() < drawChance) {
+            let jA = (j / numPoints) * Math.PI * 2;
+            let jX = (_canvas.width / 2) + (networkRadius * Math.cos(jA - (Math.PI / 2)));
+            let jY = (_canvas.height / 2) + (networkRadius * Math.sin(jA - (Math.PI / 2)));
+            
+            _ctx.beginPath();
+            _ctx.moveTo(iX, iY);
+            _ctx.lineTo(jX, jY);
+            _ctx.stroke();
+          }
+        }
+      }
+    }
+    
+    else if (mode === 5) { // Spiral shell
+      _ctx.fillStyle = lightAccentColor;
+      _ctx.strokeStyle = darkAccentColor;
+      
+      let scale = randBetween(2.5, 5);
+      let maxRadius = _canvas.width * 0.4;
+      let maxTheta = maxRadius / scale;
+      let points = 200;
+      
+      let offsetAngle = toRad(-45) - maxTheta;
+      
+      _ctx.lineWidth = _canvas.width * randBetween(0.04, 0.08) * scale * 0.15;
+      
+      let theta = 0;
+      
+      _ctx.beginPath();
+      for (let i = 0; i <= points; i++) {
+        theta = (i / points) * maxTheta;
+        let r = scale * theta;
+        let a = theta + offsetAngle;
+        
+        _ctx.lineTo((_canvas.width / 2) + (r * Math.cos(a)), (_canvas.height / 2) + (r * Math.sin(a)));
+      }
+      
+      let _theta = theta - (Math.PI * 2);
+      let _a = _theta + offsetAngle;
+      let _r = scale * _theta;
+      _ctx.lineTo((_canvas.width / 2) + (_r * Math.cos(_a)), (_canvas.height / 2) + (_r * Math.sin(_a)));
+      
+      _ctx.fill();
+      _ctx.stroke();
+    }
+    
+    else if (mode === 6) { // Flower
+      let numPetals = Math.round(randBetween(4, 8));
+      let petalRadius = _canvas.width * 0.1;
+      let pistilRadius = _canvas.width * 0.1;
+      
+      _ctx.fillStyle = lightAccentColor;
+      _ctx.strokeStyle = darkAccentColor;
+      _ctx.lineWidth = _canvas.width * 0.05;
+      
+      for (let i = 0; i < numPetals; i++) {
+        let a = ((i / numPetals) * Math.PI * 2) - (Math.PI / 2);
+        let r = pistilRadius;
+        _ctx.ellipse((_canvas.width / 2) + (r * Math.cos(a)), (_canvas.height / 2) + (r * Math.sin(a)), petalRadius, petalRadius * 2, a + (Math.PI / 2), 0, Math.PI * 2);
+        _ctx.fill();
+        //_ctx.stroke();
+      }
+      
+      _ctx.fillCircle(_canvas.width / 2, _canvas.height / 2, pistilRadius);
+      _ctx.strokeCircle(_canvas.width / 2, _canvas.height / 2, pistilRadius);
+    }
+    
+    this.profilePicture = _ctx.getImageData(0, 0, _canvas.width, _canvas.height);
+  };
+  
+  function updateAllNames() {
+    for (let i = 0; i < C.length; i++) displayUser(C[i]);
+  }
+  
+  function displayUser(canvas) {
+    canvas.user.updateUsername();
+    canvas.usernameTxt.innerHTML = canvas.user.username;
+    canvas.ctx.clearRect(0, 0, canvas.canvas.width, canvas.canvas.height);
+    canvas.ctx.putImageData(canvas.user.profilePicture, 0, 0);
+    canvas.downloadLink.href = canvas.canvas.toDataURL();
+    canvas.downloadLink.download = canvas.user.username + ".png";
+  }
+  function rerollUsername(canvas) {
+    canvas.user.setUsername("rand");
+    displayUser(canvas);
+  }
+  function rerollPicture(canvas) {
+    canvas.user.setProfilePicture(profilePictureResolution, "rand");
+    displayUser(canvas);
+  }
+  function rerollBoth(canvas) {
+    rerollUsername(canvas);
+    rerollPicture(canvas);
+  }
+  function rerollSimilarPicture(canvas) {
+    canvas.user.setProfilePicture(profilePictureResolution, canvas.user.picMode);
+    displayUser(canvas);
+  }
+  function rerollSimilarUsername(canvas) {
+    canvas.user.setUsername(canvas.user.nameMode);
+    displayUser(canvas);
+  }
+  function rerollAll() {
+    for (let i = 0; i < C.length; i++) {
+      rerollBoth(C[i]);
+    }
+  }
+  function downloadAll() {
+    if (!window.confirm("Are you sure you want to download all 5 profiles?")) return;
+    
+    for (let i = 0; i < C.length; i++) {
+      C[i].downloadLink.click();
+    }
+  }
+  
+  function hasDuplicates(arr) {
+    let duplicates = [];
+    for (let i = 0; i < arr.length; i++) {
+      for (let j = 0; j < arr.length; j++) {
+        if (i !== j) {
+          if (arr[i] === arr[j] && !duplicates.includes(arr[i])) duplicates.push(arr[i]);
+        }
+      }
+    }
+    
+    return duplicates.length === 0 ? false : duplicates;
+  }
+  
+  function averageRandTries(x, numRepeats) {
+    // Return the average number of times Math.random() has to be called before it is less than X(averaged over numRepeats iterations)
+    let totalTries = 0;
+    for (let i = 0; i < numRepeats; i++) {
+      let tries = 0;
+      let curr = Math.random();
+      while (curr >= x) {
+        tries++;
+        curr = Math.random();
+      }
+      totalTries += tries;
+    }
+    return Math.round(totalTries / numRepeats);
+  }
 </script>
 </body>
 </html>
