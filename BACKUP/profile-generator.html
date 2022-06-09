@@ -44,21 +44,23 @@
         height: 35px;
         opacity: 100%;
         vertical-align: middle;
+        background-color: transparent;
       }
       .reroll-btn, .reroll-btn:hover, .reroll-btn:active {
         background-size: 100% 100%;
-        background-color: transparent;
       }
       .reroll-btn:hover {
-        opacity: 50%;
+        background-color: #ffff80; /* Very light yellow */
       }
       .reroll-btn:active {
-        opacity: 25%;
+        background-color: #ffff33; /* Light yellow */
       }
       
       .picture-div {
         display: inline-block;
         vertical-align: middle;
+        align-content: center;
+        text-align: center;
         margin-top: 5px;
         margin-bottom: 5px;
         margin-left: 10px;
@@ -68,8 +70,8 @@
       }
       
       .reroll-btn-example {
-        width: 40px;
-        height: 40px;
+        width: 42px;
+        height: 42px;
         margin: 5px;
         border: none;
         background-size: 100% 100%;
@@ -120,7 +122,7 @@
         <img class = "reroll-btn-example" src = "images/reroll-picture-icon.png"> <span class = "reroll-btn-example-txt"><i>Reroll Profile Picture</i></span>
       </td>
       <td class = "example-td">
-        <img class = "reroll-btn-example" src = "images/similar-picture-icon.png"> <span class = "reroll-btn-example-txt"><i>Reroll <b><u>Similar</u></b> Profile Picture</i></span>
+        <img class = "reroll-btn-example" src = "images/similar-picture-icon.png" style = "width: 30px; height: 30px"> <span class = "reroll-btn-example-txt"><i>Reroll <b><u>Similar</u></b> Profile Picture</i></span>
       </td>
     </tr>
     <tr>
@@ -128,7 +130,7 @@
         <img class = "reroll-btn-example" src = "images/reroll-username-icon.png"> <span class = "reroll-btn-example-txt"><i>Reroll Username</i></span>
       </td>
       <td class = "example-td">
-        <img class = "reroll-btn-example" src = "images/similar-username-icon.png"> <span class = "reroll-btn-example-txt"><i>Reroll <b><u>Similar</u></b> Username</i></span>
+        <img class = "reroll-btn-example" src = "images/similar-username-icon.png" style = "width: 30px; height: 30px"> <span class = "reroll-btn-example-txt"><i>Reroll <b><u>Similar</u></b> Username</i></span>
       </td>
     </tr>
   </table>
@@ -361,6 +363,8 @@
       btn4.title = "Reroll Similar Picture";
       btn4.className = "reroll-btn";
       btn4.style.margin = "0";
+      btn4.style.marginTop = "3px";
+      btn4.style.width = btn4.style.height = "25px";
       btn4.onclick = () => rerollSimilarPicture(obj);
       btn4.style.backgroundImage = "url('images/similar-picture-icon.png')";
       pictureDiv.appendChild(btn4);
@@ -382,6 +386,8 @@
       btn5.title = "Reroll Similar Username";
       btn5.className = "reroll-btn";
       btn5.style.margin = "0";
+      btn5.style.marginTop = "3px";
+      btn5.style.width = btn5.style.height = "25px";
       btn5.onclick = () => rerollSimilarUsername(obj);
       btn5.style.backgroundImage = "url('images/similar-username-icon.png')";
       pictureDiv2.appendChild(btn5);
