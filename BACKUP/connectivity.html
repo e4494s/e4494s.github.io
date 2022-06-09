@@ -63,7 +63,7 @@
 <a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
 <h1>&mdash;&mdash; Connectivity &mdash;&mdash;</h1>
 <p id = "how-it-works">
-  <b><i>How It Works:</i></b> A grid will be generated and filled randomly with the selected blocks. Each block will be colored so that it connects with surrounding blocks, no matter which direction it is facing.
+  <b><i>How It Works:</i></b> A grid will be generated and filled randomly with the selected blocks. Each block will be colored so that it connects smoothly with surrounding blocks, no matter which direction it is facing or which blocks are placed.
   <br><br>
   Every generated grid with an even <span class = "setting">Grid Size</span> will connect to its own edges, so you can create a repeating pattern made up of one grid.
   <br><br>
@@ -128,8 +128,10 @@
 </table>
 <script src = "scripts/main.js"></script>
 <script>
+  let canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
-  canvas.width = canvas.height = 1000;
+  let canvasSize = 1000;
+  canvas.width = canvas.height = canvasSize;
   
   let presetsDiv = document.getElementById("presets-div");
   let tilesDiv = document.getElementById("tiles-div");
@@ -154,18 +156,19 @@
     return a == b;
   }
   
-  let selectedTiles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-  let numTiles = 20;
+  let selectedTiles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
+  let numTiles = 22;
   let gridSize = 10;
   let blockPattern = 1;
   let tileMixing = true;
   /*
-  1: Ramp    |  2: Notch   |  3: Stripe   |  4: Dots     |  5: Quills
-  6: Arc     |  7: Gear    |  8: Bars     |  9: Spots    |  10: Sun
-  11: Slice  |  12: Wheel  |  13: Layers  |  14: Face    |  15: Bumps
-  16: Stair  |  17: Slab   |  18: Joint   |  19: Pillar  |  20: Spikes
+  1: Ramp     |  2: Notch   |  3: Stripe   |  4: Dots     |  5: Quills
+  6: Arc      |  7: Gear    |  8: Bars     |  9: Spots    |  10: Sun
+  11: Slice   |  12: Wheel  |  13: Layers  |  14: Face    |  15: Bumps
+  16: Stair   |  17: Slab   |  18: Joint   |  19: Pillar  |  20: Spikes
+  21: Bubble  |  22: Thorn  |
   */
-  let tileNames = ["Ramp", "Notch", "Stripe", "Dots", "Quills", "Arc", "Gear", "Bars", "Spots", "Sun", "Slice", "Wheel", "Layers", "Face", "Bumps", "Stair", "Slab", "Joint", "Pillar", "Spikes"];
+  let tileNames = ["Ramp", "Notch", "Stripe", "Dots", "Quills", "Arc", "Gear", "Bars", "Spots", "Sun", "Slice", "Wheel", "Layers", "Face", "Bumps", "Stair", "Slab", "Joint", "Pillar", "Spikes", "Bubble", "Thorn"];
   
   let colors = ["black", "white"]; // Tile, background
   
@@ -277,6 +280,25 @@
     }
     
     updateSettings();
+  }
+  
+  let sqrt3_2 = Math.sqrt(3) / 2;
+  function triangleFromTip(x, y, sideLength, angle) { // Draws and fills an equilateral triangle from its tip at a specified angle with a specified side length
+    let cx = x;
+    let cy = y;
+    let ca = angle;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ca -= toRad(30);
+    cx += sideLength * Math.cos(ca);
+    cy += sideLength * Math.sin(ca);
+    ctx.lineTo(cx, cy);
+    ca += toRad(120);
+    cx += sideLength * Math.cos(ca);
+    cy += sideLength * Math.sin(ca);
+    ctx.lineTo(cx, cy);
+    ctx.lineTo(x, y);
+    ctx.fill();
   }
   
   function getAngles(direction, i) {
@@ -728,18 +750,20 @@
       ctx.beginPath();
       ctx.moveTo(x, y);
       ctx.lineTo(x + (size * 0.5 * xSign), y);
-      ctx.lineTo(x + (size * 0.5 * xSign), y + (size * thickness * ySign));
+      ctx.lineTo(x + (size * 0.5 * xSign) - (size * thickness * xSign), y + (size * thickness * ySign));
       ctx.lineTo(x + (size * thickness * xSign), y + (size * thickness * ySign));
-      ctx.lineTo(x + (size * thickness * xSign), y + (size * 0.5 * ySign));
+      ctx.lineTo(x + (size * thickness * xSign), y + (size * 0.5 * ySign) - (size * thickness * ySign));
       ctx.lineTo(x, y + (size * 0.5 * ySign));
       ctx.lineTo(x, y);
       ctx.fill();
       
+      let offset = 0.35;
+      
       ctx.beginPath();
-      ctx.moveTo(x + (size * (0.4 + (thickness * Math.SQRT1_2)) * xSign), y);
-      ctx.lineTo(x, y + (size * (0.4 + (thickness * Math.SQRT1_2)) * ySign));
-      ctx.lineTo(x, y + (size * (0.4 - (thickness * Math.SQRT1_2)) * ySign));
-      ctx.lineTo(x + (size * (0.4 - (thickness * Math.SQRT1_2)) * xSign), y);
+      ctx.moveTo(x + (size * (offset + (thickness * Math.SQRT1_2)) * xSign), y);
+      ctx.lineTo(x, y + (size * (offset + (thickness * Math.SQRT1_2)) * ySign));
+      ctx.lineTo(x, y + (size * (offset - (thickness * Math.SQRT1_2)) * ySign));
+      ctx.lineTo(x + (size * (offset - (thickness * Math.SQRT1_2)) * xSign), y);
       ctx.fill();
       
       return;
@@ -829,6 +853,63 @@
       
       return;
     }
+    
+    if (type === 21) { // Bubble
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (size * 0.5 * xSign), y);
+      ctx.lineTo(x, y + (size * 0.5 * ySign));
+      ctx.lineTo(x, y);
+      ctx.fill();
+      
+      let midX = x + (size * 0.25 * xSign);
+      let midY = y + (size * 0.25 * ySign);
+      
+      let radius = size * 0.2;
+      let difference = size * 0.065;
+      
+      ctx.fillStyle = colors[1 - p];
+      ctx.beginPath();
+      ctx.arc(midX, midY, radius, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.fillStyle = colors[p];
+      ctx.beginPath();
+      ctx.arc(midX, midY, radius - difference, 0, Math.PI * 2);
+      ctx.fill();
+      
+      return;
+    }
+    
+    if (type === 22) { // Thorn
+      let angles = getAngles(direction, i);
+      
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (size * 0.5 * xSign), y);
+      ctx.lineTo(x, y + (size * 0.5 * ySign));
+      ctx.lineTo(x, y);
+      ctx.fill();
+      
+      let sideLength = size * 0.5 * Math.SQRT2 * 0.4;
+      let height = sideLength * sqrt3_2;
+      
+      let midX = x + (size * 0.25 * xSign);
+      let midY = y + (size * 0.25 * ySign);
+      let _a = angles.start + toRad(45 + 180);
+      midX += height * Math.cos(_a);
+      midY += height * Math.sin(_a);
+      
+      ctx.fillStyle = colors[1 - p];
+      triangleFromTip(midX, midY, sideLength * 1.1, angles.start + toRad(45));
+      
+      midX += size * 0.08 * xSign;
+      midY += size * 0.08 * ySign;
+      ctx.fillStyle = colors[p];
+      triangleFromTip(midX, midY, sideLength * 1.1, angles.start + toRad(45));
+      
+      return;
+    }
   }
   
   function randTile() {
@@ -841,7 +922,7 @@
   function drawTiles() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    canvas.width = canvas.height = gridSize * Math.round(1000 / gridSize);
+    canvas.width = canvas.height = gridSize * Math.round(canvasSize / gridSize);
     
     let tileSize = canvas.width / gridSize;
     
@@ -894,7 +975,7 @@
     
     tileMixing = tileMixingCheckbox.checked;
     
-    canvas.width = canvas.height = gridSize * Math.round(1000 / gridSize);
+    canvas.width = canvas.height = gridSize * Math.round(canvasSize / gridSize);
     
     for (let i = 1; i <= numTiles; i++) {
       document.getElementById(`tile-img-${i}`).className = selectedTiles.includes(i) ? "active-tile-img" : "inactive-tile-img";
@@ -943,17 +1024,18 @@
     // Generate tile buttons
     let table = document.createElement("table");
     table.cellSpacing = "0";
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 5; i++) {
       let tr = document.createElement("tr");
       table.appendChild(tr);
-      for (let j = 1; j <= 5; j++) {
+      let columns = i === 4 ? 2 : 5;
+      for (let j = 1; j <= columns; j++) {
         let index = (i * 5) + j;
         
         let td = document.createElement("td");
         td.className = "tile-img-td";
         let img = document.createElement("img");
         img.className = "active-tile-img";
-        img.src = `images/connectivity/block${index}.png`;
+        img.src = `images/connectivity/block${index}.png?v=1.2`;
         img.id = `tile-img-${index}`;
         td.title = `Toggle ${tileNames[index - 1]} Block`;
         
