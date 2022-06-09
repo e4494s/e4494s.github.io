@@ -2,7 +2,7 @@
 <html>
   <head>
     <link rel = 'icon'  href = 'images/favicon.png' type = 'image/png'/>
-    <title>Circles ~ e4494s</title>
+    <title>Colliding Circles ~ e4494s</title>
     <style>
       canvas {
         width: 100%;
@@ -118,6 +118,7 @@
 </table>
 <canvas id = 'canvas'></canvas>
 <script>
+  let canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d');
   let menu_rect = menus.getBoundingClientRect();
   let ratio = 3;
