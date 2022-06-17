@@ -30,7 +30,11 @@
       <button class = "download-canvas-btn" onclick = "downloadCanvas()">Download</button>
     </td>
     <td>
-      <div><b><u>Settings/Buttons Go Here:</u></b></div>
+      <div><b><u>This Is One Setting:</u></b></div>
+      <br><br><br><!--three line breaks between related settings-->
+      <div><b><u>This Is A Related Setting:</u></b></div>
+      <hr>
+      <div><b><u>This Is An Unrelated Setting In A New Section:</u></b></div>
     </td>
   </tr>
 </table>
@@ -61,18 +65,6 @@
     // Draw the thing here
   }
   draw();
-  
-  function startStop() {
-    if (canvasRunning) {
-      canvasRunning = false;
-      startStopBtn.innerHTML = "Play";
-    }
-    else {
-      canvasRunning = true;
-      frame();
-      startStopBtn.innerHTML = "Pause";
-    }
-  }
   
   function downloadCanvas() {
     let link = document.createElement("a");
