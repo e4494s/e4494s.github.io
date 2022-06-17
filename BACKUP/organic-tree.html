@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>Organic Fractal Tree ~ e4494s</title>
+    <style>
+      #error-txt {
+        color: red;
+        font-weight: bold;
+        font-style: italic;
+        width: 300px;
+      }
+      
+      #canvas {
+        background-color: black;
+      }
+    </style>
+  </head>
+<body>
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; Organic Fractal Tree &mdash;&mdash;</h1>
+<p id = "how-it-works">
+  <b><i>How It Works:</i></b> At each step, a random number of new branches will be drawn, each with random settings of their own. This allows for widely varying trees even with the same settings.
+  <br><br>
+  <span class = "setting">Tree Stretch</span> will make the tree taller or shorter without affecting how wide horizontally it reaches. Use this to constrain the tree when certain settings make it too tall or too short.
+  <br><br>
+  <span class = "setting">Minimum Length Ratio</span> and <span class = "setting">Minimum Thickness Ratio</span> both control the <i>minimum</i> length ratio that each branch can have. Lower values make the tree smaller on average, but not always, since there is lots of randomness.
+  <br><br>
+  <span class = "setting">Minimum Splits Per Branch</span> and <span class = "setting">Maximum Splits Per Branch</span> control the fewest and most new branches allowed to grow every time a branch splits.
+  <br><br>
+  If <span class = "setting">Even Split Spacing</span> is turned <b><u>off</u></b>, then new branches will have a random angle within the allowed <span class = "setting">Branch Spread</span>. But if <span class = "setting">Even Split Spacing</span> is turned <b><u>on</u></b>, then every new branch will be evenly spaced across the allowed angles, making the tree more uniform.
+  <br><br>
+  <span class = "setting">Branch Spread</span> affects how spread out new branches are, as new branches will always grow within X&deg; of the previous branch (with X being the value of this setting).
+  <br><br>
+  <span class = "setting">Hue Variation</span> controls how much the color changes between branches.
+  <br><br>
+  <span class = "setting">Branch Bendiness</span> affects how much branches will curve in the middle, instead of being straight lines.
+  <br><br>
+  <span class = "setting">Leaf Grow Chance</span> controls the chance of a leaf growing at the end of each final branch of the tree, and <span class = "setting">Leaf Scale</span> affects how large the leaves will be drawn.
+</p>
+<hr>
+<div><b>Settings Presets:</b></div>
+<div id = "presets-div"></div>
+<hr>
+<table>
+  <tr valign = "middle">
+    <td>
+      <button onclick = "draw()">Redraw</button>
+      <br><br>
+      <div><b><u>Recursion Layers:</u></b> <span id = "tree-max-layers-txt">7</span> layer<span id = "plural-1">s</span></div>
+      <input type = "range" min = "1" max = "8" step = "1" value = "7" id = "tree-max-layers-range" oninput = "updateSettings()">
+      <br><br>
+      <div id = "error-txt"></div>
+      <canvas id = "canvas">If you're seeing this text, your browser does not support the canvas element.</canvas>
+      <br>
+      <button class = "download-canvas-btn" onclick = "downloadCanvas()">Download</button>
+    </td>
+    <td>
+      <button onclick = "if (window.confirm('Are you sure you want to reset all settings?')) loadPreset(0)">Reset Settings</button>
+      <hr>
+      <div><b><u>Initial Branch Length:</u></b> <span id = "tree-start-length-txt">250</span>px</div>
+      <input type = "range" min = "50" max = "500" step = "25" value = "250" id = "tree-start-length-range" oninput = "updateSettings()">
+      <br><br><br>
+      <div><b><u>Initial Branch Thickness:</u></b> <span id = "tree-start-width-txt">15</span>px</div>
+      <input type = "range" min = "0" max = "50" step = "5" value = "15" id = "tree-start-width-range" oninput = "updateSettings()">
+      <hr>
+      <div><b><u>Tree Stretch:</u></b> <span id = "tree-branch-stretch-txt">0</span>%</div>
+      <input type = "range" min = "-30" max = "50" step = "10" value = "0" id = "tree-branch-stretch-range" oninput = "updateSettings()">
+      <hr>
+      <div><b><u>Minimum Length Ratio:</u></b> <span id = "tree-min-rand-length-ratio-txt">50</span>%</div>
+      <input type = "range" min = "5" max = "85" step = "5" value = "50" id = "tree-min-rand-length-ratio-range" oninput = "updateSettings()">
+      <br><br><br>
+      <div><b><u>Minimum Thickness Ratio:</u></b> <span id = "tree-min-rand-width-ratio-txt">50</span>%</div>
+      <input type = "range" min = "5" max = "100" step = "5" value = "50" id = "tree-min-rand-width-ratio-range" oninput = "updateSettings()">
+      <hr>
+      <div><b><u>Minimum Splits Per Branch:</u></b> <span id = "tree-min-splits-txt">2</span> split<span id = "plural-2">s</span></div>
+      <input type = "range" min = "0" max = "8" step = "1" value = "2" id = "tree-min-splits-range" oninput = "updateSettings()">
+      <br><br><br>
+      <div><b><u>Maximum Splits Per Branch:</u></b> <span id = "tree-max-splits-txt">8</span> split<span id = "plural-3">s</span></div>
+      <input type = "range" min = "0" max = "12" step = "1" value = "8" id = "tree-max-splits-range" oninput = "updateSettings()">
+      <br><br><br>
+      <label for = "tree-even-split-spacing-checkbox"><b><u>Even Split Spacing:</u></b></label>
+      <input type = "checkbox" id = "tree-even-split-spacing-checkbox" oninput = "updateSettings()">
+    </td>
+    <td>
+      <div><b><u>Branch Spread:</u></b> <span id = "tree-rand-offset-angle-txt">45</span>&deg;</div>
+      <input type = "range" min = "0" max = "90" step = "5" value = "45" id = "tree-rand-offset-angle-range" oninput = "updateSettings()">
+      <br><br><br>
+      <div><b><u>Branch Bendiness:</u></b> <span id = "tree-rand-bend-txt">50</span>%</div>
+      <input type = "range" min = "0" max = "200" step = "25" value = "50" id = "tree-rand-bend-range" oninput = "updateSettings()">
+      <br><br><br>
+      <div><b><u>Branch Opacity:</u></b> <span id = "tree-branch-opacity-txt">50</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "10" value = "50" id = "tree-branch-opacity-range" oninput = "updateSettings()">
+      <br><br><br>
+      <label for = "tree-colored-branches-checkbox"><b><u>Colored Branches:</u></b></label>
+      <input type = "checkbox" id = "tree-colored-branches-checkbox" oninput = "updateSettings()" CHECKED>
+      <hr>
+      <div><b><u>Leaf Grow Chance:</u></b> <span id = "tree-leaf-chance-txt">50</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "5" value = "50" id = "tree-leaf-chance-range" oninput = "updateSettings()">
+      <br><br><br>
+      <div><b><u>Leaf Scale:</u></b> <span id = "tree-leaf-scale-txt">100</span>%</div>
+      <input type = "range" min = "50" max = "500" step = "50" value = "100" id = "tree-leaf-scale-range" oninput = "updateSettings()">
+      <br><br><br>
+      <div><b><u>Leaf Opacity:</u></b> <span id = "tree-leaf-opacity-txt">80</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "10" value = "80" id = "tree-leaf-opacity-range" oninput = "updateSettings()">
+      <br><br><br>
+      <label for = "tree-colored-leaves-checkbox"><b><u>Colored Leaves:</u></b></label>
+      <input type = "checkbox" id = "tree-colored-leaves-checkbox" oninput = "updateSettings()" CHECKED>
+      <hr>
+      <div><b><u>Hue Variation:</u></b> <span id = "tree-rand-offset-hue-txt">30</span>&deg;</div>
+      <input type = "range" min = "0" max = "180" step = "5" value = "30" id = "tree-rand-offset-hue-range" oninput = "updateSettings()">
+    </td>
+  </tr>
+</table>
+<script src = "scripts/main.js"></script>
+<script>
+  let canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 1500;
+  
+  let presetsDiv = document.getElementById("presets-div");
+  let errorTxt = document.getElementById("error-txt");
+  let plural1 = document.getElementById("plural-1");
+  let plural2 = document.getElementById("plural-2");
+  let plural3 = document.getElementById("plural-3");
+  let treeMaxLayersTxt = document.getElementById("tree-max-layers-txt");
+  let treeMaxLayersRange = document.getElementById("tree-max-layers-range");
+  let treeMinSplitsTxt = document.getElementById("tree-min-splits-txt");
+  let treeMinSplitsRange = document.getElementById("tree-min-splits-range");
+  let treeMaxSplitsTxt = document.getElementById("tree-max-splits-txt");
+  let treeMaxSplitsRange = document.getElementById("tree-max-splits-range");
+  let treeMinRandLengthRatioTxt = document.getElementById("tree-min-rand-length-ratio-txt");
+  let treeMinRandLengthRatioRange = document.getElementById("tree-min-rand-length-ratio-range");
+  let treeMinRandWidthRatioTxt = document.getElementById("tree-min-rand-width-ratio-txt");
+  let treeMinRandWidthRatioRange = document.getElementById("tree-min-rand-width-ratio-range");
+  let treeRandOffsetAngleTxt = document.getElementById("tree-rand-offset-angle-txt");
+  let treeRandOffsetAngleRange = document.getElementById("tree-rand-offset-angle-range");
+  let treeRandOffsetHueTxt = document.getElementById("tree-rand-offset-hue-txt");
+  let treeRandOffsetHueRange = document.getElementById("tree-rand-offset-hue-range");
+  let treeRandBendTxt = document.getElementById("tree-rand-bend-txt");
+  let treeRandBendRange = document.getElementById("tree-rand-bend-range");
+  let treeLeafChanceTxt = document.getElementById("tree-leaf-chance-txt");
+  let treeLeafChanceRange = document.getElementById("tree-leaf-chance-range");
+  let treeStartLengthTxt = document.getElementById("tree-start-length-txt");
+  let treeStartLengthRange = document.getElementById("tree-start-length-range");
+  let treeStartWidthTxt = document.getElementById("tree-start-width-txt");
+  let treeStartWidthRange = document.getElementById("tree-start-width-range");
+  let treeLeafScaleTxt = document.getElementById("tree-leaf-scale-txt");
+  let treeLeafScaleRange = document.getElementById("tree-leaf-scale-range");
+  let treeBranchOpacityTxt = document.getElementById("tree-branch-opacity-txt");
+  let treeBranchOpacityRange = document.getElementById("tree-branch-opacity-range");
+  let treeLeafOpacityTxt = document.getElementById("tree-leaf-opacity-txt");
+  let treeLeafOpacityRange = document.getElementById("tree-leaf-opacity-range");
+  let treeEvenSplitSpacingCheckbox = document.getElementById("tree-even-split-spacing-checkbox");
+  let treeColoredBranchesCheckbox = document.getElementById("tree-colored-branches-checkbox");
+  let treeColoredLeavesCheckbox = document.getElementById("tree-colored-leaves-checkbox");
+  let treeBranchStretchTxt = document.getElementById("tree-branch-stretch-txt");
+  let treeBranchStretchRange = document.getElementById("tree-branch-stretch-range");
+  
+  let Tree = {
+    startX: 0.5,
+    startY: 0.9,
+    startLength: 250,
+    startAngle: 270,
+    startWidth: 15,
+    minWidth: 1,
+    maxSplits: 8,
+    minSplits: 2,
+    maxLayers: 7,
+    startHue: 0,
+    startBend: 0.5,
+    startLerp: 0.5,
+    currentTotalBranches: 0,
+    stopped: false,
+    leafChance: 0.5,
+    minRandLengthRatio: 0.5,
+    minRandWidthRatio: 0.5,
+    randOffsetAngle: 45,
+    randOffsetHue: 30,
+    randBend: 0.5,
+    branchOpacity: 0.5,
+    leafOpacity: 0.8,
+    lengthRatio: 1,
+    leafScale: 1,
+    evenSplitSpacing: false,
+    coloredBranches: true,
+    coloredLeaves: true,
+    branchStretch: 0
+  };
+  Tree.draw = function() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.lineCap = ctx.lineJoin = "round";
+    this.startHue = Math.random() * 360;
+    this.startBend = randBetween(-this.randBend / 2, this.randBend / 2);
+    this.startLerp = Math.random();
+    this.currentTotalBranches = 0;
+    this.stopped = false;
+    errorTxt.innerHTML = "";
+    this.drawBranch(this.startX * canvas.width, this.startY * canvas.height, this.startLength, this.startBend, this.startLerp, this.startWidth, this.startAngle, this.startHue, 1);
+  };
+  Tree.drawBranch = function(x, y, length, bend, lerp, width, angle, hue, currLayer) {
+    if (currLayer > this.maxLayers || this.stopped) return;
+    
+    ctx.globalAlpha = this.branchOpacity;
+    
+    this.currentTotalBranches++;
+    if (this.currentTotalBranches >= 100000) {
+      this.stopped = true;
+      errorTxt.innerHTML = "The rendering was stopped before finishing because the total number of branches and leaves exceeded 1 million. For better results, try reducing the number of recursion layers, reducing the number of minimum/maximum branch splits, or reducing the leaf grow chance.";
+      return;
+    }
+    let endX = x + (length * Math.cos(toRad(angle)));
+    let endY = y + (length * Math.sin(toRad(angle))) - (length * this.branchStretch);
+    let dx = endX - x;
+    let dy = endY - y;
+    let midpointX = ((1 - lerp) * x) + (lerp * endX);
+    let midpointY = ((1 - lerp) * y) + (lerp * endY);
+    let normal = toRad(angle + 90);
+    let controlX = midpointX + (length * bend * Math.cos(normal));
+    let controlY = midpointY + (length * bend * Math.sin(normal));
+    ctx.lineWidth = Math.max(width, this.minWidth);
+    ctx.strokeStyle = this.coloredBranches ? `hsl(${hue}deg, 100%, 30%)` : "white";
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.quadraticCurveTo(controlX, controlY, endX, endY);
+    ctx.stroke();
+    let splits = Math.round(randBetween(this.minSplits, this.maxSplits));
+    let endBranch = currLayer === this.maxLayers || splits === 0;
+    if (endBranch) { // Draw leaf
+      if (Math.random() > this.leafChance) return;
+      
+      ctx.globalAlpha = this.leafOpacity;
+      
+      let lengthRatio = randBetween(this.minRandLengthRatio, 0.9);
+      let offsetAngle = randBetween(-this.randOffsetAngle, this.randOffsetAngle);
+      let offsetHue = randBetween(-this.randOffsetHue, this.randOffsetHue);
+      let bend = randBetween(0.25, 0.5);
+      let lerp = Math.random();
+      this.drawLeaf(endX, endY, length * lengthRatio * this.leafScale, bend, lerp, angle + offsetAngle, hue + offsetHue);
+      if (endBranch) return;
+    }
+    for (let i = 0; i < splits; i++) { // Split branches
+      let lengthRatio = randBetween(this.minRandLengthRatio, 0.9) * this.lengthRatio;;
+      let widthRatio = randBetween(this.minRandWidthRatio, 1);
+      let offsetAngle = randBetween(-this.randOffsetAngle, this.randOffsetAngle);
+      if (this.evenSplitSpacing) {
+        if (splits !== 1) offsetAngle = ((i / (splits - 1)) * (this.randOffsetAngle * 2)) - this.randOffsetAngle;
+        else offsetAngle = Math.random() < 0.5 ? -this.randOffsetAngle : this.randOffsetAngle;
+      }
+      let offsetHue = randBetween(-this.randOffsetHue, this.randOffsetHue);
+      let bend = randBetween(-this.randBend, this.randBend);
+      let lerp = Math.random();
+      this.drawBranch(endX, endY, length * lengthRatio, bend, lerp, width * widthRatio, angle + offsetAngle, hue + offsetHue, currLayer + 1);
+    }
+  };
+  Tree.drawLeaf = function(x, y, length, bend, lerp, angle, hue) {
+    this.currentTotalBranches++;
+    ctx.fillStyle = this.coloredLeaves ? `hsl(${hue}deg, 100%, 70%)` : "white";
+    let endX = x + (length * Math.cos(toRad(angle)));
+    let endY = y + (length * Math.sin(toRad(angle)));
+    let dx = endX - x;
+    let dy = endY - y;
+    let normal = toRad(angle + 90);
+    let midpointX1 = ((1 - lerp) * x) + (lerp * endX);
+    let midpointY1 = ((1 - lerp) * y) + (lerp * endY);
+    let controlX1 = midpointX1 + (length * -bend * Math.cos(normal));
+    let controlY1 = midpointY1 + (length * -bend * Math.sin(normal));
+    let midpointX2 = ((1 - lerp) * x) + (lerp * endX);
+    let midpointY2 = ((1 - lerp) * y) + (lerp * endY);
+    let controlX2 = midpointX2 + (length * bend * Math.cos(normal));
+    let controlY2 = midpointY2 + (length * bend * Math.sin(normal));
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.quadraticCurveTo(controlX1, controlY1, endX, endY);
+    ctx.quadraticCurveTo(controlX2, controlY2, x, y);
+    ctx.fill();
+  };
+  
+  function updateSettings() {
+    Tree.maxLayers = treeMaxLayersTxt.innerHTML = Number(treeMaxLayersRange.value);
+    Tree.maxSplits = treeMaxSplitsTxt.innerHTML = treeMinSplitsRange.max = Number(treeMaxSplitsRange.value);
+    Tree.minSplits = treeMinSplitsTxt.innerHTML = Number(treeMinSplitsRange.value);
+    Tree.minRandLengthRatio = Number(treeMinRandLengthRatioRange.value) / 100;
+    treeMinRandLengthRatioTxt.innerHTML = Number(treeMinRandLengthRatioRange.value);
+    Tree.minRandWidthRatio = Number(treeMinRandWidthRatioRange.value) / 100;
+    treeMinRandWidthRatioTxt.innerHTML = Number(treeMinRandWidthRatioRange.value);
+    Tree.randOffsetAngle = treeRandOffsetAngleTxt.innerHTML = Number(treeRandOffsetAngleRange.value);
+    Tree.randOffsetHue = treeRandOffsetHueTxt.innerHTML = Number(treeRandOffsetHueRange.value);
+    Tree.randBend = Number(treeRandBendRange.value) / 100;
+    treeRandBendTxt.innerHTML = Number(treeRandBendRange.value);
+    Tree.leafChance = Number(treeLeafChanceRange.value) / 100;
+    treeLeafChanceTxt.innerHTML = Number(treeLeafChanceRange.value);
+    Tree.startLength = treeStartLengthTxt.innerHTML = Number(treeStartLengthRange.value);
+    Tree.startWidth = treeStartWidthTxt.innerHTML = Math.max(Number(treeStartWidthRange.value), 1);
+    Tree.leafScale = Number(treeLeafScaleRange.value) / 100;
+    treeLeafScaleTxt.innerHTML = treeLeafScaleRange.value;
+    Tree.branchOpacity = Number(treeBranchOpacityRange.value) / 100;
+    treeBranchOpacityTxt.innerHTML = treeBranchOpacityRange.value;
+    Tree.leafOpacity = Number(treeLeafOpacityRange.value) / 100;
+    treeLeafOpacityTxt.innerHTML = treeLeafOpacityRange.value;
+    Tree.evenSplitSpacing = treeEvenSplitSpacingCheckbox.checked;
+    Tree.coloredBranches = treeColoredBranchesCheckbox.checked;
+    Tree.coloredLeaves = treeColoredLeavesCheckbox.checked;
+    Tree.branchStretch = Number(treeBranchStretchRange.value) / 100;
+    treeBranchStretchTxt.innerHTML = treeBranchStretchRange.value;
+    
+    plural1.innerHTML = Tree.maxLayers === 1 ? "" : "s";
+    plural2.innerHTML = Tree.minSplits === 1 ? "" : "s";
+    plural3.innerHTML = Tree.maxSplits === 1 ? "" : "s";
+  }
+  
+  let presets = [
+    {
+      name: "Default",
+      maxLayers: 7,
+      maxSplits: 8,
+      minSplits: 2,
+      minRandLengthRatio: 50,
+      minRandWidthRatio: 50,
+      randOffsetAngle: 45,
+      randOffsetHue: 30,
+      randBend: 50,
+      leafChance: 50,
+      startLength: 250,
+      startWidth: 15,
+      leafScale: 100,
+      leafOpacity: 80,
+      branchOpacity: 50,
+      evenSplitSpacing: false,
+      coloredBranches: true,
+      coloredLeaves: true,
+      branchStretch: 0
+    },
+    {
+      name: "Vibrant Birch",
+      maxLayers: 7,
+      maxSplits: 8,
+      minSplits: 2,
+      minRandLengthRatio: 50,
+      minRandWidthRatio: 50,
+      randOffsetAngle: 20,
+      randOffsetHue: 35,
+      randBend: 25,
+      leafChance: 50,
+      startLength: 250,
+      startWidth: 15,
+      leafScale: 150,
+      leafOpacity: 100,
+      branchOpacity: 30,
+      evenSplitSpacing: true,
+      coloredBranches: false,
+      coloredLeaves: true,
+      branchStretch: 0
+    },
+    {
+      name: "Towering Maple",
+      maxLayers: 7,
+      maxSplits: 3,
+      minSplits: 2,
+      minRandLengthRatio: 75,
+      minRandWidthRatio: 80,
+      randOffsetAngle: 40,
+      randOffsetHue: 30,
+      randBend: 50,
+      leafChance: 100,
+      startLength: 175,
+      startWidth: 30,
+      leafScale: 200,
+      leafOpacity: 100,
+      branchOpacity: 100,
+      evenSplitSpacing: true,
+      coloredBranches: true,
+      coloredLeaves: true,
+      branchStretch: 50
+    },
+    {
+      name: "White Poplar",
+      maxLayers: 7,
+      maxSplits: 6,
+      minSplits: 3,
+      minRandLengthRatio: 40,
+      minRandWidthRatio: 70,
+      randOffsetAngle: 40,
+      randOffsetHue: 0,
+      randBend: 0,
+      leafChance: 25,
+      startLength: 250,
+      startWidth: 5,
+      leafScale: 150,
+      leafOpacity: 100,
+      branchOpacity: 100,
+      evenSplitSpacing: false,
+      coloredBranches: true,
+      coloredLeaves: false,
+      branchStretch: 20
+    },
+    {
+      name: "Wheat Stalk",
+      maxLayers: 7,
+      maxSplits: 8,
+      minSplits: 2,
+      minRandLengthRatio: 50,
+      minRandWidthRatio: 50,
+      randOffsetAngle: 15,
+      randOffsetHue: 60,
+      randBend: 25,
+      leafChance: 100,
+      startLength: 250,
+      startWidth: 15,
+      leafScale: 100,
+      leafOpacity: 50,
+      branchOpacity: 50,
+      evenSplitSpacing: false,
+      coloredBranches: true,
+      coloredLeaves: true,
+      branchStretch: 0
+    },
+    {
+      name: "Ethereal Growth",
+      maxLayers: 7,
+      maxSplits: 8,
+      minSplits: 2,
+      minRandLengthRatio: 50,
+      minRandWidthRatio: 50,
+      randOffsetAngle: 45,
+      randOffsetHue: 45,
+      randBend: 50,
+      leafChance: 100,
+      startLength: 200,
+      startWidth: 15,
+      leafScale: 300,
+      leafOpacity: 10,
+      branchOpacity: 0,
+      evenSplitSpacing: true,
+      coloredBranches: true,
+      coloredLeaves: true,
+      branchStretch: 0
+    },
+    {
+      name: "Tangled Floral Bloom",
+      maxLayers: 7,
+      maxSplits: 8,
+      minSplits: 2,
+      minRandLengthRatio: 10,
+      minRandWidthRatio: 50,
+      randOffsetAngle: 50,
+      randOffsetHue: 70,
+      randBend: 100,
+      leafChance: 100,
+      startLength: 400,
+      startWidth: 10,
+      leafScale: 200,
+      leafOpacity: 50,
+      branchOpacity: 50,
+      evenSplitSpacing: false,
+      coloredBranches: true,
+      coloredLeaves: true,
+      branchStretch: 0
+    },
+    {
+      name: "Blade of Nature",
+      maxLayers: 7,
+      maxSplits: 5,
+      minSplits: 5,
+      minRandLengthRatio: 50,
+      minRandWidthRatio: 50,
+      randOffsetAngle: 0,
+      randOffsetHue: 30,
+      randBend: 100,
+      leafChance: 100,
+      startLength: 250,
+      startWidth: 15,
+      leafScale: 200,
+      leafOpacity: 80,
+      branchOpacity: 60,
+      evenSplitSpacing: false,
+      coloredBranches: true,
+      coloredLeaves: true,
+      branchStretch: 0
+    }
+  ];
+  function loadPreset(n) {
+    let p = presets[n];
+    
+    treeMaxLayersRange.value = p.maxLayers;
+    treeMaxSplitsRange.value = p.maxSplits;
+    treeMinSplitsRange.value = p.minSplits;
+    treeMinRandLengthRatioRange.value = p.minRandLengthRatio;
+    treeMinRandWidthRatioRange.value = p.minRandWidthRatio;
+    treeRandOffsetAngleRange.value = p.randOffsetAngle;
+    treeRandOffsetHueRange.value = p.randOffsetHue;
+    treeRandBendRange.value = p.randBend;
+    treeLeafChanceRange.value = p.leafChance;
+    treeStartLengthRange.value = p.startLength;
+    treeStartWidthRange.value = p.startWidth;
+    treeLeafScaleRange.value = p.leafScale;
+    treeLeafOpacityRange.value = p.leafOpacity;
+    treeBranchOpacityRange.value = p.branchOpacity;
+    treeEvenSplitSpacingCheckbox.checked = p.evenSplitSpacing;
+    treeColoredBranchesCheckbox.checked = p.coloredBranches;
+    treeColoredLeavesCheckbox.checked = p.coloredLeaves;
+    treeBranchStretchRange.value = p.branchStretch;
+    
+    updateSettings();
+    draw();
+  }
+  
+  function draw() {
+    Tree.draw();
+  }
+  draw();
+  
+  function downloadCanvas() {
+    let link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "organic-tree.png";
+    link.click();
+  }
+  
+  for (let i = 1; i < presets.length; i++) {
+    let btn = document.createElement("button");
+    btn.innerHTML = presets[i].name;
+    btn.className = "preset-btn";
+    btn.onclick = () => loadPreset(i);
+    presetsDiv.appendChild(btn);
+  }
+</script>
+</body>
+</html>
