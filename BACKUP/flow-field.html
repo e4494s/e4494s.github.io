@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>Flow Field ~ e4494s</title>
+  </head>
+<body>
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; Flow Field &mdash;&mdash;</h1>
+<p id = "how-it-works">
+  <b><i>How It Works:</i></b> A grid of random vectors is created across the canvas, forming a flow field. These vectors are averaged together with their neighbors to create smooth transitions between them. Particles are spawned randomly on the canvas and are accelerated based on the direction of the vector in the square they are currently over. Particles leave a colorful, glowing trail behind them, creating beautiful flowing patterns as they glide.
+  <br><br>
+  <span class = "setting">Flow Field Size</span> changes the grid size of the flow field.
+  <br><br>
+  <span class = "setting">Flow Field Smoothness</span> controls how many times each vector is averaged with its neighbors. Higher values will make the whole field more smooth and flowy, while lower values will create jagged edges between differect sections of the canvas.
+  <br><br>
+  <span class = "setting">Flow Field Strength</span> affects how much force the flow field exerts on the particles, so that higher values will make them move faster through it.
+  <br><br>
+  <span class = "setting">Max Point Age</span> controls how many steps each point can make before it disappears. Higher values will make each trail longer, while shorter values will limit this length.
+  <br><br>
+  Points will decelerate each step based on how high <span class = "setting">Friction</span> is.
+</p>
+<hr>
+<div><b>Settings Presets:</b></div>
+<div id = "presets-div"></div>
+<hr>
+<table>
+  <tr valign = "top">
+    <td>
+      <button id = "start-stop-btn" onclick = "startStop()">Pause</button>
+      <button onclick = "reset()">Reset</button>
+      <br><br>
+      <canvas id = "canvas">If you're seeing this text, your browser does not support the canvas element.</canvas>
+      <br>
+      <button class = "download-canvas-btn" onclick = "downloadCanvas()">Download Canvas</button>
+    </td>
+    <td>
+      <button onclick = "loadPreset(0)">Reset Settings</button>
+      <hr>
+      <div><i><b>Total Points Drawn:</b> <span id = "total-points-txt">0</span></i></div>
+      <hr>
+      <div><b><u>Flow Field Size:</u></b> <span id = "grid-size-txt">25&times;25</span></div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "grid-size-range" oninput = "updateSettings(true)">
+      <br><br><br>
+      <div><b><u>Flow Field Smoothness:</u></b> <span id = "smooth-iterations-txt">3</span> iterations</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "3" id = "smooth-iterations-range" oninput = "updateSettings(true)">
+      <br><br><br>
+      <div><b><u>Flow Field Strength:</u></b> &times;<span id = "field-strength-txt">1.0</span></div>
+      <input type = "range" min = "50" max = "500" step = "50" value = "100" id = "field-strength-range" oninput = "updateSettings(false)">
+      <hr>
+      <div><b><u>Max Point Age:</u></b> <span id = "max-age-txt">50</span> steps</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "max-age-range" oninput = "updateSettings(false)">
+      <hr>
+      <div><b><u>Friction:</u></b> <span id = "friction-txt">10</span>%</div>
+      <input type = "range" min = "0" max = "50" step = "5" value = "10" id = "friction-range" oninput = "updateSettings(false)">
+    </td>
+    <td>
+      <div><b><u>Trail Hue:</u></b> <span id = "hue-txt">120</span>&deg;</div>
+      <input type = "range" min = "0" max = "360" step = "5" value = "120" id = "hue-range" oninput = "updateSettings(false)">
+      <br><br><br>
+      <div><b><u>Trail Opacity:</u></b> <span id = "opacity-txt">5</span>%</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "opacity-range" oninput = "updateSettings(false)">
+      <br><br><br>
+      <div><b><u>Trail Hue Variation:</u></b> <span id = "hue-variation-txt">50</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "5" value = "50" id = "hue-variation-range" oninput = "updateSettings(false)">
+      <hr>
+      <div><b><u>Point Spawning:</u></b></div>
+      <input type = "radio" name = "point-spawning-radio" id = "point-spawning-radio-1" onclick = "updateSettings(false)">
+      <label for = "point-spawning-radio-1">Spawn at Edges</label>
+      <br>
+      <input type = "radio" name = "point-spawning-radio" id = "point-spawning-radio-2" onclick = "updateSettings(false)" CHECKED>
+      <label for = "point-spawning-radio-2">Spawn Randomly on Canvas</label>
+    </td>
+  </tr>
+</table>
+<br>
+<div id = "fps-body">FPS: <span id = "fps-txt"></span></div>
+<script src = "scripts/main.js"></script>
+<script>
+  let canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 1000;
+  let canvasRunning = true;
+  
+  let startStopBtn = document.getElementById("start-stop-btn");
+  let presetsDiv = document.getElementById("presets-div");
+  let fpsTxt = document.getElementById("fps-txt");
+  let totalPointsTxt = document.getElementById("total-points-txt");
+  let gridSizeTxt = document.getElementById("grid-size-txt");
+  let gridSizeRange = document.getElementById("grid-size-range");
+  let smoothIterationsTxt = document.getElementById("smooth-iterations-txt");
+  let smoothIterationsRange = document.getElementById("smooth-iterations-range");
+  let fieldStrengthTxt = document.getElementById("field-strength-txt");
+  let fieldStrengthRange = document.getElementById("field-strength-range");
+  let maxAgeTxt = document.getElementById("max-age-txt");
+  let maxAgeRange = document.getElementById("max-age-range");
+  let frictionTxt = document.getElementById("friction-txt");
+  let frictionRange = document.getElementById("friction-range");
+  let hueTxt = document.getElementById("hue-txt");
+  let hueRange = document.getElementById("hue-range");
+  let opacityTxt = document.getElementById("opacity-txt");
+  let opacityRange = document.getElementById("opacity-range");
+  let hueVariationTxt = document.getElementById("hue-variation-txt");
+  let hueVariationRange = document.getElementById("hue-variation-range");
+  let pointSpawningRadio1 = document.getElementById("point-spawning-radio-1");
+  let pointSpawningRadio2 = document.getElementById("point-spawning-radio-2");
+  
+  let gridSize = 25;
+  let tileSize = canvas.width / gridSize;
+  let maxPoints = 1;
+  let maxAge = 50;
+  let stepsPerFrame = 5000;
+  let friction = 0.1;
+  let opacity = 0.05;
+  let smoothIterations = 3;
+  let hue = 120;
+  let totalPoints = 0;
+  let edgeSpawning = false;
+  let hueVariation = 0.5;
+  let fieldStrength = 1;
+  
+  let presets = [
+    {
+      name: "Default",
+      gridSize: 25,
+      smoothIterations: 3,
+      fieldStrength: 1,
+      maxAge: 50,
+      friction: 0.1,
+      hue: 120,
+      opacity: 0.05,
+      hueVariation: 0.5,
+      edgeSpawning: false
+    },
+    {
+      name: "Checkerboard",
+      gridSize: 8,
+      smoothIterations: 0,
+      fieldStrength: 1,
+      maxAge: 5,
+      friction: 0,
+      hue: 240,
+      opacity: 0.1,
+      hueVariation: 0,
+      edgeSpawning: false
+    },
+    {
+      name: "Circuits",
+      gridSize: 25,
+      smoothIterations: 0,
+      fieldStrength: 2,
+      maxAge: 50,
+      friction: 0.5,
+      hue: 120,
+      opacity: 0.1,
+      hueVariation: 0,
+      edgeSpawning: false
+    },
+    {
+      name: "Crimson Growth",
+      gridSize: 50,
+      smoothIterations: 0,
+      fieldStrength: 1.5,
+      maxAge: 200,
+      friction: 0.1,
+      hue: 0,
+      opacity: 0.1,
+      hueVariation: 0,
+      edgeSpawning: true
+    },
+    {
+      name: "Coiling Tendrils",
+      gridSize: 100,
+      smoothIterations: 2,
+      fieldStrength: 1,
+      maxAge: 50,
+      friction: 0.25,
+      hue: 120,
+      opacity: 0.05,
+      hueVariation: 1,
+      edgeSpawning: false
+    },
+    {
+      name: "Tropical Branches",
+      gridSize: 25,
+      smoothIterations: 3,
+      fieldStrength: 5,
+      maxAge: 10,
+      friction: 0,
+      hue: 120,
+      opacity: 0.05,
+      hueVariation: 0.5,
+      edgeSpawning: true
+    }
+  ];
+  
+  let field = [];
+  
+  function initField() {
+    field = [];
+    for (let x = 0; x < gridSize; x++) {
+      let row = [];
+      for (let y = 0; y < gridSize; y++) {
+        row.push({magnitude: 1, angle: Math.random() * Math.PI * 2});
+      }
+      field.push(row);
+    }
+  }
+  function smoothField(steps) {
+    for (let j = 0; j < steps; j++) {
+      let nextField = [];
+      for (let x = 0; x < gridSize; x++) {
+        let row = [];
+        for (let y = 0; y < gridSize; y++) {
+          row.push({magnitude: 0, angle: 0});
+        }
+        nextField.push(row);
+      }
+      for (let x = 0; x < gridSize; x++) {
+        for (let y = 0; y < gridSize; y++) {
+          let vecs = [];
+          vecs.push(field[x][(y - 1 + gridSize) % gridSize]);
+          vecs.push(field[(x + 1) % gridSize][(y - 1 + gridSize) % gridSize]);
+          vecs.push(field[(x + 1) % gridSize][y]);
+          vecs.push(field[(x + 1) % gridSize][(y + 1) % gridSize]);
+          vecs.push(field[x][(y + 1) % gridSize]);
+          vecs.push(field[(x - 1 + gridSize) % gridSize][(y + 1) % gridSize]);
+          vecs.push(field[(x - 1 + gridSize) % gridSize][y]);
+          vecs.push(field[(x - 1 + gridSize) % gridSize][(y - 1 + gridSize) % gridSize]);
+          vecs.push(field[x][y]);
+          
+          let currX = 0;
+          let currY = 0;
+          for (let i = 0; i < vecs.length; i++) {
+            currX += Math.cos(vecs[i].angle);
+            currY += Math.sin(vecs[i].angle);
+          }
+          let avgAngle = Math.atan2(currY, currX);
+          nextField[x][y].magnitude = 1;
+          nextField[x][y].angle = avgAngle;
+        }
+      }
+      for (let x = 0; x < gridSize; x++) {
+        for (let y = 0; y < gridSize; y++) {
+          field[x][y] = nextField[x][y];
+        }
+      }
+    }
+  }
+  function drawField() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    tileSize = canvas.width / gridSize;
+    for (let x = 0; x < gridSize; x++) {
+      for (let y = 0; y < gridSize; y++) {
+        let h = toDeg(field[x][y].angle);
+        let brightness = 40;
+        ctx.fillStyle = `hsl(${h}deg, 100%, ${brightness}%)`;
+        ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+      }
+    }
+  }
+  
+  function randCanvasEdgePos() {
+    let r = Math.floor(Math.random() * 4);
+    if (r === 0) return {x: Math.random() * canvas.width, y: 0};
+    else if (r === 1) return {x: canvas.width, y: Math.random() * canvas.height};
+    else if (r === 2) return {x: Math.random() * canvas.width, y: canvas.height};
+    else return {x: 0, y: Math.random() * canvas.height};
+  }
+  
+  function Point() {
+    let P = randCanvasEdgePos();
+    this.x = edgeSpawning ? P.x : Math.random() * canvas.width;
+    this.y = edgeSpawning ? P.y : Math.random() * canvas.height;
+    this.vx = 0;
+    this.vy = 0;
+    this.age = 0;
+    let h = hue + randBetween(-180 * hueVariation, 180 * hueVariation);
+    this.color = `hsl(${h}deg, 100%, 50%)`;
+  }
+  Point.prototype.render = function() {
+    this.age++;
+    let fieldX = Math.floor(this.x / tileSize);
+    let fieldY = Math.floor(this.y / tileSize);
+    fieldX = fieldX.clamp(0, gridSize - 1);
+    fieldY = fieldY.clamp(0, gridSize - 1);
+    let lastX = this.x;
+    let lastY = this.y;
+    this.x += this.vx;
+    this.y += this.vy;
+    if (this.x > canvas.width + 2) this.x = lastX = -2;
+    if (this.x < -2) this.x = lastX = canvas.width + 2;
+    if (this.y > canvas.height + 2) this.y = lastY = -2;
+    if (this.y < -2) this.y = lastY = canvas.height + 2;
+    this.vx += fieldStrength * Math.cos(field[fieldX][fieldY].angle);
+    this.vy += fieldStrength * Math.sin(field[fieldX][fieldY].angle);
+    this.vx *= 1 - friction;
+    this.vy *= 1 - friction;
+    ctx.globalAlpha = opacity;
+    ctx.strokeStyle = this.color;
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(this.x, this.y);
+    ctx.stroke();
+  };
+  Point.prototype.resetPos = function() {
+    let P = randCanvasEdgePos();
+    this.x = edgeSpawning ? P.x : Math.random() * canvas.width;
+    this.y = edgeSpawning ? P.y : Math.random() * canvas.height;
+    this.vx = 0;
+    this.vy = 0;
+    this.age = 0;
+    let h = hue + randBetween(-180 * hueVariation, 180 * hueVariation);
+    this.color = `hsl(${h}deg, 100%, 50%)`;
+    totalPoints++;
+  };
+  let pointArray = [];
+  function initPoints() {
+    pointArray = [];
+    for (let i = 0; i < maxPoints; i++) {
+      totalPoints++;
+      pointArray.push(new Point());
+    }
+  }
+  
+  function loadPreset(n) {
+    let p = presets[n];
+    
+    gridSizeRange.value = gridSizeRangeArray.indexOf(p.gridSize);
+    smoothIterationsRange.value = p.smoothIterations;
+    fieldStrengthRange.value = p.fieldStrength * 100;
+    maxAgeRange.value = maxAgeRangeArray.indexOf(p.maxAge);
+    frictionRange.value = p.friction * 100;
+    opacityRange.value = opacityRangeArray.indexOf(p.opacity * 100);
+    hueRange.value = p.hue;
+    hueVariationRange.value = p.hueVariation * 100;
+    if (p.edgeSpawning) {
+      pointSpawningRadio1.checked = true;
+      pointSpawningRadio2.checked = false;
+    }
+    else {
+      pointSpawningRadio2.checked = true;
+      pointSpawningRadio1.checked = false;
+    }
+    
+    updateSettings(true);
+  }
+  
+  let lastFrameTime = 0;
+  let lastFpsDisplayTime = 1000;
+  function frame() {
+    if (Date.now() - lastFpsDisplayTime >= 500) {
+      fpsTxt.innerHTML = Math.floor(1000 / (Date.now() - lastFrameTime));
+      lastFpsDisplayTime = Date.now();
+    }
+    lastFrameTime = Date.now();
+    
+    for (let j = 0; j < stepsPerFrame; j++) {
+      let newPoints = 0;
+      for (let i = 0; i < pointArray.length; i++) {
+        pointArray[i].render();
+        if (pointArray[i].age > maxAge) {
+          pointArray[i].resetPos();
+        }
+      }
+    }
+    
+    totalPointsTxt.innerHTML = totalPoints.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    
+    if (canvasRunning) requestAnimationFrame(frame);
+  }
+  
+  function reset() {
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    tileSize = canvas.width / gridSize;
+    totalPoints = 0;
+    initField();
+    smoothField(smoothIterations);
+    initPoints();
+    if (!canvasRunning) frame();
+  }
+  reset();
+  frame();
+  
+  let gridSizeRangeArray = [5, 8, 10, 15, 20, 25, 50, 100];
+  gridSizeRange.max = gridSizeRangeArray.length - 1;
+  gridSizeRange.value = gridSizeRangeArray.indexOf(25);
+  let maxAgeRangeArray = [1, 2, 3, 4, 5, 10, 15, 20, 25, 50, 75, 100, 200];
+  maxAgeRange.max = maxAgeRangeArray.length - 1;
+  maxAgeRange.value = maxAgeRangeArray.indexOf(50);
+  let opacityRangeArray = [1, 2, 3, 4, 5, 10, 15, 20, 25, 50, 75, 100];
+  opacityRange.max = opacityRangeArray.length - 1;
+  opacityRange.value = opacityRangeArray.indexOf(5);
+  
+  function updateSettings(doReset) {
+    gridSize = gridSizeRangeArray[Number(gridSizeRange.value)];
+    gridSizeTxt.innerHTML = gridSize + "&times;" + gridSize;
+    
+    smoothIterations = smoothIterationsTxt.innerHTML = Number(smoothIterationsRange.value);
+    
+    fieldStrength = Number(fieldStrengthRange.value) / 100;
+    fieldStrengthTxt.innerHTML = fieldStrength.toFixed(1);
+    
+    maxAge = maxAgeTxt.innerHTML = maxAgeRangeArray[Number(maxAgeRange.value)];
+    
+    friction = Number(frictionRange.value) / 100;
+    frictionTxt.innerHTML = frictionRange.value;
+    
+    hue = hueTxt.innerHTML = Number(hueRange.value);
+    
+    opacity = opacityRangeArray[Number(opacityRange.value)] / 100;
+    opacityTxt.innerHTML = opacityRangeArray[Number(opacityRange.value)];
+    
+    hueVariation = Number(hueVariationRange.value) / 100;
+    hueVariationTxt.innerHTML = hueVariationRange.value;
+    
+    if (pointSpawningRadio1.checked) edgeSpawning = true;
+    if (pointSpawningRadio2.checked) edgeSpawning = false;
+    
+    if (doReset) reset();
+  }
+  
+  function startStop() {
+    if (canvasRunning) {
+      canvasRunning = false;
+      startStopBtn.innerHTML = "Play";
+    }
+    else {
+      canvasRunning = true;
+      frame();
+      startStopBtn.innerHTML = "Pause";
+    }
+  }
+  
+  function downloadCanvas() {
+    let link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "flow-field.png";
+    link.click();
+  }
+  
+  for (let i = 1; i < presets.length; i++) {
+    let btn = document.createElement("button");
+    btn.innerHTML = presets[i].name;
+    btn.className = "preset-btn";
+    btn.onclick = () => loadPreset(i);
+    presetsDiv.appendChild(btn);
+  }
+</script>
+</body>
+</html>
