@@ -3,33 +3,16 @@
 <head>
   <link rel = "icon"  href = "images/favicon.png" type = "image/png">
   <link rel = "stylesheet" href = "stylesheets/main.css">
+  <link rel = "stylesheet" href = "stylesheets/testbed.css">
   <title>Test Bed 2 ~ e4494s</title>
-  <style>
-    canvas {
-      width: 300px;
-      height: 300px;
-      border: 2px solid black;
-    }
-    
-    hr {
-      border: 1px solid black;
-    }
-    
-    .desc {
-      background-color: silver;
-      margin: 5px;
-      padding: 5px;
-      border-radius: 5px;
-    }
-    .desc mark {
-      background-color: #ffff4d;
-    }
-  </style>
 </head>
 <body>
 <script src = "scripts/main.js"></script>
-<h1>The Second Island of Misfit Code</h1>
-<div style = "font-size: 16px; background-color: rgb(255, 150, 150); padding: 8px; margin-top: 25px; margin-bottom: 25px; border-radius: 10px"><b><i>Moved to from <a href = "testbed.html" target = "_blank">testbed.html</a> on 10/17/2021.</i></b></div>
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; The Second Island of Misfit Code &mdash;&mdash;</h1>
+<div class = "red-top-div">Moved to from <a href = "testbed.html" target = "_blank">testbed.html</a> on 10/17/2021.</div>
+<br><br>
+<hr><hr>
 <!--
 <canvas id = "canvas0"></canvas>
 <button onclick = "startCanvas0()">Start/Stop</button>
@@ -56,6 +39,913 @@
   }
 </script>
 -->
+<div class = "project-num">Project #92: Random Arc Walker</div>
+<canvas id = "canvas92" style = "width: 400px; height: 400px"></canvas>
+<button onclick = "startCanvas92(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
+<button onclick = "reset92()">Reset</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>[ FPS: <span id = "fps92Txt"></span> ]</b></i></div>
+<br>
+<div><b><u>Min Arc Angle:</u></b> <span id = "minAngle92Txt">0</span>&deg;</div>
+<input type = "range" min = "0" max = "90" step = "5" value = "0" id = "minAngle92Range" oninput = "updateSettings92(false)">
+<br><br>
+<div><b><u>Max Arc Angle:</u></b> <span id = "maxAngle92Txt">90</span>&deg;</div>
+<input type = "range" min = "0" max = "360" step = "5" value = "90" id = "maxAngle92Range" oninput = "updateSettings92(false)">
+<br><br>
+<div><b><u>Arc Radius:</u></b> <span id = "arcRadius92Txt">20</span>px</div>
+<input type = "range" min = "0" max = "50" step = "5" value = "20" id = "arcRadius92Range" oninput = "updateSettings92(false)">
+<br><br>
+<div><b><u>Starting Walkers:</u></b> <span id = "startingWalkers92Txt">10</span> walker<span id = "plural92TxtA">s</span></div>
+<input type = "range" min = "1" max = "25" step = "1" value = "10" id = "startingWalkers92Range" oninput = "updateSettings92(true)">
+<br><br>
+<div><b><u>Path Width:</u></b> <span id = "lineWidth92Txt">2</span>px</div>
+<input type = "range" min = "1" max = "10" step = "1" value = "2" id = "lineWidth92Range" oninput = "updateSettings92(false)">
+<br><br>
+<div><b><u>Wrap Walkers Around Canvas:</u></b></div>
+<input type = "checkbox" id = "wrapCanvas92Checkbox" oninput = "updateSettings92(false)">
+<br><br>
+<div><b><u>Interesting Settings:</u></b></div>
+<div>
+  - Low Arc Radius / Min Arc Angle = 180&deg; / Max Arc Angle = 270&deg;
+  <br>
+  - Low Arc Radius / Min Arc Angle and Max Arc Angle = 180&deg;
+</div>
+<div class = "desc"><b><i>(6/11/2022)</i></b> Random arc walker, which is like a random walker except that the steps it takes are connected circular arcs, with an angle between "min angle" and "max angle," alternating clockwise and counterclockwise.<br><b><i>Update: (Later that day)</i></b> Added more settings and sliders for everything.</div>
+<hr><hr>
+<script>
+  const ctx92 = canvas92.getContext("2d");
+  canvas92.width = canvas92.height = 1000;
+  let canvas92Running = false;
+  
+  function updateSettings92(doReset) {
+    maxAngle92 = maxAngle92Txt.innerHTML = Number(maxAngle92Range.value);
+    minAngle92Range.max = maxAngle92;
+    minAngle92 = minAngle92Txt.innerHTML = Number(minAngle92Range.value);
+    
+    arcRadius92 = arcRadius92Txt.innerHTML = Math.max(Number(arcRadius92Range.value), 2);
+    
+    startingWalkers92 = startingWalkers92Txt.innerHTML = Number(startingWalkers92Range.value);
+    plural92TxtA.innerHTML = startingWalkers92 === 1 ? "" : "s";
+    
+    lineWidth92 = lineWidth92Txt.innerHTML = Number(lineWidth92Range.value);
+    
+    wrapCanvas92 = wrapCanvas92Checkbox.checked;
+    
+    if (wrapCanvas92 && arcWalker92Array.length === 0) doReset = true;
+    
+    if (doReset) reset92();
+  }
+  
+  let arcRadius92 = 20;
+  let minAngle92 = 0;
+  let maxAngle92 = 90;
+  let lineWidth92 = 2;
+  let startingWalkers92 = 10;
+  let wrapCanvas92 = false;
+  let stepsPerFrame92 = 3;
+  let arcRatio92 = 1;
+  
+  function ArcWalker92(x, y) {
+    this.centerX = x;
+    this.centerY = y;
+    this.radius = arcRadius92;
+    this.angle = Math.random() * 360;
+    this.counterclockwise = Math.random() < 0.5;
+    
+    this.color = `hsl(${Math.random() * 360}deg, ${randBetween(50, 100)}%, ${randBetween(30, 70)}%)`;
+    
+    this.dead = false;
+  }
+  ArcWalker92.prototype.draw = function(oX, oY, nextAngle) { // offset-x, offset-y
+    ctx92.beginPath();
+    ctx92.arc(oX + this.centerX, oY + this.centerY, this.radius, toRad(this.angle), toRad(nextAngle), this.counterclockwise);
+    ctx92.stroke();
+  };
+  ArcWalker92.prototype.walk = function() {
+    if (this.dead) return;
+    
+    ctx92.lineWidth = lineWidth92;
+    ctx92.lineCap = ctx92.lineJoin = "round";
+    ctx92.strokeStyle = this.color;
+    
+    let nextAngle = this.angle + (randBetween(minAngle92, maxAngle92) * (this.counterclockwise ? -1 : 1));
+    let nextRadius = arcRadius92 * randBetween(arcRatio92, 1);
+    
+    if (wrapCanvas92) { // Draw 9 copies in a 3x3 grid offset by the canvas size, so it still draws even near the edges before it wraps around
+      for (let x = -1; x < 2; x++) {
+        for (let y = -1; y < 2; y++) {
+          this.draw(x * canvas92.width, y * canvas92.height, nextAngle);
+        }
+      }
+    }
+    else this.draw(0, 0, nextAngle);
+    
+    this.angle = nextAngle;
+    this.centerX = this.centerX + ((this.radius + nextRadius) * Math.cos(toRad(this.angle)));
+    this.centerY = this.centerY + ((this.radius + nextRadius) * Math.sin(toRad(this.angle)));
+    this.radius = nextRadius;
+    
+    if (!wrapCanvas92) {
+      let offRight = this.centerX > canvas92.width + this.radius;
+      let offLeft = this.centerX < -this.radius;
+      let offTop = this.centerY > canvas92.height + this.radius;
+      let offBottom = this.centerY < -this.radius;
+      if (offRight || offLeft || offTop || offBottom) {
+        this.dead = true;
+        return;
+      }
+    }
+    
+    if (wrapCanvas92) {
+      this.centerX = (this.centerX + canvas92.width) % canvas92.width;
+      this.centerY = (this.centerY + canvas92.height) % canvas92.height;
+    }
+    
+    this.angle += 180;
+    this.counterclockwise = !this.counterclockwise;
+  };
+  let arcWalker92Array = [];
+  
+  let lastFrame92Time = 0;
+  let lastFps92DisplayTime = 1000;
+  function frame92() {
+    if (Date.now() - lastFps92DisplayTime >= 500) {
+      fps92Txt.innerHTML = (1000 / (Date.now() - lastFrame92Time)).toFixed(1);
+      lastFps92DisplayTime = Date.now();
+    }
+    lastFrame92Time = Date.now();
+    
+    for (let j = 0; j < stepsPerFrame92; j++) {
+      for (let i = 0; i < arcWalker92Array.length; i++) {
+        arcWalker92Array[i].walk();
+        
+        if (arcWalker92Array[i].dead) {
+          arcWalker92Array.splice(i, 1);
+          i--;
+        }
+      }
+    }
+    
+    if (canvas92Running) requestAnimationFrame(frame92);
+  }
+  function reset92() {
+    arcWalker92Array = [];
+    
+    ctx92.fillStyle = "black";
+    ctx92.fillRect(0, 0, canvas92.width, canvas92.height);
+    
+    for (let i = 0; i < startingWalkers92; i++) arcWalker92Array.push(new ArcWalker92(canvas92.width / 2, canvas92.height / 2));
+    
+    if (!canvas92Running) {
+      for (let i = 0; i < 5; i++) frame92();
+    }
+  }
+  reset92();
+  
+  function startCanvas92(caller) {
+    if (canvas92Running) {
+      canvas92Running = false;
+      caller.innerHTML = "<b><i>Paused</i></b>";
+      caller.style.color = caller.style.borderColor = "red";
+    }
+    else {
+      canvas92Running = true;
+      caller.innerHTML = "<b><i>Running</i></b>";
+      caller.style.color = caller.style.borderColor = "green";
+      frame92();
+    }
+  }
+</script>
+<div class = "project-num">Project #91: Spinners With Collision, Part 2</div>
+<canvas id = "canvas91" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "startCanvas91(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
+<button onclick = "reset91()">Reset</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>[ FPS: <span id = "fps91Txt"></span> ]</b></i></div>
+<br>
+<div><b><u>Presets:</u></b></div>
+<div id = "presetsDiv91"></div>
+<table>
+  <tr>
+    <td style = "padding: 20px">
+      <div><b><u>Rotation Speed:</u></b> <span id = "turnSpeed91Txt">3</span>x</div>
+      <input type = "range" min = "0" max = "25" step = "1" value = "3" id = "turnSpeed91Range" oninput = "updateSettings91()">
+      <br><br><br>
+      <div><b><u>Bounciness:</u></b> <span id = "bounciness91Txt">80</span>%</div>
+      <input type = "range" min = "0" max = "90" step = "10" value = "80" id = "bounciness91Range" oninput = "updateSettings91()">
+      <br><br><br>
+      <div><b><u>Gravity:</u></b> <span id = "gravity91Txt">50</span>%</div>
+      <input type = "range" min = "-200" max = "200" step = "25" value = "50" id = "gravity91Range" oninput = "updateSettings91()">
+      <br><br><br>
+      <div><b><u>Friction:</u></b> <span id = "friction91Txt">10</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "5" value = "10" id = "friction91Range" oninput = "updateSettings91()">
+    </td>
+    <td style = "padding: 20px">
+      <div><b><u>Spinner Length:</u></b> <span id = "spinner91LengthTxt">150</span>%</div>
+      <input type = "range" min = "0" max = "350" step = "25" value = "150" id = "spinner91LengthRange" oninput = "updateSettings91()">
+      <br><br><br>
+      <div><b><u>Spinner Thickness:</u></b> <span id = "lineWidth91Txt">20</span>%</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "lineWidth91Range" oninput = "updateSettings91()">
+      <br><br><br>
+      <div><b><u>Node Diameter:</u></b> <span id = "nodeRadius91Txt">12</span>%</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "nodeRadius91Range" oninput = "updateSettings91()">
+      <br><br><br>
+      <div><b><u>Node Outline:</u></b> +<span id = "outlineSize91Txt">4</span>%</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "outlineSize91Range" oninput = "updateSettings91()">
+    </td>
+    <td style = "padding: 20px">
+      <div><b><u>Trailing:</u></b></div>
+      <input type = "checkbox" id = "trailing91Checkbox" oninput = "updateSettings91()" CHECKED>
+      <br><br><br>
+      <div><b><u>Node Hue:</u></b> <span id = "endHue91Txt">0</span>&deg;</div>
+      <input type = "range" min = "0" max = "360" step = "10" value = "0" id = "endHue91Range" oninput = "updateSettings91()">
+      <br><br><br>
+      <div><b><u>Node Brightness:</u></b> <span id = "endBrightness91Txt">0</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "5" value = "0" id = "endBrightness91Range" oninput = "updateSettings91()">
+    </td>
+    <td style = "padding: 20px">
+      <div><b><u>Node Color:</u></b></div>
+      <br>
+      <div style = "display: inline-block; width: 25px; height: 25px; border: 1px solid black; background-color: black; border-radius: 10px" id = "nodeColor91Div"></div>
+    </td>
+  </tr>
+</table>
+<div class = "desc"><b><i>(6/10/2022)</i></b> An updated version of the previous project, with the spinners rotating from their center instead of their end. I realized a much easier way to add collision was just to calculate the width and the height of the bounding box around each spinner every time its angle changes, and do normal collision with that, so now it works fine. I also changed the visuals to look more cartoony and colorful, and also mouse control so you can click to add more. The physics still aren't accurate, since the speed of the spinning isn't taken into account when bouncing, but it still works pretty well.<br><b><i>(6/11/2022)</i></b> Slightly modified the code so that each spinner's length, thickness, and node radius can be updated dynamically, instead of only when it spawns. I also made it so that bounciness is not taken into account when bouncing off the left and right walls, so that it more accurately matches what you would expect, and also will let the spinners keep sliding forever if you have 0% friction.<br><b><i>Update: (Later that day)</i></b> Painstakingly added settings for 11 different variables.<br><b><i>(6/12/2022)</i></b> Added preset support and a few settings presets.</div>
+<hr><hr>
+<script>
+  const ctx91 = canvas91.getContext("2d");
+  canvas91.width = canvas91.height = 1000;
+  let canvas91Running = false;
+  let canvas91Rect = canvas91.getBoundingClientRect();
+  let canvas91Ratio = canvas91.width / 500;
+  
+  let presets91 = [
+    {
+      name: "Default",
+      trailing: true,
+      turnSpeed: 3,
+      bounciness: 80,
+      gravity: 50,
+      friction: 10,
+      spinnerLength: 150,
+      lineWidth: 20,
+      nodeDiameter: 12,
+      outlineSize: 4,
+      hue: 0,
+      brightness: 0
+    },
+    {
+      name: "Variation",
+      trailing: false,
+      turnSpeed: 5,
+      bounciness: 90,
+      gravity: 25,
+      friction: 10,
+      spinnerLength: 200,
+      lineWidth: 20,
+      nodeDiameter: 0,
+      outlineSize: 50,
+      hue: 0,
+      brightness: 0
+    },
+    {
+      name: "Orbiting Moons",
+      trailing: true,
+      turnSpeed: 3,
+      bounciness: 90,
+      gravity: 0,
+      friction: 0,
+      spinnerLength: 250,
+      lineWidth: 0,
+      nodeDiameter: 50,
+      outlineSize: 10,
+      hue: 0,
+      brightness: 100
+    },
+    {
+      name: "Fountain Splashes",
+      trailing: true,
+      turnSpeed: 2,
+      bounciness: 0,
+      gravity: 50,
+      friction: 100,
+      spinnerLength: 250,
+      lineWidth: 0,
+      nodeDiameter: 12,
+      outlineSize: 0,
+      hue: 240,
+      brightness: 65
+    }
+  ];
+  
+  let lineWidth91RangeArray = [0, 1, 2, 5, 10, 12, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 150, 200, 250];
+  lineWidth91Range.max = lineWidth91RangeArray.length - 1;
+  lineWidth91Range.value = lineWidth91RangeArray.indexOf(20);
+  
+  nodeRadius91Range.max = lineWidth91RangeArray.length - 1;
+  nodeRadius91Range.value = lineWidth91RangeArray.indexOf(12);
+  
+  let outlineSize91RangeArray = [0, 2, 4, 6, 8, 10, 20, 30, 40, 50, 60, 80, 100];
+  outlineSize91Range.max = outlineSize91RangeArray.length - 1;
+  outlineSize91Range.value = outlineSize91RangeArray.indexOf(4);
+  
+  function loadPreset91(n) {
+    let p = presets91[n];
+    
+    trailing91Checkbox.checked = p.trailing;
+    
+    turnSpeed91Range.value = p.turnSpeed;
+    
+    bounciness91Range.value = p.bounciness; // percent
+    
+    gravity91Range.value = p.gravity; // percent
+    
+    friction91Range.value = p.friction; // percent
+    
+    spinner91LengthRange.value = p.spinnerLength;
+    
+    lineWidth91Range.value = lineWidth91RangeArray.indexOf(p.lineWidth);
+    
+    nodeRadius91Range.value = lineWidth91RangeArray.indexOf(p.nodeDiameter);
+    
+    outlineSize91Range.value = outlineSize91RangeArray.indexOf(p.outlineSize);
+    
+    endHue91Range.value = p.hue;
+    
+    endBrightness91Range.value = p.brightness;
+    
+    updateSettings91();
+  }
+  for (let i = 0; i < presets91.length; i++) {
+    let p = presets91[i];
+    let btn = document.createElement("button");
+    btn.innerHTML = p.name;
+    btn.style.margin = "3px";
+    btn.onclick = () => loadPreset91(i);
+    presetsDiv91.appendChild(btn);
+  }
+  
+  function updateSettings91() {
+    trailing91 = trailing91Checkbox.checked;
+    
+    turnSpeed91 = turnSpeed91Txt.innerHTML = Number(turnSpeed91Range.value);
+    
+    bounciness91 = Number(bounciness91Range.value) / 100;
+    bounciness91Txt.innerHTML = bounciness91Range.value;
+    
+    gravity91 = Number(gravity91Range.value) / 100;
+    gravity91Txt.innerHTML = gravity91Range.value;
+    
+    friction91 = Number(friction91Range.value) / 100;
+    friction91Txt.innerHTML = friction91Range.value;
+    
+    spinner91Length = spinner91LengthTxt.innerHTML = Number(spinner91LengthRange.value);
+    
+    lineWidth91 = lineWidth91Txt.innerHTML = lineWidth91RangeArray[Number(lineWidth91Range.value)];
+    
+    nodeRadius91 = lineWidth91RangeArray[Number(nodeRadius91Range.value)] / 2;
+    nodeRadius91Txt.innerHTML = lineWidth91RangeArray[Number(nodeRadius91Range.value)];
+    
+    outlineSize91 = outlineSize91RangeArray[Number(outlineSize91Range.value)] / 2;
+    outlineSize91Txt.innerHTML = outlineSize91RangeArray[Number(outlineSize91Range.value)];
+    
+    let hue = Number(endHue91Range.value);
+    endHue91Txt.innerHTML = hue;
+    let brightness = Number(endBrightness91Range.value);
+    endBrightness91Txt.innerHTML = brightness;
+    
+    nodeColor91 = `hsl(${hue}deg, 100%, ${brightness}%)`;
+    
+    nodeColor91Div.style.backgroundColor = nodeColor91;
+    
+    if (!canvas91Running) frame91();
+  }
+  
+  let spinner91Length = 150;
+  let lineWidth91 = 20;
+  let nodeColor91 = "black";
+  let nodeRadius91 = 6;
+  let turnSpeed91 = 3;
+  let gravity91 = 0.5;
+  let friction91 = 0.1;
+  let bounciness91 = 0.8;
+  let debug91 = false;
+  let trailing91 = true;
+  let clearOpacity91 = 0.2;
+  let maxSpinners91 = 250;
+  let outlineSize91 = 2;
+  
+  /* Presets:
+    Orbiting Moons:
+    spinner length: 250
+    line width: 0
+    node hue: 0
+    node brightness: 100
+    node diameter: 50
+    turn speed: 3
+    gravity: 0%
+    friction: 0%
+    bounciness: 90%
+    trailing: true
+    outline size: 5
+    
+    Fountain Splashes:
+    spinner length: 350
+    line width: 0
+    node hue: 240
+    node brightness: 60
+    node diameter: 12
+    turn speed: 1
+    gravity: 50%
+    friction: 100%
+    bounciness: 0%
+    trailing: true
+    outline size: 0
+  */
+  
+  let Mouse91 = {
+    x: 0,
+    y: 0,
+    down: false
+  };
+  
+  function Spinner91(x, y) {
+    this.x = x;
+    this.y = y;
+    
+    let a = Math.random() * Math.PI * 2;
+    let v = randBetween(5, 10);
+    this.vx = v * Math.cos(a);
+    this.vy = v * Math.sin(a);
+    
+    let ratio = randBetween(0.5, 1);
+    
+    this.angle = Math.random() * 360;
+    this.lenRatio = randBetween(0.5, 1);
+    this.len = spinner91Length * this.lenRatio;
+    this.turnSpeed = randSign() * randBetween(0.5, 1);
+    
+    this.color = `hsl(${Math.random() * 360}deg, ${randBetween(50, 100)}%, ${randBetween(30, 60)}%)`;
+    
+    this.lineWidthRatio = ratio;
+    this.lineWidth = lineWidth91 * this.lineWidthRatio;
+    
+    this.nodeRadiusRatio = ratio;
+    this.nodeRadius = nodeRadius91 * this.nodeRadiusRatio;
+    
+    this.getSize();
+    
+    this.node1 = {};
+    this.node2 = {};
+    
+    this.getPos();
+    this.getSize();
+    
+    this.dead = false;
+  }
+  Spinner91.prototype.getPos = function() {
+    this.node1.x = this.x + (this.len * 0.5 * Math.cos(toRad(this.angle)));
+    this.node1.y = this.y + (this.len * 0.5 * Math.sin(toRad(this.angle)));
+    
+    this.node2.x = this.x - (this.len * 0.5 * Math.cos(toRad(this.angle)));
+    this.node2.y = this.y - (this.len * 0.5 * Math.sin(toRad(this.angle)));
+  };
+  Spinner91.prototype.getSize = function() {
+    let radius = Math.max(this.lineWidth / 2, this.nodeRadius + outlineSize91);
+    
+    this.width = Math.abs(this.len * Math.cos(toRad(this.angle))) + (radius * 2);
+    this.w2 = this.width / 2;
+    this.height = Math.abs(this.len * Math.sin(toRad(this.angle))) + (radius * 2);
+    this.h2 = this.height / 2;
+  };
+  Spinner91.prototype.render = function() {
+    this.len = spinner91Length * this.lenRatio;
+    this.lineWidth = lineWidth91 * this.lineWidthRatio;
+    this.nodeRadius = nodeRadius91 * this.nodeRadiusRatio;
+    
+    this.angle = (this.angle + (this.turnSpeed * turnSpeed91) + 360) % 360;
+    
+    this.getPos();
+    this.getSize();
+    
+    this.x += this.vx;
+    this.y += this.vy;
+    this.vy += gravity91;
+    
+    if (this.x - this.w2 < 0) { // Bounce off the left
+      //let overrun = this.x - this.w2;
+      //this.vx -= (overrun / this.vx) * gravity91;
+      this.x = this.w2;
+      this.vx *= -1//bounciness91;
+      this.vy *= 1 - friction91;
+    }
+    if (this.x + this.w2 > canvas91.width) { // Bounce off the right
+      //let overrun = this.x + this.w2 - canvas91.width;
+      //this.vx -= (overrun / this.vx) * gravity91;
+      this.x = canvas91.width - this.w2;
+      this.vx *= -1//bounciness91;
+      this.vy *= 1 - friction91;
+    }
+    
+    if (this.y - this.h2 < 0) { // Bounce off the top
+      //let overrun = this.y - this.h2;
+      //this.vy -= (overrun / this.vy) * gravity91;
+      this.y = this.h2;
+      this.vy *= -bounciness91;
+      this.vx *= 1 - friction91;
+    }
+    if (this.y + this.h2 > canvas91.height) { // Bounce off the bottom
+      //let overrun = this.y + this.h2 - canvas91.height;
+      //this.vy -= (overrun / this.vy) * gravity91;
+      this.y = canvas91.height - this.h2;
+      this.vy *= -bounciness91;
+      this.vx *= 1 - friction91;
+    }
+    
+    this.getPos();
+    this.getSize();
+    
+    ctx91.strokeStyle = this.color;
+    ctx91.fillStyle = nodeColor91;
+    ctx91.lineCap = ctx91.lineJoin = "round";
+    ctx91.lineWidth = this.lineWidth;
+    
+    if (this.lineWidth !== 0) {
+      ctx91.beginPath();
+      ctx91.moveTo(this.node1.x, this.node1.y);
+      ctx91.lineTo(this.node2.x, this.node2.y);
+      ctx91.stroke();
+    }
+    
+    if (outlineSize91 !== 0) {
+      ctx91.fillStyle = this.color;
+      ctx91.fillCircle(this.node1.x, this.node1.y, this.nodeRadius + outlineSize91);
+      ctx91.fillCircle(this.node2.x, this.node2.y, this.nodeRadius + outlineSize91);
+    }
+    
+    if (this.nodeRadius !== 0) {
+      ctx91.fillStyle = nodeColor91;
+      ctx91.fillCircle(this.node1.x, this.node1.y, this.nodeRadius);
+      ctx91.fillCircle(this.node2.x, this.node2.y, this.nodeRadius);
+    }
+    
+    ctx91.lineWidth = 2;
+    ctx91.strokeStyle = "black";
+    if (debug91) ctx91.strokeRectFromCenter(this.x, this.y, this.width, this.height);
+  };
+  let spinner91Array = [];
+  function addSpinner91(x, y) {
+    spinner91Array.push(new Spinner91(x, y));
+    while (spinner91Array.length > maxSpinners91) spinner91Array.splice(0, 1);
+  }
+  
+  let lastFrame91Time = 0;
+  let lastFps91DisplayTime = 1000;
+  function frame91() {
+    if (Date.now() - lastFps91DisplayTime >= 500) {
+      fps91Txt.innerHTML = (1000 / (Date.now() - lastFrame91Time)).toFixed(1);
+      lastFps91DisplayTime = Date.now();
+    }
+    lastFrame91Time = Date.now();
+    
+    ctx91.fillStyle = trailing91 ? `rgba(0, 0, 0, ${clearOpacity91})` : "black";
+    ctx91.fillRect(0, 0, canvas91.width, canvas91.height);
+    
+    for (let i = 0; i < spinner91Array.length; i++) {
+      spinner91Array[i].render();
+      
+      if (spinner91Array[i].dead) {
+        spinner91Array.splice(i, 1);
+        i--;
+      }
+    }
+    
+    if (canvas91Running) requestAnimationFrame(frame91);
+  }
+  function reset91() {
+    ctx91.fillStyle = "black";
+    ctx91.fillRect(0, 0, canvas91.width, canvas91.height);
+    
+    spinner91Array = [];
+    
+    addSpinner91(canvas91.width / 2, canvas91.height / 4);
+    
+    let _trailing91 = trailing91;
+    let _clearOpacity91 = clearOpacity91;
+    clearOpacity91 = 0.05;
+    trailing91 = true;
+    
+    if (!canvas91Running) {
+      for (let i = 0; i < 30; i++) frame91();
+    }
+    
+    trailing91 = _trailing91;
+    clearOpacity91 = _clearOpacity91;
+  }
+  reset91();
+  
+  canvas91.addEventListener("mousedown", e => {
+    if (!canvas91Running) return;
+    
+    e.preventDefault();
+    
+    Mouse91.down = true;
+    
+    canvas91Rect = canvas91.getBoundingClientRect();
+    
+    Mouse91.x = (e.clientX - canvas91Rect.left) * canvas91Ratio;
+    Mouse91.y = (e.clientY - canvas91Rect.top) * canvas91Ratio;
+    
+    addSpinner91(Mouse91.x, Mouse91.y);
+  });
+  canvas91.addEventListener("mousemove", e => {
+    if (!canvas91Running || !Mouse91.down) return;
+    
+    e.preventDefault();
+    
+    canvas91Rect = canvas91.getBoundingClientRect();
+    
+    Mouse91.x = (e.clientX - canvas91Rect.left) * canvas91Ratio;
+    Mouse91.y = (e.clientY - canvas91Rect.top) * canvas91Ratio;
+    
+    addSpinner91(Mouse91.x, Mouse91.y);
+  });
+  window.addEventListener("mouseup", e => {
+    Mouse91.down = false;
+  });
+  
+  function startCanvas91(caller) {
+    if (canvas91Running) {
+      canvas91Running = false;
+      caller.innerHTML = "<b><i>Paused</i></b>";
+      caller.style.color = caller.style.borderColor = "red";
+    }
+    else {
+      canvas91Running = true;
+      caller.innerHTML = "<b><i>Running</i></b>";
+      caller.style.color = caller.style.borderColor = "green";
+      frame91();
+    }
+  }
+</script>
+<div class = "project-num">Project #90: Spinners With Collision</div>
+<canvas id = "canvas90"></canvas>
+<button onclick = "startCanvas90(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
+<button onclick = "trailing90 = !trailing90">Toggle Trailing</button>
+<button onclick = "reset90()">Reset</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>[ FPS: <span id = "fps90Txt"></span> ]</b></i></div>
+<div class = "desc"><b><i>(6/9/2022)</i></b> More bouncing experiments, this time it's a Hinge object that has a home point and an orbit point that rotates a distance away from it, and both have collision with the walls. I want to modify the code though to make it so that it's two points orbiting an equal distance from the center, so the whole line rotates smoothly instead of looking unnatural.<br><b><i>Update: (Later that day)</i></b> I realized I'd have to completely redo my code to make the change I wanted, so I decided to leave this how it is and implement the changes in the next project. I polished it up a bit and added clicking to create more hinges as well. I also added decay so that hinges die over time and you can't just flood the canvas with them.</div>
+<hr><hr>
+<script>
+  const ctx90 = canvas90.getContext("2d");
+  canvas90.width = canvas90.height = 1000;
+  let canvas90Running = false;
+  let canvas90Rect = canvas90.getBoundingClientRect();
+  let canvas90Ratio = canvas90.width / 300;
+  
+  let orbitSpeed90 = 2;
+  let gravity90 = 0.5;
+  let bounciness90 = 0.8;
+  let homeRadius90 = 6; // Main point of each Hinge
+  let orbitRadius90 = 0; // Point that orbits home point
+  let friction90 = 0.05;
+  let lineWidth90 = 4;
+  let orbitDist90 = 300;
+  let maxAge90 = 1000;
+  let clearOpacity90 = 0.2;
+  let trailing90 = true;
+  
+  let Mouse90 = {
+    x: 0,
+    y: 0,
+    down: false
+  };
+  
+  function Hinge90(x, y) {
+    this.home = {};
+    this.home.x = x;
+    this.home.y = y;
+    this.home.radius = homeRadius90;
+    
+    let a = Math.random() * Math.PI * 2;
+    let r = randBetween(2, 5);
+    this.vx = r * Math.cos(a);
+    this.vy = r * Math.sin(a);
+    
+    this.orbit = {};
+    this.orbit.angle = Math.random() * 360;
+    this.orbit.dist = randBetween(0.5, 1);
+    this.orbit.speed = randSign() * randBetween(0.5, 1);
+    this.orbit.radius = orbitRadius90;
+    this.orbitPos();
+    
+    this.dead = false;
+    this.age = 0;
+    this.maxAge = Math.round(maxAge90 * randBetween(0.5, 1));
+  }
+  Hinge90.prototype.orbitPos = function() {
+    this.orbit.x = this.home.x + (this.orbit.dist * orbitDist90 * Math.cos(toRad(this.orbit.angle)));
+    this.orbit.y = this.home.y + (this.orbit.dist * orbitDist90 * Math.sin(toRad(this.orbit.angle)));
+    this.orbit.dx = Math.abs(this.orbit.x - this.home.x);
+    this.orbit.dy = Math.abs(this.orbit.y - this.home.y);
+  };
+  Hinge90.prototype.update = function() {
+    this.age++;
+    if (this.age >= this.maxAge) {
+      this.dead = true;
+      return;
+    }
+    
+    if (this.dead) return;
+    
+    this.home.x += this.vx;
+    this.home.y += this.vy;
+    this.vy += gravity90;
+    
+    this.orbit.angle = (this.orbit.angle + (this.orbit.speed * orbitSpeed90) + 360) % 360;
+    this.orbitPos();
+    
+    let reflectedX = false;
+    let reflectedY = false;
+    
+    if (this.home.x + this.home.radius > canvas90.width) { // Bounce HOME off right wall
+      this.home.x = canvas90.width - this.home.radius;
+      if (!reflectedX) {
+        this.vx = -Math.abs(this.vx) * bounciness90;
+        this.vy *= 1 - friction90;
+      }
+      reflectedX = true;
+    }
+    if (this.orbit.x + this.orbit.radius > canvas90.width) { // Bounce ORBIT off right wall
+      this.home.x = canvas90.width - this.orbit.radius - this.orbit.dx;
+      if (!reflectedX) {
+        this.vx = -Math.abs(this.vx) * bounciness90;
+        this.vy *= 1 - friction90;
+      }
+      reflectedX = true;
+    }
+    
+    if (this.home.x < this.home.radius) { // Bounce HOME off left wall
+      this.home.x = this.home.radius;
+      if (!reflectedX) {
+        this.vx = Math.abs(this.vx) * bounciness90;
+        this.vy *= 1 - friction90;
+      }
+      reflectedX = true;
+    }
+    if (this.orbit.x < this.orbit.radius) { // Bounce ORBIT off left wall
+      this.home.x = this.orbit.radius + this.orbit.dx;
+      if (!reflectedX) {
+        this.vx = Math.abs(this.vx) * bounciness90;
+        this.vy *= 1 - friction90;
+      }
+      reflectedX = true;
+    }
+    
+    if (this.home.y < this.home.radius) { // Bounce HOME off top wall
+      this.home.y = this.home.radius;
+      if (!reflectedY) {
+        this.vy = Math.abs(this.vy) * bounciness90;
+        this.vx *= 1 - friction90;
+      }
+      reflectedY = true;
+    }
+    if (this.orbit.y < this.orbit.radius) { // Bounce ORBIT off top wall
+      this.home.y = this.orbit.radius + this.orbit.dy;
+      if (!reflectedY) {
+        this.vy = Math.abs(this.vy) * bounciness90;
+        this.vx *= 1 - friction90;
+      }
+      reflectedY = true;
+    }
+    
+    if (this.home.y + this.home.radius > canvas90.height) { // Bounce HOME off bottom wall
+      this.home.y = canvas90.height - this.home.radius;
+      if (!reflectedY) {
+        this.vy = -Math.abs(this.vy) * bounciness90;
+        this.vx *= 1 - friction90;
+      }
+      reflectedY = true;
+    }
+    if (this.orbit.y + this.orbit.radius > canvas90.height) { // Bounce ORBIT off bottom wall
+      this.home.y = canvas90.height - this.orbit.radius - this.orbit.dy;
+      if (!reflectedY) {
+        this.vy = -Math.abs(this.vy) * bounciness90;
+        this.vx *= 1 - friction90;
+      }
+      reflectedY = true;
+    }
+  };
+  Hinge90.prototype.draw = function() {
+    let ageRatio = this.age / this.maxAge;
+    
+    this.orbitPos();
+    
+    ctx90.strokeStyle = "black";
+    ctx90.globalAlpha = 1//Math.min((1 - ageRatio) * 2, 1);
+    ctx90.lineCap = ctx90.lineJoin = "round";
+    ctx90.lineWidth = lineWidth90;
+    ctx90.beginPath();
+    ctx90.moveTo(this.home.x, this.home.y);
+    ctx90.lineTo(this.orbit.x, this.orbit.y);
+    ctx90.stroke();
+    
+    ctx90.fillStyle = "black";
+    
+    if (this.home.radius !== 0) ctx90.fillCircle(this.home.x, this.home.y, this.home.radius);
+    
+    if (this.orbit.radius !== 0) ctx90.fillCircle(this.orbit.x, this.orbit.y, this.orbit.radius);
+    
+    ctx90.globalAlpha = 1;
+  };
+  let hinge90Array = [];
+  function addHinge90(x, y) {
+    hinge90Array.push(new Hinge90(x, y));
+  }
+  
+  let lastFrame90Time = 0;
+  let lastFps90DisplayTime = 1000;
+  function frame90() {
+    if (Date.now() - lastFps90DisplayTime >= 500) {
+      fps90Txt.innerHTML = (1000 / (Date.now() - lastFrame90Time)).toFixed(1);
+      lastFps90DisplayTime = Date.now();
+    }
+    lastFrame90Time = Date.now();
+    
+    ctx90.fillStyle = `rgba(255, 255, 255, ${trailing90 ? clearOpacity90 : 1})`;
+    ctx90.fillRect(0, 0, canvas90.width, canvas90.height);
+    
+    for (let i = 0; i < hinge90Array.length; i++) {
+      hinge90Array[i].update();
+      hinge90Array[i].draw();
+      
+      if (hinge90Array[i].dead) {
+        hinge90Array.splice(i, 1);
+        i--;
+      }
+    }
+    
+    if (canvas90Running) requestAnimationFrame(frame90);
+  }
+  function reset90() {
+    ctx90.fillStyle = "white";
+    ctx90.fillRect(0, 0, canvas90.width, canvas90.height);
+    
+    hinge90Array = [];
+    
+    let _clearOpacity90 = clearOpacity90;
+    clearOpacity90 = 0.05;
+    addHinge90(canvas90.width / 2, canvas90.height / 2);
+    if (!canvas90Running) {
+      for (let i = 0; i < 25; i++) frame90();
+    }
+    clearOpacity90 = _clearOpacity90;
+  }
+  reset90();
+  
+  canvas90.addEventListener("mousedown", e => {
+    if (!canvas90Running) return;
+    
+    e.preventDefault();
+    
+    Mouse90.down = true;
+    
+    canvas90Rect = canvas90.getBoundingClientRect();
+    
+    Mouse90.x = (e.clientX - canvas90Rect.left) * canvas90Ratio;
+    Mouse90.y = (e.clientY - canvas90Rect.top) * canvas90Ratio;
+    
+    addHinge90(Mouse90.x, Mouse90.y);
+  });
+  canvas90.addEventListener("mousemove", e => {
+    if (!canvas90Running || !Mouse90.down) return;
+    
+    e.preventDefault();
+    
+    canvas90Rect = canvas90.getBoundingClientRect();
+    
+    Mouse90.x = (e.clientX - canvas90Rect.left) * canvas90Ratio;
+    Mouse90.y = (e.clientY - canvas90Rect.top) * canvas90Ratio;
+    
+    addHinge90(Mouse90.x, Mouse90.y);
+  });
+  window.addEventListener("mouseup", e => {
+    Mouse90.down = false;
+  });
+  
+  function startCanvas90(caller) {
+    if (canvas90Running) {
+      canvas90Running = false;
+      caller.innerHTML = "<b><i>Paused</i></b>";
+      caller.style.color = caller.style.borderColor = "red";
+    }
+    else {
+      canvas90Running = true;
+      caller.innerHTML = "<b><i>Running</i></b>";
+      caller.style.color = caller.style.borderColor = "green";
+      frame90();
+    }
+  }
+</script>
+<div class = "project-num">Project #89: FABRIK Man</div>
 <canvas id = "canvas89" style = "width: 450px; height: 300px"></canvas>
 <button onclick = "startCanvas89(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
 <div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>[ FPS: <span id = "fps89Txt"></span> ]</b></i></div>
@@ -348,6 +1238,7 @@
     }
   }
 </script>
+<div class = "project-num">Project #88: Bouncing Arrows</div>
 <canvas id = "canvas88" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "startCanvas88(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
 <button onclick = "reset88()">Reset</button>
@@ -558,6 +1449,7 @@
     }
   }
 </script>
+<div class = "project-num">Project #87: Square Packing on a Grid</div>
 <canvas id = "canvas87" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "draw87()">Redraw</button>
 <br>
@@ -762,6 +1654,7 @@
     draw87();
   }
 </script>
+<div class = "project-num">Project #86: Circle Locus</div>
 <canvas id = "canvas86" style = "width: 400px; height: 400px"></canvas>
 <button onclick = "startCanvas86(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
 <button onclick = "reset86()">Reset</button>
@@ -940,6 +1833,7 @@
     }
   }
 </script>
+<div class = "project-num">Project #85: Connectivity</div>
 <canvas id = "canvas85"></canvas>
 <button onclick = "draw85()">Redraw</button>
 <div class = "desc"><b><i>(5/25/2022)</i></b> Generative art that is similar to <a href = "tiles.html" target = "_blank">tiles.html</a>, except that every single tile is guaranteed to connect to adjacent tiles, to create an intricate and solid structure. Today I added the first 14 tiles, I plan to have a total of 20+.<br><b><i>(5/26/2022)</i></b> Finally added the final tiles, now I have a full 20, and everything connects exactly like I imagined it would.<br><b><i><mark>Actually finished! (5/27/2022)</mark> Moved to <a href = "connectivity.html" target = "_blank">connectivity.html</a>.</i></b></div>
@@ -1738,6 +2632,7 @@
   }
   draw85();
 </script>
+<div class = "project-num">Project #84: Profile Generator</div>
 <canvas id = "canvas84" style = "width: 400px; height: 400px"></canvas>
 <button onclick = "draw84()">New Profiles</button>
 <p><b>Possible usernames: <span id = "numUsernames84Txt"></span></b></p>
@@ -2069,6 +2964,7 @@
     return Math.round(totalTries / 10000);
   }
 </script>
+<div class = "project-num">Project #83: Tribal Beads</div>
 <canvas id = "canvas83"></canvas>
 <button onclick = "draw83()">Regenerate</button>
 <div class = "desc"><b><i>(5/6/2022)</i></b> A failed attempt to make generative art that resembled tribal beads or bracelets or something like that, I liked the idea of connecting circles with lines to make bead-like shapes but I didn't know how to place them on the canvas or how to set the settings right to make it look like I was wanting, so it looks pretty bad right now. I might go back and fix this at some point but I'm not sure what I want to do with it.</div>
@@ -2181,6 +3077,7 @@
   }
   draw83();
 </script>
+<div class = "project-num">Project #82: Recursive Square Packing</div>
 <canvas id = "canvas82"></canvas>
 <button onclick = "draw82()">Regenerate</button>
 <div class = "desc"><b><i>(5/5/2022)</i></b> An attempt to do circle packing recursion, but with squares. For some reason, the squares start inside each other and also don't reach towards each other.<br><b><i>Update: (A few minutes later)</i></b> I fixed the bug and now the squares pack correctly. Now I want to add recursion and alternate packing black squares in white squares and vice versa, to create contrasting layers of squares inside squares.<br><b><i>Update: (Later that day)</i></b> I got the recursion working, so now there's 3 layers of packed squares. I'm not sure how much I love the final result, but it looks cool enough.</div>
@@ -2337,6 +3234,7 @@
   }
   draw82();
 </script>
+<div class = "project-num">Project #81: Cellular Automata Alien Glyphs</div>
 <canvas id = "canvas81"></canvas>
 <button onclick = "draw81()">Regenerate</button>
 <div class = "desc"><b><i>(5/2/2022)</i></b> More generative reverse-enineering: this time I copied the design from <a href = "https://www.reddit.com/r/generative/comments/ufqh3l/alien_text" target = "_blank">this</a> Reddit post, with a grid of grids of cellular automata. Each rule appears once, randomly, in an 8x8 grid. I also randomized the hue every generation, so that is isn't just green like the post. The initial state of each cell is the same for all cells, but randomized every generation as well.</div>
@@ -2394,6 +3292,7 @@
   }
   draw81();
 </script>
+<div class = "project-num">Project #80: Fiber Pushing</div>
 <canvas id = "canvas80" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "startCanvas80(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
 <div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>[ FPS: <span id = "fps80Txt"></span> ]</b></i></div>
@@ -2551,6 +3450,7 @@
     }
   }
 </script>
+<div class = "project-num">Project #79: Recursive Circle Packing</div>
 <canvas id = "canvas79" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "draw79()">Regenerate</button>
 <div class = "desc"><b><i>(4/23/2022)</i></b> Recursive circle packing -- a few medium circles are packed randomly within one large circle (the size of the canvas), and each of those medium circles has mini circles packed into it as well.<br><b><i>(4/24/2022)</i></b> Added more medium circles and made th background black instead of white. I want to add another function to pack circles within a rectangle so that the medium circles reach to the edge of the canvas, instead of to the edge of a circle inside the canvas, so they fill the space better and more neatly. I also added a setting for center bias which affects how much the placed circles are biased towards the center, to create more scattered designs (although it fills up the canvas quicker). Negative bias values make the circles tend to the <i>edge</i> of the boundary instead. <i>(Possible idea: Make each mini circle be a random inscribed polygon, withthe same polygon for all mini circles within one medium circle.)</i><br><b><i>(4/25/2022)</i></b> I implemented the random shape idea but I wasn't happy with how it turned out. I'm not really sure where I want to go with this now--I really like the idea of packing circles in circles but it doesn't look super cool how it is right now.<br><b><i>Update: (Later that day)</i></b> I turned off the circle outline and made the visual size ratio be 1.75&times;, which make the medium circles look more like paint splotches or something. I like this more but it's still missing something.<br><b><i>Update: (Slightly more later that day)</i></b> I made the biggest boundary circle bigger than the canvas so the medium circles cover the whole screen, turned the visual size ratio to 5&times;, turned the opacity down to 0.8, and increased medium circles to 100. I think I finally like how this turned out, I'll do some more fiddling but it's starting to actually look like something now.<br><b><i>(4/26/2022)</i></b> Reduced size ratio to make the circles more separated.<br><b><i>(4/27/2022)</i></b> I added settings randomizing every regeneration (like hue variation, center bias, brightness variation, size ratio, etc.) and also added a new setting for the ratio of the inner ring of the circles instead of just always having solid circles. I might polish it up a bit more but I'm finally starting to like how this is turning out now.<br><b><i><mark>Actually finished! (4/28/2022)</mark> Added to <a href = "generative-art-gallery.html" target = "_blank">generative-art-gallery.html</a>.</i></b></div>
@@ -2794,6 +3694,7 @@
   }
   draw79();
 </script>
+<div class = "project-num">Project #78: Mandelbrot Viewer</div>
 <div>Click and drag to zoom. Make sure the animation is running by toggling the <b><i>Paused</i></b> button. The render gets more accurate every swipe.</div>
 <canvas id = "canvas78"></canvas>
 <button onclick = "startCanvas78(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
@@ -3176,6 +4077,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   });
 </script>
 <!--Idea?: Triangle grid with random tile size, rounded to multiple of 0.25 so they connect better-->
+<div class = "project-num">Project #77: Animated Triangle Grid</div>
 <canvas id = "canvas77"></canvas>
 <button onclick = "startCanvas77(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
 <button onclick = "reset77()">Reset</button>
@@ -3323,6 +4225,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   }
 </script>
+<div class = "project-num">Project #76: Bezier Point Connections</div>
 <canvas id = "canvas76"></canvas>
 <button onclick = "draw76()">Redraw</button>
 <div class = "desc"><b><i>(3/7/2022)</i></b> I tried to use something I implemented in the previous project, by connecting lines with random quadratic curves, but the result is pretty underwhelming.</div>
@@ -3392,6 +4295,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   }
   draw76();
 </script>
+<div class = "project-num">Project #75: Phyllotaxis Spiral Network</div>
 <canvas id = "canvas75" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "draw75()">Redraw</button>
 <div class = "desc"><b><i>(3/5/2022)</i></b> Experimenting with point networks. At first I just made a phyllotaxis spiral and connected the nearest points but it looked pretty bland. Then I added randomness to how offset each point is, and then finally changed the golden angle from &approx;137.5078&deg; to 2-4&deg; and made the connections get lighter and thinner as they go out. Now it resembles some kind of mystic tribal rune, or magical energy...<br><b><i>Update: (A few minutes later)</i></b> I wanted to emphasize the theme of mysterious ancient energy so I changed the connections from simple line to quadratic curves, with a random offset bend that increases towards the edge of the circle. This creates an interesting contrast between the geometric design of the center and the stringy loops of the edge.<br><b><i>(3/6/2022)</i></b> I added white shadows to everything to create a glowing effect and added random white glowing dots around to emphasize the energy theme.<br><b><i><mark>Actually finished! (3/6/2022)</mark> Added to <a href = "generative-art-gallery.html" target = "_blank">generative-art-gallery.html</a>.</i></b></div>
@@ -3514,6 +4418,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   }
   draw75();
 </script>
+<div class = "project-num">Project #74: Impossible Triangles</div>
 <canvas id = "canvas74" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "draw74()">Redraw</button>
 <div class = "desc"><b><i>(3/4/2022)</i></b> I worked out a program to draw the impossible Penrose Triangle.<br><b><i>(3/5/2022)</i></b> Went from drawing one large triangle, to drawing lots of them in a hexagon grid. I really like the design of the triangles but I'm not happy with this arrangement of them and I want to find a more cool looking way to put them on the screen.</div>
@@ -3615,6 +4520,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   }
   draw74();
 </script>
+<div class = "project-num">Project #73: Circle Packing: Triangles</div>
 <canvas id = "canvas73"></canvas>
 <button onclick = "draw73()">Redraw</button>
 <div class = "desc"><b><i>(3/1/2022)</i></b> More variation circle packing, this time with random triangles drawn instead of circles, and with a visual size ratio of 1.5x so they overlap each other but still are spaced out nicely.<br><b><i>Update: (Later that day)</i></b> Added more paramaters that get randomized. Lines are drawn on every triangle either from its center to its corners or its center to its edges, randomized every generation. There is also a random tilt factor for how rotated each triangle will be off the global angle, and a skew angle for how skewed the triangles will be from a perfect equilateral.<br><b><i><mark>Actually finished! (3/1/2022)</mark> Added to <a href = "generative-art-gallery.html" target = "_blank">generative-art-gallery.html</a>.</i></b></div>
@@ -3764,6 +4670,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   }
   draw73();
 </script>
+<div class = "project-num">Project #72: Circle Packing: Rocks</div>
 <canvas id = "canvas72"></canvas>
 <button onclick = "draw72()">Redraw</button>
 <div class = "desc"><b><i>(2/28/2022)</i></b> Random rock path generator, it's based on circle packing but instead of drawing circles it draws random rock shapes. I also worked with better color manipulation here, because each rock is colored as a random variation on a basic brown color, but less saturated. The orangey-brown shade of the rocks reminds me of a dry desert canyon.<br><b><i>Update: (Later that day)</i></b> I added a few more settings so I could test some ideas for variations but none of them really interested me so they're all at their default values.<br><b><i><mark>Actually finished! (2/28/2022)</mark> Added to <a href = "generative-art-gallery.html" target = "_blank">generative-art-gallery.html</a>.</i></b></div>
@@ -3897,6 +4804,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   }
   draw72();
 </script>
+<div class = "project-num">Project #71: Colorful Triangle Grid</div>
 <canvas id = "canvas71"></canvas>
 <button onclick = "draw71()">Redraw</button>
 <div class = "desc"><b><i>(2/28/2022)</i></b> I finally got a triangle grid working, but I wasn't really sure what to do with it so I have this kind of kite pattern thing, which isn't super interesting. It sort of reminds me of square holes covering the ground.</div>
@@ -3969,6 +4877,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   }
   draw71();
 </script>
+<div class = "project-num">Project #70: Nested Tangent Circles</div>
 <canvas id = "canvas70"></canvas>
 <button onclick = "draw70()">Redraw</button>
 <div class = "desc"><b><i>(2/26/2022)</i></b> Nested tangent circles, each circle (inside the main circles) touches the edge of the one around it.<br><b><i>(3/1/2022)</i></b> Decreased the grid size and increased the outline width to make everything more visible.</div>
@@ -4031,6 +4940,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   }
   draw70();
 </script>
+<div class = "project-num">Project #69: Random Walker With 3 Degrees of Freedom</div>
 <canvas id = "canvas69"></canvas>
 <button onclick = "Walker69.draw()">Redraw</button>
 <div class = "desc"><b><i>(2/25/2022)</i></b> Random walker but it has 3 degrees of freedom - hue, saturation, and/or lightness - which are randomly turned on or off every generation. If they are turned on, that degree will change randomly as it walks.</div>
@@ -4097,6 +5007,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   };
   Walker69.draw();
 </script>
+<div class = "project-num">Project #68: Pythagorean Tiling</div>
 <canvas id = "canvas68"></canvas>
 <button onclick = "draw68()">Redraw</button>
 <div class = "desc"><b><i>(2/24/2022)</i></b> Random <a href = "https://en.wikipedia.org/wiki/Pythagorean_tiling" target = "_blank">Pythagorean tiling</a> with the same concentric coloring from the hexagon grid.<br><b><i>(2/25/2022)</i></b> Added more randomness, the grid size and size of the smaller square is randomized every generation.</div>
@@ -4151,6 +5062,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   }
   draw68();
 </script>
+<div class = "project-num">Project #67: Concentric Hexagon Tiling</div>
 <canvas id = "canvas67"></canvas>
 <button onclick = "draw67()">Redraw</button>
 <div class = "desc"><b><i>(2/22/2022)</i></b> Random concentric hexagon grid tiling.</div>
@@ -4226,6 +5138,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   }
   draw67();
 </script>
+<div class = "project-num">Project #66: Cubic Optical Illusion</div>
 <canvas id = "canvas66"></canvas>
 <button onclick = "draw66()">Redraw</button>
 <div class = "desc"><b><i>(2/22/2022)</i></b> Random cubic optical illusion generator, it looks 3D and you can make it flip orientations in your mind.</div>
@@ -4309,6 +5222,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   }
   draw66();
 </script>
+<div class = "project-num">Project #65: Fractal Tree Snowflake</div>
 <canvas id = "canvas65"></canvas>
 <button onclick = "draw65()">Redraw</button>
 <div class = "desc"><b><i>(2/21/2022)</i></b> I tried to make a different snowflake generator than the one I made for <a href = "snowflake.html" target = "_blank">snowflake.html</a> by using symmetric fractal trees, but I'm not super impressed with the result.</div>
@@ -4369,6 +5283,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   }
   draw65();
 </script>
+<div class = "project-num">Project #64: T-Block Tiling</div>
 <canvas id = "canvas64"></canvas>
 <button onclick = "draw64()">Redraw</button>
 <div class = "desc"><b><i>(2/21/2022)</i></b> Tiling the plane with Tetris-style T-blocks, along with some random coloring.</div>
@@ -4441,6 +5356,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   }
   draw64();
 </script>
+<div class = "project-num">Project #63: Unconstrained Shape Walker</div>
 <canvas id = "canvas63" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "ShapeWalker63.walk()">Regenerate</button>
 <div><b><u>Turn Chance:</u></b> <span id = "turnChance63Txt">100</span>%</div>
@@ -4531,6 +5447,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     turnChance63 = Number(turnChance63Range.value) / 100;
   }
 </script>
+<div class = "project-num">Project #62: Shape Walkers in a Grid</div>
 <canvas id = "canvas62" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "draw62()">Regenerate</button>
 <div class = "desc"><b><i>(2/16/2022)</i></b> Small clusters of connected shapes generated by a grid of random walkers that each have a set turn size (120&deg;, 90&deg;, or 60&deg; (for triangle, square, or hexagon, respectively)) and walk around randomly until they leave their square.</div>
@@ -4620,6 +5537,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   }
   draw62();
 </script>
+<div class = "project-num">Project #61: Slicing Blades With Sparks</div>
 <canvas id = "canvas61"></canvas>
 <button onclick = "startCanvas61(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
 <div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>[ FPS: <span id = "fps61Txt"></span> ]</b></i></div>
@@ -4866,6 +5784,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   }
 </script>
+<div class = "project-num">Project #60: Grid of Binary Permutations</div>
 <canvas id = "canvas60"></canvas>
 <button onclick = "draw60()">Regenerate</button>
 <div class = "desc"><b><i>(2/12/2022)</i></b> Another Genuary 2021 prompt, this time from January 25th's "Make a grid of permutations of something." I'm not super happy with how this turned out but it looks sort of interesting. It's a 23x23 grid where each square shows the next number in binary (backwards) (with lime being 0 and black being 1) drawn in another smaller 3x3 grid. So, the first tile is 0 in binary, being<br><b>000<br>000<br>000</b><br> And the next one is 1 in binary, being<br><b>100<br>000<br>000</b>, and so on.<br>For example the 21st tile would be<br><b>101<br>010<br>000</b>.<br><b><i>(2/15/2022)</i></b> Added randomness--it works in the same way except that the first tile isn't always 0, it's a random number between 1 and 511. Then the next tile isn't always just one more, it's a random amount more. It's still pretty dull for the most part but at least it's not always the exact same.<br><b><i>Update: (A few minutes later)</i></b> I added some more randomness so that the color is random as well as the size of each tile when it's drawn, to give some more variation.</div>
@@ -4929,6 +5848,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   }
   draw60();
 </script>
+<div class = "project-num">Project #59: Grid of Symmetric Grids</div>
 <canvas id = "canvas59" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "draw59()">Regenerate</button>
 <div class = "desc"><b><i>(2/12/2022)</i></b> Another late Genuary project, this time inspired from last year's prompt for January 4th: "Small areas of symmetry." Each tile has vertical and horizontal symmetry, and a randomized grid size.</div>
@@ -4984,6 +5904,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   }
   draw59();
 </script>
+<div class = "project-num">Project #58: Sea of Shapes</div>
 <canvas id = "canvas58" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "draw58()">Regenerate</button>
 <div class = "desc"><b><i>(2/10/2022)</i></b> A late project inspired by Genuary 2022's prompt for January 20th: "Make a sea of shapes."</div>
@@ -5085,6 +6006,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   }
   draw58();
 </script>
+<div class = "project-num">Project #57: Generative Flower Growth</div>
 <canvas id = "canvas57" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "startCanvas57(this)">Start</button>
 <button onclick = "reset57()">Reset</button>
@@ -5229,6 +6151,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     grid57Array.push(new Grid57(mouseX, mouseY, Math.round(randBetween(2, 6))));
   });
 </script>
+<div class = "project-num">Project #56: Tic-Tac-Toe</div>
 <canvas id = "canvas56" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "reset56()">Reset</button>
 <button onclick = "switchMode56()" id = "mode56Btn">Current Mode: Human vs. Computer</button>
@@ -5436,6 +6359,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   });
 </script>
+<div class = "project-num">Project #55: Generative Crystals</div>
 <canvas id = "canvas55" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "reset55()">Regenerate</button>
 <button onclick = "test55()">Many</button>
@@ -5732,6 +6656,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   }
 </script>
+<div class = "project-num">Project #54: Euler Spirals</div>
 <canvas id = "canvas54"></canvas>
 <button onclick = "Turtle54.move()">Draw More</button>
 <div><b><u>d&theta;:</u></b> <span id = "turtle54TurnStepTxt">1.01</span>&deg;</div>
@@ -5792,6 +6717,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   }
   reset54();
 </script>
+<div class = "project-num">Project #53: Pillars of Squares</div>
 <canvas id = "canvas53"></canvas>
 <button onclick = "draw53()">Regenerate</button>
 <div class = "desc"><b><i>(2/1/2022)</i></b> More generative art, this time inspired by <a href = "https://tylerxhobbs.com/works/2018/fragments-of-vision-b" target = "_blank">this</a> artwork by Tyler Hobbs. There's lots of paramaters like brightness variation, saturation, etc. that are randomized every generation so that every time it looks similar but distinct.</div>
@@ -5888,6 +6814,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   }
   draw53();
 </script>
+<div class = "project-num">Project #52: Colorful Particles With Trails</div>
 <canvas id = "canvas52"></canvas>
 <button onclick = "startCanvas52(this)">Start</button>
 <button onclick = "reset52()">Reset</button>
@@ -6149,6 +7076,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   }
 </script>
+<div class = "project-num">Project #51: Curlicue Fractal Galaxy</div>
 <canvas id = "canvas51" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "startCanvas51(this)">Start</button>
 <button onclick = "reset51()">Reset</button>
@@ -6240,6 +7168,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   }
 </script>
+<div class = "project-num">Project #50: Trailing and Bouncing Net</div>
 <canvas id = "canvas50"></canvas>
 <button onclick = "startCanvas50(this)">Start</button>
 <button onclick = "reset50()">Reset</button>
@@ -6349,11 +7278,12 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   }
 </script>
+<div class = "project-num">Project #49: Interactive Plinko Game</div>
 <canvas id = "canvas49" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "startCanvas49(this)">Start</button>
-<button onclick = "if (window.confirm('Are you sure you want to reset your highscore?')) {highScore49 = 0; window.localStorage.setItem('highscore', 0);}">Reset Highscore</button>
+<!--<button onclick = "if (window.confirm('Are you sure you want to reset your highscore?')) {highScore49 = 0; window.localStorage.setItem('highscore', 0);}">Reset Highscore</button>-->
 <div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps49Txt"></span></b></i></div>
-<div class = "desc"><b><i>(1/25/2022)</i></b> Interactive Plinko board game, click at the top to add a ball. I possibly want to add like some scoring system with different sections at the bottom but I'm not sure yet and it'll probably stay like this for awhile.<br><b><i>(1/27/2022)</i></b> I added better UI for the remaining pinballs and made a little particle cloud when a ball falls off the screen, which I'll have change based on what section it landed in, when I add them.<br><b><i>(1/29/2022)</i></b> Added some more randomness in the pegs, so that when a ball bounces off a peg, the angle and bounciness is randomized slightly.<br><b><i>(1/30/2022)</i></b> I finally added the buckets at the bottom, and made an animation for scoring along with a total score variable. There is an array of buckets that get shuffled around every reset, to guarantee a good variety of bucket values. The reason I was delaying adding buckets is that I didn't want to try to figure out how to add add physics for the bucket edges, but I decided to make the edges not have any collision and it still looks fine.<br><b><i>Update: (Later that day)</i></b> I added a game over screen so you can keep replaying the game like an arcade.<br><b><i>Update: (Even later that day)</i></b> I added three different powerups that slide across the board -- there's a pink +1 ball powerup, a yellow x2 mult powerup (which makes the ball that collects it worth twice as much when falling into a bucket), and a gray elevator powerup, which makes the ball that collects it slide straight down, so you can align with a high value bucket for more strategy. I also added game stats to the game over page.<br><b><i>(1/31/2022)</i></b> Made highscore saved in local storage, so it is retained on page reload, and slightly modified the animation when a peg is hit.</div>
+<div class = "desc"><b><i>(1/25/2022)</i></b> Interactive Plinko board game, click at the top to add a ball. I possibly want to add like some scoring system with different sections at the bottom but I'm not sure yet and it'll probably stay like this for awhile.<br><b><i>(1/27/2022)</i></b> I added better UI for the remaining pinballs and made a little particle cloud when a ball falls off the screen, which I'll have change based on what section it landed in, when I add them.<br><b><i>(1/29/2022)</i></b> Added some more randomness in the pegs, so that when a ball bounces off a peg, the angle and bounciness is randomized slightly.<br><b><i>(1/30/2022)</i></b> I finally added the buckets at the bottom, and made an animation for scoring along with a total score variable. There is an array of buckets that get shuffled around every reset, to guarantee a good variety of bucket values. The reason I was delaying adding buckets is that I didn't want to try to figure out how to add add physics for the bucket edges, but I decided to make the edges not have any collision and it still looks fine.<br><b><i>Update: (Later that day)</i></b> I added a game over screen so you can keep replaying the game like an arcade.<br><b><i>Update: (Even later that day)</i></b> I added three different powerups that slide across the board -- there's a pink +1 ball powerup, a yellow x2 mult powerup (which makes the ball that collects it worth twice as much when falling into a bucket), and a gray elevator powerup, which makes the ball that collects it slide straight down, so you can align with a high value bucket for more strategy. I also added game stats to the game over page.<br><b><i>(1/31/2022)</i></b> Made highscore saved in local storage, so it is retained on page reload, and slightly modified the animation when a peg is hit.<br><b><i>(6/12/2022)</i></b> Removed the button to clear highscore, since awhile ago I removed all localStorage calls (the reason for this is that sometimes the localStorage call would fail, and that would make the game completely unplayable unless you specifically went into the console to clear your localStorage).</div>
 <hr><hr>
 <script>
   const ctx49 = canvas49.getContext("2d");
@@ -6997,6 +7927,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   });
 </script>
+<div class = "project-num">Project #48: Custom PRNG Random Walker</div>
 <canvas id = "canvas48"></canvas>
 <button onclick = "startCanvas48()">Start/Stop</button>
 <button onclick = "reset48()">Reset</button>
@@ -7072,6 +8003,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   }
 </script>
+<div class = "project-num">Project #47: FABRIK Servo</div>
 <canvas id = "canvas47"></canvas>
 <button onclick = "startCanvas47()">Start/Stop</button>
 <div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps47Txt"></span></b></i></div>
@@ -7358,6 +8290,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     Mouse47.down = false;
   });
 </script>
+<div class = "project-num">Project #46: FABRIK Factory</div>
 <canvas id = "canvas46" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "startCanvas46()">Start/Stop</button>
 <div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps46Txt"></span></b></i></div>
@@ -7673,6 +8606,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   }
 </script>
+<div class = "project-num">Project #45: Colliding Concentric Circles</div>
 <canvas id = "canvas45" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "draw45()">Redraw</button>
 <div class = "desc"><b><i>(1/23/2022)</i></b> More random generative art -- I'm not super pleased with how this turned out and at some point in the future I might mess with the parameters until I like it more. But it's still interesting.</div>
@@ -7726,6 +8660,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   }
   draw45();
 </script>
+<div class = "project-num">Project #44: FABRIK Spelunking</div>
 <canvas id = "canvas44" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "startCanvas44()">Start/Stop</button>
 <div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps44Txt"></span></b></i></div>
@@ -7919,6 +8854,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   });
 </script>
+<div class = "project-num">Project #43: Black Hole</div>
 <canvas id = "canvas43"></canvas>
 <button onclick = "startCanvas43()">Start/Stop</button>
 <button onclick = "reset43()">Reset</button>
@@ -8003,6 +8939,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   }
 </script>
+<div class = "project-num">Project #42: In and Out Circle Packing</div>
 <canvas id = "canvas42" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "startCanvas42()">Start/Stop</button>
 <button onclick = "reset42()">Regenerate</button>
@@ -8146,6 +9083,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     else frame42();
   }
 </script>
+<div class = "project-num">Project #41: Follower Bugs</div>
 <canvas id = "canvas41"></canvas>
 <button onclick = "startCanvas41()">Start/Stop</button>
 <div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps41Txt"></span></b></i></div>
@@ -8381,6 +9319,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     updateSettings41(true);
   }
 </script>
+<div class = "project-num">Project #40: 1D Cellular Automata Scroller</div>
 <canvas id = "canvas40"></canvas>
 <button onclick = "startCanvas40()">Start/Stop</button>
 <button onclick = "randomizeColors40()">Change Colors</button>
@@ -8506,6 +9445,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   }
 </script>
+<div class = "project-num">Project #39: Random Chord Probability</div>
 <canvas id = "canvas39" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "startCanvas39()">Start/Stop</button>
 <button onclick = "reset39()">Reset</button>
@@ -8597,6 +9537,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   reset39();
   frame39();
 </script>
+<div class = "project-num">Project #38: Hitomezashi Stitching Patterns</div>
 <canvas id = "canvas38" style = "width: 400px; height: 400px"></canvas>
 <button onclick = "drawPattern38()">Redraw</button>
 <div><b><u>Grid Size:</u></b> <span id = "gridSize38Txt">25&times;25</span></div>
@@ -8784,6 +9725,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     drawPattern38();
   }
 </script>
+<div class = "project-num">Project #37: Aligned Random Walkers</div>
 <canvas id = "canvas37" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "startCanvas37()">Start/Stop</button>
 <button onclick = "reset37(true)">Reset and Clear</button>
@@ -8896,6 +9838,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     if (reset) reset37(true);
   }
 </script>
+<div class = "project-num">Project #36: Triangle and Quadrilateral Fracture</div>
 <canvas id = "canvas36" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "splitShapes36(1)">Split Corners</button>
 <button onclick = "splitShapes36(2)">Split Edges</button>
@@ -9036,6 +9979,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     for (let i = 0; i < shape36Array.length; i++) shape36Array[i].draw();
   }
 </script>
+<div class = "project-num">Project #35: Random Walker With Trail Interaction</div>
 <canvas id = "canvas35"></canvas>
 <button onclick = "startCanvas35()">Start/Stop</button>
 <button onclick = "reset35()">Reset</button>
@@ -9140,6 +10084,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     stepsPerFrame35 = turbo35Checkbox.checked ? 5000 : 500;
   }
 </script>
+<div class = "project-num">Project #34: Quadrilateral Fracture</div>
 <canvas id = "canvas34" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "splitQuads34()">Split</button>
 <button onclick = "reset34()">Reset</button>
@@ -9276,6 +10221,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     if (redraw) redrawQuads34();
   }
 </script>
+<div class = "project-num">Project #33: Triangle Fracture</div>
 <canvas id = "canvas33" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "reset33()">Reset</button>
 <button onclick = "splitTriangles33()">Split</button>
@@ -9387,6 +10333,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     for (let i = 0; i < triangle33Array.length; i++) triangle33Array[i].draw();
   }
 </script>
+<div class = "project-num">Project #32: Rectangle Random Walker</div>
 <canvas id = "canvas32" style = "width: 400px; height: 400px"></canvas>
 <button onclick = "startCanvas32()">Start/Stop</button>
 <button onclick = "reset32()">Reset</button>
@@ -9722,6 +10669,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     if (reset) reset32();
   }
 </script>
+<div class = "project-num">Project #31: Color Field Averaging</div>
 <canvas id = "canvas31"></canvas>
 <button onclick = "startCanvas31()">Start/Stop</button>
 <button onclick = "reset31()">Reset</button>
@@ -9845,6 +10793,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   }
 </script>
+<div class = "project-num">Project #30: Square Packing</div>
 <canvas id = "canvas30" style = "width: 400px; height: 400px"></canvas>
 <button onclick = "drawSquares30()">Reset</button>
 <div><b><u>Squares:</u></b> <span id = "numSquares30Txt"></span></div>
@@ -10151,6 +11100,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     if (recolor) recolorSquares30();
   }
 </script>
+<div class = "project-num">Project #29: Interactive Card Table</div>
 <canvas id = "canvas29" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "startCanvas29()">Start/Stop</button>
 <button onclick = "stackCards29()">Stack Cards</button>
@@ -10403,6 +11353,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     for (let i = 0; i < card29Array.length; i++) card29Array[i].dragging = false;
   });
 </script>
+<div class = "project-num">Project #28: Blob Cow Evolution</div>
 <canvas id = "canvas28"></canvas>
 <button onclick = "startCanvas28()">Start/Stop</button>
 <div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>FPS: <span id = "fps28Txt"></span></b></i></div>
@@ -10572,6 +11523,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     for (let i = 0; i < blob28Array.length; i++) blob28Array[i].dragging = false;
   });
 </script>
+<div class = "project-num">Project #27: Faster DLA on a Grid With Color</div>
 <canvas id = "canvas27" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "startCanvas27()">Start/Stop</button>
 <button onclick = "reset27()">Reset</button>
@@ -10783,6 +11735,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     if (reset) reset27();
   }
 </script>
+<div class = "project-num">Project #26: Recursive Triangle Tree</div>
 <canvas id = "canvas26"></canvas>
 <button onclick = "drawTree26()">Redraw</button>
 <table>
@@ -10977,6 +11930,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     drawTree26();
   }
 </script>
+<div class = "project-num">Project #25: Curlicue Fractals</div>
 <canvas id = "canvas25"></canvas>
 <button onclick = "startCanvas25()">Start/Stop</button>
 <button onclick = "resetWalkers25()">Reset</button>
@@ -11055,6 +12009,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   }
 </script>
+<div class = "project-num">Project #24: Circle-Aligned Random Walkers</div>
 <canvas id = "canvas24"></canvas>
 <button onclick = "startCanvas24()">Start/Stop</button>
 <button onclick = "resetWalkers24()">Reset</button>
@@ -11149,6 +12104,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   }
 </script>
+<div class = "project-num">Project #23: Self-Avoiding Paths</div>
 <canvas id = "canvas23"></canvas>
 <button onclick = "startCanvas23()">Start/Stop</button>
 <button onclick = "Walker23.reset()">Reset</button>
@@ -11319,6 +12275,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     if (reset) Walker23.reset();
   }
 </script>
+<div class = "project-num">Project #22: Circle Packing: Smiley Faces</div>
 <canvas id = "canvas22" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "drawCircles22()">Regenerate</button>
 <table>
@@ -11490,6 +12447,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     yellowMode22 = !yellowMode22Checkbox.checked;
   }
 </script>
+<div class = "project-num">Project #21: Random Rocks</div>
 <canvas id = "canvas21"></canvas>
 <button onclick = "drawRocks21()">Regenerate</button>
 <div class = "desc"><b><i>(11/2/2021)</i></b> Messing around with generating random rock-like shapes, it's not the best but I like how it turned out.</div>
@@ -11537,6 +12495,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   }
   drawRocks21();
 </script>
+<div class = "project-num">Project #20: Growing and Pruning Squares</div>
 <canvas id = "canvas20"></canvas>
 <button onclick = "startCanvas20()">Start/Stop</button>
 <button onclick = "resetSquares20()">Reset</button>
@@ -11648,6 +12607,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   }
 </script>
+<div class = "project-num">Project #19: City Skyline</div>
 <canvas id = "canvas19"></canvas>
 <button onclick = "drawSkyline19()">Regenerate</button>
 <div class = "desc"><b><i>(11/1/2021)</i></b> Another unsuccessful generative art attempt, this time I was trying to make a generative city skyline to mimic the skyline in <a href = "https://www.reddit.com/r/generative/comments/qkfojk/skylines_generator" target = "_blank">this</a> Reddit post, but mine looks pretty boring.</div>
@@ -11686,6 +12646,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   }
   drawSkyline19();
 </script>
+<div class = "project-num">Project #18: 3D Rectangular Prisms</div>
 <canvas id = "canvas18" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "drawCubes18()">Regenerate</button>
 <div class = "desc"><b><i>(10/31/2021)</i></b> Generative art of 3D rectangular prisms, but it's honestly pretty dull.<br><b><i>(11/1/2021)</i></b> Messed with the generation some more, but I still don't feel like it's particularly interesting.</div>
@@ -11757,6 +12718,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   }
   drawCubes18();
 </script>
+<div class = "project-num">Project #17: Clifford Attractor</div>
 <canvas id = "canvas17"></canvas>
 <button onclick = "startCanvas17()">Start/Stop</button>
 <button onclick = "reset17()">Reset</button>
@@ -11850,6 +12812,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   }
 </script>
+<div class = "project-num">Project #16: Flow Field</div>
 <canvas id = "canvas16" style = "width: 400px; height: 400px"></canvas>
 <button onclick = "startCanvas16()">Start/Stop</button>
 <button onclick = "reset16()">Reset</button>
@@ -11903,7 +12866,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     </td>
   </tr>
 </table>
-<div class = "desc"><b><i>(10/30/2021)</i></b> An unsuccessful attempt to simulate a flow field, by having a grid of random vectors that are averaged together. For some reason, there is a strong bias towards angles around 120&deg; and 240&deg;, with little to no other angles, meaning there's something wrong with my averaging function, but I don't know what. The field is visualized with magnitude being brightness and angle being hue.<br><b><i>Update: (A few minutes later)</i></b> I realized I was going about the averaging completely wrong, I had been just averaging up the magnitudes and averaging up the angles and calling it good, but that's not how vector addition works. What I should have been doing is adding the vectors x and y components and dividing that resulting magnitude by 9 (the number of neighbors). I added that, and also added a Point16 class that moves around the flow field, tracing its path. Each point only lasts a set number of frames, and then it is replaced with a new point at a random position. Now everything works perfectly and it looks really cool. I also added more settings and sliders for everything, as well as presets.<br><b><i>(10/31/2021)</i></b> Slightly modified the code so that instead of 500 points moving 5 times per frame, there's one point moving 5000 times per frame, which is less laggy and almost twice as fast.</div>
+<div class = "desc"><b><i>(10/30/2021)</i></b> An unsuccessful attempt to simulate a flow field, by having a grid of random vectors that are averaged together. For some reason, there is a strong bias towards angles around 120&deg; and 240&deg;, with little to no other angles, meaning there's something wrong with my averaging function, but I don't know what. The field is visualized with magnitude being brightness and angle being hue.<br><b><i>Update: (A few minutes later)</i></b> I realized I was going about the averaging completely wrong, I had been just averaging up the magnitudes and averaging up the angles and calling it good, but that's not how vector addition works. What I should have been doing is adding the vectors x and y components and dividing that resulting magnitude by 9 (the number of neighbors). I added that, and also added a Point16 class that moves around the flow field, tracing its path. Each point only lasts a set number of frames, and then it is replaced with a new point at a random position. Now everything works perfectly and it looks really cool. I also added more settings and sliders for everything, as well as presets.<br><b><i>(10/31/2021)</i></b> Slightly modified the code so that instead of 500 points moving 5 times per frame, there's one point moving 5000 times per frame, which is less laggy and almost twice as fast.<br><b><i><mark>Actually finished! (6/13/2022)</mark> Moved to <a href = "flow-field.html" target = "_blank">flow-field.html</a>.</i></b></div>
 <hr><hr>
 <script>
   const ctx16 = canvas16.getContext("2d");
@@ -12246,6 +13209,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     updateSettings16(true);
   }
 </script>
+<div class = "project-num">Project #15: How Random Are You?</div>
 <canvas id = "canvas15"></canvas>
 <div><b><i>How random are you? Start typing random numbers below...</i></b></div>
 <input type = "text" id = "rand15Txt" oninput = "addRandNumbers15()">
@@ -12322,6 +13286,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   }
 </script>
+<div class = "project-num">Project #14: Tiles</div>
 <canvas id = "canvas14" style = "width: 400px; height: 400px"></canvas>
 <button onclick = "drawTiles14()">Redraw</button>
 <div><b><u>Grid Size:</u></b> <span id = "gridSize14Txt">10x10</span></div>
@@ -12861,6 +13826,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     drawTiles14();
   }
 </script>
+<div class = "project-num">Project #13: Square Subdivision With Faces</div>
 <canvas id = "canvas13" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "drawSquares13()">Redraw</button>
 <div class = "desc"><b><i>(10/28/2021)</i></b> Random square subdivision faces, based on the image from <a href = "https://www.reddit.com/r/creativecoding/comments/dvjubb/random_faces" target = "_blank">this</a> Reddit post. I also added random eyebrows for more expressions.</div>
@@ -12953,6 +13919,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   }
   drawSquares13();
 </script>
+<div class = "project-num">Project #12: Spinning Interlocking Arcs</div>
 <canvas id = "canvas12" style = "background-color: black"></canvas>
 <button onclick = "startCanvas12()">Start/Stop</button>
 <button onclick = "reset12()">Reset</button>
@@ -13019,6 +13986,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   }
 </script>
+<div class = "project-num">Project #11: Generative Mountain Range</div>
 <canvas id = "canvas11" style = "width: 600px; height: 300px"></canvas>
 <button onclick = "drawMountains11()">Regenerate</button>
 <div class = "desc"><b><i>(10/28/2021)</i></b> Generative mountain range with fog, based on <a href = "https://www.reddit.com/r/creativecoding/comments/ndsrfl/randomly_generated_mountains_with_fog_based_on_a" target = "_blank">this</a> Reddit post. Basically, each mountain starts at a certain level and a random walker traces the peaks of the mountain by moving along and varying the y-coordinate. Each time it's redrawn, there's a random fog level (brightness contrast between closest mountain and furthest mountain), random height ratio (how high up the tallest mountains can start), and random number of mountains. Each mountain is given a random steepness (how much the random walker tracing the mountain moves vertically per step) and a random ratio offset for starting height and coloring, to give more variation.</div>
@@ -13056,6 +14024,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
   }
   drawMountains11();
 </script>
+<div class = "project-num">Project #10: Random Walkers With Position-Based Coloring</div>
 <canvas id = "canvas10"></canvas>
 <button onclick = "startCanvas10()">Start/Stop</button>
 <button onclick = "reset10()">Reset</button>
@@ -13138,6 +14107,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   }
 </script>
+<div class = "project-num">Project #9: Clock Averaging</div>
 <canvas id = "canvas9" style = "background-color: black; width: 500px; height: 500px"></canvas>
 <button onclick = "startCanvas9()">Start/Stop</button>
 <button onclick = "resetClocks9()">Reset</button>
@@ -13316,6 +14286,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     if (!canvas9Running) frame9();
   }
 </script>
+<div class = "project-num">Project #8: Triangle Mesh</div>
 <canvas id = "canvas8" style = "width: 400px; height: 400px"></canvas>
 <button onclick = "resetLines8()">Reset</button>
 <table>
@@ -13490,6 +14461,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     resetLines8();
   }
 </script>
+<div class = "project-num">Project #7: Rainbow Additive Sine Waves</div>
 <canvas id = "canvas7" style = "background-color: black; width: 400px; height: 400px"></canvas>
 <button onclick = "startCanvas7()">Start/Stop</button>
 <button onclick = "reset7()">Reset Waves</button>
@@ -13585,6 +14557,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     waveSpacing7 = waveSpacing7Txt.innerHTML = Number(waveSpacing7Range.value);
   }
 </script>
+<div class = "project-num">Project #6: Cursor-Following Square Subdivision</div>
 <canvas id = "canvas6" style = "width: 500px; height: 500px"></canvas>
 <button onclick = "startCanvas6()">Start/Stop</button>
 <button onclick = "square6Array = []; square6Array.push(new Square6(0, 0, canvas6.width, 1)); drawSquares6()">Reset</button>
@@ -13663,6 +14636,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   });
 </script>
+<div class = "project-num">Project #5: Gravity Wells</div>
 <canvas id = "canvas5" style = "background-color: black; width: 500px; height: 500px"></canvas>
 <button onclick = "startCanvas5()">Start/Stop</button>
 <button onclick = "reset5()">Reset</button>
@@ -13872,6 +14846,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   }
 </script>
+<div class = "project-num">Project #4: Spiral Tiling</div>
 <canvas id = "canvas4"></canvas>
 <button onclick = "startCanvas4()">Start/Stop</button>
 <button onclick = "reset4()">Reset</button>
@@ -13950,6 +14925,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   }
 </script>
+<div class = "project-num">Project #3: Dottie Number Visualizer</div>
 <canvas id = "canvas3"></canvas>
 <button onclick = "startCanvas3()">Start/Stop</button>
 <button onclick = "randomizeDots3()">Randomize &theta;</button>
@@ -14036,6 +15012,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     }
   }
 </script>
+<div class = "project-num">Project #2: Plinko Board Distribution</div>
 <canvas id = "canvas2" style = "background-color: black"></canvas>
 <button onclick = "startCanvas2()">Start/Stop</button>
 <button onclick = "particle2Array = []">Clear</button>
@@ -14193,6 +15170,7 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
     flow2 = flow2RangeArray[Number(flow2Range.value)] / 100;
   }
 </script>
+<div class = "project-num">Project #1: Holomorphic Dynamics</div>
 <canvas id = "canvas1" style = "background-color: black"></canvas>
 <button onclick = "startCanvas1()">Start/Stop</button>
 <div class = "desc"><b><i>(10/17/2021)</i></b> Holomorphic Dynamics visualization of escape paths. The yellow point is the starting value, and the blue point is the <b><i>c</i></b> value for the equation <b><i>z_n+1 = (z_n)^2 + c</i></b>. The red lines show the paths of the point through several iterations in the complex plane, scaled from -1 to 1. The mouse cursor drags either point.</div>
