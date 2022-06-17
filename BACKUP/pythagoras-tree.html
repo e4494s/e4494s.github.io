@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>Pythagoras Fractal Tree ~ e4494s</title>
+    <style>
+      canvas {
+        background-color: black;
+      }
+      
+      .little-canvas {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 100px;
+        height: 100px;
+        border: none;
+      }
+    </style>
+  </head>
+<body>
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; Pythagoras Fractal Tree &mdash;&mdash;</h1>
+<p id = "how-it-works">
+  <b><i>How It Works:</i></b> See <a href = "https://en.wikipedia.org/wiki/Pythagoras_tree_(fractal)" target = "_blank">this Wikipedia page</a> for more details on what a Pythagoras Tree is. A single square is drawn to begin with, and then a triangle is drawn on top of the square. Two additional squares are drawn with side lengths equal to the sides of the triangle, and then the process is repeated to create a fractal of cascading smaller and smaller squares.
+  <br><br>
+  <span class = "setting">Side Branch Angle</span> and <span class = "setting">Top Branch Angle</span> both control the shape of the triangles that are drawn on each square, which will greatly affect the overall shape of the tree.
+  <br><br>
+  Turning on <span class = "setting">Random Side Angle</span> or <span class = "setting">Random Top Angle</span> will make the angles of each triangle be randomized for each square, so that the entire tree will look widely different every generation.
+  <br><br>
+  <span style = "font-style: normal; font-weight: bold">NOTE: Manipulate <span class = "setting">Top Branch Angle</span> with caution, as it greatly affects the shape of the tree. Likewise, keep in mind that turning on <span class = "setting">Random Top Angle</span> will make the tree more unpredictable and chaotic in shape.</span>
+  <br><br>
+  <span class = "setting">Tree Contrast</span> affects how much brighter branches will be near the end of the tree, compared to the beginning of the tree.
+  <br><br>
+  If <span class = "setting">Invert Contrast</span> is turned on, then further branches will be darker instead of brighter.
+  <br><br>
+  <span class = "setting">Left Branch Hue Offset</span> and <span class = "setting">Right Branch Hue Offset</span> both control how much the hue will change when a new square is drawn.
+  <br><br>
+  If <span class = "setting">Draw Triangles</span> is turned on, then the triangles on each square will be visible, and the branches will connect more smoothly.
+  <br><br>
+  If <span class = "setting">Draw Wireframe</span> is turned on, then a thin wire will be drawn connecting all of the branches of the tree.
+  <br><br>
+  <span class = "setting">Example Branch</span> shows a live preview of what each branch split will look like based on the current settings.
+</p>
+<hr>
+<div><b>Settings Presets:</b></div>
+<div id = "presets-div"></div>
+<hr>
+<table>
+  <tr valign = "middle">
+    <td>
+      <button onclick = "draw()">Redraw</button>
+      <br><br>
+      <div><b><u>Recursion Layers:</u></b> <span id = "max-layers-txt">10</span></div>
+      <input type = "range" min = "1" max = "12" step = "1" value = "10" id = "max-layers-range" oninput = "updateSettings()">
+      <br><br>
+      <canvas id = "canvas">If you're seeing this text, your browser does not support the canvas element.</canvas>
+      <br>
+      <button class = "download-canvas-btn" onclick = "downloadCanvas()">Download</button>
+    </td>
+    <td>
+      <button onclick = "if (window.confirm('Are you sure you want to reset all settings?')) loadPreset(0)">Reset Settings</button>
+      <hr>
+      <div><b><u>Initial Size:</u></b> <span id = "start-size-txt">120</span>px</div>
+      <input type = "range" min = "50" max = "200" step = "10" value = "120" id = "start-size-range" oninput = "updateSettings()">
+      <hr>
+      <div><b><u>Side Branch Angle:</u></b> <span id = "left-branch-angle-txt">45</span>&deg;</div>
+      <input type = "range" min = "5" max = "85" step = "1" value = "45" id = "left-branch-angle-range" oninput = "updateSettings()">
+      <br><br><br>
+      <label for = "random-side-branch-angles-checkbox"><b><u>Random Side Angle:</u></b></label>
+      <input type = "checkbox" id = "random-side-branch-angles-checkbox" oninput = "updateSettings()" CHECKED>
+      <hr>
+      <div><b><u>Top Branch Angle:</u></b> <span id = "top-branch-angle-txt">90</span>&deg;</div>
+      <input type = "range" min = "75" max = "120" step = "1" value = "90" id = "top-branch-angle-range" oninput = "updateSettings()">
+      <br><br><br>
+      <label for = "random-top-branch-angles-checkbox"><b><u>Random Top Angle:</u></b></label>
+      <input type = "checkbox" id = "random-top-branch-angles-checkbox" oninput = "updateSettings()">
+      <hr>
+      <label for = "circle-branches-checkbox"><b><u>Circle Branches:</u></b></label>
+      <input type = "checkbox" id = "circle-branches-checkbox" oninput = "updateSettings()">
+    </td>
+    <td>
+      <div><b><u>Tree Brightness:</u></b> <span id = "brightness-mult-txt">120%</span></div>
+      <input type = "range" min = "50" max = "160" step = "10" value = "120" id = "brightness-mult-range" oninput = "updateSettings()">
+      <hr>
+      <div><b><u>Tree Contrast:</u></b> <span id = "contrast-txt">50</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "10" value = "50" id = "contrast-range" oninput = "updateSettings()">
+      <br><br><br>
+      <label for = "invert-contrast-checkbox"><b><u>Invert Contrast:</u></b></label>
+      <input type = "checkbox" id = "invert-contrast-checkbox" oninput = "updateSettings()" CHECKED>
+      <hr>
+      <label for = "rainbow-branches-checkbox"><b><u>Colored Branches:</u></b></label>
+      <input type = "checkbox" id = "rainbow-branches-checkbox" oninput = "updateSettings()" CHECKED>
+      <br><br><br>
+      <div><b><u>Initial Hue:</u></b> <span id = "start-hue-txt">0</span>&deg;</div>
+      <input type = "range" min = "0" max = "360" step = "15" value = "0" id = "start-hue-range" oninput = "updateSettings()">
+      <br><br><br>
+      <label for = "random-hue-checkbox"><b><u>Random Hue Every Draw:</u></b></label>
+      <input type = "checkbox" id = "random-hue-checkbox" oninput = "updateSettings()">
+      <hr>
+      <div><b><u>Left Branch Hue Offset:</u></b> <span id = "hue-offset-left-txt">15</span>&deg;</div>
+      <input type = "range" min = "0" max = "360" step = "5" value = "15" id = "hue-offset-left-range" oninput = "updateSettings()">
+      <br><br><br>
+      <div><b><u>Right Branch Hue Offset:</u></b> <span id = "hue-offset-right-txt">15</span>&deg;</div>
+      <input type = "range" min = "0" max = "360" step = "5" value = "15" id = "hue-offset-right-range" oninput = "updateSettings()">
+    </td>
+    <td>
+      <div style = "text-align: center"><b><i>Example Branch:</i></b></div>
+      <br>
+      <canvas class = "little-canvas" id = "canvas1"></canvas>
+      <hr>
+      <label for = "draw-branches-checkbox"><b><u>Draw Branches:</u></b></label>
+      <input type = "checkbox" id = "draw-branches-checkbox" oninput = "updateSettings()" CHECKED>
+      <br><br><br>
+      <label for = "draw-triangles-checkbox"><b><u>Draw Triangles:</u></b></label>
+      <input type = "checkbox" id = "draw-triangles-checkbox" oninput = "updateSettings()" CHECKED>
+      <br><br><br>
+      <label for = "draw-wireframe-checkbox"><b><u>Draw Wireframe:</u></b></label>
+      <input type = "checkbox" id = "draw-wireframe-checkbox" oninput = "updateSettings()">
+      <hr>
+      <div><b><u>Wireframe Thickness:</u></b> <span id = "wireframe-ratio-txt">10</span>%</div>
+      <input type = "range" min = "0" max = "50" step = "5" value = "10" id = "wireframe-ratio-range" oninput = "updateSettings()">
+      <br><br><br>
+      <div><b><u>Wireframe Color:</u></b></div>
+      <input type = "radio" name = "wireframe-color-radio" id = "wireframe-color-radio-1" oninput = "updateSettings()" CHECKED>
+      <label for = "wireframe-color-radio-1">Black</label>
+      <br>
+      <input type = "radio" name = "wireframe-color-radio" id = "wireframe-color-radio-2" oninput = "updateSettings()">
+      <label for = "wireframe-color-radio-2">White</label>
+      <br>
+      <input type = "radio" name = "wireframe-color-radio" id = "wireframe-color-radio-3" oninput = "updateSettings()">
+      <label for = "wireframe-color-radio-3">Branch Color</label>
+    </td>
+  </tr>
+</table>
+<script src = "scripts/main.js"></script>
+<script>
+  let canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 1000;
+  
+  let canvas1 = document.getElementById("canvas1");
+  const ctx1 = canvas1.getContext("2d");
+  canvas1.width = canvas1.height = 500;
+  
+  let leftBranchAngleTxt = document.getElementById("left-branch-angle-txt");
+  let leftBranchAngleRange = document.getElementById("left-branch-angle-range");
+  let randomSideBranchAnglesCheckbox = document.getElementById("random-side-branch-angles-checkbox");
+  let topBranchAngleTxt = document.getElementById("top-branch-angle-txt");
+  let topBranchAngleRange = document.getElementById("top-branch-angle-range");
+  let randomTopBranchAnglesCheckbox = document.getElementById("random-top-branch-angles-checkbox");
+  let startSizeTxt = document.getElementById("start-size-txt");
+  let startSizeRange = document.getElementById("start-size-range");
+  let maxLayersTxt = document.getElementById("max-layers-txt");
+  let maxLayersRange = document.getElementById("max-layers-range");
+  let rainbowBranchesCheckbox = document.getElementById("rainbow-branches-checkbox");
+  let startHueTxt = document.getElementById("start-hue-txt");
+  let startHueRange = document.getElementById("start-hue-range");
+  let hueOffsetLeftTxt = document.getElementById("hue-offset-left-txt");
+  let hueOffsetLeftRange = document.getElementById("hue-offset-left-range");
+  let hueOffsetRightTxt = document.getElementById("hue-offset-right-txt");
+  let hueOffsetRightRange = document.getElementById("hue-offset-right-range");
+  let brightnessMultTxt = document.getElementById("brightness-mult-txt");
+  let brightnessMultRange = document.getElementById("brightness-mult-range");
+  let contrastTxt = document.getElementById("contrast-txt");
+  let contrastRange = document.getElementById("contrast-range");
+  let invertContrastCheckbox = document.getElementById("invert-contrast-checkbox");
+  let drawTrianglesCheckbox = document.getElementById("draw-triangles-checkbox");
+  let drawBranchesCheckbox = document.getElementById("draw-branches-checkbox");
+  let drawWireframeCheckbox = document.getElementById("draw-wireframe-checkbox");
+  let circleBranchesCheckbox = document.getElementById("circle-branches-checkbox");
+  let randomHueCheckbox = document.getElementById("random-hue-checkbox");
+  let wireframeRatioTxt = document.getElementById("wireframe-ratio-txt");
+  let wireframeRatioRange = document.getElementById("wireframe-ratio-range");
+  let wireframeColorRadio1 = document.getElementById("wireframe-color-radio-1");
+  let wireframeColorRadio2 = document.getElementById("wireframe-color-radio-2");
+  let wireframeColorRadio3 = document.getElementById("wireframe-color-radio-3");
+  
+  let randomHue = false;
+  
+  function drawSquareFromCorner(x, y, size, angle, isLeft) {
+    let corners = [];
+    let cx = x;
+    let cy = y;
+    let ca = angle;
+    ctx1.beginPath();
+    ctx1.moveTo(cx, cy);
+    for (let i = 0; i < 4; i++) {
+      cx += size * Math.cos(toRad(ca));
+      cy -= size * Math.sin(toRad(ca));
+      ca += 90;
+      ctx1.lineTo(cx, cy);
+      corners.push({x: cx, y: cy});
+    }
+    return corners;
+  }
+  
+  function drawCanvas1() { // This has got to be some of the messiest code I've ever written but somehow it works
+    ctx1.clearRect(0, 0, canvas1.width, canvas1.height);
+    
+    let size = canvas1.width * 0.3;
+    
+    let x = (canvas1.width / 2) - (size / 2);
+    let y = canvas1.height * 0.9;
+    
+    let sinTop = 1 / Math.sin(toRad(PythagorasTree.startTopBranchAngle));
+    let scaleLeft = sinTop * Math.sin(toRad(PythagorasTree.startLeftBranchAngle));
+    let scaleRight = sinTop * Math.sin(toRad(180 - (PythagorasTree.startTopBranchAngle + PythagorasTree.startLeftBranchAngle)));
+    
+    // Bottom square
+    ctx1.fillStyle = ctx1.strokeStyle = !PythagorasTree.rainbowBranches ? `hsl(0deg, 0%, ${50 * PythagorasTree.brightnessMult}%)` : `hsl(${PythagorasTree.startHue}deg, 100%, ${50 * PythagorasTree.brightnessMult}%)`;
+    if (PythagorasTree.pureWhiteBranches) ctx1.fillStyle = ctx1.strokeStyle = "white";
+    drawSquareFromCorner(x, y, size, 0);
+    if (!PythagorasTree.circleBranches) {
+      if (PythagorasTree.drawBranches) {
+        ctx1.fill();
+        ctx1.stroke();
+      }
+    }
+    else {
+      if (PythagorasTree.drawBranches) {
+        ctx1.fillCircle(x + (size / 2), y - (size / 2), size / 2);
+      }
+    }
+    if (PythagorasTree.drawTriangles) {
+      let c = drawSquareFromCorner(x, y - size, size * scaleLeft, 180 - (PythagorasTree.startTopBranchAngle + PythagorasTree.startLeftBranchAngle));
+      ctx1.beginPath();
+      ctx1.moveTo(x, y - size);
+      ctx1.lineTo(c[0].x, c[0].y);
+      ctx1.lineTo(x + size, y - size);
+      ctx1.lineTo(x, y - size);
+      ctx1.fill();
+      ctx1.stroke();
+    }
+    if (PythagorasTree.drawWireframe) {
+      if (PythagorasTree.wireframeColor === 1) ctx1.strokeStyle = "black";
+      else if (PythagorasTree.wireframeColor === 2) ctx1.strokeStyle = "white";
+      else if (PythagorasTree.wireframeColor === 3) ctx1.strokeStyle = `hsl(${PythagorasTree.startHue}deg, 100%, 50%)`;
+      ctx1.lineCap = ctx1.lineJoin = "butt";
+      ctx1.lineWidth = Math.max(size * PythagorasTree.wireframeRatio, PythagorasTree.minLineWidth);
+      ctx1.beginPath();
+      ctx1.moveTo(x + (size / 2), y + 1);
+      ctx1.lineTo(x + (size / 2), y - size);
+      ctx1.stroke();
+      ctx1.lineWidth = 1;
+    }
+    
+    
+    
+    
+    // Left square
+    let sizeL = size * scaleLeft;
+    let sizeR = size * scaleRight;
+    ctx1.fillStyle = ctx1.strokeStyle = !PythagorasTree.rainbowBranches ? `hsl(0deg, 0%, ${50 * PythagorasTree.brightnessMult}%)` : `hsl(${PythagorasTree.startHue - PythagorasTree.hueOffsetLeft}deg, 100%, ${50 * PythagorasTree.brightnessMult}%)`;
+    if (PythagorasTree.pureWhiteBranches) ctx1.fillStyle = ctx1.strokeStyle = "white";
+    let corners1 = drawSquareFromCorner(x, y - size, sizeL, 180 - (PythagorasTree.startTopBranchAngle + PythagorasTree.startLeftBranchAngle));
+    if (!PythagorasTree.circleBranches) {
+      if (PythagorasTree.drawBranches) {
+        ctx1.fill();
+        ctx1.stroke();
+      }
+    }
+    else {
+      if (PythagorasTree.drawBranches) {
+        ctx1.fillCircle((corners1[0].x + corners1[2].x) / 2, (corners1[0].y + corners1[2].y) / 2, size * 0.5 * scaleLeft);
+      }
+    }
+    if (PythagorasTree.drawTriangles) {
+      let c = drawSquareFromCorner(corners1[2].x, corners1[2].y, size * scaleLeft * scaleLeft, (180 - (PythagorasTree.startTopBranchAngle + PythagorasTree.startLeftBranchAngle)) + (180 - (PythagorasTree.startTopBranchAngle + PythagorasTree.startLeftBranchAngle)));
+      ctx1.beginPath();
+      ctx1.moveTo(corners1[2].x, corners1[2].y);
+      ctx1.lineTo(c[0].x, c[0].y);
+      ctx1.lineTo(corners1[1].x, corners1[1].y);
+      ctx1.lineTo(corners1[2].x, corners1[2].y);
+      ctx1.fill();
+      ctx1.stroke();
+    }
+    if (PythagorasTree.drawWireframe) {
+      if (PythagorasTree.wireframeColor === 1) ctx1.strokeStyle = "black";
+      else if (PythagorasTree.wireframeColor === 2) ctx1.strokeStyle = "white";
+      else if (PythagorasTree.wireframeColor === 3) ctx1.strokeStyle = `hsl(${PythagorasTree.startHue - PythagorasTree.hueOffsetLeft}deg, 100%, 50%)`;
+      ctx1.lineCap = ctx1.lineJoin = "round";
+      ctx1.lineWidth = Math.max(size * scaleLeft * PythagorasTree.wireframeRatio, PythagorasTree.minLineWidth);
+      ctx1.beginPath();
+      ctx1.moveTo(x + (size / 2), y - size);
+      ctx1.lineTo((corners1[3].x + corners1[0].x) / 2, (corners1[3].y + corners1[0].y) / 2);
+      ctx1.lineTo((corners1[1].x + corners1[2].x) / 2, (corners1[1].y + corners1[2].y) / 2);
+      ctx1.stroke();
+      ctx1.lineWidth = 1;
+    }
+    
+    
+    // Right square
+    ctx1.fillStyle = ctx1.strokeStyle = !PythagorasTree.rainbowBranches ? `hsl(0deg, 0%, ${50 * PythagorasTree.brightnessMult}%)` : `hsl(${PythagorasTree.startHue + PythagorasTree.hueOffsetRight}deg, 100%, ${50 * PythagorasTree.brightnessMult}%)`;
+    if (PythagorasTree.pureWhiteBranches) ctx1.fillStyle = ctx1.strokeStyle = "white";
+    let corners2 = drawSquareFromCorner(corners1[0].x, corners1[0].y, sizeR, 180 - (PythagorasTree.startTopBranchAngle + PythagorasTree.startLeftBranchAngle) - (180 - PythagorasTree.startTopBranchAngle));
+    if (!PythagorasTree.circleBranches) {
+      if (PythagorasTree.drawBranches) {
+        ctx1.fill();
+        ctx1.stroke();
+      }
+    }
+    else {
+      if (PythagorasTree.drawBranches) {
+        ctx1.fillCircle((corners2[0].x + corners2[2].x) / 2, (corners2[0].y + corners2[2].y) / 2, size * 0.5 * scaleRight);
+      }
+    }
+    if (PythagorasTree.drawTriangles) {
+      let c = drawSquareFromCorner(corners2[2].x, corners2[2].y, size * scaleRight * scaleLeft, 180 - (PythagorasTree.startTopBranchAngle + PythagorasTree.startLeftBranchAngle) - (180 - PythagorasTree.startTopBranchAngle) + (180 - (PythagorasTree.startTopBranchAngle + PythagorasTree.startLeftBranchAngle)));
+      ctx1.beginPath();
+      ctx1.moveTo(corners2[2].x, corners2[2].y);
+      ctx1.lineTo(c[0].x, c[0].y);
+      ctx1.lineTo(corners2[1].x, corners2[1].y);
+      ctx1.lineTo(corners2[2].x, corners2[2].y);
+      ctx1.fill();
+      ctx1.stroke();
+    }
+    if (PythagorasTree.drawWireframe) {
+      if (PythagorasTree.wireframeColor === 1) ctx1.strokeStyle = "black";
+      else if (PythagorasTree.wireframeColor === 2) ctx1.strokeStyle = "white";
+      else if (PythagorasTree.wireframeColor === 3) ctx1.strokeStyle = `hsl(${PythagorasTree.startHue + PythagorasTree.hueOffsetRight}deg, 100%, 50%)`;
+      ctx1.lineCap = ctx1.lineJoin = "round";
+      ctx1.lineWidth = Math.max(size * scaleRight * PythagorasTree.wireframeRatio, PythagorasTree.minLineWidth);
+      ctx1.beginPath();
+      ctx1.moveTo(x + (size / 2), y - size);
+      ctx1.lineTo((corners2[3].x + corners2[0].x) / 2, (corners2[3].y + corners2[0].y) / 2);
+      ctx1.lineTo((corners2[1].x + corners2[2].x) / 2, (corners2[1].y + corners2[2].y) / 2);
+      ctx1.stroke();
+      ctx1.lineWidth = 1;
+    }
+  }
+  
+  let presetsDiv = document.getElementById("presets-div");
+  
+  let PythagorasTree = {
+    startX: 500,
+    startY: 800,
+    startSize: 120,
+    startAngle: 0,
+    maxLayers: 10,
+    startLeftBranchAngle: 45,
+    startTopBranchAngle: 90,
+    randomSideBranchAngles: true,
+    randomTopBranchAngles: false,
+    startHue: 0,
+    hueOffsetLeft: 15,
+    hueOffsetRight: 15,
+    rainbowBranches: true,
+    drawTriangles: true,
+    circleBranches: false,
+    branchOverlay: false,
+    contrast: 50,
+    invertContrast: true,
+    brightnessMult: 1.2,
+    drawWireframe: false,
+    wireframeRatio: 0.1,
+    minLineWidth: 2,
+    wireframeColor: 1, // 1: Black  |  2: White  |  3: Branch Color
+    drawBranches: true,
+    pureWhiteBranches: false
+  };
+  PythagorasTree.draw = function() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.globalCompositeOperation = this.branchOverlay ? "lighter" : "source-over";
+    
+    let nextTopBranchAngle = this.startTopBranchAngle;
+    let nextLeftBranchAngle = this.startLeftBranchAngle;
+    if (this.randomTopBranchAngles) {
+      nextLeftBranchAngle = this.randomSideBranchAngles ? randBetween(30, 60) : this.startLeftBranchAngle;
+      nextTopBranchAngle = randBetween(75, 175 - nextLeftBranchAngle);
+    }
+    if (this.randomSideBranchAngles) {
+      nextTopBranchAngle = this.randomTopBranchAngles ? randBetween(75, 120) : this.startTopBranchAngle;
+      nextLeftBranchAngle = randBetween(30, 150 - nextTopBranchAngle);
+    }
+    
+    this.drawSquare(this.startX - (this.startSize / 2), this.startY + (this.startSize / 2), this.startSize, this.startAngle, 1, true, nextLeftBranchAngle, nextTopBranchAngle, randomHue ? Math.random() * 360 : this.startHue, {x: this.startX, y: this.startY + (this.startSize / 2)});
+  };
+  PythagorasTree.drawSquare = function(x, y, size, angle, currLayer, isLeft, leftBranchAngle, topBranchAngle, hue, lastWirePos) {
+    if (currLayer > this.maxLayers) return;
+    let cx = x;
+    let cy = y;
+    let corners = [];
+    let sign = isLeft ? 1 : -1;
+    let layerRatio = currLayer / (this.maxLayers + 1);
+    if (this.invertContrast) layerRatio = 1 - ((currLayer + 1) / this.maxLayers);
+    let brightness = ((layerRatio * this.contrast) + ((100 - this.contrast) / 2)) * this.brightnessMult;
+    ctx.fillStyle = this.rainbowBranches ? `hsl(${hue}deg, 100%, ${brightness}%)` : `hsl(0deg, 0%, ${brightness}%)`;
+    if (this.pureWhiteBranches) ctx.fillStyle = "white";
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    for (let i = 0; i < 4; i++) {
+      corners.push({x: cx, y: cy});
+      cx += size * Math.cos(toRad(angle + (i * sign * 90)));
+      cy -= size * Math.sin(toRad(angle + (i * sign * 90)));
+      ctx.lineTo(cx, cy);
+    }
+    if (this.circleBranches && this.drawBranches) ctx.fillCircle((corners[0].x + corners[2].x) / 2, (corners[0].y + corners[2].y) / 2, size / 2);
+    
+    let nextTopBranchAngle = this.startTopBranchAngle;
+    let nextLeftBranchAngle = this.startLeftBranchAngle;
+    if (this.randomTopBranchAngles) {
+      nextLeftBranchAngle = this.randomSideBranchAngles ? randBetween(30, 60) : this.startLeftBranchAngle;
+      nextTopBranchAngle = randBetween(75, 175 - nextLeftBranchAngle);
+    }
+    if (this.randomSideBranchAngles) {
+      nextTopBranchAngle = this.randomTopBranchAngles ? randBetween(75, 120) : this.startTopBranchAngle;
+      nextLeftBranchAngle = randBetween(30, 150 - nextTopBranchAngle);
+    }
+    
+    let sinTop = 1 / Math.sin(toRad(topBranchAngle));
+    let scaleLeft = sinTop * Math.sin(toRad(leftBranchAngle));
+    let scaleRight = sinTop * Math.sin(toRad(180 - (topBranchAngle + leftBranchAngle)));
+    
+    if (this.drawTriangles) { // I honestly have no idea how this code works but it does so don't touch it
+      if (this.circleBranches || !this.drawBranches) ctx.beginPath();
+      ctx.moveTo(corners[3].x, corners[3].y);
+      let a = angle - leftBranchAngle + 180 + (360 - topBranchAngle);
+      if (!isLeft) a = angle + (180 - (topBranchAngle + leftBranchAngle)) + 180 - (360 - topBranchAngle);
+      let scale = isLeft ? scaleLeft : scaleRight;
+      ctx.lineTo(corners[3].x + (size * scale * Math.cos(toRad(a))), corners[3].y - (size * scale * Math.sin(toRad(a))));
+      ctx.lineTo(corners[2].x, corners[2].y);
+      if (this.circleBranches || !this.drawBranches) ctx.fill();
+    }
+    if (!this.circleBranches) {
+      if (this.drawBranches) ctx.fill();
+      ctx.strokeStyle = ctx.fillStyle;
+      ctx.lineWidth = 1;
+      if (!this.branchOverlay && this.drawBranches) ctx.stroke();
+    }
+    
+    if (this.drawWireframe) {
+      if (this.wireframeColor === 1) ctx.strokeStyle = "black";
+      else if (this.wireframeColor === 2) ctx.strokeStyle = "white";
+      else if (this.wireframeColor === 3) ctx.strokeStyle = `hsl(${hue}deg, 100%, 50%)`;
+      ctx.lineCap = ctx.lineJoin = currLayer === 1 ? "butt" : "round";
+      let oY = currLayer === 1 ? 1 : 0;
+      ctx.lineWidth = Math.max(size * this.wireframeRatio, this.minLineWidth);
+      ctx.beginPath();
+      ctx.moveTo(lastWirePos.x, lastWirePos.y + oY);
+      ctx.lineTo((corners[0].x + corners[1].x) / 2, ((corners[0].y + corners[1].y) / 2) + oY);
+      ctx.lineTo((corners[2].x + corners[3].x) / 2, (corners[2].y + corners[3].y) / 2);
+      ctx.stroke();
+    }
+    
+    let pos = {x: (corners[2].x + corners[3].x) / 2, y: (corners[2].y + corners[3].y) / 2};
+    
+    if (isLeft) {
+      this.drawSquare(corners[3].x, corners[3].y, size * scaleLeft, angle + (180 - (topBranchAngle + leftBranchAngle)), currLayer + 1, true, nextLeftBranchAngle, nextTopBranchAngle, hue - this.hueOffsetLeft, pos);
+      this.drawSquare(corners[2].x, corners[2].y, size * scaleRight, angle - leftBranchAngle + 180, currLayer + 1, false, nextLeftBranchAngle, nextTopBranchAngle, hue + this.hueOffsetRight, pos);
+    }
+    else {
+      this.drawSquare(corners[2].x, corners[2].y, size * scaleLeft, angle + (180 - (topBranchAngle + leftBranchAngle)) + 180, currLayer + 1, true, nextLeftBranchAngle, nextTopBranchAngle, hue - this.hueOffsetLeft, pos);
+      this.drawSquare(corners[3].x, corners[3].y, size * scaleRight, angle - leftBranchAngle, currLayer + 1, false, nextLeftBranchAngle, nextTopBranchAngle, hue + this.hueOffsetRight, pos);
+    }
+  };
+  
+  let presets = [
+    {
+      name: "Default",
+      randomSideAngles: true,
+      randomTopAngles: false,
+      topBranchAngle: 90,
+      leftBranchAngle: 45,
+      maxLayers: 10,
+      rainbowBranches: true,
+      startSize: 120,
+      startHue: 0,
+      hueOffsetLeft: 15,
+      hueOffsetRight: 15,
+      brightnessMult: 120,
+      contrast: 50,
+      invertContrast: true,
+      drawTriangles: true,
+      drawBranches: true,
+      drawWireframe: false,
+      circleBranches: false,
+      randomHue: false,
+      wireframeRatio: 10,
+      wireframeColor: 1
+    },
+    {
+      name: "Hollow Oak",
+      randomSideAngles: true,
+      randomTopAngles: false,
+      topBranchAngle: 90,
+      leftBranchAngle: 45,
+      maxLayers: 10,
+      rainbowBranches: true,
+      startSize: 120,
+      startHue: 0,
+      hueOffsetLeft: 0,
+      hueOffsetRight: 0,
+      brightnessMult: 120,
+      contrast: 100,
+      invertContrast: false,
+      drawTriangles: true,
+      drawBranches: true,
+      drawWireframe: true,
+      circleBranches: false,
+      randomHue: true,
+      wireframeRatio: 25,
+      wireframeColor: 1
+    },
+    {
+      name: "Banded Coral",
+      randomSideAngles: true,
+      randomTopAngles: false,
+      topBranchAngle: 90,
+      leftBranchAngle: 45,
+      maxLayers: 10,
+      rainbowBranches: true,
+      startSize: 120,
+      startHue: 0,
+      hueOffsetLeft: 180,
+      hueOffsetRight: 180,
+      brightnessMult: 120,
+      contrast: 50,
+      invertContrast: true,
+      drawTriangles: false,
+      drawBranches: false,
+      drawWireframe: true,
+      circleBranches: false,
+      randomHue: true,
+      wireframeRatio: 40,
+      wireframeColor: 3
+    },
+    {
+      name: "Tiny Trailing Dots",
+      randomSideAngles: true,
+      randomTopAngles: false,
+      topBranchAngle: 90,
+      leftBranchAngle: 45,
+      maxLayers: 12,
+      rainbowBranches: true,
+      startSize: 120,
+      startHue: 0,
+      hueOffsetLeft: 180,
+      hueOffsetRight: 20,
+      brightnessMult: 150,
+      contrast: 70,
+      invertContrast: true,
+      drawTriangles: false,
+      drawBranches: true,
+      drawWireframe: true,
+      circleBranches: true,
+      randomHue: true,
+      wireframeRatio: 10,
+      wireframeColor: 1
+    },
+    {
+      name: "Balancing Shapes",
+      randomSideAngles: true,
+      randomTopAngles: true,
+      topBranchAngle: 90,
+      leftBranchAngle: 45,
+      maxLayers: 12,
+      rainbowBranches: true,
+      startSize: 120,
+      startHue: 0,
+      hueOffsetLeft: 330,
+      hueOffsetRight: 30,
+      brightnessMult: 130,
+      contrast: 60,
+      invertContrast: true,
+      drawTriangles: true,
+      drawBranches: true,
+      drawWireframe: false,
+      circleBranches: true,
+      randomHue: true,
+      wireframeRatio: 10,
+      wireframeColor: 1
+    }
+  ];
+  function loadPreset(n) {
+    let p = presets[n];
+    
+    randomSideBranchAnglesCheckbox.checked = p.randomSideAngles;
+    randomTopBranchAnglesCheckbox.checked = p.randomTopAngles;
+    topBranchAngleRange.value = p.topBranchAngle;
+    leftBranchAngleRange.value = p.leftBranchAngle;
+    maxLayersRange.value = p.maxLayers;
+    rainbowBranchesCheckbox.checked = p.rainbowBranches;
+    startSizeRange.value = p.startSize;
+    startHueRange.value = p.startHue;
+    hueOffsetLeftRange.value = p.hueOffsetLeft;
+    hueOffsetRightRange.value = p.hueOffsetRight;
+    brightnessMultRange.value = p.brightnessMult;
+    contrastRange.value = p.contrast;
+    invertContrastCheckbox.checked = p.invertContrast;
+    drawTrianglesCheckbox.checked = p.drawTriangles;
+    circleBranchesCheckbox.checked = p.circleBranches;
+    randomHueCheckbox.checked = p.randomHue;
+    drawBranchesCheckbox.checked = p.drawBranches;
+    drawWireframeCheckbox.checked = p.drawWireframe;
+    wireframeRatioRange.value = p.wireframeRatio;
+    if (p.wireframeColor === 1) wireframeColorRadio1.checked = true;
+    else if (p.wireframeColor === 2) wireframeColorRadio2.checked = true;
+    else if (p.wireframeColor === 3) wireframeColorRadio3.checked = true;
+    
+    updateSettings();
+  }
+  
+  function draw() {
+    drawCanvas1();
+    
+    PythagorasTree.draw();
+  }
+  draw();
+  
+  function updateSettings() {
+    PythagorasTree.randomSideBranchAngles = randomSideBranchAnglesCheckbox.checked;
+    PythagorasTree.randomTopBranchAngles = randomTopBranchAnglesCheckbox.checked;
+    PythagorasTree.startTopBranchAngle = topBranchAngleTxt.innerHTML = Number(topBranchAngleRange.value);
+    leftBranchAngleRange.max = 175 - PythagorasTree.startTopBranchAngle;
+    PythagorasTree.startLeftBranchAngle = leftBranchAngleTxt.innerHTML = Number(leftBranchAngleRange.value);
+    PythagorasTree.maxLayers = maxLayersTxt.innerHTML = Number(maxLayersRange.value);
+    PythagorasTree.rainbowBranches = rainbowBranchesCheckbox.checked;
+    PythagorasTree.startSize = startSizeTxt.innerHTML = Number(startSizeRange.value);
+    PythagorasTree.startHue = startHueTxt.innerHTML = Number(startHueRange.value);
+    PythagorasTree.hueOffsetLeft = hueOffsetLeftTxt.innerHTML = Number(hueOffsetLeftRange.value);
+    PythagorasTree.hueOffsetRight = hueOffsetRightTxt.innerHTML = Number(hueOffsetRightRange.value);
+    PythagorasTree.brightnessMult = Number(brightnessMultRange.value) / 100;
+    if (Number(brightnessMultRange.value) >= 155) {
+      PythagorasTree.pureWhiteBranches = true; 
+      brightnessMultTxt.innerHTML = "Pure white";
+    }
+    else {
+      PythagorasTree.pureWhiteBranches = false;
+      brightnessMultTxt.innerHTML = brightnessMultRange.value + "%";
+    }
+    PythagorasTree.contrast = contrastTxt.innerHTML = Number(contrastRange.value);
+    PythagorasTree.invertContrast = invertContrastCheckbox.checked;
+    PythagorasTree.drawTriangles = drawTrianglesCheckbox.checked;
+    PythagorasTree.circleBranches = circleBranchesCheckbox.checked;
+    randomHue = randomHueCheckbox.checked;
+    PythagorasTree.drawBranches = drawBranchesCheckbox.checked;
+    PythagorasTree.drawWireframe = drawWireframeCheckbox.checked;
+    PythagorasTree.wireframeRatio = Math.max(Number(wireframeRatioRange.value), 1) / 100;
+    wireframeRatioTxt.innerHTML = Math.max(Number(wireframeRatioRange.value), 1);
+    if (wireframeColorRadio1.checked) PythagorasTree.wireframeColor = 1;
+    else if (wireframeColorRadio2.checked) PythagorasTree.wireframeColor = 2;
+    else if (wireframeColorRadio3.checked) PythagorasTree.wireframeColor = 3;
+    
+    draw();
+  }
+  
+  function downloadCanvas() {
+    let link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "pythagoras-tree.png";
+    link.click();
+  }
+  
+  for (let i = 1; i < presets.length; i++) {
+    let btn = document.createElement("button");
+    btn.innerHTML = presets[i].name;
+    btn.className = "preset-btn";
+    btn.onclick = () => loadPreset(i);
+    presetsDiv.appendChild(btn);
+  }
+</script>
+</body>
+</html>
