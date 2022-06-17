@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>Asymmetric Fractal Tree ~ e4494s</title>
+    <style>
+      canvas {
+        background-color: black;
+      }
+      
+      .setting-group {
+        padding: 10px;
+        background-color: #e0e0e0;
+        border: 1px solid black;
+        border-radius: 10px;
+      }
+      .setting-group-title {
+        font-size: 15px;
+        font-style: italic;
+        font-weight: bold;
+        text-decoration: underline;
+      }
+      
+      .little-canvas {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 100px;
+        height: 100px;
+        border: none;
+      }
+    </style>
+  </head>
+<body>
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; Asymmetric Fractal Tree &mdash;&mdash;</h1>
+<p id = "how-it-works">
+  <b><i>How It Works:</i></b> At every step, the end of every branch will split into two separate branches. Change up <span class = "setting">Left Branch Settings</span> and <span class = "setting">Right Branch Settings</span> to independently affect how each split behaves.
+  <br><br>
+  <span class = "setting">Initial Branch Length</span> and <span class = "setting">Initial Branch Width</span> controls the starting length and size of the tree.
+  <br><br>
+  <span class = "setting">Branch Contrast</span> controls how much brighter branches are as they get further out. If <span class = "setting">Invert Contrast</span> is checked, then further branches will be darker; otherwise, further branches will be lighter.
+  <br><br>
+  <span class = "setting">Angle Offset</span> affects at what angle each new branch is placed.
+  <br><br>
+  <span class = "setting">Branch Length Ratio</span> and <span class = "setting">Branch Width Ratio</span> for either branch controls how the size of each branch changes every step (for example, if <span class = "setting">Branch Length Ratio</span> is 80%, each branch's length will be multiplied by 0.8 every layer, getting progressively shorter).
+  <br><br>
+  <span class = "setting">Hue Change</span> controls how each new branch changes hue based on the previous branch, which affects the overall coloring of the tree.
+  <br><br>
+  <span class = "setting">Example Branch</span> shows a live preview of what each branch split will look like based on the current settings.
+</p>
+<hr>
+<div><b>Settings Presets:</b></div>
+<div id = "presets-div"></div>
+<hr>
+<table>
+  <tr valign = "middle">
+    <td>
+      <button onclick = "draw()">Redraw</button>
+      <button onclick = "if (window.confirm('Are you sure you want to reset all settings?')) BinaryTree.loadPreset(0)">Reset Settings</button>
+      <br><br>
+      <div><b><u>Recursion Layers:</u></b> <span id = "binary-tree-max-layers-txt">16</span></div>
+      <input type = "range" min = "1" max = "17" step = "1" value = "16" id = "binary-tree-max-layers-range" oninput = "updateSettings(false)">
+      <br><br>
+      <canvas id = "canvas">If you're seeing this text, your browser does not support the canvas element.</canvas>
+      <br>
+      <button class = "download-canvas-btn" onclick = "downloadCanvas()">Download</button>
+    </td>
+    <td>
+      <div><b><u>Tree Position:</u></b> (<span id = "binary-tree-start-x-txt">42</span>%, <span id = "binary-tree-start-y-txt">90</span>%)</div>
+      <input type = "range" min = "0" max = "100" step = "1" value = "42" id = "binary-tree-start-x-range" oninput = "updateSettings(false)">
+      <br>
+      <input type = "range" min = "0" max = "100" step = "1" value = "90" id = "binary-tree-start-y-range" oninput = "updateSettings(false)">
+      <br><br><br>
+      <div><b><u>Tree Rotation:</u></b> <span id = "binary-tree-start-angle-txt">270</span>&deg;</div>
+      <input type = "range" min = "0" max = "360" step = "15" value = "270" id = "binary-tree-start-angle-range" oninput = "updateSettings(false)">
+      <hr>
+      <div><b><u>Initial Branch Length:</u></b> <span id = "binary-tree-start-length-txt">250</span>px</div>
+      <input type = "range" min = "25" max = "400" step = "25" value = "250" id = "binary-tree-start-length-range" oninput = "updateSettings(false)">
+      <br><br><br>
+      <div><b><u>Initial Branch Thickness:</u></b> <span id = "binary-tree-start-width-txt">15</span>px</div>
+      <input type = "range" min = "1" max = "30" step = "1" value = "15" id = "binary-tree-start-width-range" oninput = "updateSettings(false)">
+      <br><br><br>
+      <div><b><u>Minimum Branch Thickness:</u></b> <span id = "binary-tree-min-width-txt">0.5</span>px</div>
+      <input type = "range" min = "0" max = "20" step = "1" value = "5" id = "binary-tree-min-width-range" oninput = "updateSettings(false)">
+      <hr>
+      <label for = "binary-tree-rainbow-branches-checkbox"><b><u>Colored Branches:</u></b></label>
+      <input type = "checkbox" id = "binary-tree-rainbow-branches-checkbox" oninput = "updateSettings(false)" CHECKED>
+      <br><br><br>
+      <div><b><u>Initial Branch Hue:</u></b> <span id = "binary-tree-start-hue-txt">300</span>&deg;</div>
+      <input type = "range" min = "0" max = "360" step = "5" value = "300" id = "binary-tree-start-hue-range" oninput = "updateSettings(false)">
+      <hr>
+      <div><b><u>Branch Contrast:</u></b> <span id = "binary-tree-contrast-txt">0</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "10" value = "0" id = "binary-tree-contrast-range" oninput = "updateSettings(false)">
+      <br><br><br>
+      <label for = "binary-tree-invert-contrast-checkbox"><b><u>Invert Contrast:</u></b></label>
+      <input type = "checkbox" id = "binary-tree-invert-contrast-checkbox" oninput = "updateSettings(false)">
+    </td>
+    <td>
+      <div class = "setting-group">
+        <div class = "setting-group-title">Left Branch Settings:</div>
+        <br>
+        <div><b><u>Angle Offset:</u></b> <span id = "binary-tree-offset-angle-1-txt">30</span>&deg;</div>
+        <input type = "range" min = "0" max = "360" step = "1" value = "30" id = "binary-tree-offset-angle-1-range" oninput = "updateSettings(false)">
+        <hr>
+        <div><b><u>Branch Length Ratio:</u></b> <span id = "binary-tree-length-ratio-1-txt">65</span>%</div>
+        <input type = "range" min = "5" max = "95" step = "1" value = "65" id = "binary-tree-length-ratio-1-range" oninput = "updateSettings(false)">
+        <br><br><br>
+        <div><b><u>Branch Thickness Ratio:</u></b> <span id = "binary-tree-width-ratio-1-txt">50</span>%</div>
+        <input type = "range" min = "5" max = "100" step = "5" value = "50" id = "binary-tree-width-ratio-1-range" oninput = "updateSettings(false)">
+        <hr>
+        <div><b><u>Hue Change:</u></b> -<span id = "binary-tree-offset-hue-1-txt">25</span>&deg;</div>
+        <input type = "range" min = "0" max = "360" step = "5" value = "25" id = "binary-tree-offset-hue-1-range" oninput = "updateSettings(false)">
+      </div>
+      <br><br>
+      <div class = "setting-group">
+        <div class = "setting-group-title">Right Branch Settings:</div>
+        <br>
+        <div><b><u>Angle Offset:</u></b> <span id = "binary-tree-offset-angle-2-txt">45</span>&deg;</div>
+        <input type = "range" min = "0" max = "360" step = "1" value = "45" id = "binary-tree-offset-angle-2-range" oninput = "updateSettings(false)">
+        <hr>
+        <div><b><u>Branch Length Ratio:</u></b> <span id = "binary-tree-length-ratio-2-txt">75</span>%</div>
+        <input type = "range" min = "5" max = "95" step = "1" value = "75" id = "binary-tree-length-ratio-2-range" oninput = "updateSettings(false)">
+        <br><br><br>
+        <div><b><u>Branch Thickness Ratio:</u></b> <span id = "binary-tree-width-ratio-2-txt">80</span>%</div>
+        <input type = "range" min = "5" max = "100" step = "5" value = "80" id = "binary-tree-width-ratio-2-range" oninput = "updateSettings(false)">
+        <hr>
+        <div><b><u>Hue Change:</u></b> +<span id = "binary-tree-offset-hue-2-txt">35</span>&deg;</div>
+        <input type = "range" min = "0" max = "360" step = "5" value = "35" id = "binary-tree-offset-hue-2-range" oninput = "updateSettings(false)">
+      </div>
+    </td>
+    <td>
+      <div style = "text-align: center"><b><i>Example Branch:</i></b></div>
+      <br>
+      <canvas class = "little-canvas" id = "canvas1"></canvas>
+    </td>
+  </tr>
+</table>
+<script src = "scripts/main.js"></script>
+<script>
+  let canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.height = 1000;
+  
+  let canvas1 = document.getElementById("canvas1");
+  const ctx1 = canvas1.getContext("2d");
+  canvas1.width = canvas1.height = 250;
+  
+  let presetsDiv = document.getElementById("presets-div");
+  let binaryTreeMaxLayersTxt = document.getElementById("binary-tree-max-layers-txt");
+  let binaryTreeMaxLayersRange = document.getElementById("binary-tree-max-layers-range");
+  let binaryTreeStartXTxt = document.getElementById("binary-tree-start-x-txt");
+  let binaryTreeStartXRange = document.getElementById("binary-tree-start-x-range");
+  let binaryTreeStartYTxt = document.getElementById("binary-tree-start-y-txt");
+  let binaryTreeStartYRange = document.getElementById("binary-tree-start-y-range");
+  let binaryTreeStartAngleTxt = document.getElementById("binary-tree-start-angle-txt");
+  let binaryTreeStartAngleRange = document.getElementById("binary-tree-start-angle-range");
+  let binaryTreeStartLengthTxt = document.getElementById("binary-tree-start-length-txt");
+  let binaryTreeStartLengthRange = document.getElementById("binary-tree-start-length-range");
+  let binaryTreeStartWidthTxt = document.getElementById("binary-tree-start-width-txt");
+  let binaryTreeStartWidthRange = document.getElementById("binary-tree-start-width-range");
+  let binaryTreeMinWidthTxt = document.getElementById("binary-tree-min-width-txt");
+  let binaryTreeMinWidthRange = document.getElementById("binary-tree-min-width-range");
+  let binaryTreeRainbowBranchesCheckbox = document.getElementById("binary-tree-rainbow-branches-checkbox");
+  let binaryTreeStartHueTxt = document.getElementById("binary-tree-start-hue-txt");
+  let binaryTreeStartHueRange = document.getElementById("binary-tree-start-hue-range");
+  let binaryTreeContrastTxt = document.getElementById("binary-tree-contrast-txt");
+  let binaryTreeContrastRange = document.getElementById("binary-tree-contrast-range");
+  let binaryTreeInvertContrastCheckbox = document.getElementById("binary-tree-invert-contrast-checkbox");
+  
+  let binaryTreeOffsetAngle1Txt = document.getElementById("binary-tree-offset-angle-1-txt");
+  let binaryTreeOffsetAngle1Range = document.getElementById("binary-tree-offset-angle-1-range");
+  let binaryTreeLengthRatio1Txt = document.getElementById("binary-tree-length-ratio-1-txt");
+  let binaryTreeLengthRatio1Range = document.getElementById("binary-tree-length-ratio-1-range");
+  let binaryTreeWidthRatio1Txt = document.getElementById("binary-tree-width-ratio-1-txt");
+  let binaryTreeWidthRatio1Range = document.getElementById("binary-tree-width-ratio-1-range");
+  let binaryTreeOffsetHue1Txt = document.getElementById("binary-tree-offset-hue-1-txt");
+  let binaryTreeOffsetHue1Range = document.getElementById("binary-tree-offset-hue-1-range");
+  
+  let binaryTreeOffsetAngle2Txt = document.getElementById("binary-tree-offset-angle-2-txt");
+  let binaryTreeOffsetAngle2Range = document.getElementById("binary-tree-offset-angle-2-range");
+  let binaryTreeLengthRatio2Txt = document.getElementById("binary-tree-length-ratio-2-txt");
+  let binaryTreeLengthRatio2Range = document.getElementById("binary-tree-length-ratio-2-range");
+  let binaryTreeWidthRatio2Txt = document.getElementById("binary-tree-width-ratio-2-txt");
+  let binaryTreeWidthRatio2Range = document.getElementById("binary-tree-width-ratio-2-range");
+  let binaryTreeOffsetHue2Txt = document.getElementById("binary-tree-offset-hue-2-txt");
+  let binaryTreeOffsetHue2Range = document.getElementById("binary-tree-offset-hue-2-range");
+  
+  function drawCanvas1() {
+    ctx1.clearRect(0, 0, canvas1.width, canvas1.height);
+    
+    ctx1.lineWidth = Math.max(BinaryTree.minWidth, BinaryTree.startWidth);
+    ctx1.lineCap = ctx1.lineJoin = "round";
+    ctx1.strokeStyle = BinaryTree.rainbowBranches ? `hsl(${BinaryTree.startHue}deg, 100%, 50%)` : "white";
+    
+    let len = 125;
+    
+    let cx = canvas1.width * 0.5;
+    let cy = canvas1.height * 0.9;
+    
+    ctx1.beginPath();
+    ctx1.moveTo(cx, cy);
+    cy -= len;
+    ctx1.lineTo(cx, cy);
+    ctx1.stroke();
+    
+    ctx1.lineWidth = Math.max(BinaryTree.minWidth, BinaryTree.startWidth * BinaryTree.widthRatio1);
+    ctx1.strokeStyle = BinaryTree.rainbowBranches ? `hsl(${BinaryTree.startHue - BinaryTree.offsetHue1}deg, 100%, 50%)` : "white";
+    let len1 = len * BinaryTree.lengthRatio1;
+    let a1 = 270 - BinaryTree.offsetAngle1;
+    ctx1.beginPath();
+    ctx1.moveTo(cx, cy);
+    ctx1.lineTo(cx + (len1 * Math.cos(toRad(a1))), cy + (len1 * Math.sin(toRad(a1))));
+    ctx1.stroke();
+    
+    cx = canvas1.width * 0.5;
+    cy = canvas1.height * 0.9;
+    cy -= len;
+    ctx1.lineWidth = Math.max(BinaryTree.minWidth, BinaryTree.startWidth * BinaryTree.widthRatio2);
+    ctx1.strokeStyle = BinaryTree.rainbowBranches ? `hsl(${BinaryTree.startHue + BinaryTree.offsetHue2}deg, 100%, 50%)` : "white";
+    let len2 = len * BinaryTree.lengthRatio2;
+    let a2 = 270 + BinaryTree.offsetAngle2;
+    ctx1.beginPath();
+    ctx1.moveTo(cx, cy);
+    ctx1.lineTo(cx + (len2 * Math.cos(toRad(a2))), cy + (len2 * Math.sin(toRad(a2))));
+    ctx1.stroke();
+  }
+  
+  let BinaryTree = {
+    startX: 0.42,
+    startY: 0.9,
+    startAngle: 270,
+    startLength: 250,
+    startWidth: 15,
+    minWidth: 0.5,
+    startHue: 300,
+    
+    offsetAngle1: 30,
+    offsetAngle2: 45,
+    
+    lengthRatio1: 0.65,
+    lengthRatio2: 0.75,
+    
+    widthRatio1: 0.5,
+    widthRatio2: 0.8,
+    
+    offsetHue1: 25,
+    offsetHue2: 35,
+    
+    rainbowBranches: true,
+    
+    maxLayers: 16,
+    
+    contrast: 0,
+    invertContrast: false, // false: further branches are LIGHTER   |   true: further branches are DARKER
+    
+    presets: [
+      {
+        name: "Default",
+        startX: 0.42,
+        startY: 0.9,
+        startAngle: 270,
+        startLength: 250,
+        startWidth: 15,
+        minWidth: 0.5,
+        startHue: 300,
+        offsetAngle1: 30,
+        offsetAngle2: 45,
+        lengthRatio1: 0.65,
+        lengthRatio2: 0.75,
+        widthRatio1: 0.5,
+        widthRatio2: 0.8,
+        offsetHue1: 25,
+        offsetHue2: 35,
+        rainbowBranches: true,
+        maxLayers: 16,
+        contrast: 0,
+        invertContrast: false
+      },
+      {
+        name: "Simple Symmetric",
+        startX: 0.5,
+        startY: 0.9,
+        startAngle: 270,
+        startLength: 250,
+        startWidth: 20,
+        minWidth: 0.5,
+        startHue: 0,
+        offsetAngle1: 30,
+        offsetAngle2: 30,
+        lengthRatio1: 0.7,
+        lengthRatio2: 0.7,
+        widthRatio1: 0.7,
+        widthRatio2: 0.7,
+        offsetHue1: 25,
+        offsetHue2: 25,
+        rainbowBranches: true,
+        maxLayers: 16,
+        contrast: 0,
+        invertContrast: false
+      },
+      {
+        name: "Alien Coral",
+        startX: 0.42,
+        startY: 0.9,
+        startAngle: 270,
+        startLength: 300,
+        startWidth: 25,
+        minWidth: 0.5,
+        startHue: 30,
+        offsetAngle1: 20,
+        offsetAngle2: 80,
+        lengthRatio1: 0.65,
+        lengthRatio2: 0.65,
+        widthRatio1: 0.8,
+        widthRatio2: 0.8,
+        offsetHue1: 30,
+        offsetHue2: 330,
+        rainbowBranches: true,
+        maxLayers: 16,
+        contrast: 0,
+        invertContrast: false
+      },
+      {
+        name: "Hexagons and Pentagons",
+        startX: 0.57,
+        startY: 0.9,
+        startAngle: 270,
+        startLength: 250,
+        startWidth: 15,
+        minWidth: 0.7,
+        startHue: 180,
+        offsetAngle1: 60,
+        offsetAngle2: 72,
+        lengthRatio1: 0.75,
+        lengthRatio2: 0.6,
+        widthRatio1: 0.65,
+        widthRatio2: 0.8,
+        offsetHue1: 10,
+        offsetHue2: 0,
+        rainbowBranches: true,
+        maxLayers: 16,
+        contrast: 0,
+        invertContrast: false
+      },
+      {
+        name: "Flexing Pine",
+        startX: 0.75,
+        startY: 0.9,
+        startAngle: 270,
+        startLength: 200,
+        startWidth: 20,
+        minWidth: 1,
+        startHue: 120,
+        offsetAngle1: 10,
+        offsetAngle2: 315,
+        lengthRatio1: 0.85,
+        lengthRatio2: 0.55,
+        widthRatio1: 0.75,
+        widthRatio2: 0.3,
+        offsetHue1: 0,
+        offsetHue2: 0,
+        rainbowBranches: true,
+        maxLayers: 16,
+        contrast: 50,
+        invertContrast: true
+      },
+      {
+        name: "Leaves All The Way Down",
+        startX: 0.96,
+        startY: 0.25,
+        startAngle: 180,
+        startLength: 375,
+        startWidth: 25,
+        minWidth: 1.2,
+        startHue: 60,
+        offsetAngle1: 15,
+        offsetAngle2: 270,
+        lengthRatio1: 0.7,
+        lengthRatio2: 0.6,
+        widthRatio1: 0.6,
+        widthRatio2: 0.6,
+        offsetHue1: 5,
+        offsetHue2: 0,
+        rainbowBranches: true,
+        maxLayers: 16,
+        contrast: 0,
+        invertContrast: false
+      },
+      {
+        name: "Spiraling Branches",
+        startX: 0.32,
+        startY: 0.94,
+        startAngle: 315,
+        startLength: 275,
+        startWidth: 15,
+        minWidth: 0.3,
+        startHue: 300,
+        offsetAngle1: 45,
+        offsetAngle2: 0,
+        lengthRatio1: 0.75,
+        lengthRatio2: 0.7,
+        widthRatio1: 0.8,
+        widthRatio2: 0.7,
+        offsetHue1: 25,
+        offsetHue2: 35,
+        rainbowBranches: false,
+        maxLayers: 17,
+        contrast: 20,
+        invertContrast: true
+      },
+      {
+        name: "Chaotic Twists",
+        startX: 0.53,
+        startY: 0.82,
+        startAngle: 270,
+        startLength: 350,
+        startWidth: 25,
+        minWidth: 0.5,
+        startHue: 330,
+        offsetAngle1: 120,
+        offsetAngle2: 100,
+        lengthRatio1: 0.7,
+        lengthRatio2: 0.7,
+        widthRatio1: 0.7,
+        widthRatio2: 0.7,
+        offsetHue1: 0,
+        offsetHue2: 0,
+        rainbowBranches: true,
+        maxLayers: 15,
+        contrast: 0,
+        invertContrast: false
+      },
+      {
+        name: "Hilbert Curve",
+        startX: 0.5,
+        startY: 0.85,
+        startAngle: 270,
+        startLength: 350,
+        startWidth: 3,
+        minWidth: 0.5,
+        startHue: 0,
+        offsetAngle1: 90,
+        offsetAngle2: 90,
+        lengthRatio1: 0.7,
+        lengthRatio2: 0.7,
+        widthRatio1: 1,
+        widthRatio2: 1,
+        offsetHue1: 0,
+        offsetHue2: 5,
+        rainbowBranches: true,
+        maxLayers: 14,
+        contrast: 60,
+        invertContrast: true
+      },
+      {
+        name: "Ghostly Fabric",
+        startX: 0.6,
+        startY: 0.71,
+        startAngle: 225,
+        startLength: 300,
+        startWidth: 1,
+        minWidth: 0.5,
+        startHue: 150,
+        offsetAngle1: 195,
+        offsetAngle2: 10,
+        lengthRatio1: 0.85,
+        lengthRatio2: 0.65,
+        widthRatio1: 0.05,
+        widthRatio2: 0.05,
+        offsetHue1: 0,
+        offsetHue2: 0,
+        rainbowBranches: true,
+        maxLayers: 15,
+        contrast: 0,
+        invertContrast: false
+      },
+      {
+        name: "Intricate Loops",
+        startX: 0.57,
+        startY: 0.73,
+        startAngle: 270,
+        startLength: 275,
+        startWidth: 1,
+        minWidth: 0.5,
+        startHue: 240,
+        offsetAngle1: 30,
+        offsetAngle2: 180,
+        lengthRatio1: 0.75,
+        lengthRatio2: 0.7,
+        widthRatio1: 1,
+        widthRatio2: 1,
+        offsetHue1: 0,
+        offsetHue2: 0,
+        rainbowBranches: true,
+        maxLayers: 17,
+        contrast: 0,
+        invertContrast: false
+      },
+      {
+        name: "Textured Feather",
+        startX: 0.43,
+        startY: 0.71,
+        startAngle: 270,
+        startLength: 200,
+        startWidth: 1,
+        minWidth: 0.5,
+        startHue: 60,
+        offsetAngle1: 180,
+        offsetAngle2: 15,
+        lengthRatio1: 0.7,
+        lengthRatio2: 0.8,
+        widthRatio1: 1,
+        widthRatio2: 1,
+        offsetHue1: 0,
+        offsetHue2: 0,
+        rainbowBranches: true,
+        maxLayers: 17,
+        contrast: 0,
+        invertContrast: false
+      }
+      /*{
+        startX: 0.42,
+        startY: 0.9,
+        startAngle: 270,
+        startLength: 250,
+        startWidth: 15,
+        minWidth: 0.5,
+        startHue: 300,
+        offsetAngle1: 30,
+        offsetAngle2: 45,
+        lengthRatio1: 0.65,
+        lengthRatio2: 0.75,
+        widthRatio1: 0.5,
+        widthRatio2: 0.8,
+        offsetHue1: 25,
+        offsetHue2: 35,
+        rainbowBranches: true,
+        inverseColors: false,
+        maxLayers: 16
+      }*/
+    ]
+  };
+  BinaryTree.loadPreset = function(n) {
+    let p = this.presets[n];
+    binaryTreeStartXRange.value = p.startX * 100;
+    binaryTreeStartYRange.value = p.startY * 100;
+    binaryTreeStartAngleRange.value = p.startAngle;
+    binaryTreeStartLengthRange.value = p.startLength;
+    binaryTreeStartWidthRange.value = p.startWidth;
+    binaryTreeMinWidthRange.value = p.minWidth * 10;
+    binaryTreeStartHueRange.value = p.startHue;
+    binaryTreeOffsetAngle1Range.value = p.offsetAngle1;
+    binaryTreeOffsetAngle2Range.value = p.offsetAngle2;
+    binaryTreeLengthRatio1Range.value = p.lengthRatio1 * 100;
+    binaryTreeLengthRatio2Range.value = p.lengthRatio2 * 100;
+    binaryTreeWidthRatio1Range.value = p.widthRatio1 * 100;
+    binaryTreeWidthRatio2Range.value = p.widthRatio2 * 100;
+    binaryTreeOffsetHue1Range.value = p.offsetHue1;
+    binaryTreeOffsetHue2Range.value = p.offsetHue2;
+    binaryTreeRainbowBranchesCheckbox.checked = p.rainbowBranches;
+    binaryTreeMaxLayersRange.value = p.maxLayers;
+    binaryTreeContrastRange.value = p.contrast;
+    binaryTreeInvertContrastCheckbox.checked = p.invertContrast;
+    
+    updateSettings(true);
+  };
+  BinaryTree.draw = function() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.lineCap = ctx.lineJoin = "round";
+    this.drawBranch(canvas.width * this.startX, canvas.height * this.startY, this.startAngle, this.startLength, this.startWidth, this.startHue, 0);
+  };
+  BinaryTree.drawBranch = function(x, y, angle, length, width, hue, currLayer) {
+    if (currLayer >= this.maxLayers) return;
+    
+    let layerRatio = currLayer / (this.maxLayers + 1);
+    if (this.invertContrast) layerRatio = 1 - ((currLayer + 1) / this.maxLayers);
+    let brightness = (layerRatio * this.contrast) + ((100 - this.contrast) / 2);
+    
+    let nextX = x + (length * Math.cos(toRad(angle)));
+    let nextY = y + (length * Math.sin(toRad(angle)));
+    let a = 0;
+    ctx.strokeStyle = this.rainbowBranches ? `hsl(${hue + a}deg, 100%, ${brightness}%)` : `hsl(0deg, 0%, ${brightness}%)`;
+    ctx.lineWidth = Math.max(width, this.minWidth);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(nextX, nextY);
+    ctx.stroke();
+    this.drawBranch(nextX, nextY, angle - this.offsetAngle1, length * this.lengthRatio1, width * this.widthRatio1, hue - this.offsetHue1, currLayer + 1);
+    this.drawBranch(nextX, nextY, angle + this.offsetAngle2, length * this.lengthRatio2, width * this.widthRatio2, hue + this.offsetHue2, currLayer + 1);
+  };
+  
+  function draw() {
+    BinaryTree.draw();
+  }
+  
+  function updateSettings(drawTree) {
+    BinaryTree.maxLayers = binaryTreeMaxLayersTxt.innerHTML = Number(binaryTreeMaxLayersRange.value);
+    
+    BinaryTree.startX = Number(binaryTreeStartXRange.value) / 100;
+    binaryTreeStartXTxt.innerHTML = Number(binaryTreeStartXRange.value);
+    
+    BinaryTree.startY = Number(binaryTreeStartYRange.value) / 100;
+    binaryTreeStartYTxt.innerHTML = Number(binaryTreeStartYRange.value);
+    
+    BinaryTree.startAngle = binaryTreeStartAngleTxt.innerHTML = Number(binaryTreeStartAngleRange.value);
+    
+    BinaryTree.startLength = binaryTreeStartLengthTxt.innerHTML = Number(binaryTreeStartLengthRange.value);
+    
+    BinaryTree.startWidth = binaryTreeStartWidthTxt.innerHTML = Number(binaryTreeStartWidthRange.value);
+    
+    BinaryTree.minWidth = Number(binaryTreeMinWidthRange.value) / 10;
+    binaryTreeMinWidthTxt.innerHTML = (Number(binaryTreeMinWidthRange.value) / 10).toFixed(1);
+    
+    BinaryTree.rainbowBranches = binaryTreeRainbowBranchesCheckbox.checked;
+    
+    BinaryTree.startHue = binaryTreeStartHueTxt.innerHTML = Number(binaryTreeStartHueRange.value);
+    
+    BinaryTree.contrast = binaryTreeContrastTxt.innerHTML = Number(binaryTreeContrastRange.value);
+    
+    BinaryTree.invertContrast = binaryTreeInvertContrastCheckbox.checked;
+    
+    BinaryTree.offsetAngle1 = binaryTreeOffsetAngle1Txt.innerHTML = Number(binaryTreeOffsetAngle1Range.value);
+    BinaryTree.offsetAngle2 = binaryTreeOffsetAngle2Txt.innerHTML = Number(binaryTreeOffsetAngle2Range.value);
+    
+    BinaryTree.lengthRatio1 = Number(binaryTreeLengthRatio1Range.value) / 100;
+    binaryTreeLengthRatio1Txt.innerHTML = Number(binaryTreeLengthRatio1Range.value);
+    BinaryTree.lengthRatio2 = Number(binaryTreeLengthRatio2Range.value) / 100;
+    binaryTreeLengthRatio2Txt.innerHTML = Number(binaryTreeLengthRatio2Range.value);
+    
+    BinaryTree.widthRatio1 = Number(binaryTreeWidthRatio1Range.value) / 100;
+    binaryTreeWidthRatio1Txt.innerHTML = Number(binaryTreeWidthRatio1Range.value);
+    BinaryTree.widthRatio2 = Number(binaryTreeWidthRatio2Range.value) / 100;
+    binaryTreeWidthRatio2Txt.innerHTML = Number(binaryTreeWidthRatio2Range.value);
+    
+    BinaryTree.offsetHue1 = binaryTreeOffsetHue1Txt.innerHTML = Number(binaryTreeOffsetHue1Range.value);
+    BinaryTree.offsetHue2 = binaryTreeOffsetHue2Txt.innerHTML = Number(binaryTreeOffsetHue2Range.value);
+    
+    drawCanvas1();
+    
+    if (drawTree) draw();
+  }
+  updateSettings(true);
+  
+  function randomizeRange(element) {
+    return Number(randBetween(Number(element.min), Number(element.max))).toMultipleOf(Number(element.step));
+  }
+  
+  function randomizeSettings() {
+    if (!confirm("Are you sure you want to randomize all settings?")) return;
+    binaryTreeStartLengthRange.value = Math.round(randBetween(200, 400));
+    binaryTreeStartWidthRange.value = randomizeRange(binaryTreeStartWidthRange);
+    binaryTreeMinWidthRange.value = randomizeRange(binaryTreeMinWidthRange);
+    binaryTreeRainbowBranchesCheckbox.checked = Math.random() >= 0.5;
+    binaryTreeStartHueRange.value = randomizeRange(binaryTreeStartHueRange);
+    binaryTreeOffsetAngle1Range.value = randomizeRange(binaryTreeOffsetAngle1Range);
+    binaryTreeLengthRatio1Range.value = Math.round(randBetween(25, 95));
+    binaryTreeWidthRatio1Range.value = randomizeRange(binaryTreeWidthRatio1Range);
+    binaryTreeOffsetHue1Range.value = randomizeRange(binaryTreeOffsetHue1Range);
+    binaryTreeOffsetAngle2Range.value = randomizeRange(binaryTreeOffsetAngle2Range);
+    binaryTreeLengthRatio2Range.value = Math.round(randBetween(25, 95));
+    binaryTreeWidthRatio2Range.value = randomizeRange(binaryTreeWidthRatio2Range);
+    binaryTreeOffsetHue2Range.value = randomizeRange(binaryTreeOffsetHue2Range);
+    
+    updateSettings(true);
+  }
+  
+  function startStop() {
+    if (canvasRunning) {
+      canvasRunning = false;
+      startStopBtn.innerHTML = "Play";
+    }
+    else {
+      canvasRunning = true;
+      frame();
+      startStopBtn.innerHTML = "Pause";
+    }
+  }
+  
+  function downloadCanvas() {
+    let link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "asymmetric-tree.png";
+    link.click();
+  }
+  
+  for (let i = 1; i < BinaryTree.presets.length; i++) {
+    let btn = document.createElement("button");
+    btn.innerHTML = BinaryTree.presets[i].name;
+    btn.className = "preset-btn";
+    btn.onclick = () => BinaryTree.loadPreset(i);
+    presetsDiv.appendChild(btn);
+  }
+</script>
+</body>
+</html>
