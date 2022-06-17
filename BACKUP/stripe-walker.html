@@ -54,7 +54,7 @@
       <hr>
       <div><b><u>Stripe Length:</u></b> <span id = "line-length-txt">400</span>%</div>
       <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "line-length-range" oninput = "updateSettings(false)">
-      <br><br>
+      <br><br><br>
       <div><b><u>Stripe Thickness:</u></b> <span id = "line-thickness-txt">100</span>%</div>
       <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "line-thickness-range" oninput = "updateSettings(false)">
     </td>
@@ -67,10 +67,10 @@
       <hr>
       <div><b><u>Stripe Brightness:</u></b> <span id = "line-brightness-txt">70</span>%</div>
       <input type = "range" min = "0" max = "100" step = "10" value = "70" id = "line-brightness-range" oninput = "updateSettings(false)">
-      <br><br>
+      <br><br><br>
       <div><b><u>Stripe Opacity:</u></b> <span id = "line-opacity-txt">5</span>%</div>
       <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "line-opacity-range" oninput = "updateSettings(false)">
-      <br><br>
+      <br><br><br>
       <div><b><u>Stripe Color Variation:</u></b> <span id = "hue-variation-txt">0.5</span>%</div>
       <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "hue-variation-range" oninput = "updateSettings(false)">
     </td>
@@ -80,6 +80,7 @@
 <div id = "fps-body">FPS: <span id = "fps-txt"></span></div>
 <script src = "scripts/main.js"></script>
 <script>
+  let canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
   canvas.width = canvas.height = 1000;
   let canvasRunning = true;
