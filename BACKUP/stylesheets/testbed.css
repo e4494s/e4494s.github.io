@@ -1,0 +1,74 @@
+canvas {
+  width: 300px;
+  height: 300px;
+  border: 2px solid black;
+}
+
+hr {
+  /*border: none;
+  border-top: 5px solid black;*/
+  border: none;
+  height: 4px;
+  width: 100%;
+  border-radius: 4px;
+  background-color: black;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.desc {
+  background-color: silver;
+  margin: 5px;
+  padding: 5px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+.desc mark {
+  background-color: yellow;
+}
+
+.project-num {
+  margin-top: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  font-style: italic;
+  padding: 8px;
+  padding-bottom: 2px;
+  background-color: #ffff33;
+  margin-bottom: 10px;
+  border-bottom: 2px solid black;
+  border-radius: 15px 15px 0 0;
+}
+
+.yellow-top-div, .red-top-div {
+  font-size: 18px;
+  padding: 8px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  border: 2px solid black;
+  font-weight: bold;
+  font-style: italic;
+}
+.yellow-top-div {
+  background-color: rgb(255, 255, 100);
+}
+.red-top-div {
+  background-color: rgb(255, 150, 150);
+}
+
+/* Stuff from page.css */
+
+#top-title {
+  height: 50px;
+  width: 168px;
+  background: url("https://e4494s.neocities.org/images/e4494s-top-title.png");
+  display: inline-block;
+  background-size: 100% 100%;
+}
+
+h1 {
+  color: #ff9500; /* Accent color */
+  font-size: 35px;
+  font-style: italic;
+}
