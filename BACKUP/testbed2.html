@@ -10,7 +10,8 @@
 <script src = "scripts/main.js"></script>
 <a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
 <h1>&mdash;&mdash; The Second Island of Misfit Code &mdash;&mdash;</h1>
-<div class = "red-top-div">Moved to from <a href = "testbed.html" target = "_blank">testbed.html</a> on 10/17/2021.</div>
+<div class = "yellow-top-div">Reached 99 projects on 6/26/2022! Moved to <a href = "testbed3.html" target = "_blank">testbed3.html</a>.</div>
+<div class = "red-top-div">Started on 10/17/2021. (Moved to here from <a href = "testbed.html" target = "_blank">testbed.html</a>)</div>
 <br><br>
 <hr><hr>
 <!--
@@ -39,6 +40,816 @@
   }
 </script>
 -->
+<div class = "project-num">Project #99: Crowded Constellations</div>
+<canvas id = "canvas99" style = "width: 400px; height: 400px"></canvas>
+<button onclick = "draw99()">Redraw</button>
+<div class = "desc"><b><i>(6/26/2022)</i></b> Constellation generator, using modified circle packing. The circles are placed and sized the same as normal circle packing, but instead of drawing the circles themselves, a star (of fixed size) is drawn at each circle's position, and then a line connects it to the nearest circle. This creates varying distinct shapes that resemble constellations in a starry sky.<br><b><i>Update: (Later that day)</i></b> Added padding so that constellations can't generate right on the edge of the canvas, making them all more visible overall.</div>
+<hr><hr>
+<script>
+  const ctx99 = canvas99.getContext("2d");
+  canvas99.width = canvas99.height = 1000;
+  
+  let maxCircles99 = 2000;
+  let canvas99Filled = false;
+  let minCircle99Size = 25;
+  let maxCircle99Size = 100;
+  let edgeBoundaries99 = false; // If true, the circles will touch the edge, otherwise they will grow past the canvas
+  let nodeRadius99 = 8;
+  let color99 = "rgb(193, 163, 247)";
+  let bgColor99 = "#0b0024";
+  let lineWidth99 = 3;
+  let drawChance99 = 1;
+  let shadowColor99 = "rgba(255, 255, 255, 0.6)";
+  let shadowSize99 = 20;
+  let drawIterations99 = 2;
+  let numStars99 = 100;
+  let padding99 = 25;
+  
+  function Circle99() {
+    let x = randBetween(padding99, canvas99.width - padding99);
+    let y = randBetween(padding99, canvas99.height - padding99);
+    let tries = 0;
+    while (!validatePoint99(x, y)) {
+      if (tries > 1000) {
+        canvas99Filled = true;
+        return;
+      }
+      x = randBetween(padding99, canvas99.width - padding99);
+      y = randBetween(padding99, canvas99.height - padding99);
+      tries++;
+    }
+    this.x = x;
+    this.y = y;
+    this.radius = 0;
+    this.grow();
+  }
+  Circle99.prototype.grow = function() {
+    // Find closest circle and grow
+    
+    let closestX = this.x;
+    let closestY = this.y;
+    
+    let smallestDist = Infinity;
+    for (let i = 0; i < circle99Array.length; i++) {
+      if (i != circle99Array.indexOf(this)) {
+        let dx = this.x - circle99Array[i].x;
+        let dy = this.y - circle99Array[i].y;
+        let distSq = (dx * dx) + (dy * dy);
+        let dist = Math.sqrt(distSq) - circle99Array[i].radius;
+        if (dist < smallestDist) {
+          smallestDist = dist;
+          if (dist <= maxCircle99Size) {
+            closestX = circle99Array[i].x;
+            closestY = circle99Array[i].y;
+          }
+        }
+      }
+    }
+    if (edgeBoundaries99) {
+      let distToTop = this.y;
+      if (distToTop <= smallestDist) {
+        smallestDist = distToTop;
+        closestX = this.x;
+        closestY = 0;
+      }
+      let distToRight = canvas99.width - this.x;
+      if (distToRight <= smallestDist) {
+        smallestDist = distToRight;
+        closestX = canvas99.width;
+        closestY = this.y;
+      }
+      let distToBottom = canvas99.height - this.y;
+      if (distToBottom <= smallestDist) {
+        smallestDist = distToBottom;
+        closestX = this.x;
+        closestY = canvas99.height;
+      }
+      let distToLeft = this.x;
+      if (distToLeft <= smallestDist) {
+        smallestDist = distToLeft;
+        closestX = 0;
+        closestY = this.y;
+      }
+    }
+    this.radius = Math.min(smallestDist, maxCircle99Size);
+    
+    ctx99.shadowColor = shadowColor99;
+    ctx99.shadowBlur = shadowSize99;
+    ctx99.fillStyle = ctx99.strokeStyle = color99;
+    ctx99.lineWidth = lineWidth99;
+    ctx99.lineCap = ctx99.lineJoin = "round";
+    
+    if (Math.random() < drawChance99) {
+      for (let i = 0; i < drawIterations99; i++) {
+        ctx99.beginPath();
+        ctx99.moveTo(closestX, closestY);
+        ctx99.lineTo(this.x, this.y);
+        ctx99.stroke();
+      }
+    }
+    
+    if (nodeRadius99 !== 0) {
+      for (let i = 0; i < drawIterations99; i++) {
+        ctx99.fillCircle(this.x, this.y, nodeRadius99);
+      }
+    }
+    
+    ctx99.shadowBlur = 0;
+  };
+  let circle99Array = [];
+  
+  function validatePoint99(x, y) {
+    for (let i = 0; i < circle99Array.length; i++) {
+      let dx = circle99Array[i].x - x;
+      let dy = circle99Array[i].y - y;
+      let distSq = (dx * dx) + (dy * dy);
+      let r = circle99Array[i].radius + minCircle99Size;
+      if (distSq <= r * r) return false; // Too close to a circle
+    }
+    if (edgeBoundaries99) {
+      if (x < minCircle99Size || x > canvas99.width - minCircle99Size) return false; // Too close to left/right
+      if (y < minCircle99Size || y > canvas99.height - minCircle99Size) return false; // Too close to top/bottom
+    }
+    return true;
+  }
+  
+  function draw99() {
+    ctx99.fillStyle = bgColor99;
+    ctx99.fillRect(0, 0, canvas99.width, canvas99.height);
+    
+    numStars99 = Math.round(randBetween(100, 250));
+    minCircle99Size = randBetween(25, 35);
+    
+    for (let i = 0; i < numStars99; i++) {
+      ctx99.fillStyle = "white";
+      ctx99.shadowColor = "white";
+      ctx99.shadowBlur = randBetween(4, 8);
+      
+      let x = Math.random() * canvas99.width;
+      let y = Math.random() * canvas99.height;
+      let intensity = Math.round(randBetween(1, 3));
+      
+      for (let j = 0; j < intensity; j++) ctx99.fillCircle(x, y, randBetween(1, 2));
+      
+      ctx99.shadowBlur = 0;
+    }
+    
+    canvas99Filled = false;
+    circle99Array = [];
+    
+    while (circle99Array.length < maxCircles99 && !canvas99Filled) circle99Array.push(new Circle99());
+  }
+  draw99();
+</script>
+<div class = "project-num">Project #98: Animated Rectangle Subdivision</div>
+<canvas id = "canvas98"></canvas>
+<button onclick = "startCanvas98(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
+<button onclick = "reset98()">Reset</button>
+<div><b><i><span id = "finished98Txt">1</span>%</i></b></div>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>[ FPS: <span id = "fps98Txt"></span> ]</b></i></div>
+<div class = "desc"><b><i>(6/25/2022)</i></b> Rectangle subdivision that animates and splits further over time. I also made it where there is an initial hue that varies with each new rectangle that is split, so that it's not just a random rainbow.<br><b><i>(6/26/2022)</i></b> Slightly modified the for-loop done per frame so that it doesn't slow down when there's more rectangles, and decreased the canvas resolution.</div>
+<hr><hr>
+<script>
+  const ctx98 = canvas98.getContext("2d");
+  canvas98.width = canvas98.height = 500;
+  let canvas98Size = 500;
+  let canvas98Running = false;
+  
+  let maxLayers98 = 13;
+  let splitsPerDraw98 = 2000;
+  let minThickness98 = 5;
+  let currSplits98 = 0;
+  let stepsPerFrame98 = 15;
+  let hueVariation98 = 0.1;
+  let currDoneInFrame98 = 0;
+  
+  function nextHue98(hue) {
+    return hue + (randBetween(-180, 180) * hueVariation98);
+  }
+  
+  function Square98(x, y, width, height, layer, hue) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.layer = layer;
+    
+    this.hue = hue;
+    this.saturation = randBetween(75, 100);
+    this.brightness = randBetween(35, 65);
+  }
+  Square98.prototype.split = function(direction) {
+    let widthLess = this.width <= minThickness98;
+    let heightLess = this.height <= minThickness98;
+    
+    if (this.layer > maxLayers98 || (widthLess && heightLess)) {
+      currDoneInFrame98--;
+      return;
+    }
+    currSplits98++;
+    
+    if (widthLess) direction = 0;
+    if (heightLess) direction = 1;
+    
+    let halfWidth = this.width / 2;
+    let halfHeight = this.height / 2;
+    
+    if (direction === 0) { // Horizontal split
+      square98Array.push(new Square98(this.x, this.y, this.width, halfHeight, this.layer + 1, nextHue98(this.hue)));
+      square98Array.push(new Square98(this.x, this.y + halfHeight, this.width, halfHeight, this.layer + 1, nextHue98(this.hue)));
+    }
+    else { // Vertical split
+      square98Array.push(new Square98(this.x, this.y, halfWidth, this.height, this.layer + 1, nextHue98(this.hue)));
+      square98Array.push(new Square98(this.x + halfWidth, this.y, halfWidth, this.height, this.layer + 1, nextHue98(this.hue)));
+    }
+    square98Array.splice(square98Array.indexOf(this), 1);
+  };
+  Square98.prototype.draw = function() {
+    ctx98.fillStyle = `hsl(${this.hue}deg, ${this.saturation}%, ${this.brightness}%)`;
+    ctx98.fillRect(this.x, this.y, this.width, this.height);
+    
+    ctx98.lineWidth = 2;
+    //ctx98.strokeRect(this.x, this.y, this.width, this.height);
+  };
+  let square98Array = [];
+  
+  function drawSquares98() {
+    for (let i = 0; i < square98Array.length; i++) square98Array[i].draw();
+  }
+  
+  let lastFrame98Time = 0;
+  let lastFps98DisplayTime = 1000;
+  function frame98() {
+    if (Date.now() - lastFps98DisplayTime >= 500) {
+      fps98Txt.innerHTML = (1000 / (Date.now() - lastFrame98Time)).toFixed(1);
+      lastFps98DisplayTime = Date.now();
+    }
+    lastFrame98Time = Date.now();
+    
+    ctx98.clearRect(0, 0, canvas98.width, canvas98.height);
+    
+    for (currDoneInFrame98 = 0; currDoneInFrame98 < stepsPerFrame98; currDoneInFrame98++) {
+      if (currSplits98 < splitsPerDraw98) {
+        square98Array[Math.floor(Math.random() * square98Array.length)].split(Math.round(Math.random()));
+      }
+    }
+    
+    finished98Txt.innerHTML = Math.round((square98Array.length / (splitsPerDraw98 + 1)) * 100);
+    
+    drawSquares98();
+    
+    if (canvas98Running) requestAnimationFrame(frame98);
+  }
+  function reset98() {
+    let gridSize = Math.pow(2, Math.floor(Math.log2(canvas98Size / minThickness98)) + 1);
+    canvas98.width = canvas98.height = gridSize * Math.round(canvas98Size / gridSize);
+    
+    square98Array = [];
+    square98Array.push(new Square98(0, 0, canvas98.width, canvas98.height, 1, Math.random() * 360));
+    
+    currSplits98 = 0;
+    
+    drawSquares98();
+  }
+  reset98();
+  frame98();
+  
+  function startCanvas98(caller) {
+    if (canvas98Running) {
+      canvas98Running = false;
+      caller.innerHTML = "<b><i>Paused</i></b>";
+      caller.style.color = caller.style.borderColor = "red";
+    }
+    else {
+      canvas98Running = true;
+      caller.innerHTML = "<b><i>Running</i></b>";
+      caller.style.color = caller.style.borderColor = "green";
+      frame98();
+    }
+  }
+  
+  function draw98() {
+    ctx98.fillStyle = "white";
+    ctx98.fillRect(0, 0, canvas98.width, canvas98.height);
+    ctx98.fillStyle = "black";
+    
+    square98Array = [];
+    square98Array.push(new Square98(0, 0, canvas98.width, canvas98.height, 1));
+    
+    currSplits98 = 0;
+    while (currSplits98 < splitsPerDraw98) {
+      square98Array[Math.floor(Math.random() * square98Array.length)].split(Math.round(Math.random()));
+    }
+    
+    for (let i = 0; i < square98Array.length; i++) square98Array[i].draw();
+  }
+  //draw98();
+</script>
+<div class = "project-num">Project #97: [TEMPLATE]: Rectangle Subdivision</div>
+<canvas id = "canvas97"></canvas>
+<button onclick = "draw97()">Redraw</button>
+<div class = "desc"><b><i>(6/25/2022)</i></b> A template project similar to square subdivision, except instead of one square splitting into 4 smaller squares, one rectangle splits into two smaller rectangles (with a random orientation).</div>
+<hr><hr>
+<script>
+  const ctx97 = canvas97.getContext("2d");
+  canvas97.width = canvas97.height = 1000;
+  
+  let maxLayers97 = 13;
+  let splitsPerDraw97 = 2000;
+  let minThickness97 = 10;
+  let currSplits97 = 0;
+  
+  function Square97(x, y, width, height, layer) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.layer = layer;
+  }
+  Square97.prototype.split = function(direction) {
+    let widthLess = this.width <= minThickness97;
+    let heightLess = this.height <= minThickness97;
+    
+    if (this.layer > maxLayers97 || (widthLess && heightLess)) return;
+    currSplits97++;
+    
+    if (widthLess) direction = 0;
+    if (heightLess) direction = 1;
+    
+    let halfWidth = this.width / 2;
+    let halfHeight = this.height / 2;
+    
+    if (direction === 0) { // Horizontal split
+      square97Array.push(new Square97(this.x, this.y, this.width, halfHeight, this.layer + 1));
+      square97Array.push(new Square97(this.x, this.y + halfHeight, this.width, halfHeight, this.layer + 1));
+    }
+    else { // Vertical split
+      square97Array.push(new Square97(this.x, this.y, halfWidth, this.height, this.layer + 1));
+      square97Array.push(new Square97(this.x + halfWidth, this.y, halfWidth, this.height, this.layer + 1));
+    }
+    square97Array.splice(square97Array.indexOf(this), 1);
+  };
+  Square97.prototype.draw = function() {
+    ctx97.fillStyle = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
+    ctx97.fillRect(this.x, this.y, this.width, this.height);
+    
+    ctx97.lineWidth = 2;
+    ctx97.strokeRect(this.x, this.y, this.width, this.height);
+  };
+  let square97Array = [];
+  
+  function draw97() {
+    ctx97.fillStyle = "white";
+    ctx97.fillRect(0, 0, canvas97.width, canvas97.height);
+    ctx97.fillStyle = "black";
+    
+    square97Array = [];
+    square97Array.push(new Square97(0, 0, canvas97.width, canvas97.height, 1));
+    
+    currSplits97 = 0;
+    while (currSplits97 < splitsPerDraw97) {
+      square97Array[Math.floor(Math.random() * square97Array.length)].split(Math.round(Math.random()));
+    }
+    
+    for (let i = 0; i < square97Array.length; i++) square97Array[i].draw();
+  }
+  draw97();
+</script>
+<div class = "project-num">Project #96: Random Striped Grid</div>
+<canvas id = "canvas96" style = "width: 400px; height: 400px"></canvas>
+<button onclick = "draw96()">Redraw</button>
+<div><b><u>Grid Size:</u></b> <span id = "gridSize96Txt">6&times;6</span></div>
+<input type = "range" min = "2" max = "15" step = "1" value = "6" id = "gridSize96Range" oninput = "updateSettings96()">
+<br><br>
+<div><b><u>Stripes Per Tile:</u></b> <span id = "numBars96Txt">3</span></div>
+<input type = "range" min = "2" max = "11" step = "1" value = "4" id = "numBars96Range" oninput = "updateSettings96()">
+<br><br>
+<div><b><u>Stripe Thickness:</u></b> <span id = "thickness96Txt">60</span>%</div>
+<input type = "range" min = "10" max = "90" step = "5" value = "60" id = "thickness96Range" oninput = "updateSettings96()">
+<br><br>
+<div><b><u>Stripe Hue:</u></b> <span id = "hue96Txt">240</span>&deg;</div>
+<input type = "range" min = "0" max = "360" step = "10" value = "240" id = "hue96Range" oninput = "updateSettings96()">
+<br><br>
+<label for = "blackBg96Checkbox"><b><u>Black Background:</u></b></label>
+<input type = "checkbox" id = "blackBg96Checkbox" oninput = "updateSettings96()">
+<div class = "desc"><b><i>(6/25/2022)</i></b> A small project testing what it would look like to have a grid filled randomly with blocks that are either made up of horizontal stripes or vertical stripes.<br><b><i>Update: (Later that day)</i></b> Added colors and sliders for settings.</div>
+<hr><hr>
+<script>
+  const ctx96 = canvas96.getContext("2d");
+  canvas96.width = canvas96.height = 500;
+  let canvasSize96 = 500;
+  
+  let gridSize96 = 6;
+  let numBars96 = 4;
+  let thickness96 = 0.4;
+  let hue96 = 240;
+  let blackBg96 = false;
+  
+  function updateSettings96() {
+    gridSize96 = Number(gridSize96Range.value);
+    gridSize96Txt.innerHTML = gridSize96 + "&times;" + gridSize96;
+    numBars96 = Number(numBars96Range.value);
+    numBars96Txt.innerHTML = numBars96 - 1;
+    thickness96 = 1 - (Number(thickness96Range.value) / 100);
+    thickness96Txt.innerHTML = thickness96Range.value;
+    hue96 = hue96Txt.innerHTML = Number(hue96Range.value);
+    blackBg96 = blackBg96Checkbox.checked;
+    
+    draw96();
+  }
+  
+  function drawTile96(x, y, size, numBars, thickness, direction) {
+    if (direction === 0) { // ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â°Ãƒâ€šÃ‚Â¡
+      for (let i = 0; i < numBars; i++) {
+        let ratio = i / (numBars - 1);
+        let iy = y + (ratio * size);
+        if (i !== 0) iy -= thickness / 2;
+        let end = i === 0 || i === numBars - 1;
+        ctx96.fillRect(x, iy, size, end ? thickness / 2 : thickness);
+        //ctx96.fillCircle(x, iy, 5);
+      }
+    }
+    else if (direction === 1) { // ÃƒÆ’Ã‚Â¢Ãƒâ€šÃ‚Â¦ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬
+      for (let i = 0; i < numBars; i++) {
+        let ratio = i / (numBars - 1);
+        let ix = x + (ratio * size);
+        if (i !== 0) ix -= thickness / 2;
+        let end = i === 0 || i === numBars - 1;
+        ctx96.fillRect(ix, y, end ? thickness / 2 : thickness, size);
+      }
+    }
+  }
+  
+  function draw96() {
+    canvas96.width = canvas96.height = gridSize96 * Math.round(canvasSize96 / gridSize96);
+    if (canvas96.width / gridSize96 < 100) canvas96.width = canvas96.height = 100 * gridSize96;
+    
+    ctx96.fillStyle = `hsl(${hue96}deg, 100%, 50%)`;
+    ctx96.fillRect(0, 0, canvas96.width, canvas96.height);
+    ctx96.fillStyle = blackBg96 ? "black" : "white";
+    
+    let tileSize = canvas96.width / gridSize96;
+    let thickness = Math.max((thickness96 / (numBars96 - 1)) * tileSize, 1);
+    
+    for (let x = 0; x < gridSize96; x++) {
+      for (let y = 0; y < gridSize96; y++) {
+        drawTile96(x * tileSize, y * tileSize, tileSize, numBars96, thickness, Math.random() < 0.5 ? 0 : 1);
+      }
+    }
+  }
+  draw96();
+</script>
+<div class = "project-num">Project #95: Circle Packing: Shapes With Regions</div>
+<canvas id = "canvas95" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "draw95()">Redraw</button>
+<div class = "desc"><b><i>(6/24/2022)</i></b> This project is similar to Project #73, except that there's triangles, squares, pentagons, and hexagons, and there's 9 regions on the grid that each have different settings to create distinct but overlapping regions. I also added more visual settings, like a third type of connection (instead of corners-->middle or midpoints-->middle), which connects adjacent midpoints to create a smaller copy of the shape inside itself.<br><b><i><mark>Actually finished! (6/24/2022)</mark> Added to <a href = "generative-art-gallery.html" target = "_blank">generative-art-gallery.html</a>.</i></b></div>
+<hr><hr>
+<script>
+  const ctx95 = canvas95.getContext("2d");
+  canvas95.width = canvas95.height = 1500;
+  
+  let maxCircles95 = 2000;
+  let canvas95Filled = false;
+  let minCircle95Size = 5;
+  let maxCircle95Size = 0.2//100;
+  let edgeBoundaries95 = false; // If true, the circles will touch the edge, otherwise they will grow past the canvas
+  let gridSize95 = 3; // Different regions of shapes
+  let grid95 = []; // Shape settings
+  let visualSizeRatio95 = 1.2;
+  let lineWidth95 = 3;
+  let blur95 = 0.2;
+  
+  function Circle95() {
+    let x = Math.random() * canvas95.width;
+    let y = Math.random() * canvas95.height;
+    let tries = 0;
+    while (!validatePoint95(x, y)) {
+      if (tries > 1000) {
+        canvas95Filled = true;
+        return;
+      }
+      x = Math.random() * canvas95.width;
+      y = Math.random() * canvas95.height;
+      tries++;
+    }
+    this.x = x;
+    this.y = y;
+    this.radius = 0;
+    this.grow();
+  }
+  Circle95.prototype.grow = function() {
+    // Find closest circle and grow
+    
+    let smallestDist = Infinity;
+    for (let i = 0; i < circle95Array.length; i++) {
+      if (i != circle95Array.indexOf(this)) {
+        let dx = this.x - circle95Array[i].x;
+        let dy = this.y - circle95Array[i].y;
+        let distSq = (dx * dx) + (dy * dy);
+        let dist = Math.sqrt(distSq) - circle95Array[i].radius;
+        if (dist <= smallestDist) smallestDist = dist;
+      }
+    }
+    if (edgeBoundaries95) {
+      let distToTop = this.y;
+      if (distToTop <= smallestDist) smallestDist = distToTop;
+      let distToRight = canvas95.width - this.x;
+      if (distToRight <= smallestDist) smallestDist = distToRight;
+      let distToBottom = canvas95.height - this.y;
+      if (distToBottom <= smallestDist) smallestDist = distToBottom;
+      let distToLeft = this.x;
+      if (distToLeft <= smallestDist) smallestDist = distToLeft;
+    }
+    
+    let ratioX = (this.x / canvas95.width) + ((1 / gridSize95) * 0.5 * randBetween(-blur95, blur95));
+    let ratioY = (this.y / canvas95.height) + ((1 / gridSize95) * 0.5 * randBetween(-blur95, blur95));
+    
+    let gridX = Math.floor(ratioX * gridSize95);
+    if (gridX > gridSize95 - 1) gridX = gridSize95 - 1;
+    if (gridX < 0) gridX = 0;
+    let gridY = Math.floor(ratioY * gridSize95);
+    if (gridY > gridSize95 - 1) gridY = gridSize95 - 1;
+    if (gridY < 0) gridY = 0;
+    let gridPos = (gridY * gridSize95) + gridX;
+    
+    this.radius = Math.min(smallestDist, grid95[gridPos].maxSize);
+    
+    // Draw circle
+    drawShape95(this.x, this.y, this.radius * visualSizeRatio95, grid95[gridPos]);
+  };
+  let circle95Array = [];
+  
+  function sizeScale95(sides) {
+    if (sides === 3) return 1.35;
+    if (sides === 4) return 1.15;
+    if (sides === 5) return 1.05;
+    return 1;
+  }
+  
+  function drawShape95(x, y, radius, pos) {
+    ctx95.strokeStyle = pos.outlineColor;
+    ctx95.lineWidth = Math.min(lineWidth95, radius / 5);
+    ctx95.lineCap = ctx95.lineJoin = "round";
+    ctx95.fillStyle = `hsl(${pos.hue}deg, ${randBetween(80, 100)}%, ${randBetween(30, 70) * pos.brightness}%)`;
+    
+    radius *= sizeScale95(pos.sides);
+    
+    let numPoints = pos.sides;
+    let angle = (Math.PI * 2) / numPoints;
+    let corners = [];
+    let offset = toRad(randBetween(-pos.tilt, pos.tilt));
+    
+    ctx95.beginPath();
+    for (let i = 0; i < numPoints; i++) {
+      let a = (angle * (i + (randBetween(-0.5, 0.5) * pos.skew))) + pos.alignment + offset;
+      let r = radius;
+      let iX = x + (r * Math.cos(a));
+      let iY = y + (r * Math.sin(a));
+      corners.push({x: iX, y: iY});
+      ctx95.lineTo(iX, iY);
+    }
+    ctx95.lineTo(corners[0].x, corners[0].y);
+    ctx95.lineTo(corners[1].x, corners[1].y);
+    
+    ctx95.fill();
+    ctx95.stroke();
+    
+    let midpoints = [];
+    let sumX = 0;
+    let sumY = 0;
+    
+    for (let i = 0; i < corners.length; i++) {
+      sumX += corners[i].x;
+      sumY += corners[i].y;
+      let j = (i + 1) % corners.length;
+      midpoints.push({x: (corners[i].x + corners[j].x) / 2, y: (corners[i].y + corners[j].y) / 2});
+    }
+    let middle = {x: sumX / corners.length, y: sumY / corners.length};
+    
+    if (pos.connection === 0) return;
+    if (pos.connection === 1) { // Corners to middle
+      ctx95.beginPath();
+      for (let i = 0; i < corners.length; i++) {
+        ctx95.moveTo(corners[i].x, corners[i].y);
+        ctx95.lineTo(middle.x, middle.y);
+        ctx95.stroke();
+      }
+    }
+    if (pos.connection === 2) { // Midpoints to middle
+      ctx95.beginPath();
+      for (let i = 0; i < midpoints.length; i++) {
+        ctx95.moveTo(midpoints[i].x, midpoints[i].y);
+        ctx95.lineTo(middle.x, middle.y);
+        ctx95.stroke();
+      }
+    }
+    if (pos.connection === 3) { // Midpoints to adjacent midpoints
+      ctx95.beginPath();
+      for (let i = 0; i < midpoints.length; i++) {
+        let j = (i + 1) % midpoints.length;
+        ctx95.moveTo(midpoints[i].x, midpoints[i].y);
+        ctx95.lineTo(midpoints[j].x, midpoints[j].y);
+        ctx95.stroke();
+      }
+    }
+  }
+  
+  function validatePoint95(x, y) {
+    for (let i = 0; i < circle95Array.length; i++) {
+      let dx = circle95Array[i].x - x;
+      let dy = circle95Array[i].y - y;
+      let distSq = (dx * dx) + (dy * dy);
+      let r = circle95Array[i].radius + minCircle95Size;
+      if (distSq <= r * r) return false; // Too close to a circle
+    }
+    if (edgeBoundaries95) {
+      if (x < minCircle95Size || x > canvas95.width - minCircle95Size) return false; // Too close to left/right
+      if (y < minCircle95Size || y > canvas95.height - minCircle95Size) return false; // Too close to top/bottom
+    }
+    return true;
+  }
+  
+  function draw95() {
+    ctx95.fillStyle = "black";
+    ctx95.fillRect(0, 0, canvas95.width, canvas95.height);
+    
+    canvas95Filled = false;
+    circle95Array = [];
+    
+    let tileSize = canvas95.width / gridSize95;
+    
+    minCircle95Size = 0.01 * tileSize;
+    
+    let min = Math.random() < 0.5 ? 1.05 : 0.9;
+    visualSizeRatio95 = randBetween(min, 1.2);
+    
+    grid95 = [];
+    for (let x = 0; x < gridSize95; x++) {
+      for (let y = 0; y < gridSize95; y++) {
+        grid95.push({
+          hue: Math.random() * 360,
+          sides: Math.round(randBetween(3, 6)),
+          brightness: randBetween(0.6, 1 / 0.8),
+          tilt: randBetween(0, 15),
+          skew: randBetween(0, 0.25),
+          maxSize: (maxCircle95Size * randBetween(0.3, 1.2)) * tileSize,
+          outlineColor: Math.random() < 0.8 ? "black" : "white",
+          connection: Math.round(randBetween(0, 3)),
+          alignment: Math.random() * Math.PI * 2
+        });
+      }
+    }
+    
+    while (circle95Array.length < maxCircles95 && !canvas95Filled) circle95Array.push(new Circle95());
+  }
+  draw95();
+</script>
+<div class = "project-num">Project #94: [TEMPLATE]: Square Subdivision</div>
+<canvas id = "canvas94"></canvas>
+<button onclick = "draw94()">Redraw</button>
+<div class = "desc"><b><i>(6/24/2022)</i></b> Another template project based on old square subdivision code.<br><b><i>(6/25/2022)</i></b> Added colors to make the template less bland.</div>
+<hr><hr>
+<script>
+  const ctx94 = canvas94.getContext("2d");
+  canvas94.width = canvas94.height = 1000;
+  
+  let maxLayers94 = 7;
+  let splitsPerDraw94 = 500;
+  
+  function Square94(x, y, size, layer) {
+    this.x = x;
+    this.y = y;
+    this.size = size;
+    this.layer = layer;
+  }
+  Square94.prototype.split = function() {
+    if (this.layer > maxLayers94) return; // Don't go too deep
+    let halfSize = this.size / 2;
+    square94Array.push(new Square94(this.x, this.y, halfSize, this.layer + 1)); // Replace self with 4 new squares
+    square94Array.push(new Square94(this.x + halfSize, this.y, halfSize, this.layer + 1));
+    square94Array.push(new Square94(this.x, this.y + halfSize, halfSize, this.layer + 1));
+    square94Array.push(new Square94(this.x + halfSize, this.y + halfSize, halfSize, this.layer + 1));
+    square94Array.splice(square94Array.indexOf(this), 1);
+  };
+  Square94.prototype.draw = function() {
+    ctx94.fillStyle = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
+    ctx94.fillRect(this.x, this.y, this.size, this.size);
+    
+    ctx94.lineWidth = 2;
+    ctx94.strokeRect(this.x, this.y, this.size, this.size);
+  };
+  let square94Array = [];
+  
+  function draw94() {
+    ctx94.fillStyle = "white";
+    ctx94.fillRect(0, 0, canvas94.width, canvas94.height);
+    ctx94.fillStyle = "black";
+    
+    square94Array = [];
+    square94Array.push(new Square94(0, 0, canvas94.width, 1));
+    
+    for (let i = 0; i < splitsPerDraw94; i++) {
+      square94Array[Math.floor(Math.random() * square94Array.length)].split();
+    }
+    
+    for (let i = 0; i < square94Array.length; i++) square94Array[i].draw();
+  }
+  draw94();
+</script>
+<div class = "project-num">Project #93: [TEMPLATE]: Circle Packing</div>
+<canvas id = "canvas93"></canvas>
+<button onclick = "draw93()">Redraw</button>
+<div class = "desc"><b><i>(6/24/2022)</i></b> A template project for circle packing, with just a barebones design of just drawing black circles, the code coming from older projects. This way, I can just copy and paste this code and change the drawing function every time I have an idea for another variation on circle packing.<br><b><i>(6/25/2022)</i></b> Added colors to make the template less bland.</div>
+<hr><hr>
+<script>
+  const ctx93 = canvas93.getContext("2d");
+  canvas93.width = canvas93.height = 1000;
+  
+  let maxCircles93 = 2000;
+  let canvas93Filled = false;
+  let minCircle93Size = 5;
+  let maxCircle93Size = 100;
+  let edgeBoundaries93 = false; // If true, the circles will touch the edge, otherwise they will grow past the canvas
+  
+  function Circle93() {
+    let x = Math.random() * canvas93.width;
+    let y = Math.random() * canvas93.height;
+    let tries = 0;
+    while (!validatePoint93(x, y)) {
+      if (tries > 1000) {
+        canvas93Filled = true;
+        return;
+      }
+      x = Math.random() * canvas93.width;
+      y = Math.random() * canvas93.height;
+      tries++;
+    }
+    this.x = x;
+    this.y = y;
+    this.radius = 0;
+    this.grow();
+  }
+  Circle93.prototype.grow = function() {
+    // Find closest circle and grow
+    
+    let smallestDist = Infinity;
+    for (let i = 0; i < circle93Array.length; i++) {
+      if (i != circle93Array.indexOf(this)) {
+        let dx = this.x - circle93Array[i].x;
+        let dy = this.y - circle93Array[i].y;
+        let distSq = (dx * dx) + (dy * dy);
+        let dist = Math.sqrt(distSq) - circle93Array[i].radius;
+        if (dist <= smallestDist) smallestDist = dist;
+      }
+    }
+    if (edgeBoundaries93) {
+      let distToTop = this.y;
+      if (distToTop <= smallestDist) smallestDist = distToTop;
+      let distToRight = canvas93.width - this.x;
+      if (distToRight <= smallestDist) smallestDist = distToRight;
+      let distToBottom = canvas93.height - this.y;
+      if (distToBottom <= smallestDist) smallestDist = distToBottom;
+      let distToLeft = this.x;
+      if (distToLeft <= smallestDist) smallestDist = distToLeft;
+    }
+    this.radius = Math.min(smallestDist, maxCircle93Size);
+    
+    // Draw circle
+    ctx93.fillStyle = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
+    ctx93.fillCircle(this.x, this.y, this.radius);
+    
+    ctx93.lineWidth = 2;
+    ctx93.strokeCircle(this.x, this.y, this.radius);
+  };
+  let circle93Array = [];
+  
+  function validatePoint93(x, y) {
+    for (let i = 0; i < circle93Array.length; i++) {
+      let dx = circle93Array[i].x - x;
+      let dy = circle93Array[i].y - y;
+      let distSq = (dx * dx) + (dy * dy);
+      let r = circle93Array[i].radius + minCircle93Size;
+      if (distSq <= r * r) return false; // Too close to a circle
+    }
+    if (edgeBoundaries93) {
+      if (x < minCircle93Size || x > canvas93.width - minCircle93Size) return false; // Too close to left/right
+      if (y < minCircle93Size || y > canvas93.height - minCircle93Size) return false; // Too close to top/bottom
+    }
+    return true;
+  }
+  
+  function draw93() {
+    ctx93.fillStyle = "white";
+    ctx93.fillRect(0, 0, canvas93.width, canvas93.height);
+    ctx93.fillStyle = "black";
+    
+    canvas93Filled = false;
+    circle93Array = [];
+    
+    while (circle93Array.length < maxCircles93 && !canvas93Filled) circle93Array.push(new Circle93());
+  }
+  draw93();
+</script>
 <div class = "project-num">Project #92: Random Arc Walker</div>
 <canvas id = "canvas92" style = "width: 400px; height: 400px"></canvas>
 <button onclick = "startCanvas92(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
@@ -15330,3 +16141,31 @@ The <b>Two-Cosine Fractal</b> is the same as the Cosine Fractal, but with 2 time
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
