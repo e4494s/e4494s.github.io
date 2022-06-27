@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel = "icon"  href = "images/favicon.png" type = "image/png">
+  <link rel = "stylesheet" href = "stylesheets/main.css">
+  <link rel = "stylesheet" href = "stylesheets/testbed.css">
+  <title>Test Bed 3 ~ e4494s</title>
+</head>
+<body>
+<script src = "scripts/main.js"></script>
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; The Third Island of Misfit Code &mdash;&mdash;</h1>
+<div class = "red-top-div">Started on 6/26/2022. (Moved to here from <a href = "testbed2.html" target = "_blank">testbed2.html</a>)</div>
+<br><br>
+<hr><hr>
+<!--
+<canvas id = "canvas0"></canvas>
+<button onclick = "startCanvas0()">Start/Stop</button>
+<div class = "desc"></div>
+<hr><hr>
+<script>
+  const ctx0 = canvas0.getContext("2d");
+  canvas0.width = canvas0.height = 300;
+  let canvas0Running = false;
+  
+  function frame0() {
+    ctx0.clearRect(0, 0, canvas0.width, canvas0.height);
+    
+    if (canvas0Running) requestAnimationFrame(frame0);
+  }
+  frame0();
+  
+  function startCanvas0() {
+    if (canvas0Running) canvas0Running = false;
+    else {
+      canvas0Running = true;
+      frame0();
+    }
+  }
+</script>
+-->
+<div class = "project-num">Project #1: Banded Bouncing Trails</div>
+<canvas id = "canvas1"></canvas>
+<button onclick = "startCanvas1(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
+<button onclick = "reset1()">Reset</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>[ FPS: <span id = "fps1Txt"></span> ]</b></i></div>
+<div class = "desc"><b><i>(6/26/2022)</i></b> A random project involving bouncing circles that randomly change their hue over time, and which slowly grow darker and smaller until they disappear, creating twisting trails with bands of color along them. Click to add more circles. This isn't a super important project but I implemented a really important idea for bouncing--smoothness. Instead of getting blocky trails (like in <a href = "bounce.html" target = "_blank">bounce.html</a>) when trailing is turned on, the circles instead render 5 times per frame, moving at 1/5 their speed every time. This results in identical behavior, but with more pleasing and smooth trails.</div>
+<hr><hr>
+<script>
+  const ctx1 = canvas1.getContext("2d");
+  canvas1.width = canvas1.height = 1000;
+  let canvas1Rect = canvas1.getBoundingClientRect();
+  let canvas1Ratio = canvas1.width / 300;
+  let canvas1Running = false;
+  
+  let Mouse1 = {
+    down: false,
+    x: 0,
+    y: 0,
+    lastSpawnTime: 0
+  };
+  
+  let timeBetweenSpawns1 = 100;
+  
+  let startSize1 = 100;
+  let maxAge1 = 300;
+  let gravity1 = 0.5;
+  let friction1 = 0.1;
+  let bounciness1 = 0.8;
+  let hueVariation1 = 40;
+  let smoothness1 = 5;
+  
+  function mapValue1(a, b, t) {
+    return a + ((b - a) * t);
+  }
+  
+  function Square1(x, y) {
+    this.x = x;
+    this.y = y;
+    this.vx = randBetween(4, 8) * randSign();
+    this.vy = 0;
+    
+    this.size = startSize1;
+    this.age = 0;
+    this.hue = Math.random() * 360;
+    this.saturation = 100;
+    this.brightness = 50;
+    
+    this.dead = false;
+  }
+  Square1.prototype.update = function(dt) {
+    this.age += dt;
+    if (this.age >= maxAge1) {
+      this.dead = true;
+      return;
+    }
+    
+    this.x += this.vx * dt;
+    this.y += this.vy * dt;
+    this.vy += gravity1 * dt;
+    
+    let ageRatio = 1 - (this.age / maxAge1);
+    
+    this.hue += Math.random() * hueVariation1 * (Math.random() < 0.5 ? 1 : -1) * dt;
+    this.brightness = mapValue1(10, 60, ageRatio);
+    
+    this.size = startSize1 * ageRatio;
+    let half = this.size / 2;
+    
+    if (this.x + half > canvas1.width) { // Bounce off right
+      this.x = canvas1.width - half;
+      this.vx *= -1;
+    }
+    if (this.x - half < 0) { // Bounce off left
+      this.x = half;
+      this.vx *= -1;
+    }
+    
+    if (this.y + half > canvas1.height) { // Bounce off bottom
+      this.y = canvas1.height - half;
+      this.vy *= -bounciness1;
+      this.vx *= 1 - friction1;
+    }
+    if (this.y - half < 0) { // Bounce off top
+      this.y = half;
+      this.vy *= -bounciness1;
+      this.vx *= 1 - friction1;
+    }
+  };
+  Square1.prototype.draw = function() {
+    ctx1.fillStyle = `hsl(${this.hue}deg, ${this.saturation}%, ${this.brightness}%)`;
+    //ctx1.fillRectFromCenter(this.x, this.y, this.size, this.size);
+    ctx1.fillCircle(this.x, this.y, this.size / 2);
+  };
+  let square1Array = [];
+  
+  function reset1() {
+    ctx1.fillStyle = "black";
+    ctx1.fillRect(0, 0, canvas1.width, canvas1.height);
+    
+    square1Array = [];
+    square1Array.push(new Square1(canvas1.width / 2, canvas1.height / 2));
+    
+    if (!canvas1Running) {
+      for (let i = 0; i < 50; i++) frame1();
+    }
+  }
+  
+  let lastFrame1Time = 0;
+  let lastFps1DisplayTime = 1000;
+  function frame1() {
+    if (Date.now() - lastFps1DisplayTime >= 500) {
+      fps1Txt.innerHTML = (1000 / (Date.now() - lastFrame1Time)).toFixed(1);
+      lastFps1DisplayTime = Date.now();
+    }
+    lastFrame1Time = Date.now();
+    
+    if (Date.now() - Mouse1.lastSpawnTime >= timeBetweenSpawns1 && Mouse1.down) {
+      square1Array.push(new Square1(Mouse1.x, Mouse1.y));
+      Mouse1.lastSpawnTime = Date.now();
+    }
+    
+    for (let j = 0; j < smoothness1; j++) {
+      for (let i = 0; i < square1Array.length; i++) {
+        square1Array[i].update(1 / smoothness1);
+        square1Array[i].draw();
+        
+        if (square1Array[i].dead) {
+          square1Array.splice(i, 1);
+          i--;
+        }
+      }
+    }
+    
+    if (canvas1Running) requestAnimationFrame(frame1);
+  }
+  reset1();
+  
+  canvas1.addEventListener("mousedown", e => {
+    if (!canvas1Running) return;
+    
+    e.preventDefault();
+    
+    canvas1Rect = canvas1.getBoundingClientRect();
+    
+    Mouse1.x = (e.clientX - canvas1Rect.left) * canvas1Ratio;
+    Mouse1.y = (e.clientY - canvas1Rect.top) * canvas1Ratio;
+    Mouse1.down = true;
+  });
+  canvas1.addEventListener("mousemove", e => {
+    if (!canvas1Running || !Mouse1.down) return;
+    
+    e.preventDefault();
+    
+    canvas1Rect = canvas1.getBoundingClientRect();
+    
+    Mouse1.x = (e.clientX - canvas1Rect.left) * canvas1Ratio;
+    Mouse1.y = (e.clientY - canvas1Rect.top) * canvas1Ratio;
+  });
+  window.addEventListener("mouseup", e => {
+    Mouse1.down = false;
+  });
+  
+  function startCanvas1(caller) {
+    if (canvas1Running) {
+      canvas1Running = false;
+      caller.innerHTML = "<b><i>Paused</i></b>";
+      caller.style.color = caller.style.borderColor = "red";
+    }
+    else {
+      canvas1Running = true;
+      caller.innerHTML = "<b><i>Running</i></b>";
+      caller.style.color = caller.style.borderColor = "green";
+      frame1();
+    }
+  }
+</script>
+
+
+
+
+
+
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
