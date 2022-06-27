@@ -216,6 +216,14 @@
     <canvas id = "canvas27"></canvas>
   </div>
   <div class = "canvas-div">
+    <div class = "canvas-title">Dominions of Topology</div>
+    <div class = "date-txt">2022</div>
+    <button class = "canvas-btn" onclick = "draw28()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(28)">Export</button>
+    <br>
+    <canvas id = "canvas28"></canvas>
+  </div>
+  <div class = "canvas-div">
     <div class = "canvas-title">Banded Orbs</div>
     <div class = "date-txt">2022</div>
     <button class = "canvas-btn" onclick = "draw20()">Redraw</button>
@@ -350,11 +358,12 @@
 <script src = "scripts/main.js"></script>
 <script>
   function drawAll() {
-    for (let i = 1; i <= 27; i++) {
+    for (let i = 1; i <= 28; i++) {
       document.getElementById("canvas" + i).style.backgroundImage = `url("https://e4494s.github.io/e4494s-images/ga-gallery/art-${i}.png")`;
     }
   }
   
+  let canvas28 = document.getElementById("canvas28");
   let canvas27 = document.getElementById("canvas27");
   let canvas26 = document.getElementById("canvas26");
   let canvas25 = document.getElementById("canvas25");
@@ -382,6 +391,206 @@
   let canvas3 = document.getElementById("canvas3");
   let canvas2 = document.getElementById("canvas2");
   let canvas1 = document.getElementById("canvas1");
+  
+  // Dominions of Topology
+  
+  const ctx28 = canvas28.getContext("2d");
+  canvas28.width = canvas28.height = 1500;
+  
+  let maxCircles28 = 2000;
+  let canvas28Filled = false;
+  let minCircle28Size = 5;
+  let maxCircle28Size = 0.2//100;
+  let edgeBoundaries28 = false; // If true, the circles will touch the edge, otherwise they will grow past the canvas
+  let gridSize28 = 3; // Different regions of shapes
+  let grid28 = []; // Shape settings
+  let visualSizeRatio28 = 1.2;
+  let lineWidth28 = 3;
+  let blur28 = 0.2;
+  
+  function Circle28() {
+    let x = Math.random() * canvas28.width;
+    let y = Math.random() * canvas28.height;
+    let tries = 0;
+    while (!validatePoint28(x, y)) {
+      if (tries > 1000) {
+        canvas28Filled = true;
+        return;
+      }
+      x = Math.random() * canvas28.width;
+      y = Math.random() * canvas28.height;
+      tries++;
+    }
+    this.x = x;
+    this.y = y;
+    this.radius = 0;
+    this.grow();
+  }
+  Circle28.prototype.grow = function() {
+    // Find closest circle and grow
+    
+    let smallestDist = Infinity;
+    for (let i = 0; i < circle28Array.length; i++) {
+      if (i != circle28Array.indexOf(this)) {
+        let dx = this.x - circle28Array[i].x;
+        let dy = this.y - circle28Array[i].y;
+        let distSq = (dx * dx) + (dy * dy);
+        let dist = Math.sqrt(distSq) - circle28Array[i].radius;
+        if (dist <= smallestDist) smallestDist = dist;
+      }
+    }
+    if (edgeBoundaries28) {
+      let distToTop = this.y;
+      if (distToTop <= smallestDist) smallestDist = distToTop;
+      let distToRight = canvas28.width - this.x;
+      if (distToRight <= smallestDist) smallestDist = distToRight;
+      let distToBottom = canvas28.height - this.y;
+      if (distToBottom <= smallestDist) smallestDist = distToBottom;
+      let distToLeft = this.x;
+      if (distToLeft <= smallestDist) smallestDist = distToLeft;
+    }
+    
+    let ratioX = (this.x / canvas28.width) + ((1 / gridSize28) * 0.5 * randBetween(-blur28, blur28));
+    let ratioY = (this.y / canvas28.height) + ((1 / gridSize28) * 0.5 * randBetween(-blur28, blur28));
+    
+    let gridX = Math.floor(ratioX * gridSize28);
+    if (gridX > gridSize28 - 1) gridX = gridSize28 - 1;
+    if (gridX < 0) gridX = 0;
+    let gridY = Math.floor(ratioY * gridSize28);
+    if (gridY > gridSize28 - 1) gridY = gridSize28 - 1;
+    if (gridY < 0) gridY = 0;
+    let gridPos = (gridY * gridSize28) + gridX;
+    
+    this.radius = Math.min(smallestDist, grid28[gridPos].maxSize);
+    
+    // Draw circle
+    drawShape28(this.x, this.y, this.radius * visualSizeRatio28, grid28[gridPos]);
+  };
+  let circle28Array = [];
+  
+  function sizeScale28(sides) {
+    if (sides === 3) return 1.35;
+    if (sides === 4) return 1.15;
+    if (sides === 5) return 1.05;
+    return 1;
+  }
+  
+  function drawShape28(x, y, radius, pos) {
+    ctx28.strokeStyle = pos.outlineColor;
+    ctx28.lineWidth = Math.min(lineWidth28, radius / 5);
+    ctx28.lineCap = ctx28.lineJoin = "round";
+    ctx28.fillStyle = `hsl(${pos.hue}deg, ${randBetween(80, 100)}%, ${randBetween(30, 70) * pos.brightness}%)`;
+    
+    radius *= sizeScale28(pos.sides);
+    
+    let numPoints = pos.sides;
+    let angle = (Math.PI * 2) / numPoints;
+    let corners = [];
+    let offset = toRad(randBetween(-pos.tilt, pos.tilt));
+    
+    ctx28.beginPath();
+    for (let i = 0; i < numPoints; i++) {
+      let a = (angle * (i + (randBetween(-0.5, 0.5) * pos.skew))) + pos.alignment + offset;
+      let r = radius;
+      let iX = x + (r * Math.cos(a));
+      let iY = y + (r * Math.sin(a));
+      corners.push({x: iX, y: iY});
+      ctx28.lineTo(iX, iY);
+    }
+    ctx28.lineTo(corners[0].x, corners[0].y);
+    ctx28.lineTo(corners[1].x, corners[1].y);
+    
+    ctx28.fill();
+    ctx28.stroke();
+    
+    let midpoints = [];
+    let sumX = 0;
+    let sumY = 0;
+    
+    for (let i = 0; i < corners.length; i++) {
+      sumX += corners[i].x;
+      sumY += corners[i].y;
+      let j = (i + 1) % corners.length;
+      midpoints.push({x: (corners[i].x + corners[j].x) / 2, y: (corners[i].y + corners[j].y) / 2});
+    }
+    let middle = {x: sumX / corners.length, y: sumY / corners.length};
+    
+    if (pos.connection === 0) return;
+    if (pos.connection === 1) { // Corners to middle
+      ctx28.beginPath();
+      for (let i = 0; i < corners.length; i++) {
+        ctx28.moveTo(corners[i].x, corners[i].y);
+        ctx28.lineTo(middle.x, middle.y);
+        ctx28.stroke();
+      }
+    }
+    if (pos.connection === 2) { // Midpoints to middle
+      ctx28.beginPath();
+      for (let i = 0; i < midpoints.length; i++) {
+        ctx28.moveTo(midpoints[i].x, midpoints[i].y);
+        ctx28.lineTo(middle.x, middle.y);
+        ctx28.stroke();
+      }
+    }
+    if (pos.connection === 3) { // Midpoints to adjacent midpoints
+      ctx28.beginPath();
+      for (let i = 0; i < midpoints.length; i++) {
+        let j = (i + 1) % midpoints.length;
+        ctx28.moveTo(midpoints[i].x, midpoints[i].y);
+        ctx28.lineTo(midpoints[j].x, midpoints[j].y);
+        ctx28.stroke();
+      }
+    }
+  }
+  
+  function validatePoint28(x, y) {
+    for (let i = 0; i < circle28Array.length; i++) {
+      let dx = circle28Array[i].x - x;
+      let dy = circle28Array[i].y - y;
+      let distSq = (dx * dx) + (dy * dy);
+      let r = circle28Array[i].radius + minCircle28Size;
+      if (distSq <= r * r) return false; // Too close to a circle
+    }
+    if (edgeBoundaries28) {
+      if (x < minCircle28Size || x > canvas28.width - minCircle28Size) return false; // Too close to left/right
+      if (y < minCircle28Size || y > canvas28.height - minCircle28Size) return false; // Too close to top/bottom
+    }
+    return true;
+  }
+  
+  function draw28() {
+    ctx28.fillStyle = "black";
+    ctx28.fillRect(0, 0, canvas28.width, canvas28.height);
+    
+    canvas28Filled = false;
+    circle28Array = [];
+    
+    let tileSize = canvas28.width / gridSize28;
+    
+    minCircle28Size = 0.01 * tileSize;
+    
+    let min = Math.random() < 0.5 ? 1.05 : 0.9;
+    visualSizeRatio28 = randBetween(min, 1.2);
+    
+    grid28 = [];
+    for (let x = 0; x < gridSize28; x++) {
+      for (let y = 0; y < gridSize28; y++) {
+        grid28.push({
+          hue: Math.random() * 360,
+          sides: Math.round(randBetween(3, 6)),
+          brightness: randBetween(0.6, 1 / 0.8),
+          tilt: randBetween(0, 15),
+          skew: randBetween(0, 0.25),
+          maxSize: (maxCircle28Size * randBetween(0.3, 1.2)) * tileSize,
+          outlineColor: Math.random() < 0.8 ? "black" : "white",
+          connection: Math.round(randBetween(0, 3)),
+          alignment: Math.random() * Math.PI * 2
+        });
+      }
+    }
+    
+    while (circle28Array.length < maxCircles28 && !canvas28Filled) circle28Array.push(new Circle28());
+  }
   
   //
   // Reemergence
@@ -3238,3 +3447,11 @@
 
 </body>
 </html>
+
+
+
+
+
+
+
+
