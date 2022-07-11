@@ -14,37 +14,2469 @@
 <br><br>
 <hr><hr>
 <!--
-<canvas id = "canvas0"></canvas>
-<button onclick = "startCanvas0()">Start/Stop</button>
-<div class = "desc"></div>
+<div class = "project-num">Project #NUMB: </div>
+<canvas id = "canvasNUMB"></canvas>
+<button onclick = "startCanvasNUMB(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>[ FPS: <span id = "fpsNUMBTxt"></span> ]</b></i></div>
+<div class = "desc">
+  <b><i>(0/0/0000):</i></b>
+</div>
 <hr><hr>
 <script>
-  const ctx0 = canvas0.getContext("2d");
-  canvas0.width = canvas0.height = 300;
-  let canvas0Running = false;
+  const ctxNUMB = canvasNUMB.getContext("2d");
+  canvasNUMB.width = canvasNUMB.height = 1000;
+  let canvasNUMBRunning = false;
   
-  function frame0() {
-    ctx0.clearRect(0, 0, canvas0.width, canvas0.height);
+  let lastFrameNUMBTime = 0;
+  let lastFpsNUMBDisplayTime = 1000;
+  function frameNUMB() {
+    if (Date.now() - lastFpsNUMBDisplayTime >= 500) {
+      fpsNUMBTxt.innerHTML = (1000 / (Date.now() - lastFrameNUMBTime)).toFixed(1);
+      lastFpsNUMBDisplayTime = Date.now();
+    }
+    lastFrameNUMBTime = Date.now();
     
-    if (canvas0Running) requestAnimationFrame(frame0);
+    ctxNUMB.clearRect(0, 0, canvasNUMB.width, canvasNUMB.height);
+    
+    if (canvasNUMBRunning) requestAnimationFrame(frameNUMB);
   }
-  frame0();
+  frameNUMB();
   
-  function startCanvas0() {
-    if (canvas0Running) canvas0Running = false;
+  function startCanvasNUMB(caller) {
+    if (canvasNUMBRunning) {
+      canvasNUMBRunning = false;
+      caller.innerHTML = "<b><i>Paused</i></b>";
+      caller.style.color = caller.style.borderColor = "red";
+    }
     else {
-      canvas0Running = true;
-      frame0();
+      canvasNUMBRunning = true;
+      caller.innerHTML = "<b><i>Running</i></b>";
+      caller.style.color = caller.style.borderColor = "green";
+      frameNUMB();
     }
   }
 </script>
 -->
+<div class = "project-num">Project #9: Generative Pipes</div>
+<canvas id = "canvas9" style = "width: 400px; height: 400px"></canvas>
+<button onclick = "draw9()">Redraw</button>
+<div class = "desc">
+  <b><i>(7/9/2022):</i></b> This started out as a variation on Project #4, except without the self-avoidance. Basically, it's just a random walker that only draws a line when it isn't on a previously visited square, which will eventually fill the whole grid with one connected path. Soon after I got that working, I added lots of varying settings and designs and it now resembles abstract pipes or connectors. This was a small project initially that I didn't really care about but I really love how it looks now.
+  <br>
+  <b><i>(Later that night):</i></b> Added a simple black shadow blur to everything and it greatly improved the depth of the piece overall.
+  <br><br>
+  <b><i>(7/10/2022):</i></b> Modified the grid so that there's extra tiles off the canvas, so that the pipes connect offscreen, which brings the piece together better.
+  <br>
+  <b><i><mark>(Later that day): Actually finished!</mark> Added to <a href = "generative-art-gallery.html" target = "_blank">generative-art-gallery.html</a> as "Jumbled Pipeworks."</i></b>
+</div>
+<hr><hr>
+<script>
+  const ctx9 = canvas9.getContext("2d");
+  canvas9.width = canvas9.height = 1000;
+  
+  let gridSize9 = 15;
+  let tileSize9 = canvas9.width / (gridSize9 - 2);
+  let filledCells9 = 0;
+  let circleSize9 = 0;
+  let innerCircleSize9 = 0.45;
+  let lineWidth9 = 0.3;
+  let innerLineWidth9 = 0.45;
+  let hue9 = 0;
+  let hueVariation9 = 0.25;
+  let turnChance9 = 0.01;
+  let contrast9 = 0.5;
+  let saturation9 = 0.5;
+  let density = 1;
+  let brightnessMult9 = 1;
+  let shadowSize9 = 0.15;
+  
+  let Walker9 = {};
+  Walker9.reset = function() {
+    this.x = Math.floor(Math.random() * gridSize9);
+    this.y = Math.floor(Math.random() * gridSize9);
+    this.direction = Math.floor(Math.random() * 4);
+    
+    while (filledCells9 < gridSize9 * gridSize9 * density) this.walk();
+  };
+  Walker9.isOnGrid = function(direction) {
+    let x = this.x;
+    let y = this.y;
+    if (direction === 0) y--; // Up
+    if (direction === 1) x++; // Right
+    if (direction === 2) y++; // Down
+    if (direction === 3) x--; // Left
+    
+    return x >= 0 && x < gridSize9 && y >= 0 && y < gridSize9;
+  };
+  Walker9.drawLine = function(a, b) {
+    let lineWidth = Math.round((tileSize9 * lineWidth9) / 2) * 2;
+    let h = hue9 + (Math.random() * hueVariation9 * randSign() * 180);
+    let s = randBetween(saturation9, saturation9 * 2) * 100;
+    let l = (50 + (Math.random() * contrast9 * 50 * randSign())) * brightnessMult9;
+    let color = `hsl(${h}deg, ${s}%, ${l}%)`;
+    
+    ctx9.shadowColor = "black";
+    ctx9.shadowBlur = shadowSize9 * tileSize9;
+    
+    ctx9.lineCap = ctx9.lineJoin = "round";
+    
+    ctx9.beginPath();
+    ctx9.moveTo(a.x, a.y);
+    ctx9.lineTo(b.x, b.y);
+    
+    ctx9.lineWidth = lineWidth;
+    ctx9.strokeStyle = color;
+    ctx9.stroke();
+    ctx9.strokeStyle = "black";
+    ctx9.lineWidth = lineWidth * innerLineWidth9;
+    if (innerLineWidth9 !== 0) ctx9.stroke();
+    
+    ctx9.fillStyle = color;
+    ctx9.fillCircle(a.x, a.y, tileSize9 * 0.5 * circleSize9);
+    ctx9.fillCircle(b.x, b.y, tileSize9 * 0.5 * circleSize9);
+    
+    ctx9.shadowBlur = 0;
+    
+    let size = tileSize9 * 0.5 * circleSize9 * innerCircleSize9;
+    if (size <= 0) return;
+    
+    ctx9.fillStyle = "black";
+    ctx9.fillCircle(a.x, a.y, size);
+    ctx9.fillCircle(b.x, b.y, size);
+  };
+  Walker9.walk = function() {
+    if (filledCells9 >= gridSize9 * gridSize9 * density) { // Don't walk if canvas is already filled
+      return;
+    }
+    
+    let lastX = this.x;
+    let lastY = this.y;
+    
+    let directions = [];
+    for (let i = 0; i < 4; i++) {
+      if (this.isOnGrid(i)) directions.push(i); // Find all directions that don't move off the grid
+    }
+    
+    let turning = false;
+    if (Math.random() < turnChance9 || !directions.includes(this.direction)) { // If chance is met, turn randomly (or if current direction is invalid)
+      this.direction = directions[Math.floor(Math.random() * directions.length)];
+      turning = true;
+    }
+    
+    // Randomize settings
+    innerLineWidth9 = Math.round(Math.random() * 8) / 10;
+    circleSize9 = Math.random() < 0.25 ? 0 : Math.round(randBetween(2, 8)) / 10; // 25% chance to have no circle
+    innerCircleSize9 = Math.random() < 0.25 ? -1 : Math.round(randBetween(4, 9)) / 10; // 25% chance to have no inner circle
+    
+    let chosen = this.direction;
+    
+    if (chosen === 0) this.y--; // Up
+    if (chosen === 1) this.x++; // Right
+    if (chosen === 2) this.y++; // Down
+    if (chosen === 3) this.x--; // Left
+    
+    if (!grid9[this.x][this.y]) { // If current cell is not previously filled:
+      grid9[this.x][this.y] = true;
+      filledCells9++;
+      
+      this.drawLine(
+        {
+          x: (lastX - 0.5) * tileSize9,
+          y: (lastY - 0.5) * tileSize9
+        },
+        {
+          x: (this.x - 0.5) * tileSize9,
+          y: (this.y - 0.5) * tileSize9
+        }
+      );
+    }
+  };
+  let grid9 = [];
+  
+  function draw9() {
+    ctx9.fillStyle = "black";
+    ctx9.fillRect(0, 0, canvas9.width, canvas9.height);
+    
+    // Randomize settings
+    hue9 = Math.random() * 360;
+    hueVariation9 = Math.random() * Math.random();
+    gridSize9 = Math.round(randBetween(5, 10)) + 2;
+    lineWidth9 = randBetween(0.2, 0.5);
+    contrast9 = randBetween(0.1, 0.9);
+    saturation9 = randBetween(0.15, 1);
+    turnChance9 = Math.random() < 0.5 ? 1 : 0.01;
+    brightnessMult9 = randBetween(0.4, 1.35);
+    
+    tileSize9 = canvas9.width / (gridSize9 - 2);
+    
+    filledCells9 = 0;
+    
+    grid9 = [];
+    for (let x = 0; x < gridSize9; x++) {
+      let line = [];
+      for (let y = 0; y < gridSize9; y++) {
+        line.push(false); // Filled: true, empty: false
+      }
+      grid9.push(line);
+    }
+    
+    Walker9.reset();
+  }
+  draw9();
+</script>
+<div class = "project-num">Project #8: Camera-Following Random Walker</div>
+<canvas id = "canvas8"></canvas>
+<button onclick = "startCanvas8(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>[ FPS: <span id = "fps8Txt"></span> ]</b></i></div>
+<div class = "desc">
+  <b><i>(7/4/2022, slightly past midnight):</i></b> A random walker that moves with Brownian motion and traces out a path behind it, except a "camera" always centers on it as it moves around, so the walker is always in the middle of the canvas. I like how this looks but I want to find some way to make a smoother random walker, so the camera doesn't shake around so much every frame.
+  <br>
+  <b><i>(Later that day):</i></b> I improved the smoothness by only taking 1 step per frame, instead of 5, and just turning up the velocity, and fiddling with some other settings. I also gave it a cool visual change which reminds me of maybe a firefly or a spark, with a glowing yellow trail that gets smaller and dimmer towards the end of the tail.
+  <br>
+  <b><i>(Even later that day):</i></b> Added a glowing Spark object that spawns around the walker's trail as it moves.
+  <br>
+  <b><i>(Later that night):</i></b> Modified the Sparks and made them spawn randomly on the canvas, and made the walker's hue gradually change.
+  <br><br>
+  <b><i>(7/9/2022)</i></b> Made the walker always draw above Sparks, which looks better when it moves over one.
+</div>
+<hr><hr>
+<script>
+  const ctx8 = canvas8.getContext("2d");
+  canvas8.width = canvas8.height = 1000;
+  let canvas8Running = false;
+  
+  let tailLength8 = 200;
+  let speed8 = 60;
+  let lineWidth8 = 25;
+  let stepsPerFrame8 = 1;
+  let acceleration8 = 0.05;
+  let friction8 = 0.03;
+  let hue8 = 60;
+  let sparkAge8 = 75;
+  let sparkSize8 = 35;
+  let sparkChance8 = 1;
+  let hueStep8 = 0.5;
+  let shadowSize8 = 15;
+  
+  let Camera8 = {x: canvas8.width / 2, y: canvas8.height / 2};
+  
+  function Spark8(x, y, sizeRatio) {
+    this.x = x;
+    this.y = y;
+    this.age = 0;
+    this.maxAge = Math.round(sparkAge8 * randBetween(0.5, 1));
+    this.size = sparkSize8 * sizeRatio * randBetween(0.5, 1);
+    
+    this.dead = false;
+  }
+  Spark8.prototype.render = function() {
+    if (this.age >= this.maxAge) {
+      this.dead = true;
+      return;
+    }
+    
+    let ratio = 1 - (this.age / this.maxAge);
+    ctx8.fillStyle = `hsla(${hue8}deg, 100%, ${ratio * ratio * 150}%, ${ratio})`;
+    ctx8.shadowColor = `hsl(${hue8}deg, 100%, ${ratio * ratio * 150}%)`;
+    ctx8.shadowBlur = 5;
+    
+    ctx8.globalAlpha = ratio;
+    ctx8.fillCircle(this.x - Walker8.x + Camera8.x, this.y - Walker8.y + Camera8.y, this.size * (1 - ratio));
+    ctx8.globalAlpha = 1;
+    
+    this.age++;
+    ctx8.shadowBlur = 0;
+  };
+  let spark8Array = [];
+  
+  let Walker8 = {};
+  Walker8.reset = function() {
+    this.x = 0;
+    this.y = 0;
+    this.vx = 0;
+    this.vy = 0;
+    
+    this.tail = [];
+  };
+  Walker8.reset();
+  Walker8.walk = function() {
+    let a = Math.random() * Math.PI * 2;
+    let v = Math.random() * acceleration8;
+    
+    this.vx += v * Math.cos(a);
+    this.vy += v * Math.sin(a);
+    
+    this.vx *= 1 - friction8;
+    this.vy *= 1 - friction8;
+    
+    this.x += this.vx * speed8;
+    this.y += this.vy * speed8;
+    
+    this.tail.push({x: this.x, y: this.y});
+    
+    while (this.tail.length > tailLength8) {
+      this.tail.splice(0, 1);
+    }
+  };
+  Walker8.draw = function() {
+    ctx8.lineCap = ctx8.lineJoin = "round";
+    
+    //let sparkIndex = Math.random() < sparkChance8 ? Math.floor(Math.random() * this.tail.length) : -1;
+    
+    for (let i = 0; i < this.tail.length; i++) {
+      let ratio = (i + (tailLength8 - this.tail.length) + 1) / (tailLength8 - 1);
+      
+      let tailI = this.tail[i];
+      let tailJ = i === this.tail.length - 1 ? {x: this.x, y: this.y} : this.tail[i + 1];
+      
+      ctx8.shadowBlur = shadowSize8;
+      ctx8.strokeStyle = ctx8.shadowColor = `hsl(${hue8}deg, 100%, ${ratio * ratio * 100}%)`;
+      ctx8.lineWidth = lineWidth8 * ratio;
+      
+      ctx8.beginPath();
+      ctx8.moveTo(tailI.x - this.x + Camera8.x, tailI.y - this.y + Camera8.y);
+      ctx8.lineTo(tailJ.x - this.x + Camera8.x, tailJ.y - this.y + Camera8.y);
+      ctx8.stroke();
+      
+      /*if (sparkIndex === i) {
+        let dx = tailI.x - tailJ.x;
+        let dy = tailI.y - tailJ.y;
+        let a = Math.random() * Math.PI * 2;//Math.atan2(dy, dx) + toRad(randBetween(-15, 15));
+        let d = lineWidth8 * randBetween(3, 6);
+        spark8Array.push(new Spark8(tailI.x + (d * Math.cos(a)), tailI.y + (d * Math.sin(a)), ratio));
+      }*/
+    }
+    
+    ctx8.shadowBlur = 0;
+  };
+  
+  let lastFrame8Time = 0;
+  let lastFps8DisplayTime = 1000;
+  function frame8() {
+    if (Date.now() - lastFps8DisplayTime >= 500) {
+      fps8Txt.innerHTML = (1000 / (Date.now() - lastFrame8Time)).toFixed(1);
+      lastFps8DisplayTime = Date.now();
+    }
+    lastFrame8Time = Date.now();
+    
+    ctx8.fillStyle = "black";
+    ctx8.fillRect(0, 0, canvas8.width, canvas8.height);
+    
+    hue8 += Math.random() * hueStep8;
+    
+    for (let i = 0; i < stepsPerFrame8; i++) Walker8.walk();
+    
+    if (Math.random() < sparkChance8) spark8Array.push(new Spark8(Walker8.x + (randBetween(-0.75, 0.75) * canvas8.width), Walker8.y + (randBetween(-0.75, 0.75) * canvas8.height), randBetween(0.5, 1)));
+    
+    for (let i = 0; i < spark8Array.length; i++) {
+      spark8Array[i].render();
+      
+      if (spark8Array[i].dead) {
+        spark8Array.splice(i, 1);
+        i--;
+      }
+    }
+    
+    Walker8.draw();
+    
+    if (canvas8Running) requestAnimationFrame(frame8);
+  }
+  for (let i = 0; i < 50; i++) frame8();
+  
+  function startCanvas8(caller) {
+    if (canvas8Running) {
+      canvas8Running = false;
+      caller.innerHTML = "<b><i>Paused</i></b>";
+      caller.style.color = caller.style.borderColor = "red";
+    }
+    else {
+      canvas8Running = true;
+      caller.innerHTML = "<b><i>Running</i></b>";
+      caller.style.color = caller.style.borderColor = "green";
+      frame8();
+    }
+  }
+</script>
+<div class = "project-num">Project #7: Generative Caves With Marching Squares</div>
+<canvas id = "canvas7" style = "width: 600px; height: 300px"></canvas>
+<button onclick = "reset7()">Redraw</button>
+<div class = "desc">
+  <b><i>(7/2/2022):</i></b> Procedural cave generator using cellular automata. I used the same idea as <a href = "https://www.youtube.com/watch?v=v7yyZZjF1z4" target = "_blank">this</a> tutorial from Sebastian Lague but with my own code.
+  <br>
+  <b><i>(Later that night):</i></b> I implemented the marching squares algorithm onto the cave generator so it creates smoother and more natural looking formations, and added colors.
+  <br>
+  <b><i>(Even later that night):</i></b> Still following the videos, I added polishing the cave to remove tiny sections of walls and tiny pockets of air.
+  <br><br>
+  <b><i>(7/3/2022, continuing past midnight):</i></b> Added the beginning of making passageways between isolated rooms so that they're all connected. It doesn't work yet but the groundwork for the code is there and functional.
+  <br>
+  <b><i>(Later that day):</i></b> Got the passageway algorithm working properly, though they still don't actually draw yet.
+  <br><br>
+  <b><i>(7/9/2022):</i></b> Finally finished the tutorial and got the passageways working!
+</div>
+<hr><hr>
+<script>
+  const ctx7 = canvas7.getContext("2d");
+  let canvasWidth7 = 1000;
+  let canvasHeight7 = 500;
+  canvas7.width = canvasWidth7;
+  canvas7.height = canvasHeight7;
+  
+  let debug7 = false;
+  
+  let minWallSize7 = 50; // Wall regions below this size become air
+  let minAirSize7 = 50; // Air pockets below this size turn into wall
+  
+  let passageSize7 = 2; // How wide passages are
+  
+  let gridWidth7 = 100;
+  let gridHeight7 = 50;
+  
+  let tileWidth7 = 0;
+  let tileHeight7 = 0;
+  
+  let backgroundColor7 = "hsl(0deg, 0%, 30%)";
+  let wallColor7 = "hsl(0deg, 0%, 5%)";
+  let fillChance7 = 0.45;
+  let smoothness7 = 15;
+  let searchPadding7 = 1; // When searching for neighbors, how far off to each side do you search? (1 means a 3x3 grid, 2 means 5x5, etc)
+  /*
+  Question marks indicate which squares are searched for some square "X"
+  
+  Search Padding = 1:
+      ? ? ?
+      ? X ?
+      ? ? ?
+  
+  Search Padding = 2:
+      ? ? ? ? ?
+      ? ? ? ? ?
+      ? ? X ? ?
+      ? ? ? ? ?
+      ? ? ? ? ?
+  
+  This setting is really only useful at higher grid sizes, otherwise just keep it at 1
+  */
+  
+  let grid7 = [];
+  
+  function drawGrid7() {
+    // Remove moire patterns by making canvas size a multiple of grid size
+    canvas7.width = Math.round(canvasWidth7 / gridWidth7) * gridWidth7;
+    canvas7.height = Math.round(canvasHeight7 / gridHeight7) * gridHeight7;
+    
+    ctx7.fillStyle = backgroundColor7;
+    ctx7.fillRect(0, 0, canvas7.width, canvas7.height);
+    ctx7.fillStyle = wallColor7;
+    
+    tileWidth7 = canvas7.width / gridWidth7;
+    tileHeight7 = canvas7.height / gridHeight7;
+    
+    for (let x = 0; x < gridWidth7; x++) {
+      for (let y = 0; y < gridHeight7; y++) {
+        if (grid7[x][y] === 1) ctx7.fillRect(x * tileWidth7, y * tileHeight7, tileWidth7, tileHeight7);
+      }
+    }
+  }
+  
+  function fillPoints7(points) {
+    ctx7.beginPath();
+    ctx7.moveTo(points[0].x, points[0].y);
+    for (let i = 0; i < points.length; i++) {
+      let j = i// % points.length;
+      ctx7.lineTo(points[j].x, points[j].y);
+    }
+    ctx7.fill();
+  }
+  
+  function drawMarchingSquares7() {
+    // Remove moire patterns by making canvas size a multiple of grid size (minus 1 since marching squares use a 2x2 neighborhood each)
+    canvas7.width = Math.round(canvasWidth7 / (gridWidth7 - 1)) * (gridWidth7 - 1);
+    canvas7.height = Math.round(canvasHeight7 / (gridHeight7 - 1)) * (gridHeight7 - 1);
+    
+    tileWidth7 = canvas7.width / (gridWidth7 - 1);
+    tileHeight7 = canvas7.height / (gridHeight7 - 1);
+    
+    ctx7.fillStyle = backgroundColor7;
+    ctx7.fillRect(0, 0, canvas7.width, canvas7.height);
+    ctx7.fillStyle = wallColor7;
+    
+    for (let x = 0; x < gridWidth7 - 1; x++) {
+      for (let y = 0; y < gridHeight7 - 1; y++) {
+        let nodes = [
+          grid7[x][y],
+          grid7[x + 1][y],
+          grid7[x + 1][y + 1],
+          grid7[x][y + 1]
+        ];
+        
+        let corners = [];
+        corners.push({x: x * tileWidth7, y: y * tileHeight7});
+        corners.push({x: (x + 1) * tileWidth7, y: y * tileHeight7});
+        corners.push({x: (x + 1) * tileWidth7, y: (y + 1) * tileHeight7});
+        corners.push({x: x * tileWidth7, y: (y + 1) * tileHeight7});
+        
+        let midpoints = [];
+        midpoints.push({x: (x + 0.5) * tileWidth7, y: y * tileHeight7});
+        midpoints.push({x: (x + 1) * tileWidth7, y: (y + 0.5) * tileHeight7});
+        midpoints.push({x: (x + 0.5) * tileWidth7, y: (y + 1) * tileHeight7});
+        midpoints.push({x: x * tileWidth7, y: (y + 0.5) * tileHeight7});
+        
+        let configuration = 0;
+        
+        if (nodes[0] === 1) configuration += 1;
+        if (nodes[1] === 1) configuration += 2;
+        if (nodes[2] === 1) configuration += 4;
+        if (nodes[3] === 1) configuration += 8;
+        
+        switch (configuration) {
+          // 0 points
+          case 0:
+            break;
+          
+          
+          // 1 point
+          case 1:
+            fillPoints7([midpoints[3], corners[0], midpoints[0]]);
+            break;
+          
+          case 2:
+            fillPoints7([midpoints[0], corners[1], midpoints[1]]);
+            break;
+          
+          case 4:
+            fillPoints7([midpoints[1], corners[2], midpoints[2]]);
+            break;
+          
+          case 8:
+            fillPoints7([midpoints[2], corners[3], midpoints[3]]);
+            break;
+          
+          
+          // 2 points
+          case 3:
+            fillPoints7([corners[0], corners[1], midpoints[1], midpoints[3]]);
+            break;
+          
+          case 5:
+            fillPoints7([midpoints[3], corners[0], midpoints[0], midpoints[1], corners[2], midpoints[2]]);
+            break;
+          
+          case 6:
+            fillPoints7([midpoints[0], corners[1], corners[2], midpoints[2]]);
+            break;
+          
+          case 9:
+            fillPoints7([corners[0], midpoints[0], midpoints[2], corners[3]]);
+            break;
+          
+          case 10:
+            fillPoints7([midpoints[0], corners[1], midpoints[1], midpoints[2], corners[3], midpoints[3]]);
+            break;
+          
+          case 12:
+            fillPoints7([midpoints[1], corners[2], corners[3], midpoints[3]]);
+            break;
+          
+          
+          // 3 points
+          case 7:
+            fillPoints7([midpoints[3], corners[0], corners[1], corners[2], midpoints[2]]);
+            break;
+          
+          case 11:
+            fillPoints7([corners[0], corners[1], midpoints[1], midpoints[2], corners[3]]);
+            break;
+          
+          case 13:
+            fillPoints7([corners[0], midpoints[0], midpoints[1], corners[2], corners[3]]);
+            break;
+          
+          case 14:
+            fillPoints7([midpoints[0], corners[1], corners[2], corners[3], midpoints[3]]);
+            break;
+          
+          
+          // 4 points
+          case 15:
+            fillPoints7([corners[0], corners[1], corners[2], corners[3]]);
+            break;
+        }
+        
+        /*
+        0 0 1
+        3   1
+        3 2 2
+        */
+      }
+    }
+  }
+  
+  function isOnGrid7(x, y) {
+    return x >= 0 && x < gridWidth7 && y >= 0 && y < gridHeight7;
+  }
+  
+  function countNeighbors7(x, y) {
+    let total = 0;
+    for (let _x = x - searchPadding7; _x <= x + searchPadding7; _x++) {
+      for (let _y = y - searchPadding7; _y <= y + searchPadding7; _y++) {
+        if (isOnGrid7(_x, _y)) {
+          if (_x !== x || _y !== y) total += grid7[_x][_y];
+        }
+        else total++;
+      }
+    }
+    
+    return total;
+  }
+  
+  function smoothGrid7() {
+    // Clone grid
+    let nextGrid = [];
+    for (let x = 0; x < gridWidth7; x++) {
+      let line = [];
+      for (let y = 0; y < gridHeight7; y++) {
+        line.push(grid7[x][y]);
+      }
+      nextGrid.push(line);
+    }
+    
+    // Find how many neighbors is half of the total neighborhood
+    let half = ((searchPadding7 + searchPadding7 + 1) * (searchPadding7 + searchPadding7 + 1) - 1) * 0.5;
+    
+    // For each cell, if it has less than half its neighbors black, it becomes white, and black for more than half
+    for (let x = 0; x < gridWidth7; x++) {
+      for (let y = 0; y < gridHeight7; y++) {
+        let neighbors = countNeighbors7(x, y);
+        if (neighbors > half) nextGrid[x][y] = 1;
+        else if (neighbors < half) nextGrid[x][y] = 0;
+      }
+    }
+    
+    // Transfer cloned grid
+    for (let x = 0; x < gridWidth7; x++) {
+      for (let y = 0; y < gridHeight7; y++) {
+        grid7[x][y] = nextGrid[x][y];
+      }
+    }
+  }
+  
+  function tilesInRegion7(startX, startY) { // Flood-fill algorithm (returns an array of points)
+    let totalTiles = []; // Array of tiles in current region
+    
+    let tileType = grid7[startX][startY]; // What type is the current tile (and therefore which we'll be counting)
+    
+    let lookedAt = []; // Which tiles have already been searched
+    for (let x = 0; x < gridWidth7; x++) {
+      let line = [];
+      for (let y = 0; y < gridHeight7; y++) {
+        line.push(false);
+      }
+      lookedAt.push(line);
+    }
+    
+    let queue = []; // Next tiles to be searched and counted and continue the flood filling
+    queue.push({x: startX, y: startY});
+    lookedAt[startX][startY] = true;
+    
+    while (queue.length > 0) {
+      let tile = queue.splice(0, 1)[0]; // Dequeue first item in queue
+      totalTiles.push(tile);
+      
+      for (let x = tile.x - 1; x <= tile.x + 1; x++) {
+        for (let y = tile.y - 1; y <= tile.y + 1; y++) {
+          if (isOnGrid7(x, y) && (x === tile.x || y === tile.y)) { // Only continue if current pos is on the grid and not a diagonal neighbor
+            if (!lookedAt[x][y] && grid7[x][y] === tileType) { // Only continue if current pos hasn't been searched, and is of the same type as tileType
+              lookedAt[x][y] = true;
+              queue.push({x: x, y: y});
+            }
+          }
+        }
+      }
+    }
+    
+    return totalTiles;
+  }
+  
+  function findAllRegions7(tileType) { // Find all regions that have a specified type (returns one array filled with multiple arrays of points)
+    let totalRegions = [];
+    
+    let lookedAt = []; // Which tiles have already been searched
+    for (let x = 0; x < gridWidth7; x++) {
+      let line = [];
+      for (let y = 0; y < gridHeight7; y++) {
+        line.push(false);
+      }
+      lookedAt.push(line);
+    }
+    
+    for (let x = 0; x < gridWidth7; x++) {
+      for (let y = 0; y < gridHeight7; y++) {
+        if (!lookedAt[x][y] && grid7[x][y] === tileType) { // Only continue if current pos hasn't been searched, and is of the same type as tileType
+          let region = tilesInRegion7(x, y); // Find region of current position
+          
+          totalRegions.push(region);
+          
+          for (let i = 0; i < region.length; i++) lookedAt[region[i].x][region[i].y] = true;
+        }
+      }
+    }
+    
+    return totalRegions;
+  }
+  
+  function cleanGrid7() {
+    // Remove tiny sections of wall
+    let wallRegions = findAllRegions7(1);
+    
+    for (let i = 0; i < wallRegions.length; i++) { // Loop through all wall regions
+      if (wallRegions[i].length < minWallSize7) { // Find regions that are too small
+        for (let j = 0; j < wallRegions[i].length; j++) { // Loop through all points in that region and turn them into air instead of wall
+          grid7[wallRegions[i][j].x][wallRegions[i][j].y] = 0;
+        }
+      }
+    }
+    
+    // Remove tiny pockets of air
+    let airRegions = findAllRegions7(0);
+    let validRooms = []; // Rooms that aren't too small
+    
+    for (let i = 0; i < airRegions.length; i++) { // Loop through all air regions
+      if (airRegions[i].length < minAirSize7) { // Find regions that are too small
+        for (let j = 0; j < airRegions[i].length; j++) { // Loop through all points in that region and turn them into wall instead of air
+          grid7[airRegions[i][j].x][airRegions[i][j].y] = 1;
+        }
+      }
+      else validRooms.push(new Room7(airRegions[i])); // If not too small, add to valid rooms
+    }
+    
+    if (validRooms.length === 0) return;
+    
+    let biggestRoom = validRooms[0];
+    let highestSize = 0;
+    for (let i = 0; i < validRooms.length; i++) {
+      if (validRooms[i].tiles.length > highestSize) {
+        highestSize = validRooms[i].tiles.length;
+        biggestRoom = validRooms[i];
+      }
+    }
+    biggestRoom.isMainRoom = true;
+    biggestRoom.isAccessibleFromMainRoom = true;
+    
+    connectClosestRooms7(validRooms, false);
+  }
+  
+  function connectClosestRooms7(allRooms, forceAccessibilityFromMainRoom) {
+    let roomListA = [];
+    let roomListB = [];
+    
+    if (forceAccessibilityFromMainRoom) {
+      for (let i = 0; i < allRooms.length; i++) {
+        let room = allRooms[i];
+        if (room.isAccessibleFromMainRoom) roomListB.push(room);
+        else roomListA.push(room);
+      }
+    }
+    else {
+      roomListA = allRooms;
+      roomListB = allRooms;
+    }
+    
+    let bestDistance = 0;
+    let bestTileI, bestTileJ;
+    let bestRoomI, bestRoomJ;
+    let connectionFound = false;
+    
+    for (let i = 0; i < roomListA.length; i++) {
+      let roomI = roomListA[i];
+      
+      if (!forceAccessibilityFromMainRoom) {
+        connectionFound = false;
+        if (roomI.connectedRooms.length > 0) {
+          continue;
+        }
+      }
+      
+      for (let j = 0; j < roomListB.length; j++) {
+        let roomJ = roomListB[j];
+        
+        if (i === j || roomI.connectedRooms.includes(roomJ) || roomJ.connectedRooms.includes(roomI)) {
+          continue;
+        }
+        
+        // Compare distances between all edge tiles in Room I and Room J
+        for (let ii = 0; ii < roomI.edgeTiles.length; ii++) {
+          for (let jj = 0; jj < roomJ.edgeTiles.length; jj++) {
+            let tileI = roomI.edgeTiles[ii];
+            let tileJ = roomJ.edgeTiles[jj];
+            let dx = tileI.x - tileJ.x;
+            let dy = tileI.y - tileJ.y;
+            let distSq = (dx * dx) + (dy * dy);
+            
+            if (distSq < bestDistance || !connectionFound) {
+              bestDistance = distSq;
+              connectionFound = true;
+              bestTileI = tileI;
+              bestTileJ = tileJ;
+              bestRoomI = roomI;
+              bestRoomJ = roomJ;
+            }
+          }
+        }
+      }
+      if (connectionFound && !forceAccessibilityFromMainRoom) createPassage7(bestRoomI, bestRoomJ, bestTileI, bestTileJ);
+    }
+    
+    if (connectionFound && forceAccessibilityFromMainRoom) {
+      createPassage7(bestRoomI, bestRoomJ, bestTileI, bestTileJ);
+      connectClosestRooms7(allRooms, true);
+    }
+    
+    if (!forceAccessibilityFromMainRoom) {
+      connectClosestRooms7(allRooms, true);
+    }
+  }
+  
+  function createPassage7(roomA, roomB, tileA, tileB) { // Create an air passage connecting two rooms
+    connectTwoRooms7(roomA, roomB);
+    
+    /*if (!debug7) return;
+    
+    setTimeout(() => {
+      ctx7.lineWidth = 3;
+      ctx7.strokeStyle = "yellow";
+      ctx7.beginPath();
+      ctx7.moveTo((tileA.x) * tileWidth7, (tileA.y) * tileHeight7);
+      ctx7.lineTo((tileB.x) * tileWidth7, (tileB.y) * tileHeight7);
+      ctx7.stroke();
+    }, 500);*/
+    
+    let line = getLine7(tileA, tileB);
+    for (let i = 0; i < line.length; i++) {
+      createCircle7(line[i], passageSize7, 0);
+    }
+  }
+  
+  function createCircle7(pos, radius, fillType) { // Fill a circle with a set radius and a set tile type
+    for (let x = -radius; x <= radius; x++) {
+      for (let y = -radius; y <= radius; y++) {
+        if ((x * x) + (y * y) <= radius * radius) { // If point is inside or on circle
+          let _x = x + pos.x;
+          let _y = y + pos.y;
+          if (isOnGrid7(_x, _y)) grid7[_x][_y] = fillType; // If on grid, set it to tile type
+        }
+      }
+    }
+  }
+  
+  function getLine7(from, to) { // Takes two points, returns an array of points that connects them in a line
+    let line = [];
+    
+    let x = from.x;
+    let y = from.y;
+    
+    let dx = to.x - from.x;
+    let dy = to.y - from.y;
+    
+    let inverted = false;
+    let step = dx < 0 ? -1 : 1;
+    let gradientStep = dy < 0 ? -1 : 1;
+    
+    let longest = Math.abs(dx);
+    let shortest = Math.abs(dy);
+    
+    if (longest < shortest) {
+      inverted = true;
+      longest = Math.abs(dy);
+      shortest = Math.abs(dx);
+      
+      step = dy < 0 ? -1 : 1;
+      gradientStep = dx < 0 ? -1 : 1;
+    }
+    
+    let gradientAccumulation = longest / 2;
+    
+    for (let i = 0; i < longest; i++) {
+      line.push({x: x, y: y});
+      
+      if (inverted) y += step;
+      else x += step;
+      
+      gradientAccumulation += shortest;
+      
+      if (gradientAccumulation >= longest) {
+        if (inverted) x += gradientStep;
+        else y += gradientStep;
+        
+        gradientAccumulation -= longest;
+      }
+    }
+    
+    return line;
+  }
+  
+  function Room7(tiles) {
+    this.tiles = tiles;
+    this.isMainRoom = false;
+    this.isAccessibleFromMainRoom = false;
+    
+    // Find edge tiles:
+    let lookedAt = []; // Which tiles have already been searched for being edge tiles or not
+    for (let x = 0; x < gridWidth7; x++) {
+      let line = [];
+      for (let y = 0; y < gridHeight7; y++) {
+        line.push(false);
+      }
+      lookedAt.push(line);
+    }
+    
+    this.edgeTiles = [];
+    for (let i = 0; i < this.tiles.length; i++) {
+      let iTile = this.tiles[i];
+      for (let x = iTile.x - 1; x <= iTile.x + 1; x++) {
+        for (let y = iTile.y - 1; y <= iTile.y + 1; y++) {
+          if (isOnGrid7(x, y) && (x === iTile.x || y === iTile.y)) { // Only continue if current pos is on the grid and not a diagonal neighbor
+            if (!lookedAt[x][y] && grid7[x][y] === 1) { // Only continue if current pos hasn't been checked, then see if current neighbor is a wall
+              this.edgeTiles.push({x: x, y: y});
+              lookedAt[x][y] = true;
+            }
+          }
+        }
+      }
+    }
+    
+    this.connectedRooms = [];
+  }
+  Room7.prototype.setAccessibleFromMainRoom = function() {
+    if (!this.isAccessibleFromMainRoom) {
+      this.isAccessibleFromMainRoom = true;
+      for (let i = 0; i < this.connectedRooms.length; i++) {
+        this.connectedRooms[i].setAccessibleFromMainRoom();
+      }
+    }
+  };
+  
+  function connectTwoRooms7(roomA, roomB) { // Connect two Room7 objects
+    if (roomA.isAccessibleFromMainRoom) roomB.setAccessibleFromMainRoom();
+    else if (roomB.isAccessibleFromMainRoom) roomA.setAccessibleFromMainRoom();
+    
+    if (!roomA.connectedRooms.includes(roomB)) roomA.connectedRooms.push(roomB);
+    if (!roomB.connectedRooms.includes(roomA)) roomB.connectedRooms.push(roomA);
+  }
+  
+  function reset7() {
+    fillChance7 = randBetween(0.5, 0.55);
+    
+    // Initialize grid
+    grid7 = [];
+    for (let x = 0; x < gridWidth7; x++) {
+      let line = [];
+      for (let y = 0; y < gridHeight7; y++) {
+        line.push(Math.random() < fillChance7 ? 1 : 0);
+      }
+      grid7.push(line);
+    }
+    
+    for (let i = 0; i < smoothness7; i++) smoothGrid7();
+    
+    cleanGrid7();
+    
+    drawMarchingSquares7();
+  }
+  reset7();
+</script>
+<div class = "project-num">Project #6: 1D Circle Packing</div>
+<canvas id = "canvas6"></canvas>
+<button onclick = "draw6()">Redraw</button>
+<div class = "desc">
+  <b><i>(7/2/2022):</i></b> Circle packing in one dimension, but repeated several times at different heights. I like the structure that the output has, but even after fiddling with the visual style a lot I can't get it to look quite how I want it to.
+  <br>
+  <b><i>(Later that day):</i></b> I changed up the code a lot for how it draws. Now there's between 20 and 30 rows (so they smush together), and lots of settings are randomized every generation. The ends also vary in length and together, and there's a shadow blur. I'm actually really pleased with how it turned out now.
+  <br><br>
+  <b><i><mark>(7/9/2022): Actually finished!</mark> Added to <a href = "generative-art-gallery.html" target = "_blank">generative-art-gallery.html</a> as "Harmonic Precision."</i></b>
+</div>
+<hr><hr>
+<script>
+  const ctx6 = canvas6.getContext("2d");
+  canvas6.width = canvas6.height = 1000;
+  
+  let numRows6 = 25;
+  let paddingX6 = 0.3;
+  let paddingY6 = 0.3;
+  let lineColor6 = "white";
+  let backgroundColor6 = "black";
+  let endCircleRadius6 = 8;
+  let endPadding6 = 30;
+  let lineWidth6 = 3;
+  let minSize6 = 0.007;
+  let maxSize6 = 0.06;
+  let currFilled6 = false;
+  let sizeRatio6 = 0.8;
+  let maxTries6 = 1000;
+  let shadowSize6 = 10;
+  let shadowIterations6 = 3;
+  
+  function mapValue6(min, max, value, newMin, newMax) {
+    let ratio = (value - min) / (max - min);
+    return (ratio * (newMax - newMin)) + newMin;
+  }
+  
+  function Circle6(boundX, boundY, boundSize, arr, minSize, maxSize, hueOffset) {
+    this.boundX = boundX;
+    this.boundY = boundY;
+    this.boundSize = boundSize;
+    this.arr = arr;
+    this.minSize = minSize;
+    this.maxSize = maxSize;
+    this.hueOffset = hueOffset;
+    
+    this.radius = 0;
+    
+    let tries = 0;
+    this.x = randBetween(this.boundX, this.boundX + this.boundSize);
+    while (!this.isValid()) {
+      this.x = randBetween(this.boundX, this.boundX + this.boundSize);
+      
+      tries++;
+      if (tries > maxTries6) {
+        currFilled6 = true;
+        return;
+      }
+    }
+    
+    this.grow();
+  }
+  Circle6.prototype.isValid = function() {
+    if (this.x - this.boundX < this.minSize) return false;
+    if (this.boundX + this.boundSize - this.x < this.minSize) return false;
+    
+    for (let i = 0; i < this.arr.length; i++) {
+      if (i !== this.arr.indexOf(this)) {
+        let dx = Math.abs(this.arr[i].x - this.x) - this.arr[i].radius;
+        if (dx < this.minSize) return false;
+      }
+    }
+    
+    return true;
+  };
+  Circle6.prototype.grow = function() {
+    let minDist = Infinity;
+    
+    for (let i = 0; i < this.arr.length; i++) {
+      if (i !== this.arr.indexOf(this)) {
+        let dx = Math.abs(this.arr[i].x - this.x) - this.arr[i].radius;
+        if (dx < minDist) minDist = dx;
+      }
+    }
+    
+    let toLeft = this.x - this.boundX;
+    let toRight = this.boundX + this.boundSize - this.x;
+    if (toLeft < minDist) minDist = toLeft;
+    if (toRight < minDist) minDist = toRight;
+    
+    if (minDist > this.maxSize) minDist = this.maxSize;
+    
+    this.radius = minDist;
+    
+    let h = mapValue6(this.minSize, this.maxSize, this.radius, 0, 360) + this.hueOffset;
+    
+    ctx6.fillStyle = `hsl(${h}deg, ${randBetween(50, 100)}%, ${randBetween(10, 40)}%)`;
+    ctx6.strokeStyle = lineColor6;
+    ctx6.lineWidth = Math.min(lineWidth6, this.radius * 0.4);
+    ctx6.fillCircle(this.x, this.boundY, this.radius * sizeRatio6);
+    ctx6.strokeCircle(this.x, this.boundY, this.radius * sizeRatio6);
+    
+    ctx6.fillStyle = lineColor6;
+  };
+  
+  function drawRow6(x, y, len, hueOffset) {
+    let minSize = len * minSize6;
+    let maxSize = len * maxSize6;
+    
+    endCircleRadius6 = 0//randBetween(5, 11);
+    
+    let padding = randBetween(0.6, 3) * endPadding6;
+    
+    ctx6.fillStyle = ctx6.strokeStyle = lineColor6;
+    ctx6.shadowBlur = shadowSize6;
+    
+    ctx6.lineWidth = lineWidth6;
+    ctx6.beginPath();
+    ctx6.moveTo(x - padding, y);
+    ctx6.lineTo(x + len + padding, y);
+    
+    for (let i = 0; i < shadowIterations6; i++) ctx6.stroke();
+    
+    ctx6.shadowBlur = 0;
+    
+    ctx6.fillCircle(x - padding, y, endCircleRadius6);
+    ctx6.fillCircle(x + len + padding, y, endCircleRadius6);
+    
+    let circles = [];
+    currFilled6 = false;
+    while (!currFilled6) circles.push(new Circle6(x, y, len, circles, minSize, maxSize, hueOffset));
+    
+    return [{x: x - padding, y: y}, {x: x + len + padding, y: y}];
+  }
+  
+  function draw6() {
+    ctx6.fillStyle = backgroundColor6;
+    ctx6.fillRect(0, 0, canvas6.width, canvas6.height);
+    
+    ctx6.lineCap = ctx6.lineJoin = "round";
+    
+    numRows6 = Math.round(randBetween(20, 30));
+    maxSize6 = randBetween(0.045, 0.075);
+    let spacing = (canvas6.height * (1 - paddingY6)) / (numRows6 - 1);
+    let hueOffset = Math.random() * 360;
+    lineWidth6 = randBetween(2, 4);
+    
+    let h = Math.random() * 360;
+    
+    lineColor6 = `hsl(${h}deg, ${randBetween(50, 100)}%, ${randBetween(20, 100)}%)`;
+    ctx6.shadowColor = `hsl(${h}deg, 100%, 60%)`;
+    
+    let ends = [];
+    
+    for (let i = 0; i < numRows6; i++) {
+      let y = (i * spacing) + (canvas6.height * paddingY6 * 0.5);
+      
+      ends.push(drawRow6(canvas6.width * paddingX6 * 0.5, y, canvas6.width * (1 - paddingX6), hueOffset));
+    }
+    
+    ctx6.lineWidth = lineWidth6;
+    ctx6.strokeStyle = lineColor6;
+    ctx6.shadowBlur = shadowSize6;
+    for (let i = 0; i < 2; i++) {
+      ctx6.beginPath();
+      ctx6.moveTo(ends[0][i].x, ends[0][i].y);
+      for (let j = 0; j < ends.length; j++) {
+        ctx6.lineTo(ends[j][i].x, ends[j][i].y);
+      }
+      for (let k = 0; k < shadowIterations6; k++) ctx6.stroke();
+    }
+  }
+  draw6();
+</script>
+<div class = "project-num">Project #5: Alien Hieroglyphs</div>
+<canvas id = "canvas5"></canvas>
+<button onclick = "draw5()">Redraw</button>
+<div class = "desc">
+  <b><i>(7/2/2022):</i></b> Alien glyph generator, using the same random path generator from Project #4, but run multiple times in a grid, resembling some kind of intricate alien language. I added glow and colors to increase the effect, and also made the characters generate similar to Japanese kanji (in columns from the top). I also added lots of randomization for each character to increase the variety.
+  <br><br>
+  <b><i><mark>(7/9/2022): Actually finished!</mark> Added to <a href = "generative-art-gallery.html" target = "_blank">generative-art-gallery.html</a> as "Alien Hieroglyphs."</i></b>
+</div>
+<hr><hr>
+<script>
+  const ctx5 = canvas5.getContext("2d");
+  canvas5.width = canvas5.height = 1000;
+  
+  let Walker5 = {};
+  Walker5.checkDirection = function(n) {
+    if (n === 0) { // Up
+      let x = this.x;
+      let y = this.y - 1;
+      if (x < 0 || x >= glyphSize5 || y < 0 || y >= glyphSize5) return false;
+      if (grid5[x][y].filled) return false;
+      return true;
+    }
+    if (n === 1) { // Right
+      let x = this.x + 1;
+      let y = this.y;
+      if (x < 0 || x >= glyphSize5 || y < 0 || y >= glyphSize5) return false;
+      if (grid5[x][y].filled) return false;
+      return true;
+    }
+    if (n === 2) { // Down
+      let x = this.x;
+      let y = this.y + 1;
+      if (x < 0 || x >= glyphSize5 || y < 0 || y >= glyphSize5) return false;
+      if (grid5[x][y].filled) return false;
+      return true;
+    }
+    if (n === 3) { // Left
+      let x = this.x - 1;
+      let y = this.y;
+      if (x < 0 || x >= glyphSize5 || y < 0 || y >= glyphSize5) return false;
+      if (grid5[x][y].filled) return false;
+      return true;
+    }
+    
+    if (n === 4) { // Top Right
+      let x = this.x + 1;
+      let y = this.y - 1;
+      if (x < 0 || x >= glyphSize5 || y < 0 || y >= glyphSize5) return false;
+      if (grid5[x][y].filled || grid5[x][y].diagonal2) return false;
+      return true;
+    }
+    if (n === 5) { // Bottom Right
+      let x = this.x + 1;
+      let y = this.y + 1;
+      if (x < 0 || x >= glyphSize5 || y < 0 || y >= glyphSize5) return false;
+      if (grid5[x][y].filled || grid5[x][y].diagonal1) return false;
+      return true;
+    }
+    if (n === 6) { // Bottom Left
+      let x = this.x - 1;
+      let y = this.y + 1;
+      if (x < 0 || x >= glyphSize5 || y < 0 || y >= glyphSize5) return false;
+      if (grid5[x][y].filled || grid5[x][y].diagonal2) return false;
+      return true;
+    }
+    if (n === 7) { // Top Left
+      let x = this.x - 1;
+      let y = this.y - 1;
+      if (x < 0 || x >= glyphSize5 || y < 0 || y >= glyphSize5) return false;
+      if (grid5[x][y].filled || grid5[x][y].diagonal1) return false;
+      return true;
+    }
+  };
+  Walker5.isOnGrid = function(n) {
+    let x = this.x;
+    let y = this.y;
+    if (n === 0) y--;
+    else if (n === 1) x++;
+    else if (n === 2) y++;
+    else if (n === 3) x--;
+    else if (n === 4) {
+      x++;
+      y--;
+      if (x < 0 || x >= glyphSize5 || y < 0 || y >= glyphSize5) return false;
+      if (grid5[x][y].diagonal2) return false;
+    }
+    else if (n === 5) {
+      x++;
+      y++;
+      if (x < 0 || x >= glyphSize5 || y < 0 || y >= glyphSize5) return false;
+      if (grid5[x][y].diagonal1) return false;
+    }
+    else if (n === 6) {
+      x--;
+      y++;
+      if (x < 0 || x >= glyphSize5 || y < 0 || y >= glyphSize5) return false;
+      if (grid5[x][y].diagonal2) return false;
+    }
+    else if (n === 7) {
+      x--;
+      y--;
+      if (x < 0 || x >= glyphSize5 || y < 0 || y >= glyphSize5) return false;
+      if (grid5[x][y].diagonal1) return false;
+    }
+    
+    return x >= 0 && x < glyphSize5 && y >= 0 && y < glyphSize5;
+  };
+  Walker5.walk = function() {
+    if (filledCells5 >= glyphSize5 * glyphSize5 * density5) return;
+    
+    let lastX = this.x;
+    let lastY = this.y;
+    
+    grid5[this.x][this.y].filled = true;
+    
+    let directions = [];
+    
+    if (directionMode5 === 1) {
+      for (let i = 0; i <= 3; i++) {
+        if (this.checkDirection(i)) directions.push(i);
+      }
+    }
+    else if (directionMode5 === 2) {
+      for (let i = 4; i <= 7; i++) {
+        if (this.checkDirection(i)) directions.push(i);
+      }
+    }
+    else if (directionMode5 === 3) {
+      for (let i = 0; i <= 7; i++) {
+        if (this.checkDirection(i)) directions.push(i);
+      }
+    }
+    
+    if (directions.length === 0) {
+      directions = [];
+      
+      if (directionMode5 === 1) {
+        for (let i = 0; i <= 3; i++) {
+          if (this.isOnGrid(i)) directions.push(i);
+        }
+      }
+      else if (directionMode5 === 2) {
+        for (let i = 4; i <= 7; i++) {
+          if (this.isOnGrid(i)) directions.push(i);
+        }
+      }
+      else if (directionMode5 === 3) {
+        for (let i = 0; i <= 7; i++) {
+          if (this.isOnGrid(i)) directions.push(i);
+        }
+      }
+      
+      let dontTurn = Math.random() > turnChance5 && directions.includes(this.direction);
+      if (!dontTurn) {
+        this.direction = directions[Math.floor(Math.random() * directions.length)];
+      }
+      
+      
+      if (this.direction === 0) this.y--; // Up
+      else if (this.direction === 1) this.x++; // Right
+      else if (this.direction === 2) this.y++; // Down
+      else if (this.direction === 3) this.x--; // Left
+      
+      else if (this.direction === 4) { // Top Right
+        this.x++;
+        this.y--;
+      }
+      else if (this.direction === 5) { // Bottom Right
+        this.x++;
+        this.y++;
+      }
+      else if (this.direction === 6) { // Bottom Left
+        this.x--;
+        this.y++;
+      }
+      else if (this.direction === 7) { // Top Left
+        this.x--;
+        this.y--;
+      }
+      
+      if (overlap5 && !(!grid5[this.x][this.y].diagonal1 && !grid5[this.x][this.y].diagonal2)) {
+        ctx5.moveTo(((lastX + 0.5) * tileSize5) + this.oX, ((lastY + 0.5) * tileSize5) + this.oY);
+        ctx5.lineTo(((this.x + 0.5) * tileSize5) + this.oX, ((this.y + 0.5) * tileSize5) + this.oY);
+      }
+    }
+    else {
+      if (this.direction === 4) { // Top Right
+        let x1 = this.x - 1;
+        let y1 = this.y;
+        let x2 = this.x;
+        let y2 = this.y + 1;
+        
+        if (!(x1 < 0 || x1 >= glyphSize5 || y1 < 0 || y1 >= glyphSize5)) {
+          grid5[x1][y1].diagonal1 = true;
+        }
+        if (!(x2 < 0 || x2 >= glyphSize5 || y2 < 0 || y2 >= glyphSize5)) {
+          grid5[x2][y2].diagonal1 = true;
+        }
+      }
+      else if (this.direction === 5) { // Bottom Right
+        let x1 = this.x - 1;
+        let y1 = this.y;
+        let x2 = this.x;
+        let y2 = this.y - 1;
+        
+        if (!(x1 < 0 || x1 >= glyphSize5 || y1 < 0 || y1 >= glyphSize5)) {
+          grid5[x1][y1].diagonal2 = true;
+        }
+        if (!(x2 < 0 || x2 >= glyphSize5 || y2 < 0 || y2 >= glyphSize5)) {
+          grid5[x2][y2].diagonal2 = true;
+        }
+      }
+      else if (this.direction === 6) { // Bottom Left
+        let x1 = this.x;
+        let y1 = this.y - 1;
+        let x2 = this.x + 1;
+        let y2 = this.y;
+        
+        if (!(x1 < 0 || x1 >= glyphSize5 || y1 < 0 || y1 >= glyphSize5)) {
+          grid5[x1][y1].diagonal1 = true;
+        }
+        if (!(x2 < 0 || x2 >= glyphSize5 || y2 < 0 || y2 >= glyphSize5)) {
+          grid5[x2][y2].diagonal1 = true;
+        }
+      }
+      else if (this.direction === 7) { // Top Left
+        let x1 = this.x + 1;
+        let y1 = this.y;
+        let x2 = this.x;
+        let y2 = this.y + 1;
+        
+        if (!(x1 < 0 || x1 >= glyphSize5 || y1 < 0 || y1 >= glyphSize5)) {
+          grid5[x1][y1].diagonal2 = true;
+        }
+        if (!(x2 < 0 || x2 >= glyphSize5 || y2 < 0 || y2 >= glyphSize5)) {
+          grid5[x2][y2].diagonal2 = true;
+        }
+      }
+      
+      let dontTurn = Math.random() > turnChance5 && directions.includes(this.direction);
+      if (!dontTurn) {
+        this.direction = directions[Math.floor(Math.random() * directions.length)];
+      }
+      
+      if (this.direction === 0) this.y--; // Up
+      else if (this.direction === 1) this.x++; // Right
+      else if (this.direction === 2) this.y++; // Down
+      else if (this.direction === 3) this.x--; // Left
+      else if (this.direction === 4) { // Top Right
+        this.x++;
+        this.y--;
+      }
+      else if (this.direction === 5) { // Bottom Right
+        this.x++;
+        this.y++;
+      }
+      else if (this.direction === 6) { // Bottom Left
+        this.x--;
+        this.y++;
+      }
+      else if (this.direction === 7) { // Top Left
+        this.x--;
+        this.y--;
+      }
+      
+      filledCells5++;
+      
+      ctx5.moveTo(((lastX + 0.5) * tileSize5) + this.oX, ((lastY + 0.5) * tileSize5) + this.oY);
+      ctx5.lineTo(((this.x + 0.5) * tileSize5) + this.oX, ((this.y + 0.5) * tileSize5) + this.oY);
+    }
+  };
+  
+  let gridSize5 = 8;
+  let padding5 = 0.2;
+  let glyphSize5 = 3;
+  
+  let filledCells5 = 0;
+  let density5 = 1;
+  let grid5 = [];
+  let directionMode5 = 3;
+  let turnChance5 = 0.1;
+  let tileSize5 = 0;
+  let thickness5 = 0.4;
+  let hue5 = 120;
+  let contrast5 = 0.7;
+  let hueVariation5 = 0.15;
+  let shadowOpacity5 = 0.8;
+  let shadowSize5 = 1.5;
+  let shadowIterations5 = 2;
+  let overlap5 = false;
+  
+  function draw5() {
+    ctx5.fillStyle = "black";
+    ctx5.fillRect(0, 0, canvas5.width, canvas5.height);
+    
+    hue5 = Math.random() * 360;
+    
+    let lens = [];
+    for (let i = 0; i < gridSize5; i++) lens.push(Math.round(randBetween(2, gridSize5)));
+    
+    for (let x = 0; x < gridSize5; x++) {
+      for (let y = 0; y < gridSize5; y++) {
+        density5 = Math.round(randBetween(7, 10)) / 10;
+        thickness5 = randBetween(0.3, 0.5);
+        
+        if (Math.random() < 0.5) glyphSize5 = 4;
+        else glyphSize5 = 3;
+        
+        let tileSize = canvas5.width / gridSize5;
+        let paddedSize = tileSize * (1 - padding5);
+        tileSize5 = paddedSize / glyphSize5;
+        let offset = padding5 * tileSize * 0.5;
+        
+        if ((y + 1) <= lens[x]) {
+          Walker5.oX = (x * tileSize) + offset;
+          Walker5.oY = (y * tileSize) + offset;
+          
+          Walker5.x = Math.floor(Math.random() * glyphSize5);
+          Walker5.y = Math.floor(Math.random() * glyphSize5);
+          Walker5.direction = Math.round(randBetween(0, 3));
+          
+          filledCells5 = 1;
+          
+          grid5 = [];
+          for (let i = 0; i < glyphSize5; i++) {
+            let line = [];
+            for (let j = 0; j < glyphSize5; j++) {
+              line.push({filled: false, diagonal1: false, diagonal2: false});
+            }
+            grid5.push(line);
+          }
+          
+          //if (Math.random() < 0.2) directionMode5 = 1;
+          //else directionMode5 = 3;
+          
+          let h = hue5 + (Math.random() * 180 * hueVariation5 * randSign());
+          let brightness = 50 + (Math.random() * 40 * contrast5 * randSign());
+          
+          ctx5.shadowColor = `hsla(${h}deg, 100%, ${brightness}%, ${shadowOpacity5})`;
+          ctx5.shadowBlur = (tileSize5 * thickness5).toMultipleOf(2) * shadowSize5;
+          
+          ctx5.lineWidth = (tileSize5 * thickness5).toMultipleOf(2);
+          ctx5.lineCap = ctx5.lineJoin = "round";
+          ctx5.strokeStyle = `hsl(${h}deg, 100%, ${brightness}%)`;
+          ctx5.beginPath();
+          
+          while (filledCells5 < glyphSize5 * glyphSize5 * density5) Walker5.walk();
+          
+          for (let k = 0; k < shadowIterations5; k++) ctx5.stroke();
+          
+          ctx5.shadowBlur = 0;
+        }
+      }
+    }
+  }
+  draw5();
+</script>
+<div class = "project-num">Project #4: Space-Filling Path</div>
+<canvas id = "canvas4"></canvas>
+<button onclick = "startCanvas4(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
+<button onclick = "reset4()">Reset</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>[ FPS: <span id = "fps4Txt"></span> ]</b></i></div>
+<table>
+  <tr>
+    <td style = "padding: 15px">
+      <div><b><u>Grid Size:</u></b> <span id = "gridSize4Txt">10&times;10</span></div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "gridSize4Range" oninput = "updateSettings4(true)">
+      <br><br><br>
+      <div><b><u>Turn Chance:</u></b> <span id = "turnChance4Txt">10</span>%</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "turnChance4Range" oninput = "updateSettings4(false)">
+      <br><br><br>
+      <div><b><u>Total Coverage:</u></b> <span id = "density4Txt">100</span>%</div>
+      <input type = "range" min = "10" max = "100" step = "10" value = "100" id = "density4Range" oninput = "updateSettings4(false)">
+    </td>
+    <td style = "padding: 15px">
+      <div><b><u>Path Thickness:</u></b> <span id = "thickness4Txt">40</span>%</div>
+      <input type = "range" min = "10" max = "60" step = "5" value = "40" id = "thickness4Range" oninput = "updateSettings4(true)">
+      <br><br><br>
+      <div><b><u>Path Hue:</u></b> <span id = "hue4Txt">60</span>&deg;</div>
+      <input type = "range" min = "0" max = "360" step = "10" value = "60" id = "hue4Range" oninput = "updateSettings4(true)">
+      <br><br><br>
+      <div><b><u>Path Contrast:</u></b> <span id = "contrast4Txt">0</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "10" value = "0" id = "contrast4Range" oninput = "updateSettings4(true)">
+      <br><br><br>
+      <label for = "directionMode4Checkbox"><b><u>Diagonal movement:</u></b></label>
+      <input type = "checkbox" id = "directionMode4Checkbox" oninput = "updateSettings4(true)" CHECKED>
+    </td>
+  </tr>
+</table>
+<div class = "desc">
+  <b><i>(6/30/2022):</i></b> A variation on the previous project where there is only ever one path, but once it gets stuck it just stops drawing and is allowed to walk through itself, until it reaches an open square. This is repeated over and over, slowly filling the canvas with a single branching path.
+  <br>
+  <b><i>(Later that night):</i></b> I spent over an hour trying half a dozen different ways to fix one bug and finally got it (hopefully) fixed. The bug was that diagonal paths could sometimes cause lines to be drawn incorrectly and you could have 2 distinct disconnected paths, instead of a single connected path every time.
+  <br><br>
+  <b><i>(7/1/2022, and 7/2/2022 past midnight):</i></b> Added more visual settings like hue and contrast, and added sliders for everything.
+</div>
+<hr><hr>
+<script>
+  const ctx4 = canvas4.getContext("2d");
+  canvas4.width = canvas4.height = 1000;
+  let canvasSize4 = 1000;
+  let canvas4Running = false;
+  
+  let gridSize4RangeArray = [3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100];
+  gridSize4Range.max = gridSize4RangeArray.length - 1;
+  gridSize4Range.value = gridSize4RangeArray.indexOf(10);
+  
+  let turnChance4RangeArray = [1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100];
+  turnChance4Range.max = turnChance4RangeArray.length - 1;
+  turnChance4Range.value = turnChance4RangeArray.indexOf(10);
+  
+  function updateSettings4(doReset) {
+    gridSize4 = gridSize4RangeArray[Number(gridSize4Range.value)];
+    gridSize4Txt.innerHTML = gridSize4 + "&times" + gridSize4;
+    
+    turnChance4 = turnChance4RangeArray[Number(turnChance4Range.value)] / 100;
+    turnChance4Txt.innerHTML = turnChance4RangeArray[Number(turnChance4Range.value)];
+    
+    density4 = Number(density4Range.value) / 100;
+    density4Txt.innerHTML = density4Range.value;
+    
+    thickness4 = Number(thickness4Range.value) / 100;
+    thickness4Txt.innerHTML = thickness4Range.value;
+    
+    hue4 = hue4Txt.innerHTML = Number(hue4Range.value);
+    
+    contrast4 = Number(contrast4Range.value) / 100;
+    contrast4Txt.innerHTML = contrast4Range.value;
+    
+    if (directionMode4Checkbox.checked) directionMode4 = 3;
+    else directionMode4 = 1;
+    
+    if (doReset) reset4();
+  }
+  
+  let gridSize4 = 10;
+  let grid4 = [];
+  let filledCells4 = 0;
+  let density4 = 1;
+  let turnChance4 = 0.1;
+  let hue4 = 60;
+  let thickness4 = 0.4;
+  let tileSize4 = 0;
+  let stepsPerFrame4 = 5;
+  let directionMode4 = 3;
+  let contrast4 = 0;
+  
+  let Walker4 = {};
+  Walker4.checkDirection = function(n) {
+    if (n === 0) { // Up
+      let x = this.x;
+      let y = this.y - 1;
+      if (x < 0 || x >= gridSize4 || y < 0 || y >= gridSize4) return false;
+     if (grid4[x][y].filled) return false;
+      return true;
+    }
+    if (n === 1) { // Right
+      let x = this.x + 1;
+      let y = this.y;
+      if (x < 0 || x >= gridSize4 || y < 0 || y >= gridSize4) return false;
+      if (grid4[x][y].filled) return false;
+      return true;
+    }
+    if (n === 2) { // Down
+      let x = this.x;
+      let y = this.y + 1;
+      if (x < 0 || x >= gridSize4 || y < 0 || y >= gridSize4) return false;
+      if (grid4[x][y].filled) return false;
+      return true;
+    }
+    if (n === 3) { // Left
+      let x = this.x - 1;
+      let y = this.y;
+      if (x < 0 || x >= gridSize4 || y < 0 || y >= gridSize4) return false;
+      if (grid4[x][y].filled) return false;
+      return true;
+    }
+    
+    if (n === 4) { // Top Right
+      let x = this.x + 1;
+      let y = this.y - 1;
+      if (x < 0 || x >= gridSize4 || y < 0 || y >= gridSize4) return false;
+      if (grid4[x][y].filled || grid4[x][y].diagonal2) return false;
+      return true;
+    }
+    if (n === 5) { // Bottom Right
+      let x = this.x + 1;
+      let y = this.y + 1;
+      if (x < 0 || x >= gridSize4 || y < 0 || y >= gridSize4) return false;
+      if (grid4[x][y].filled || grid4[x][y].diagonal1) return false;
+      return true;
+    }
+    if (n === 6) { // Bottom Left
+      let x = this.x - 1;
+      let y = this.y + 1;
+      if (x < 0 || x >= gridSize4 || y < 0 || y >= gridSize4) return false;
+      if (grid4[x][y].filled || grid4[x][y].diagonal2) return false;
+      return true;
+    }
+    if (n === 7) { // Top Left
+      let x = this.x - 1;
+      let y = this.y - 1;
+      if (x < 0 || x >= gridSize4 || y < 0 || y >= gridSize4) return false;
+      if (grid4[x][y].filled || grid4[x][y].diagonal1) return false;
+      return true;
+    }
+  };
+  Walker4.isOnGrid = function(n) {
+    let x = this.x;
+    let y = this.y;
+    if (n === 0) y--;
+    else if (n === 1) x++;
+    else if (n === 2) y++;
+    else if (n === 3) x--;
+    else if (n === 4) {
+      x++;
+      y--;
+      if (x < 0 || x >= gridSize4 || y < 0 || y >= gridSize4) return false;
+      if (grid4[x][y].diagonal2) return false;
+    }
+    else if (n === 5) {
+      x++;
+      y++;
+      if (x < 0 || x >= gridSize4 || y < 0 || y >= gridSize4) return false;
+      if (grid4[x][y].diagonal1) return false;
+    }
+    else if (n === 6) {
+      x--;
+      y++;
+      if (x < 0 || x >= gridSize4 || y < 0 || y >= gridSize4) return false;
+      if (grid4[x][y].diagonal2) return false;
+    }
+    else if (n === 7) {
+      x--;
+      y--;
+      if (x < 0 || x >= gridSize4 || y < 0 || y >= gridSize4) return false;
+      if (grid4[x][y].diagonal1) return false;
+    }
+    
+    return x >= 0 && x < gridSize4 && y >= 0 && y < gridSize4;
+  };
+  Walker4.walk = function() {
+    if (filledCells4 >= gridSize4 * gridSize4 * density4) return;
+    
+    let lastX = this.x;
+    let lastY = this.y;
+    
+    grid4[this.x][this.y].filled = true;
+    
+    let directions = [];
+    
+    if (directionMode4 === 1) {
+      for (let i = 0; i <= 3; i++) {
+        if (this.checkDirection(i)) directions.push(i);
+      }
+    }
+    else if (directionMode4 === 2) {
+      for (let i = 4; i <= 7; i++) {
+        if (this.checkDirection(i)) directions.push(i);
+      }
+    }
+    else if (directionMode4 === 3) {
+      for (let i = 0; i <= 7; i++) {
+        if (this.checkDirection(i)) directions.push(i);
+      }
+    }
+    
+    if (directions.length === 0) {
+      directions = [];
+      
+      if (directionMode4 === 1) {
+        for (let i = 0; i <= 3; i++) {
+          if (this.isOnGrid(i)) directions.push(i);
+        }
+      }
+      else if (directionMode4 === 2) {
+        for (let i = 4; i <= 7; i++) {
+          if (this.isOnGrid(i)) directions.push(i);
+        }
+      }
+      else if (directionMode4 === 3) {
+        for (let i = 0; i <= 7; i++) {
+          if (this.isOnGrid(i)) directions.push(i);
+        }
+      }
+      
+      let dontTurn = Math.random() > turnChance4 && directions.includes(this.direction);
+      if (!dontTurn) {
+        this.direction = directions[Math.floor(Math.random() * directions.length)];
+      }
+      
+      
+      if (this.direction === 0) this.y--; // Up
+      else if (this.direction === 1) this.x++; // Right
+      else if (this.direction === 2) this.y++; // Down
+      else if (this.direction === 3) this.x--; // Left
+      
+      else if (this.direction === 4) { // Top Right
+        this.x++;
+        this.y--;
+      }
+      else if (this.direction === 5) { // Bottom Right
+        this.x++;
+        this.y++;
+      }
+      else if (this.direction === 6) { // Bottom Left
+        this.x--;
+        this.y++;
+      }
+      else if (this.direction === 7) { // Top Left
+        this.x--;
+        this.y--;
+      }
+    }
+    else {
+      if (this.direction === 4) { // Top Right
+        let x1 = this.x - 1;
+        let y1 = this.y;
+        let x2 = this.x;
+        let y2 = this.y + 1;
+        
+        if (!(x1 < 0 || x1 >= gridSize4 || y1 < 0 || y1 >= gridSize4)) {
+          grid4[x1][y1].diagonal1 = true;
+        }
+        if (!(x2 < 0 || x2 >= gridSize4 || y2 < 0 || y2 >= gridSize4)) {
+          grid4[x2][y2].diagonal1 = true;
+        }
+      }
+      else if (this.direction === 5) { // Bottom Right
+        let x1 = this.x - 1;
+        let y1 = this.y;
+        let x2 = this.x;
+        let y2 = this.y - 1;
+        
+        if (!(x1 < 0 || x1 >= gridSize4 || y1 < 0 || y1 >= gridSize4)) {
+          grid4[x1][y1].diagonal2 = true;
+        }
+        if (!(x2 < 0 || x2 >= gridSize4 || y2 < 0 || y2 >= gridSize4)) {
+          grid4[x2][y2].diagonal2 = true;
+        }
+      }
+      else if (this.direction === 6) { // Bottom Left
+        let x1 = this.x;
+        let y1 = this.y - 1;
+        let x2 = this.x + 1;
+        let y2 = this.y;
+        
+        if (!(x1 < 0 || x1 >= gridSize4 || y1 < 0 || y1 >= gridSize4)) {
+          grid4[x1][y1].diagonal1 = true;
+        }
+        if (!(x2 < 0 || x2 >= gridSize4 || y2 < 0 || y2 >= gridSize4)) {
+          grid4[x2][y2].diagonal1 = true;
+        }
+      }
+      else if (this.direction === 7) { // Top Left
+        let x1 = this.x + 1;
+        let y1 = this.y;
+        let x2 = this.x;
+        let y2 = this.y + 1;
+        
+        if (!(x1 < 0 || x1 >= gridSize4 || y1 < 0 || y1 >= gridSize4)) {
+          grid4[x1][y1].diagonal2 = true;
+        }
+        if (!(x2 < 0 || x2 >= gridSize4 || y2 < 0 || y2 >= gridSize4)) {
+          grid4[x2][y2].diagonal2 = true;
+        }
+      }
+      
+      let dontTurn = Math.random() > turnChance4 && directions.includes(this.direction);
+      if (!dontTurn) {
+        this.direction = directions[Math.floor(Math.random() * directions.length)];
+      }
+      
+      if (this.direction === 0) this.y--; // Up
+      else if (this.direction === 1) this.x++; // Right
+      else if (this.direction === 2) this.y++; // Down
+      else if (this.direction === 3) this.x--; // Left
+      else if (this.direction === 4) { // Top Right
+        this.x++;
+        this.y--;
+      }
+      else if (this.direction === 5) { // Bottom Right
+        this.x++;
+        this.y++;
+      }
+      else if (this.direction === 6) { // Bottom Left
+        this.x--;
+        this.y++;
+      }
+      else if (this.direction === 7) { // Top Left
+        this.x--;
+        this.y--;
+      }
+      
+      filledCells4++;
+      
+      ctx4.lineWidth = (tileSize4 * thickness4).toMultipleOf(2);
+      ctx4.lineCap = ctx4.lineJoin = "round";
+      ctx4.strokeStyle = `hsl(${hue4}deg, 100%, ${50 + (Math.random() * 40 * contrast4 * randSign())}%)`;
+      
+      ctx4.beginPath();
+      ctx4.moveTo((lastX + 0.5) * tileSize4, (lastY + 0.5) * tileSize4);
+      ctx4.lineTo((this.x + 0.5) * tileSize4, (this.y + 0.5) * tileSize4);
+      ctx4.stroke();
+    }
+  };
+  
+  function reset4() {
+    Walker4.x = Math.floor(Math.random() * gridSize4);
+    Walker4.y = Math.floor(Math.random() * gridSize4);
+    Walker4.direction = Math.round(randBetween(0, 3));
+    
+    grid4 = [];
+    for (let i = 0; i < gridSize4; i++) {
+      let line = [];
+      for (let j = 0; j < gridSize4; j++) {
+        line.push({filled: false, diagonal1: false, diagonal2: false});
+      }
+      grid4.push(line);
+    }
+    
+    filledCells4 = 1;
+    
+    canvas4.width = canvas4.height = gridSize4 * Math.round(canvasSize4 / gridSize4);
+    tileSize4 = canvas4.width / gridSize4;
+    
+    ctx4.fillStyle = "black";
+    ctx4.fillRect(0, 0, canvas4.width, canvas4.height);
+    
+    if (!canvas4Running) frame4();
+  }
+  
+  let lastFrame4Time = 0;
+  let lastFps4DisplayTime = 1000;
+  function frame4() {
+    if (Date.now() - lastFps4DisplayTime >= 500) {
+      fps4Txt.innerHTML = (1000 / (Date.now() - lastFrame4Time)).toFixed(1);
+      lastFps4DisplayTime = Date.now();
+    }
+    lastFrame4Time = Date.now();
+    
+    for (let i = 0; i < stepsPerFrame4; i++) Walker4.walk();
+    
+    if (canvas4Running) requestAnimationFrame(frame4);
+  }
+  //let _stepsPerFrame4 = stepsPerFrame4;
+  //stepsPerFrame4 = 1000;
+  reset4();
+  //stepsPerFrame4 = _stepsPerFrame4;
+  
+  function startCanvas4(caller) {
+    if (canvas4Running) {
+      canvas4Running = false;
+      caller.innerHTML = "<b><i>Paused</i></b>";
+      caller.style.color = caller.style.borderColor = "red";
+    }
+    else {
+      canvas4Running = true;
+      caller.innerHTML = "<b><i>Running</i></b>";
+      caller.style.color = caller.style.borderColor = "green";
+      frame4();
+    }
+  }
+</script>
+<div class = "project-num">Project #3: Self-Avoiding Random Walkers</div>
+<canvas id = "canvas3"></canvas>
+<button onclick = "startCanvas3(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
+<button onclick = "reset3()">Reset</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>[ FPS: <span id = "fps3Txt"></span> ]</b></i></div>
+<br>
+<table>
+  <tr>
+    <td style = "padding: 15px">
+      <div><b><u>Grid Size:</u></b> <span id = "gridSize3Txt">50&times;50</span></div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "gridSize3Range" oninput = "updateSettings3(true)">
+      <br><br><br>
+      <div><b><u>Turn Chance:</u></b> <span id = "turnChance3Txt">10</span>%</div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "turnChance3Range" oninput = "updateSettings3(false)">
+      <br><br><br>
+      <div><b><u>Total Coverage:</u></b> <span id = "density3Txt">100</span>%</div>
+      <input type = "range" min = "10" max = "100" step = "10" value = "100" id = "density3Range" oninput = "updateSettings3(false)">
+    </td>
+    <td style = "padding: 15px">
+      <div><b><u>Path Thickness:</u></b> <span id = "thickness3Txt">50</span>%</div>
+      <input type = "range" min = "10" max = "100" step = "10" value = "50" id = "thickness3Range" oninput = "updateSettings3(true)">
+      <br><br><br>
+      <div><b><u>End Node Size:</u></b> <span id = "nodeSize3Txt">0</span>%</div>
+      <input type = "range" min = "0" max = "100" step = "10" value = "0" id = "nodeSize3Range" oninput = "updateSettings3(true)">
+      <br><br><br>
+      <div><b><u>Drawing Mode:</u></b></div>
+      <input type = "radio" name = "drawMode3Radio" id = "drawMode3Radio1" oninput = "updateSettings3(true)" CHECKED>
+      <label for = "drawMode3Radio1">Paths</label>
+      <br>
+      <input type = "radio" name = "drawMode3Radio" id = "drawMode3Radio2" oninput = "updateSettings3(true)">
+      <label for = "drawMode3Radio2">Full Squares</label>
+    </td>
+    <td style = "padding: 15px">
+      <div><b><u>Movement Directions:</u></b></div>
+      <input type = "radio" name = "directionMode3Radio" id = "directionMode3Radio1" oninput = "updateSettings3(false)" CHECKED>
+      <label for = "directionMode3Radio1">Orthogonal</label>
+      <br>
+      <input type = "radio" name = "directionMode3Radio" id = "directionMode3Radio2" oninput = "updateSettings3(false)">
+      <label for = "directionMode3Radio2">Diagonal</label>
+      <br>
+      <input type = "radio" name = "directionMode3Radio" id = "directionMode3Radio3" oninput = "updateSettings3(false)">
+      <label for = "directionMode3Radio3">Both</label>
+      <br><br><br>
+      <div><b><u>Rendering Speed:</u></b></div>
+      <input type = "radio" name = "speed3Radio" id = "speed3Radio1" oninput = "updateSettings3(false)" CHECKED>
+      <label for = "speed3Radio1">Normal</label>
+      <br>
+      <input type = "radio" name = "speed3Radio" id = "speed3Radio2" oninput = "updateSettings3(false)">
+      <label for = "speed3Radio2">Turbo</label>
+      <br>
+      <input type = "radio" name = "speed3Radio" id = "speed3Radio3" oninput = "updateSettings3(false)">
+      <label for = "speed3Radio3">Instant</label>
+    </td>
+  </tr>
+</table>
+<div class = "desc">
+  <b><i>(6/28/2022):</i></b> I finally got an implementation of a self-avoiding random walk working correctly--the walker moves randomly (with a low turn chance) but never crosses itself or an old path. When it gets stuck, it starts a new path with a new color and repeats until the canvas is filled.
+  <br>
+  <b><i>(Later that day):</i></b> Added a second drawing mode which is just filled squares instead of connected paths.
+  <br><br>
+  <b><i>(6/29/2022):</i></b> Added sliders for everything. Added support for diagonal movement which works well but not perfectly. I got the kinks worked out so that even diagonal paths never cross--but there's often lots of space left open as a result of that, and I'm not sure if I can do anything about that.
+  <br>
+  <b><i>(Slightly later that night):</i></b> I fiddled with the code some more and got diagonal movement working perfectly now, and added radio buttons for directions.
+</div>
+<hr><hr>
+<script>
+  const ctx3 = canvas3.getContext("2d");
+  canvas3.width = canvas3.height = 1000;
+  let canvasSize3 = 1000;
+  let canvas3Running = false;
+  
+  let speed3 = 1;
+  
+  let gridSize3RangeArray = [3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100];
+  gridSize3Range.max = gridSize3RangeArray.length - 1;
+  gridSize3Range.value = gridSize3RangeArray.indexOf(50);
+  
+  let turnChance3RangeArray = [0, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100];
+  turnChance3Range.max = turnChance3RangeArray.length - 1;
+  turnChance3Range.value = turnChance3RangeArray.indexOf(10);
+  
+  function updateSettings3(doReset) {
+    gridSize3 = gridSize3RangeArray[Number(gridSize3Range.value)];
+    gridSize3Txt.innerHTML = gridSize3 + "&times" + gridSize3;
+    
+    turnChance3 = turnChance3RangeArray[Number(turnChance3Range.value)] / 100;
+    turnChance3Txt.innerHTML = turnChance3RangeArray[Number(turnChance3Range.value)];
+    
+    density3 = Number(density3Range.value) / 100;
+    density3Txt.innerHTML = density3Range.value;
+    
+    thickness3 = Number(thickness3Range.value) / 100;
+    thickness3Txt.innerHTML = thickness3Range.value;
+    
+    nodeSize3 = Number(nodeSize3Range.value) / 100;
+    nodeSize3Txt.innerHTML = nodeSize3Range.value;
+    
+    if (drawMode3Radio1.checked) drawMode3 = 1;
+    else if (drawMode3Radio2.checked) drawMode3 = 2;
+    
+    if (speed3Radio1.checked) speed3 = 1;
+    else if (speed3Radio2.checked) speed3 = 2;
+    else if (speed3Radio3.checked) speed3 = 3;
+    
+    if (speed3 === 1) stepsPerFrame3 = 5;
+    else if (speed3 === 2) stepsPerFrame3 = 50;
+    
+    if (directionMode3Radio1.checked) directionMode3 = 1;
+    else if (directionMode3Radio2.checked) directionMode3 = 2;
+    else if (directionMode3Radio3.checked) directionMode3 = 3;
+    
+    if (doReset) reset3();
+  }
+  
+  let gridSize3 = 50;
+  let grid3 = [];
+  let turnChance3 = 0.1;
+  let tileSize3 = 0;
+  let thickness3 = 0.5;
+  let nodeSize3 = 0;
+  let filledCells3 = 0;
+  let stepsPerFrame3 = 5;
+  let density3 = 1;
+  let drawMode3 = 1; // 1: Lines connect paths  |  2: Filled squares at every position
+  let directionMode3 = 1; // 1: +  |  2: X  |  3: + and X
+  
+  function Walker3() {
+    this.x = 0;
+    this.y = 0;
+    
+    this.color = "";
+    
+    this.direction = 0;
+    
+    if (directionMode3 === 1) this.direction = Math.round(randBetween(0, 3));
+    else if (directionMode3 === 2) this.direction = Math.round(randBetween(4, 7));
+    else if (directionMode3 === 3) this.direction = Math.round(randBetween(1, 7));
+    
+    this.age = 0;
+    
+    this.resetPos();
+  }
+  Walker3.prototype.resetPos = function() {
+    if (filledCells3 >= gridSize3 * gridSize3 * density3) return;
+    
+    this.age = 0;
+    
+    do {
+      this.x = Math.floor(Math.random() * gridSize3);
+      this.y = Math.floor(Math.random() * gridSize3);
+    }
+    while (!grid3[this.x][this.y].open);
+    
+    this.color = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
+    
+    ctx3.fillStyle = this.color;
+    if (nodeSize3 !== 0) ctx3.fillCircle((this.x + 0.5) * tileSize3, (this.y + 0.5) * tileSize3, tileSize3 * nodeSize3 * 0.5);
+    
+    if (drawMode3 === 2) {
+      ctx3.fillStyle = this.color;
+      ctx3.fillRectFromCenter((this.x + 0.5) * tileSize3, (this.y + 0.5) * tileSize3, tileSize3, tileSize3);
+    }
+  };
+  Walker3.prototype.checkDirection = function(n) {
+    if (n === 0) { // Up
+      let x = this.x;
+      let y = this.y - 1;
+      if (x < 0 || x >= gridSize3 || y < 0 || y >= gridSize3) return false;
+      if (!grid3[x][y].open) return false;
+      return true;
+    }
+    if (n === 1) { // Right
+      let x = this.x + 1;
+      let y = this.y;
+      if (x < 0 || x >= gridSize3 || y < 0 || y >= gridSize3) return false;
+      if (!grid3[x][y].open) return false;
+      return true;
+    }
+    if (n === 2) { // Down
+      let x = this.x;
+      let y = this.y + 1;
+      if (x < 0 || x >= gridSize3 || y < 0 || y >= gridSize3) return false;
+      if (!grid3[x][y].open) return false;
+      return true;
+    }
+    if (n === 3) { // Left
+      let x = this.x - 1;
+      let y = this.y;
+      if (x < 0 || x >= gridSize3 || y < 0 || y >= gridSize3) return false;
+      if (!grid3[x][y].open) return false;
+      return true;
+    }
+    
+    if (n === 4) { // Top Right
+      let x = this.x + 1;
+      let y = this.y - 1;
+      if (x < 0 || x >= gridSize3 || y < 0 || y >= gridSize3) return false;
+      if (!grid3[x][y].open || grid3[x][y].diagonal2) return false;
+      return true;
+    }
+    if (n === 5) { // Bottom Right
+      let x = this.x + 1;
+      let y = this.y + 1;
+      if (x < 0 || x >= gridSize3 || y < 0 || y >= gridSize3) return false;
+      if (!grid3[x][y].open || grid3[x][y].diagonal1) return false;
+      return true;
+    }
+    if (n === 6) { // Bottom Left
+      let x = this.x - 1;
+      let y = this.y + 1;
+      if (x < 0 || x >= gridSize3 || y < 0 || y >= gridSize3) return false;
+      if (!grid3[x][y].open || grid3[x][y].diagonal2) return false;
+      return true;
+    }
+    if (n === 7) { // Top Left
+      let x = this.x - 1;
+      let y = this.y - 1;
+      if (x < 0 || x >= gridSize3 || y < 0 || y >= gridSize3) return false;
+      if (!grid3[x][y].open || grid3[x][y].diagonal1) return false;
+      return true;
+    }
+  };
+  Walker3.prototype.walk = function() {
+    if (filledCells3 >= gridSize3 * gridSize3 * density3) return;
+    
+    let lastX = this.x;
+    let lastY = this.y;
+    
+    grid3[this.x][this.y].open = false;
+    filledCells3++;
+    
+    if (this.direction === 4) { // Top Right
+      let x1 = this.x - 1;
+      let y1 = this.y;
+      let x2 = this.x;
+      let y2 = this.y + 1;
+      
+      if (!(x1 < 0 || x1 >= gridSize3 || y1 < 0 || y1 >= gridSize3)) {
+        grid3[x1][y1].diagonal1 = true;
+      }
+      if (!(x2 < 0 || x2 >= gridSize3 || y2 < 0 || y2 >= gridSize3)) {
+        grid3[x2][y2].diagonal1 = true;
+      }
+    }
+    else if (this.direction === 5) { // Bottom Right
+      let x1 = this.x - 1;
+      let y1 = this.y;
+      let x2 = this.x;
+      let y2 = this.y - 1;
+      
+      if (!(x1 < 0 || x1 >= gridSize3 || y1 < 0 || y1 >= gridSize3)) {
+        grid3[x1][y1].diagonal2 = true;
+      }
+      if (!(x2 < 0 || x2 >= gridSize3 || y2 < 0 || y2 >= gridSize3)) {
+        grid3[x2][y2].diagonal2 = true;
+      }
+    }
+    else if (this.direction === 6) { // Bottom Left
+      let x1 = this.x;
+      let y1 = this.y - 1;
+      let x2 = this.x + 1;
+      let y2 = this.y;
+      
+      if (!(x1 < 0 || x1 >= gridSize3 || y1 < 0 || y1 >= gridSize3)) {
+        grid3[x1][y1].diagonal1 = true;
+      }
+      if (!(x2 < 0 || x2 >= gridSize3 || y2 < 0 || y2 >= gridSize3)) {
+        grid3[x2][y2].diagonal1 = true;
+      }
+    }
+    else if (this.direction === 7) { // Top Left
+      let x1 = this.x + 1;
+      let y1 = this.y;
+      let x2 = this.x;
+      let y2 = this.y + 1;
+      
+      if (!(x1 < 0 || x1 >= gridSize3 || y1 < 0 || y1 >= gridSize3)) {
+        grid3[x1][y1].diagonal2 = true;
+      }
+      if (!(x2 < 0 || x2 >= gridSize3 || y2 < 0 || y2 >= gridSize3)) {
+        grid3[x2][y2].diagonal2 = true;
+      }
+    }
+    
+    let directions = [];
+    
+    if (directionMode3 === 1) {
+      for (let i = 0; i <= 3; i++) {
+        if (this.checkDirection(i)) directions.push(i);
+      }
+    }
+    else if (directionMode3 === 2) {
+      for (let i = 4; i <= 7; i++) {
+        if (this.checkDirection(i)) directions.push(i);
+      }
+    }
+    else if (directionMode3 === 3) {
+      for (let i = 0; i <= 7; i++) {
+        if (this.checkDirection(i)) directions.push(i);
+      }
+    }
+    
+    if (directions.length === 0) {
+      ctx3.fillStyle = this.color;
+      if (nodeSize3 !== 0) ctx3.fillCircle((this.x + 0.5) * tileSize3, (this.y + 0.5) * tileSize3, tileSize3 * nodeSize3 * 0.5);
+      
+      if (this.age === 0) {
+        if (drawMode3 === 1) {
+          ctx3.strokeStyle = this.color;
+          ctx3.beginPath();
+          ctx3.moveTo((lastX + 0.5) * tileSize3, (lastY + 0.5) * tileSize3);
+          ctx3.lineTo((this.x + 0.5) * tileSize3, (this.y + 0.5) * tileSize3);
+          ctx3.stroke();
+        }
+        else if (drawMode3 === 2) {
+          ctx3.fillStyle = this.color;
+          ctx3.fillRectFromCenter((this.x + 0.5) * tileSize3, (this.y + 0.5) * tileSize3, tileSize3, tileSize3);
+        }
+      }
+      
+      this.resetPos();
+      return;
+    }
+    
+    let dontTurn = Math.random() > turnChance3 && directions.includes(this.direction);
+    if (!dontTurn) {
+      this.direction = directions[Math.floor(Math.random() * directions.length)];
+    }
+    
+    if (this.direction === 0) this.y--; // Up
+    else if (this.direction === 1) this.x++; // Right
+    else if (this.direction === 2) this.y++; // Down
+    else if (this.direction === 3) this.x--; // Left
+    
+    else if (this.direction === 4) { // Top Right
+      this.x++;
+      this.y--;
+    }
+    else if (this.direction === 5) { // Bottom Right
+      this.x++;
+      this.y++;
+    }
+    else if (this.direction === 6) { // Bottom Left
+      this.x--;
+      this.y++;
+    }
+    else if (this.direction === 7) { // Top Left
+      this.x--;
+      this.y--;
+    }
+    
+    if (drawMode3 === 1) {
+      ctx3.lineWidth = (tileSize3 * thickness3).toMultipleOf(2);
+      ctx3.lineCap = ctx3.lineJoin = "round";
+      ctx3.strokeStyle = this.color;
+      
+      ctx3.beginPath();
+      ctx3.moveTo((lastX + 0.5) * tileSize3, (lastY + 0.5) * tileSize3);
+      ctx3.lineTo((this.x + 0.5) * tileSize3, (this.y + 0.5) * tileSize3);
+      ctx3.stroke();
+    }
+    else if (drawMode3 === 2) {
+      ctx3.fillStyle = this.color;
+      ctx3.fillRectFromCenter((this.x + 0.5) * tileSize3, (this.y + 0.5) * tileSize3, tileSize3, tileSize3);
+    }
+    
+    this.age++;
+  };
+  let walker3Array = [];
+  
+  function reset3() {
+    canvas3.width = canvas3.height = gridSize3 * Math.round(canvasSize3 / gridSize3);
+    tileSize3 = canvas3.width / gridSize3;
+    
+    if (speed3 === 1) stepsPerFrame3 = 5;
+    else if (speed3 === 2) stepsPerFrame3 = 50;
+    
+    ctx3.fillStyle = "black";
+    ctx3.fillRect(0, 0, canvas3.width, canvas3.height);
+    
+    filledCells3 = 0;
+    
+    grid3 = [];
+    
+    for (let i = 0; i < gridSize3; i++) {
+      let row = [];
+      for (let j = 0; j < gridSize3; j++) {
+        row.push({open: true, diagonal1: false, diagonal2: false}); // True: open    false: occupied
+      }
+      grid3.push(row);
+    }
+    
+    walker3Array = [];
+    walker3Array.push(new Walker3());
+    
+    if (!canvas3Running) frame3();
+  }
+  
+  let lastFrame3Time = 0;
+  let lastFps3DisplayTime = 1000;
+  function frame3() {
+    if (Date.now() - lastFps3DisplayTime >= 500) {
+      fps3Txt.innerHTML = (1000 / (Date.now() - lastFrame3Time)).toFixed(1);
+      lastFps3DisplayTime = Date.now();
+    }
+    lastFrame3Time = Date.now();
+    
+    if (speed3 !== 3) {
+      for (let i = 0; i < stepsPerFrame3; i++) walker3Array[0].walk();
+    }
+    else {
+      while (!(filledCells3 >= gridSize3 * gridSize3 * density3)) walker3Array[0].walk();
+    }
+    
+    if (canvas3Running) requestAnimationFrame(frame3);
+  }
+  reset3();
+  
+  function startCanvas3(caller) {
+    if (canvas3Running) {
+      canvas3Running = false;
+      caller.innerHTML = "<b><i>Paused</i></b>";
+      caller.style.color = caller.style.borderColor = "red";
+    }
+    else {
+      canvas3Running = true;
+      caller.innerHTML = "<b><i>Running</i></b>";
+      caller.style.color = caller.style.borderColor = "green";
+      frame3();
+    }
+  }
+</script>
+<div class = "project-num">Project #2: Skewed Grid</div>
+<canvas id = "canvas2"></canvas>
+<button onclick = "draw2()">Redraw</button>
+<div class = "desc">
+  <b><i>(6/27/2022):</i></b> A grid of squares but with an added skew variable (which affects how much the corners of each square move from their normal position), which increases towards the center of the grid. There is also a draw chance variable for various lines across each square that also increases towards the center of the grid.
+</div>
+<hr><hr>
+<script>
+  const ctx2 = canvas2.getContext("2d");
+  canvas2.width = canvas2.height = 500;
+  let canvasSize2 = 500;
+  
+  let gridSize2 = 20;
+  let padding2 = 0;
+  let drawChance2 = 1;
+  
+  function drawSquare2(x, y, size, skew) {
+    //ctx2.fillRect(x, y, size, size);
+    //return;
+    
+    let corners = [];
+    corners.push({x: x, y: y});
+    corners.push({x: x + size, y: y});
+    corners.push({x: x + size, y: y + size});
+    corners.push({x: x, y: y + size});
+    
+    if (Math.random() < 0.5) corners[0].x += Math.random() * 0.5 * size * skew;
+    else corners[0].y += Math.random() * 0.5 * size * skew;
+    
+    if (Math.random() < 0.5) corners[1].x -= Math.random() * 0.5 * size * skew;
+    else corners[1].y += Math.random() * 0.5 * size * skew;
+    
+    if (Math.random() < 0.5) corners[2].x -= Math.random() * 0.5 * size * skew;
+    else corners[2].y -= Math.random() * 0.5 * size * skew;
+    
+    if (Math.random() < 0.5) corners[3].x += Math.random() * 0.5 * size * skew;
+    else corners[3].y -= Math.random() * 0.5 * size * skew;
+    
+    let midpoints = [];
+    for (let i = 0; i < corners.length; i++) {
+      let j = (i + 1) % corners.length;
+      midpoints.push({x: (corners[i].x + corners[j].x) / 2, y: (corners[i].y + corners[j].y) / 2});
+    }
+    
+    ctx2.beginPath();
+    ctx2.moveTo(corners[0].x, corners[0].y);
+    ctx2.lineTo(corners[1].x, corners[1].y);
+    ctx2.lineTo(corners[2].x, corners[2].y);
+    ctx2.lineTo(corners[3].x, corners[3].y);
+    ctx2.lineTo(corners[0].x, corners[0].y);
+    ctx2.fill();
+    
+    ctx2.beginPath();
+    ctx2.moveTo(midpoints[0].x, midpoints[0].y);
+    ctx2.lineTo(midpoints[2].x, midpoints[2].y);
+    if (Math.random() < drawChance2) ctx2.stroke();
+    
+    ctx2.beginPath();
+    ctx2.moveTo(midpoints[1].x, midpoints[1].y);
+    ctx2.lineTo(midpoints[3].x, midpoints[3].y);
+    if (Math.random() < drawChance2) ctx2.stroke();
+    
+    ctx2.beginPath();
+    ctx2.moveTo(corners[0].x, corners[0].y);
+    ctx2.lineTo(corners[2].x, corners[2].y);
+    if (Math.random() < drawChance2) ctx2.stroke();
+    
+    ctx2.beginPath();
+    ctx2.moveTo(corners[1].x, corners[1].y);
+    ctx2.lineTo(corners[3].x, corners[3].y);
+    if (Math.random() < drawChance2) ctx2.stroke();
+  }
+  
+  function lerp2(a, b, t) {
+    return a + ((b - a) * t);
+  }
+  
+  function draw2() {
+    gridSize2 = Math.round(randBetween(15, 25));
+    
+    canvas2.width = canvas2.height = gridSize2 * Math.round(canvasSize2 / gridSize2);
+    
+    ctx2.fillStyle = "black";
+    ctx2.fillRect(0, 0, canvas2.width, canvas2.height);
+    
+    ctx2.fillStyle = "white";
+    ctx2.lineWidth = 2;
+    
+    let tileSize = canvas2.width / gridSize2;
+    let paddedSize = tileSize * (1 - padding2);
+    let offset = padding2 * tileSize * 0.5;
+    let hue = Math.random() * 360;
+    let saturation = randBetween(25, 75);
+    let distToFracture = randBetween(0.25, 0.5);
+    
+    for (let x = 0; x < gridSize2; x++) {
+      for (let y = 0; y < gridSize2; y++) {
+        let _x = (x + 0.5) * tileSize;
+        let _y = (y + 0.5) * tileSize;
+        
+        let dx = (canvas2.width / 2) - _x;
+        let dy = (canvas2.height / 2) - _y;
+        let distSq = (dx * dx) + (dy * dy);
+        let dist = Math.sqrt(distSq);
+        let ratio = Math.max(0, 1 - (dist / (canvas2.width * Math.SQRT2 * distToFracture)));
+        
+        ctx2.fillStyle = `hsl(${hue}deg, ${saturation}%, ${Math.max(10, lerp2(-10, 90, 1 - ratio))}%)`;
+        
+        drawChance2 = 1 - (dist / (canvas2.width * Math.SQRT2 * Math.min(0.45, 0.45 * distToFracture * 3)));
+        
+        drawSquare2((x * tileSize) + offset, (y * tileSize) + offset, paddedSize, ratio);
+      }
+    }
+  }
+  draw2();
+</script>
 <div class = "project-num">Project #1: Banded Bouncing Trails</div>
 <canvas id = "canvas1"></canvas>
 <button onclick = "startCanvas1(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
 <button onclick = "reset1()">Reset</button>
 <div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>[ FPS: <span id = "fps1Txt"></span> ]</b></i></div>
-<div class = "desc"><b><i>(6/26/2022)</i></b> A random project involving bouncing circles that randomly change their hue over time, and which slowly grow darker and smaller until they disappear, creating twisting trails with bands of color along them. Click to add more circles. This isn't a super important project but I implemented a really important idea for bouncing--smoothness. Instead of getting blocky trails (like in <a href = "bounce.html" target = "_blank">bounce.html</a>) when trailing is turned on, the circles instead render 5 times per frame, moving at 1/5 their speed every time. This results in identical behavior, but with more pleasing and smooth trails.</div>
+<div class = "desc">
+  <b><i>(6/26/2022):</i></b> A random project involving bouncing circles that randomly change their hue over time, and which slowly grow darker and smaller until they disappear, creating twisting trails with bands of color along them. Click to add more circles. This isn't a super important project but I implemented a really important idea for bouncing--smoothness. Instead of getting blocky trails (like in <a href = "bounce.html" target = "_blank">bounce.html</a>) when trailing is turned on, the circles instead render 5 times per frame, moving at 1/5 their speed every time. This results in identical behavior, but with more pleasing and smooth trails.
+</div>
 <hr><hr>
 <script>
   const ctx1 = canvas1.getContext("2d");
