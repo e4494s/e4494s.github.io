@@ -1,5 +1,42 @@
 <!DOCTYPE html>
 <html>
+<!--
+PAGE TIMELINE:
+
+(7/10/2022):
+- Added "Jumbled Pipeworks"
+
+(7/9/2022):
+- Added "Alien Hieroglyphs"
+- Added "Harmonic Precision"
+
+(6/24/2022):
+- Added "Dominions of Topology"
+
+(5/30/2022):
+- Changed how the page reloads, instead of drawing every artwork on reload, it just loads preloaded images of each, which makes it like 100x faster
+- Added "Reemergence"
+
+(5/20/2022):
+- Added "Rectangular Moss"
+- Added "Teeming Metropolis"
+
+(4/28/2022):
+- Added "Effervescence"
+
+(3/6/2022):
+- Added "Ancient Tribal Energy"
+
+(3/1/2022):
+- Added "Triformations"
+
+(2/28/2022):
+- Added "Earthen Canyon Walls"
+
+(Early 2022):
+- Page created
+- Several artworks added
+-->
   <head>
     <meta charset = "utf-8">
     <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
@@ -129,7 +166,7 @@
   <div class = "subtitle">Click "Redraw" to regenerate a new random piece for each artwork.<br>Click the export button by each artwork to open it in a new tab so you can download it to your computer.<br><b><i>Some artworks are best viewed when zoomed in for a higher resolution.</i></b></div>
   <div class = "canvas-div">
     <div class = "canvas-title">Geometric Pillars</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">February 2022</div>
     <button class = "canvas-btn" onclick = "draw18()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(18)">Export</button>
     <br>
@@ -137,7 +174,7 @@
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Autumnal Growth</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">September 2021</div>
     <button class = "canvas-btn" onclick = "draw2()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(2)">Export</button>
     <br>
@@ -145,7 +182,7 @@
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Remnants of Attraction</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">October 2021</div>
     <button class = "canvas-btn" onclick = "draw3()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(3)">Export</button>
     <br>
@@ -153,31 +190,39 @@
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">A Fractured Oath</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">November 2021</div>
     <button class = "canvas-btn" onclick = "draw12()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(12)">Export</button>
     <br>
     <canvas id = "canvas12"></canvas>
   </div>
   <div class = "canvas-div">
+    <div class = "canvas-title">Jumbled Pipeworks</div>
+    <div class = "date-txt">July 2022</div>
+    <button class = "canvas-btn" onclick = "draw31()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(31)">Export</button>
+    <br>
+    <canvas id = "canvas31"></canvas>
+  </div>
+  <div class = "canvas-div">
     <div class = "canvas-title">Effervescence</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">April 2022</div>
     <button class = "canvas-btn" onclick = "draw24()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(24)">Export</button>
     <br>
     <canvas id = "canvas24"></canvas>
   </div>
   <div class = "canvas-div">
-    <div class = "canvas-title">Gaze of the Divine</div>
-    <div class = "date-txt">2022</div>
-    <button class = "canvas-btn" onclick = "draw17()">Redraw</button>
-    <button class = "download-canvas-btn" onclick = "downloadCanvas(17)">Export</button>
+    <div class = "canvas-title">Alien Hieroglyphs</div>
+    <div class = "date-txt">July 2022</div>
+    <button class = "canvas-btn" onclick = "draw29()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(29)">Export</button>
     <br>
-    <canvas id = "canvas17"></canvas>
+    <canvas id = "canvas29"></canvas>
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Discarded Origami</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">October 2021&mdash;Early 2022</div>
     <button class = "canvas-btn" onclick = "draw5()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(5)">Export</button>
     <br>
@@ -185,15 +230,23 @@
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Ancient Tribal Energy</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">March 2022</div>
     <button class = "canvas-btn" onclick = "draw23()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(23)">Export</button>
     <br>
     <canvas id = "canvas23"></canvas>
   </div>
   <div class = "canvas-div">
+    <div class = "canvas-title">Harmonic Precision</div>
+    <div class = "date-txt">July 2022</div>
+    <button class = "canvas-btn" onclick = "draw30()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(30)">Export</button>
+    <br>
+    <canvas id = "canvas30"></canvas>
+  </div>
+  <div class = "canvas-div">
     <div class = "canvas-title">Community and Seclusion</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">November 2021&mdash;Early 2022</div>
     <button class = "canvas-btn" onclick = "draw7()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(7)">Export</button>
     <br>
@@ -201,7 +254,7 @@
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Rectangular Moss</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">September 2021&mdash;May 2022</div>
     <button class = "canvas-btn" onclick = "draw25()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(25)">Export</button>
     <br>
@@ -209,7 +262,7 @@
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Reemergence</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">May 2022</div>
     <button class = "canvas-btn" onclick = "draw27()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(27)">Export</button>
     <br>
@@ -217,15 +270,23 @@
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Dominions of Topology</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">June 2022</div>
     <button class = "canvas-btn" onclick = "draw28()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(28)">Export</button>
     <br>
     <canvas id = "canvas28"></canvas>
   </div>
   <div class = "canvas-div">
+    <div class = "canvas-title">Gaze of the Divine</div>
+    <div class = "date-txt">February 2022</div>
+    <button class = "canvas-btn" onclick = "draw17()">Redraw</button>
+    <button class = "download-canvas-btn" onclick = "downloadCanvas(17)">Export</button>
+    <br>
+    <canvas id = "canvas17"></canvas>
+  </div>
+  <div class = "canvas-div">
     <div class = "canvas-title">Banded Orbs</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">Early 2022</div>
     <button class = "canvas-btn" onclick = "draw20()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(20)">Export</button>
     <br>
@@ -233,7 +294,7 @@
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Lonely, Muted Mountains</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">October 2021</div>
     <button class = "canvas-btn" onclick = "draw6()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(6)">Export</button>
     <br>
@@ -241,7 +302,7 @@
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Teeming Metropolis</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">November 2021</div>
     <button class = "canvas-btn" onclick = "draw26()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(26)">Export</button>
     <br>
@@ -249,7 +310,7 @@
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Earthen Canyon Walls</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">February 2022</div>
     <button class = "canvas-btn" onclick = "draw21()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(21)">Export</button>
     <br>
@@ -257,7 +318,7 @@
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Interlock</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">January 2022</div>
     <button class = "canvas-btn" onclick = "draw15()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(15)">Export</button>
     <br>
@@ -265,7 +326,7 @@
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Triformations</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">March 2022</div>
     <button class = "canvas-btn" onclick = "draw22()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(22)">Export</button>
     <br>
@@ -273,7 +334,7 @@
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Leeching Amoeba</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">November 2021&mdash;Early 2022</div>
     <button class = "canvas-btn" onclick = "draw8()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(8)">Export</button>
     <br>
@@ -281,7 +342,7 @@
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Euclid's Hurricane</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">February 2022</div>
     <button class = "canvas-btn" onclick = "draw19()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(19)">Export</button>
     <br>
@@ -289,7 +350,7 @@
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Recursive Descent</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">September 2021</div>
     <button class = "canvas-btn" onclick = "draw1()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(1)">Export</button>
     <br>
@@ -297,7 +358,7 @@
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Grasping Coral</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">November 2021&mdash;Early 2022</div>
     <button class = "canvas-btn" onclick = "draw9()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(9)">Export</button>
     <br>
@@ -305,7 +366,7 @@
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Umbral Forms</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">November 2021&mdash;Early 2022</div>
     <button class = "canvas-btn" onclick = "draw10()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(10)">Export</button>
     <br>
@@ -313,7 +374,7 @@
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Crystalline Mosaic</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">October 2021&mdash;Early 2022</div>
     <button class = "canvas-btn" onclick = "draw4()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(4)">Export</button>
     <br>
@@ -321,7 +382,7 @@
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Chromatic Smears</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">November 2021&mdash;Early 2022</div>
     <button class = "canvas-btn" onclick = "draw11()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(11)">Export</button>
     <br>
@@ -329,7 +390,7 @@
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Interference</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">January 2022</div>
     <button class = "canvas-btn" onclick = "draw16()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(16)">Export</button>
     <br>
@@ -337,7 +398,7 @@
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Tumultuous Terrain</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">December 2021&mdash;Early 2022</div>
     <button class = "canvas-btn" onclick = "draw13()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(13)">Export</button>
     <br>
@@ -345,7 +406,7 @@
   </div>
   <div class = "canvas-div">
     <div class = "canvas-title">Splintered Mirror</div>
-    <div class = "date-txt">2022</div>
+    <div class = "date-txt">December 2021&mdash;Early 2022</div>
     <button class = "canvas-btn" onclick = "draw14()">Redraw</button>
     <button class = "download-canvas-btn" onclick = "downloadCanvas(14)">Export</button>
     <br>
@@ -358,11 +419,14 @@
 <script src = "scripts/main.js"></script>
 <script>
   function drawAll() {
-    for (let i = 1; i <= 28; i++) {
+    for (let i = 1; i <= 31; i++) {
       document.getElementById("canvas" + i).style.backgroundImage = `url("https://e4494s.github.io/e4494s-images/ga-gallery/art-${i}.png")`;
     }
   }
   
+  let canvas31 = document.getElementById("canvas31");
+  let canvas30 = document.getElementById("canvas30");
+  let canvas29 = document.getElementById("canvas29");
   let canvas28 = document.getElementById("canvas28");
   let canvas27 = document.getElementById("canvas27");
   let canvas26 = document.getElementById("canvas26");
@@ -391,6 +455,670 @@
   let canvas3 = document.getElementById("canvas3");
   let canvas2 = document.getElementById("canvas2");
   let canvas1 = document.getElementById("canvas1");
+  
+  // Jumbled Pipeworks
+  
+  const ctx31 = canvas31.getContext("2d");
+  canvas31.width = canvas31.height = 1000;
+  
+  let gridSize31 = 15;
+  let tileSize31 = canvas31.width / (gridSize31 - 2);
+  let filledCells31 = 0;
+  let circleSize31 = 0;
+  let innerCircleSize31 = 0.45;
+  let lineWidth31 = 0.3;
+  let innerLineWidth31 = 0.45;
+  let hue31 = 0;
+  let hueVariation31 = 0.25;
+  let turnChance31 = 0.01;
+  let contrast31 = 0.5;
+  let saturation31 = 0.5;
+  let density = 1;
+  let brightnessMult31 = 1;
+  let shadowSize31 = 0.15;
+  
+  let Walker31 = {};
+  Walker31.reset = function() {
+    this.x = Math.floor(Math.random() * gridSize31);
+    this.y = Math.floor(Math.random() * gridSize31);
+    this.direction = Math.floor(Math.random() * 4);
+    
+    while (filledCells31 < gridSize31 * gridSize31 * density) this.walk();
+  };
+  Walker31.isOnGrid = function(direction) {
+    let x = this.x;
+    let y = this.y;
+    if (direction === 0) y--; // Up
+    if (direction === 1) x++; // Right
+    if (direction === 2) y++; // Down
+    if (direction === 3) x--; // Left
+    
+    return x >= 0 && x < gridSize31 && y >= 0 && y < gridSize31;
+  };
+  Walker31.drawLine = function(a, b) {
+    let lineWidth = Math.round((tileSize31 * lineWidth31) / 2) * 2;
+    let h = hue31 + (Math.random() * hueVariation31 * randSign() * 180);
+    let s = randBetween(saturation31, saturation31 * 2) * 100;
+    let l = (50 + (Math.random() * contrast31 * 50 * randSign())) * brightnessMult31;
+    let color = `hsl(${h}deg, ${s}%, ${l}%)`;
+    
+    ctx31.shadowColor = "black";
+    ctx31.shadowBlur = shadowSize31 * tileSize31;
+    
+    ctx31.lineCap = ctx31.lineJoin = "round";
+    
+    ctx31.beginPath();
+    ctx31.moveTo(a.x, a.y);
+    ctx31.lineTo(b.x, b.y);
+    
+    ctx31.lineWidth = lineWidth;
+    ctx31.strokeStyle = color;
+    ctx31.stroke();
+    ctx31.strokeStyle = "black";
+    ctx31.lineWidth = lineWidth * innerLineWidth31;
+    if (innerLineWidth31 !== 0) ctx31.stroke();
+    
+    ctx31.fillStyle = color;
+    ctx31.fillCircle(a.x, a.y, tileSize31 * 0.5 * circleSize31);
+    ctx31.fillCircle(b.x, b.y, tileSize31 * 0.5 * circleSize31);
+    
+    ctx31.shadowBlur = 0;
+    
+    let size = tileSize31 * 0.5 * circleSize31 * innerCircleSize31;
+    if (size <= 0) return;
+    
+    ctx31.fillStyle = "black";
+    ctx31.fillCircle(a.x, a.y, size);
+    ctx31.fillCircle(b.x, b.y, size);
+  };
+  Walker31.walk = function() {
+    if (filledCells31 >= gridSize31 * gridSize31 * density) { // Don't walk if canvas is already filled
+      return;
+    }
+    
+    let lastX = this.x;
+    let lastY = this.y;
+    
+    let directions = [];
+    for (let i = 0; i < 4; i++) {
+      if (this.isOnGrid(i)) directions.push(i); // Find all directions that don't move off the grid
+    }
+    
+    let turning = false;
+    if (Math.random() < turnChance31 || !directions.includes(this.direction)) { // If chance is met, turn randomly (or if current direction is invalid)
+      this.direction = directions[Math.floor(Math.random() * directions.length)];
+      turning = true;
+    }
+    
+    // Randomize settings
+    innerLineWidth31 = Math.round(Math.random() * 8) / 10;
+    circleSize31 = Math.random() < 0.25 ? 0 : Math.round(randBetween(2, 8)) / 10; // 25% chance to have no circle
+    innerCircleSize31 = Math.random() < 0.25 ? -1 : Math.round(randBetween(4, 9)) / 10; // 25% chance to have no inner circle
+    
+    let chosen = this.direction;
+    
+    if (chosen === 0) this.y--; // Up
+    if (chosen === 1) this.x++; // Right
+    if (chosen === 2) this.y++; // Down
+    if (chosen === 3) this.x--; // Left
+    
+    if (!grid31[this.x][this.y]) { // If current cell is not previously filled:
+      grid31[this.x][this.y] = true;
+      filledCells31++;
+      
+      this.drawLine(
+        {
+          x: (lastX - 0.5) * tileSize31,
+          y: (lastY - 0.5) * tileSize31
+        },
+        {
+          x: (this.x - 0.5) * tileSize31,
+          y: (this.y - 0.5) * tileSize31
+        }
+      );
+    }
+  };
+  let grid31 = [];
+  
+  function draw31() {
+    ctx31.fillStyle = "black";
+    ctx31.fillRect(0, 0, canvas31.width, canvas31.height);
+    
+    // Randomize settings
+    hue31 = Math.random() * 360;
+    hueVariation31 = Math.random() * Math.random();
+    gridSize31 = Math.round(randBetween(5, 10)) + 2;
+    lineWidth31 = randBetween(0.2, 0.5);
+    contrast31 = randBetween(0.1, 0.9);
+    saturation31 = randBetween(0.15, 1);
+    turnChance31 = Math.random() < 0.5 ? 1 : 0.01;
+    brightnessMult31 = randBetween(0.4, 1.35);
+    
+    tileSize31 = canvas31.width / (gridSize31 - 2);
+    
+    filledCells31 = 0;
+    
+    grid31 = [];
+    for (let x = 0; x < gridSize31; x++) {
+      let line = [];
+      for (let y = 0; y < gridSize31; y++) {
+        line.push(false); // Filled: true, empty: false
+      }
+      grid31.push(line);
+    }
+    
+    Walker31.reset();
+  }
+  
+  // Harmonic Precision
+  
+  const ctx30 = canvas30.getContext("2d");
+  canvas30.width = canvas30.height = 1000;
+  
+  let numRows30 = 25;
+  let paddingX30 = 0.3;
+  let paddingY30 = 0.3;
+  let lineColor30 = "white";
+  let backgroundColor30 = "black";
+  let endCircleRadius30 = 8;
+  let endPadding30 = 30;
+  let lineWidth30 = 3;
+  let minSize30 = 0.007;
+  let maxSize30 = 0.06;
+  let currFilled30 = false;
+  let sizeRatio30 = 0.8;
+  let maxTries30 = 1000;
+  let shadowSize30 = 10;
+  let shadowIterations30 = 3;
+  
+  function mapValue30(min, max, value, newMin, newMax) {
+    let ratio = (value - min) / (max - min);
+    return (ratio * (newMax - newMin)) + newMin;
+  }
+  
+  function Circle30(boundX, boundY, boundSize, arr, minSize, maxSize, hueOffset) {
+    this.boundX = boundX;
+    this.boundY = boundY;
+    this.boundSize = boundSize;
+    this.arr = arr;
+    this.minSize = minSize;
+    this.maxSize = maxSize;
+    this.hueOffset = hueOffset;
+    
+    this.radius = 0;
+    
+    let tries = 0;
+    this.x = randBetween(this.boundX, this.boundX + this.boundSize);
+    while (!this.isValid()) {
+      this.x = randBetween(this.boundX, this.boundX + this.boundSize);
+      
+      tries++;
+      if (tries > maxTries30) {
+        currFilled30 = true;
+        return;
+      }
+    }
+    
+    this.grow();
+  }
+  Circle30.prototype.isValid = function() {
+    if (this.x - this.boundX < this.minSize) return false;
+    if (this.boundX + this.boundSize - this.x < this.minSize) return false;
+    
+    for (let i = 0; i < this.arr.length; i++) {
+      if (i !== this.arr.indexOf(this)) {
+        let dx = Math.abs(this.arr[i].x - this.x) - this.arr[i].radius;
+        if (dx < this.minSize) return false;
+      }
+    }
+    
+    return true;
+  };
+  Circle30.prototype.grow = function() {
+    let minDist = Infinity;
+    
+    for (let i = 0; i < this.arr.length; i++) {
+      if (i !== this.arr.indexOf(this)) {
+        let dx = Math.abs(this.arr[i].x - this.x) - this.arr[i].radius;
+        if (dx < minDist) minDist = dx;
+      }
+    }
+    
+    let toLeft = this.x - this.boundX;
+    let toRight = this.boundX + this.boundSize - this.x;
+    if (toLeft < minDist) minDist = toLeft;
+    if (toRight < minDist) minDist = toRight;
+    
+    if (minDist > this.maxSize) minDist = this.maxSize;
+    
+    this.radius = minDist;
+    
+    let h = mapValue30(this.minSize, this.maxSize, this.radius, 0, 360) + this.hueOffset;
+    
+    ctx30.fillStyle = `hsl(${h}deg, ${randBetween(50, 100)}%, ${randBetween(10, 40)}%)`;
+    ctx30.strokeStyle = lineColor30;
+    ctx30.lineWidth = Math.min(lineWidth30, this.radius * 0.4);
+    ctx30.fillCircle(this.x, this.boundY, this.radius * sizeRatio30);
+    ctx30.strokeCircle(this.x, this.boundY, this.radius * sizeRatio30);
+    
+    ctx30.fillStyle = lineColor30;
+  };
+  
+  function drawRow30(x, y, len, hueOffset) {
+    let minSize = len * minSize30;
+    let maxSize = len * maxSize30;
+    
+    endCircleRadius30 = 0//randBetween(5, 11);
+    
+    let padding = randBetween(0.6, 3) * endPadding30;
+    
+    ctx30.fillStyle = ctx30.strokeStyle = lineColor30;
+    ctx30.shadowBlur = shadowSize30;
+    
+    ctx30.lineWidth = lineWidth30;
+    ctx30.beginPath();
+    ctx30.moveTo(x - padding, y);
+    ctx30.lineTo(x + len + padding, y);
+    
+    for (let i = 0; i < shadowIterations30; i++) ctx30.stroke();
+    
+    ctx30.shadowBlur = 0;
+    
+    ctx30.fillCircle(x - padding, y, endCircleRadius30);
+    ctx30.fillCircle(x + len + padding, y, endCircleRadius30);
+    
+    let circles = [];
+    currFilled30 = false;
+    while (!currFilled30) circles.push(new Circle30(x, y, len, circles, minSize, maxSize, hueOffset));
+    
+    return [{x: x - padding, y: y}, {x: x + len + padding, y: y}];
+  }
+  
+  function draw30() {
+    ctx30.fillStyle = backgroundColor30;
+    ctx30.fillRect(0, 0, canvas30.width, canvas30.height);
+    
+    ctx30.lineCap = ctx30.lineJoin = "round";
+    
+    numRows30 = Math.round(randBetween(20, 30));
+    maxSize30 = randBetween(0.045, 0.075);
+    let spacing = (canvas30.height * (1 - paddingY30)) / (numRows30 - 1);
+    let hueOffset = Math.random() * 360;
+    lineWidth30 = randBetween(2, 4);
+    
+    let h = Math.random() * 360;
+    
+    lineColor30 = `hsl(${h}deg, ${randBetween(50, 100)}%, ${randBetween(20, 100)}%)`;
+    ctx30.shadowColor = `hsl(${h}deg, 100%, 60%)`;
+    
+    let ends = [];
+    
+    for (let i = 0; i < numRows30; i++) {
+      let y = (i * spacing) + (canvas30.height * paddingY30 * 0.5);
+      
+      ends.push(drawRow30(canvas30.width * paddingX30 * 0.5, y, canvas30.width * (1 - paddingX30), hueOffset));
+    }
+    
+    ctx30.lineWidth = lineWidth30;
+    ctx30.strokeStyle = lineColor30;
+    ctx30.shadowBlur = shadowSize30;
+    for (let i = 0; i < 2; i++) {
+      ctx30.beginPath();
+      ctx30.moveTo(ends[0][i].x, ends[0][i].y);
+      for (let j = 0; j < ends.length; j++) {
+        ctx30.lineTo(ends[j][i].x, ends[j][i].y);
+      }
+      for (let k = 0; k < shadowIterations30; k++) ctx30.stroke();
+    }
+  }
+  
+  // Alien Hieroglyphs
+  
+  const ctx29 = canvas29.getContext("2d");
+  canvas29.width = canvas29.height = 1000;
+  
+  let Walker29 = {};
+  Walker29.checkDirection = function(n) {
+    if (n === 0) { // Up
+      let x = this.x;
+      let y = this.y - 1;
+      if (x < 0 || x >= glyphSize29 || y < 0 || y >= glyphSize29) return false;
+      if (grid29[x][y].filled) return false;
+      return true;
+    }
+    if (n === 1) { // Right
+      let x = this.x + 1;
+      let y = this.y;
+      if (x < 0 || x >= glyphSize29 || y < 0 || y >= glyphSize29) return false;
+      if (grid29[x][y].filled) return false;
+      return true;
+    }
+    if (n === 2) { // Down
+      let x = this.x;
+      let y = this.y + 1;
+      if (x < 0 || x >= glyphSize29 || y < 0 || y >= glyphSize29) return false;
+      if (grid29[x][y].filled) return false;
+      return true;
+    }
+    if (n === 3) { // Left
+      let x = this.x - 1;
+      let y = this.y;
+      if (x < 0 || x >= glyphSize29 || y < 0 || y >= glyphSize29) return false;
+      if (grid29[x][y].filled) return false;
+      return true;
+    }
+    
+    if (n === 4) { // Top Right
+      let x = this.x + 1;
+      let y = this.y - 1;
+      if (x < 0 || x >= glyphSize29 || y < 0 || y >= glyphSize29) return false;
+      if (grid29[x][y].filled || grid29[x][y].diagonal2) return false;
+      return true;
+    }
+    if (n === 5) { // Bottom Right
+      let x = this.x + 1;
+      let y = this.y + 1;
+      if (x < 0 || x >= glyphSize29 || y < 0 || y >= glyphSize29) return false;
+      if (grid29[x][y].filled || grid29[x][y].diagonal1) return false;
+      return true;
+    }
+    if (n === 6) { // Bottom Left
+      let x = this.x - 1;
+      let y = this.y + 1;
+      if (x < 0 || x >= glyphSize29 || y < 0 || y >= glyphSize29) return false;
+      if (grid29[x][y].filled || grid29[x][y].diagonal2) return false;
+      return true;
+    }
+    if (n === 7) { // Top Left
+      let x = this.x - 1;
+      let y = this.y - 1;
+      if (x < 0 || x >= glyphSize29 || y < 0 || y >= glyphSize29) return false;
+      if (grid29[x][y].filled || grid29[x][y].diagonal1) return false;
+      return true;
+    }
+  };
+  Walker29.isOnGrid = function(n) {
+    let x = this.x;
+    let y = this.y;
+    if (n === 0) y--;
+    else if (n === 1) x++;
+    else if (n === 2) y++;
+    else if (n === 3) x--;
+    else if (n === 4) {
+      x++;
+      y--;
+      if (x < 0 || x >= glyphSize29 || y < 0 || y >= glyphSize29) return false;
+      if (grid29[x][y].diagonal2) return false;
+    }
+    else if (n === 5) {
+      x++;
+      y++;
+      if (x < 0 || x >= glyphSize29 || y < 0 || y >= glyphSize29) return false;
+      if (grid29[x][y].diagonal1) return false;
+    }
+    else if (n === 6) {
+      x--;
+      y++;
+      if (x < 0 || x >= glyphSize29 || y < 0 || y >= glyphSize29) return false;
+      if (grid29[x][y].diagonal2) return false;
+    }
+    else if (n === 7) {
+      x--;
+      y--;
+      if (x < 0 || x >= glyphSize29 || y < 0 || y >= glyphSize29) return false;
+      if (grid29[x][y].diagonal1) return false;
+    }
+    
+    return x >= 0 && x < glyphSize29 && y >= 0 && y < glyphSize29;
+  };
+  Walker29.walk = function() {
+    if (filledCells29 >= glyphSize29 * glyphSize29 * density29) return;
+    
+    let lastX = this.x;
+    let lastY = this.y;
+    
+    grid29[this.x][this.y].filled = true;
+    
+    let directions = [];
+    
+    if (directionMode29 === 1) {
+      for (let i = 0; i <= 3; i++) {
+        if (this.checkDirection(i)) directions.push(i);
+      }
+    }
+    else if (directionMode29 === 2) {
+      for (let i = 4; i <= 7; i++) {
+        if (this.checkDirection(i)) directions.push(i);
+      }
+    }
+    else if (directionMode29 === 3) {
+      for (let i = 0; i <= 7; i++) {
+        if (this.checkDirection(i)) directions.push(i);
+      }
+    }
+    
+    if (directions.length === 0) {
+      directions = [];
+      
+      if (directionMode29 === 1) {
+        for (let i = 0; i <= 3; i++) {
+          if (this.isOnGrid(i)) directions.push(i);
+        }
+      }
+      else if (directionMode29 === 2) {
+        for (let i = 4; i <= 7; i++) {
+          if (this.isOnGrid(i)) directions.push(i);
+        }
+      }
+      else if (directionMode29 === 3) {
+        for (let i = 0; i <= 7; i++) {
+          if (this.isOnGrid(i)) directions.push(i);
+        }
+      }
+      
+      let dontTurn = Math.random() > turnChance29 && directions.includes(this.direction);
+      if (!dontTurn) {
+        this.direction = directions[Math.floor(Math.random() * directions.length)];
+      }
+      
+      
+      if (this.direction === 0) this.y--; // Up
+      else if (this.direction === 1) this.x++; // Right
+      else if (this.direction === 2) this.y++; // Down
+      else if (this.direction === 3) this.x--; // Left
+      
+      else if (this.direction === 4) { // Top Right
+        this.x++;
+        this.y--;
+      }
+      else if (this.direction === 5) { // Bottom Right
+        this.x++;
+        this.y++;
+      }
+      else if (this.direction === 6) { // Bottom Left
+        this.x--;
+        this.y++;
+      }
+      else if (this.direction === 7) { // Top Left
+        this.x--;
+        this.y--;
+      }
+      
+      if (overlap29 && !(!grid29[this.x][this.y].diagonal1 && !grid29[this.x][this.y].diagonal2)) {
+        ctx29.moveTo(((lastX + 0.5) * tileSize29) + this.oX, ((lastY + 0.5) * tileSize29) + this.oY);
+        ctx29.lineTo(((this.x + 0.5) * tileSize29) + this.oX, ((this.y + 0.5) * tileSize29) + this.oY);
+      }
+    }
+    else {
+      if (this.direction === 4) { // Top Right
+        let x1 = this.x - 1;
+        let y1 = this.y;
+        let x2 = this.x;
+        let y2 = this.y + 1;
+        
+        if (!(x1 < 0 || x1 >= glyphSize29 || y1 < 0 || y1 >= glyphSize29)) {
+          grid29[x1][y1].diagonal1 = true;
+        }
+        if (!(x2 < 0 || x2 >= glyphSize29 || y2 < 0 || y2 >= glyphSize29)) {
+          grid29[x2][y2].diagonal1 = true;
+        }
+      }
+      else if (this.direction === 5) { // Bottom Right
+        let x1 = this.x - 1;
+        let y1 = this.y;
+        let x2 = this.x;
+        let y2 = this.y - 1;
+        
+        if (!(x1 < 0 || x1 >= glyphSize29 || y1 < 0 || y1 >= glyphSize29)) {
+          grid29[x1][y1].diagonal2 = true;
+        }
+        if (!(x2 < 0 || x2 >= glyphSize29 || y2 < 0 || y2 >= glyphSize29)) {
+          grid29[x2][y2].diagonal2 = true;
+        }
+      }
+      else if (this.direction === 6) { // Bottom Left
+        let x1 = this.x;
+        let y1 = this.y - 1;
+        let x2 = this.x + 1;
+        let y2 = this.y;
+        
+        if (!(x1 < 0 || x1 >= glyphSize29 || y1 < 0 || y1 >= glyphSize29)) {
+          grid29[x1][y1].diagonal1 = true;
+        }
+        if (!(x2 < 0 || x2 >= glyphSize29 || y2 < 0 || y2 >= glyphSize29)) {
+          grid29[x2][y2].diagonal1 = true;
+        }
+      }
+      else if (this.direction === 7) { // Top Left
+        let x1 = this.x + 1;
+        let y1 = this.y;
+        let x2 = this.x;
+        let y2 = this.y + 1;
+        
+        if (!(x1 < 0 || x1 >= glyphSize29 || y1 < 0 || y1 >= glyphSize29)) {
+          grid29[x1][y1].diagonal2 = true;
+        }
+        if (!(x2 < 0 || x2 >= glyphSize29 || y2 < 0 || y2 >= glyphSize29)) {
+          grid29[x2][y2].diagonal2 = true;
+        }
+      }
+      
+      let dontTurn = Math.random() > turnChance29 && directions.includes(this.direction);
+      if (!dontTurn) {
+        this.direction = directions[Math.floor(Math.random() * directions.length)];
+      }
+      
+      if (this.direction === 0) this.y--; // Up
+      else if (this.direction === 1) this.x++; // Right
+      else if (this.direction === 2) this.y++; // Down
+      else if (this.direction === 3) this.x--; // Left
+      else if (this.direction === 4) { // Top Right
+        this.x++;
+        this.y--;
+      }
+      else if (this.direction === 5) { // Bottom Right
+        this.x++;
+        this.y++;
+      }
+      else if (this.direction === 6) { // Bottom Left
+        this.x--;
+        this.y++;
+      }
+      else if (this.direction === 7) { // Top Left
+        this.x--;
+        this.y--;
+      }
+      
+      filledCells29++;
+      
+      ctx29.moveTo(((lastX + 0.5) * tileSize29) + this.oX, ((lastY + 0.5) * tileSize29) + this.oY);
+      ctx29.lineTo(((this.x + 0.5) * tileSize29) + this.oX, ((this.y + 0.5) * tileSize29) + this.oY);
+    }
+  };
+  
+  let gridSize29 = 8;
+  let padding29 = 0.2;
+  let glyphSize29 = 3;
+  
+  let filledCells29 = 0;
+  let density29 = 1;
+  let grid29 = [];
+  let directionMode29 = 3;
+  let turnChance29 = 0.1;
+  let tileSize29 = 0;
+  let thickness29 = 0.4;
+  let hue29 = 120;
+  let contrast29 = 0.7;
+  let hueVariation29 = 0.15;
+  let shadowOpacity29 = 0.8;
+  let shadowSize29 = 1.5;
+  let shadowIterations29 = 2;
+  let overlap29 = false;
+  
+  function draw29() {
+    ctx29.fillStyle = "black";
+    ctx29.fillRect(0, 0, canvas29.width, canvas29.height);
+    
+    hue29 = Math.random() * 360;
+    
+    let lens = [];
+    for (let i = 0; i < gridSize29; i++) lens.push(Math.round(randBetween(2, gridSize29)));
+    
+    for (let x = 0; x < gridSize29; x++) {
+      for (let y = 0; y < gridSize29; y++) {
+        density29 = Math.round(randBetween(7, 10)) / 10;
+        thickness29 = randBetween(0.3, 0.5);
+        
+        if (Math.random() < 0.5) glyphSize29 = 4;
+        else glyphSize29 = 3;
+        
+        let tileSize = canvas29.width / gridSize29;
+        let paddedSize = tileSize * (1 - padding29);
+        tileSize29 = paddedSize / glyphSize29;
+        let offset = padding29 * tileSize * 0.5;
+        
+        if ((y + 1) <= lens[x]) {
+          Walker29.oX = (x * tileSize) + offset;
+          Walker29.oY = (y * tileSize) + offset;
+          
+          Walker29.x = Math.floor(Math.random() * glyphSize29);
+          Walker29.y = Math.floor(Math.random() * glyphSize29);
+          Walker29.direction = Math.round(randBetween(0, 3));
+          
+          filledCells29 = 1;
+          
+          grid29 = [];
+          for (let i = 0; i < glyphSize29; i++) {
+            let line = [];
+            for (let j = 0; j < glyphSize29; j++) {
+              line.push({filled: false, diagonal1: false, diagonal2: false});
+            }
+            grid29.push(line);
+          }
+          
+          //if (Math.random() < 0.2) directionMode29 = 1;
+          //else directionMode29 = 3;
+          
+          let h = hue29 + (Math.random() * 180 * hueVariation29 * randSign());
+          let brightness = 50 + (Math.random() * 40 * contrast29 * randSign());
+          
+          ctx29.shadowColor = `hsla(${h}deg, 100%, ${brightness}%, ${shadowOpacity29})`;
+          ctx29.shadowBlur = (tileSize29 * thickness29).toMultipleOf(2) * shadowSize29;
+          
+          ctx29.lineWidth = (tileSize29 * thickness29).toMultipleOf(2);
+          ctx29.lineCap = ctx29.lineJoin = "round";
+          ctx29.strokeStyle = `hsl(${h}deg, 100%, ${brightness}%)`;
+          ctx29.beginPath();
+          
+          while (filledCells29 < glyphSize29 * glyphSize29 * density29) Walker29.walk();
+          
+          for (let k = 0; k < shadowIterations29; k++) ctx29.stroke();
+          
+          ctx29.shadowBlur = 0;
+        }
+      }
+    }
+  }
   
   // Dominions of Topology
   
