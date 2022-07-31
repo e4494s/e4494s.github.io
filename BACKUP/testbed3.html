@@ -57,6 +57,908 @@
   }
 </script>
 -->
+<div class = "project-num">Project #14: Sunny-Side-Up Eggsteroid Belt</div>
+<canvas id = "canvas14" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "draw14()">Redraw</button>
+<div class = "desc">
+  <b><i>(7/18/2022):</i></b> Experimenting with random blob generating turning into this Eggsteroid Belt. The eggs are placed with normal circle packing, and the shapes of the eggs are are made by assigning random radii around a point and then averaging out each radius with its neighbors a few times (and scaling so it matches the initial given radius).
+  <br><br>
+  <b><i>(7/20/2022):</i></b> I spent ages trying to change the code so that eggs could be closer together, based on the actual shape of the egg, instead of just the bounding circle around it. I finally got it working though, which means that the eggs pack together better and leave less awkward spaces.
+  <br>
+  <b><i>(Later that night):</i></b> I added a Path object that eggs can't touch, which is a randomized sine wave snaking across the canvas, clearing a path through the asteroid field.
+  <br><br>
+  <b><i>(7/18/2022):</i></b> I added a rocket that is placed randomly in the open path, and is angled so it looks like it's flying through the path. It's just a blue rectangle for now but I want to make it a bacon rocketship to fit with the breakfast/space theme. I also added random tiny stars in the background to fill the empty space better and also make it more clear that this is in space, and added some randomization for the minimum and maximum circle sizes to create more variation on each generation.
+  <br><br>
+  <b><i>(7/24/2022):</i></b> I finally got an algorithm working for drawing random bacon, and I actually like how it turned out. It has a random size, waviness, number of stripes, etc. and it replaces the blue rectangle as the rocket body.
+  <br>
+  <b><i>(Later that day):</i></b> Added a fire trail to the bacon rocket and added motion blur lines that slope with the path to show the route the rocket has taken, and indicate it's going really fast.
+</div>
+<hr><hr>
+<script>
+  const ctx14 = canvas14.getContext("2d");
+  canvas14.width = canvas14.height = 1000;
+  
+  let smoothness14 = 25;
+  let numPoints14 = 100;
+  let maxCircles14 = 2000;
+  let canvas14Filled = false;
+  let minCircle14Size = 15;//10;
+  let maxCircle14Size = 175;
+  let edgeBoundaries14 = false; // If true, the circles will touch the edge, otherwise they will grow past the canvas
+  let sizeRatio14 = 1;
+  let innerRatio14 = 0.4;
+  let lineWidthRatio14 = 0.04;
+  let fitToEggShape14 = true; // For debugging, whether or not the eggs are treated as pure circles or as organic shapes for shape packing
+  
+  let Rocket14 = {
+    x: 0,
+    y: 0,
+    width: 80,
+    height: 30,
+    numStripes: 4,
+    waviness: 3,
+    offsetX: 0,
+    cycles: 1
+  };
+  Rocket14.palette = function(i) {
+    if (i === 0 || i === this.numStripes - 2) { // First or last stripe
+      let h = 0 + randBetween(-10, 10);
+      let s = 71 + randBetween(-5, 5);
+      let l = 41 + randBetween(-5, 5);
+      return `hsl(${h}deg, ${s}%, ${l}%)`;
+    }
+    if (i === Math.floor((this.numStripes - 1) / 2)) {
+      let h = 36 + randBetween(-10, 10);
+      let s = 78 + randBetween(-5, 5);
+      let l = 70 + randBetween(-5, 5);
+      return `hsl(${h}deg, ${s}%, ${l}%)`;
+    }
+    
+    let h = 0 + randBetween(-10, 10);
+    let s = 90 + randBetween(-5, 5);
+    let l = 65 + randBetween(-5, 5);
+    return `hsl(${h}deg, ${s}%, ${l}%)`;
+  };
+  Rocket14.draw = function() {
+    this.y = pointOnPath14(this.x) + (randBetween(-0.35, 0.35) * Path14.thickness); // Find y value on path, with some variation up and down
+    
+    let angle = toDeg(Math.atan(slopeOnPath14(this.x))); // Find angle to make rocket point along path
+    
+    // Uncomment to draw rocket's bounding box
+    //ctx14.fillStyle = "blue";
+    //ctx14.fillRotatedRectFromCenter(this.x, this.y, this.width, this.height, angle);
+    
+    ctx14.save();
+    ctx14.translate(this.x, this.y);
+    ctx14.rotate(toRad(angle));
+    
+    // Draw motion blur lines
+    
+    ctx14.lineCap = "round";
+    ctx14.lineWidth = 1;
+    ctx14.strokeStyle = "rgba(255, 255, 255, 0.5)";
+    for (let i = 0; i < 40; i++) {
+      let _x = randBetween(-1.25, 0.2) * this.width;
+      let _y = randBetween(-1.35, 1.35) * this.height * Math.random();
+      let len = this.width * randBetween(0.15, 0.25) * randSign();
+      let iAngle = toDeg(Math.atan(slopeOnPath14(this.x + _x)));
+      let a = toRad(iAngle - angle);
+      
+      drawCenteredLine14(_x, _y, len, a);
+    }
+    
+    // Draw smoke
+    
+    let numSmokes = 200;
+    for (let i = 0; i < numSmokes; i++) {
+      let _x = -this.width / 2;
+      let _y = -this.height / 2;
+      
+      let endY = _y + this.height;
+      
+      let t = randBetween(0.25, 0.75);
+      let smokeX = _x;
+      let smokeY = ((_y - endY) * t) + endY;
+      
+      drawSmoke14(
+        smokeX, // x
+        smokeY, // y
+        this.height * 0.12, // size
+        this.width * 1.2, // travel
+        toRad(angle + 180), // angle
+        toRad(35) // spread
+      );
+    }
+    
+    // Draw bacon
+    
+    for (let i = 0; i < this.numStripes - 1; i++) {
+      let iRatio = i / (this.numStripes - 1);
+      
+      let _y = (-this.height / 2) + (this.height * iRatio);
+      let height = this.height * 0.5 * (1 / this.numStripes) * this.waviness;
+      
+      ctx14.strokeStyle = this.palette(i);
+      ctx14.lineWidth = 3;
+      ctx14.lineCap = "butt";
+      
+      drawSquigglyStripe14(
+        -this.width / 2, // x
+        _y, // y
+        this.width, // width
+        height, // height
+        this.offsetX, // offsetX
+        this.cycles, // cycles
+        this.height * (1 / (this.numStripes - 1)) // thickness
+      );
+    }
+    
+    ctx14.restore();
+  };
+  
+  function drawCenteredLine14(x, y, len, angle) {
+    let xComp = len * Math.cos(angle) * 0.5;
+    let yComp = len * Math.sin(angle) * 0.5;
+    ctx14.beginPath();
+    ctx14.moveTo(x - xComp, y - yComp);
+    ctx14.lineTo(x + xComp, y + yComp);
+    ctx14.stroke();
+  }
+  
+  function drawSmoke14(x, y, size, travel, angle, spread) {
+    let ratio = Math.random() * Math.random();
+    
+    let a = angle + randBetween(-spread, spread);
+    let r = ratio * travel;
+    
+    let _x = x + (r * Math.cos(a));
+    let _y = y + (r * Math.sin(a));
+    
+    let h = 60 + randBetween(-15, 15);
+    let s = randBetween(80, 100);
+    let l = (Math.random() * Math.random() * 50) + 50;
+    ctx14.fillStyle = `hsl(${h}deg, ${s}%, ${l}%)`;
+    ctx14.globalAlpha = (1 - ratio) * 0.5;
+    ctx14.fillCircle(_x, _y, size * (1 - ratio));
+    ctx14.globalAlpha = 1;
+  }
+  
+  let Path14 = {
+    offsetX: 0, // Shifts wave left and right
+    offsetY: 0, // Shifts wave up and down
+    cycles: 1.5, // Number of cycles across the canvas
+    height: 250, // Distance from middle to top of crest (half total height, technically)
+    thickness: 50 // Closest distance an egg can be from the wave itself (half total thickness, technically)
+  }; // Path where eggs can't touch, to allow a way through the asteroid belt
+  
+  function drawSquigglyStripe14(x, y, width, height, offsetX, cycles, thickness) {
+    let numPoints = 100;
+    
+    let yCorrection = height * Math.sin(offsetX); // In case a wave starts not at y = 0, adjust all y-values so it does
+    
+    for (let i = 0; i < numPoints; i++) {
+      let iRatio = i / (numPoints - 1);
+      let theta = (iRatio * Math.PI * 2 * cycles) + offsetX; // theta value based on points drawn
+      
+      let _x = x + (iRatio * width);
+      let _y = y + (height * Math.sin(theta)) - yCorrection;
+      
+      ctx14.beginPath();
+      ctx14.moveTo(_x, _y);
+      ctx14.lineTo(_x, _y + thickness);
+      ctx14.stroke();
+    }
+  }
+  
+  function validatePoint14(x, y) {
+    for (let i = 0; i < circle14Array.length; i++) {
+      let circle = circle14Array[i];
+      
+      let dx = circle.x - x;
+      let dy = circle.y - y;
+      let distSq = (dx * dx) + (dy * dy);
+      let r = circle.radius + minCircle14Size;
+      if (distSq <= r * r) { // If point is within bounding circle of current egg:
+        if (!fitToEggShape14) return false;
+        // Find closest point in that egg
+        let minDist = Infinity;
+        let closest;// = {x: 0, y: 0, radius: 0};
+        for (let j = 0; j < circle.points.length; j++) {
+          let P = circle.points[j];
+          let _dx = P.x - x;
+          let _dy = P.y - y;
+          let _distSq = (_dx * _dx) + (_dy * _dy);
+          if (_distSq < minDist) {
+            minDist = _distSq;
+            closest = circle.points[j];
+          }
+        }
+        
+        let _r = closest.radius + minCircle14Size;
+        if (distSq <= _r * _r) return false; // Return false if it's inside (or to close to) the egg's shape
+      }
+    }
+    if (edgeBoundaries14) {
+      if (x < minCircle14Size || x > canvas14.width - minCircle14Size) return false; // Too close to left/right
+      if (y < minCircle14Size || y > canvas14.height - minCircle14Size) return false; // Too close to top/bottom
+    }
+    
+    let distToPath = distToPath14(x, y);
+    if (distToPath < minCircle14Size) return false;
+    
+    return true;
+  }
+  
+  function slopeOnPath14(x) {
+    let xRatio = x / canvas14.width;
+    
+    let theta = Math.PI * 2 * Path14.cycles * xRatio;
+    theta += Path14.offsetX;
+    
+    return (Math.PI * 2 * Path14.cycles * Path14.height * Math.cos(theta)) / canvas14.width;
+  }
+  
+  function pointOnPath14(x) {
+    let xRatio = x / canvas14.width;
+    
+    let theta = Math.PI * 2 * Path14.cycles * xRatio;
+    theta += Path14.offsetX;
+    
+    return (Path14.height * Math.sin(theta)) + (canvas14.height / 2) + Path14.offsetY;
+  }
+  
+  function distToPath14(x, y) {
+    let pathY = pointOnPath14(x);
+    
+    let dist = Math.abs(pathY - y) - Path14.thickness;
+    
+    return dist;
+  }
+  
+  function Circle14() {
+    let x = Math.random() * canvas14.width;
+    let y = Math.random() * canvas14.height;
+    let tries = 0;
+    while (!validatePoint14(x, y)) {
+      if (tries > 1000) {
+        canvas14Filled = true;
+        return;
+      }
+      x = Math.random() * canvas14.width;
+      y = Math.random() * canvas14.height;
+      tries++;
+    }
+    this.x = x;
+    this.y = y;
+    this.radius = 0;
+    
+    this.points = [];
+    
+    this.grow();
+  }
+  Circle14.prototype.grow = function() {
+    // Find closest circle and grow
+    
+    let smallestDist = Infinity;
+    for (let i = 0; i < circle14Array.length; i++) {
+      if (i != circle14Array.indexOf(this)) {
+        let circle = circle14Array[i];
+        let dx = this.x - circle.x;
+        let dy = this.y - circle.y;
+        let distSq = (dx * dx) + (dy * dy); // Distance to center of circle, squared
+        
+        if (!fitToEggShape14) {
+          let dist = Math.sqrt(distSq) - circle.radius; // Find shortest distance to egg
+          if (dist <= smallestDist) smallestDist = dist;
+        }
+        else {
+          let minDist = Infinity; // Find closest point
+          let closest;
+          for (let j = 0; j < circle.points.length; j++) {
+            let P = circle.points[j];
+            let _dx = P.x - this.x;
+            let _dy = P.y - this.y;
+            let _distSq = (_dx * _dx) + (_dy * _dy);
+            if (_distSq < minDist) {
+              minDist = _distSq;
+              closest = P;
+            }
+          }
+          
+          let dist = Math.sqrt(distSq) - closest.radius; // Find shortest distance to egg
+          if (dist <= smallestDist) smallestDist = dist;
+        }
+      }
+    }
+    if (edgeBoundaries14) {
+      let distToTop = this.y;
+      if (distToTop <= smallestDist) smallestDist = distToTop;
+      let distToRight = canvas14.width - this.x;
+      if (distToRight <= smallestDist) smallestDist = distToRight;
+      let distToBottom = canvas14.height - this.y;
+      if (distToBottom <= smallestDist) smallestDist = distToBottom;
+      let distToLeft = this.x;
+      if (distToLeft <= smallestDist) smallestDist = distToLeft;
+    }
+    
+    let distToPath = distToPath14(this.x, this.y);
+    if (distToPath <= smallestDist) smallestDist = distToPath;
+    
+    this.radius = Math.min(smallestDist, maxCircle14Size);
+    
+    let points = numPoints14;
+    
+    ctx14.strokeStyle = "black";
+    ctx14.lineWidth = Math.max(2, this.radius * lineWidthRatio14);
+    ctx14.lineCap = ctx14.lineJoin = "round";
+    
+    // Draw egg white
+    ctx14.fillStyle = "white";
+    this.points = drawBlob14(this.x, this.y, this.radius, sizeRatio14, points, false);
+    
+    // Draw egg yolk (less points so its smoother)
+    ctx14.fillStyle = "yellow";
+    drawBlob14(this.x, this.y, this.radius, sizeRatio14 * innerRatio14, Math.round(points / 1.75), true);
+  };
+  let circle14Array = [];
+  
+  function drawBlob14(x, y, radius, scale, numPoints, doStroke) {
+    let radii = []; // Obtain list of radii for points
+    for (let i = 0; i < numPoints; i++) {
+      radii.push(radius * randBetween(0.1, 1));
+      //if (radius * randBetween(0.1, 1) <= 0) console.log("oh no");
+    }
+    for (let i = 0; i < smoothness14; i++) { // Average each radius with its adjacent neighbors to smooth the blob
+      let nextRadii = [];
+      for (let j = 0; j < radii.length; j++) {
+        let left = radii[(j - 1 + radii.length) % radii.length]; // Left neighbor
+        let right = radii[(j + 1) % radii.length]; // Right neighbor
+        nextRadii.push((left + radii[j] + right) / 3); // Average of sum
+      }
+      radii = nextRadii;
+    }
+    
+    // Find largest radius
+    let maxRadius = 0;
+    for (let i = 0; i < radii.length; i++) {
+      if (radii[i] > maxRadius) maxRadius = radii[i];
+    }
+    
+    let correction = radius / maxRadius; // Multiplier to normalize radii so they don't shrink too small after averaging
+    
+    let points = [];
+    
+    ctx14.beginPath(); // Draw lines connecting all radii
+    let zeroX, zeroY;
+    for (let i = 0; i < numPoints; i++) {
+      let theta = (i / numPoints) * Math.PI * 2;
+      let r = radii[i] * correction;
+      let c = Math.cos(theta);
+      let s = Math.sin(theta);
+      let _x = x + (r * scale * c);
+      let _y = y + (r * scale * s);
+      
+      points.push({
+        x: x + (r * c),
+        y: y + (r * s),
+        radius: r
+      });
+      
+      if (i === 0) {
+        zeroX = _x;
+        zeroY = _y;
+        ctx14.moveTo(_x, _y);
+      }
+      else ctx14.lineTo(_x, _y);
+    }
+    
+    ctx14.lineTo(zeroX, zeroY);
+    ctx14.fill();
+    if (doStroke) ctx14.stroke();
+    
+    return points;
+  }
+  
+  function draw14() {
+    ctx14.fillStyle = "black";
+    ctx14.fillRect(0, 0, canvas14.width, canvas14.height);
+    
+    let numStars = Math.round(randBetween(500, 1500));
+    ctx14.fillStyle = "white";
+    for (let i = 0; i < numStars; i++) {
+      let x = Math.random() * canvas14.width;
+      let y = Math.random() * canvas14.height;
+      let radius = randBetween(0.5, 1.5);
+      for (let j = 0; j < 2; j++) ctx14.fillCircle(x, y, radius);
+    }
+    
+    Path14.cycles = randBetween(0.75, 1.5);
+    Path14.height = randBetween(50, 100);
+    Path14.thickness = randBetween(randBetween(50, 75), 100);
+    Path14.offsetX = Math.random() * Math.PI * 2;
+    Path14.offsetY = randBetween(-150, 150);
+    
+    Rocket14.x = randBetween(0.15, 0.85) * canvas14.width;
+    Rocket14.height = Math.max(25, Path14.thickness * randBetween(0.35, 0.6));
+    Rocket14.width = Rocket14.height * randBetween(2.25, 2.75) * 1.25;
+    Rocket14.waviness = randBetween(2, 3);
+    Rocket14.offsetX = Math.random() * Math.PI * 2;
+    Rocket14.cycles = randBetween(1, 1.35);
+    Rocket14.numStripes = Math.round(randBetween(4, 6));
+    
+    minCircle14Size = randBetween(12, 18);
+    maxCircle14Size = randBetween(100, 200);
+    sizeRatio14 = Math.min(100, Math.round(randBetween(95, 105))) / 100;
+    
+    ctx14.fillStyle = "red";
+    canvas14Filled = false;
+    circle14Array = [];
+    
+    while (circle14Array.length < maxCircles14 && !canvas14Filled) circle14Array.push(new Circle14());
+    
+    Rocket14.draw();
+  }
+  draw14();
+</script>
+<div class = "project-num">Project #13: Luminous Snowflakes</div>
+<canvas id = "canvas13"></canvas>
+<button onclick = "startCanvas13(this)" style = "color: red; border-color: red"><b><i>Paused</i></b></button>
+<button onclick = "reset13()">Reset</button>
+<div style = "color: dimgray; margin: 5px; font-size: 11px"><i><b>[ FPS: <span id = "fps13Txt"></span> ]</b></i></div>
+<div class = "desc">
+  <b><i>(7/17/2022):</i></b> I was inspired by the look of Project #12 so this has a similar structure. A number of "Collectors" are strewn about the canvas, each with a set position, hue, scale, angle, etc. Each frame (2000 times), a random Collector is chosen and a line is drawn, biased towards the center of the collector. The angle of the drawn line is constrained to be a multiple of 60&deg; to make 6-fold symmetry (and angled by the Collector's angle). This creates interesting patterns from the overlay of hundreds of thousands of incredibly thin and translucent lines that resemble snowflake shapes.
+  <br>
+  <b><i>(Later that night):</i></b> Added more settings that are randomized every time you click "Reset." I wanted to make this a piece in the Generative Art Gallery, but in order for it to have the look I want, over 300,000 lines have to be drawn, which takes a solid 5-6 seconds every single time, which would probably be way too laggy to actually implement.
+  <br>
+  <b><i>(Even later that night):</i></b> Added a tilt variable that affects how offset the lines' angles are, instead of always snapping to a 60&deg; multiple.
+</div>
+<hr><hr>
+<script>
+  const ctx13 = canvas13.getContext("2d");
+  canvas13.width = canvas13.height = 1000;
+  let canvas13Running = false;
+  
+  let opacity13 = 0.03;
+  let lineWidth13 = 0.25;
+  let numCollectors13 = 25;
+  let lineLength13 = 300;
+  let stepsPerFrame13 = 2000; // 350,000 for drawing all at once
+  let bias13 = 3; // Bias toward center for positioning new lines
+  let spread13 = 0.25;
+  let hueVariation13 = 0.2;
+  let hue13 = 240;
+  let currDrawn13 = 0;
+  let tilt13 = 5;
+  
+  function rand13() {
+    let r = 1;
+    for (let i = 0; i < bias13; i++) r *= Math.random();
+    return r;
+  }
+  
+  function Collector13() { // "Collector" because it collects random lines
+    this.x = Math.random() * canvas13.width;
+    this.y = Math.random() * canvas13.height;
+    this.hue = hue13 + (Math.random() * randSign() * hueVariation13 * 180);
+    this.angle = Math.random() * Math.PI * 2;
+    
+    this.scale = randBetween(0.5, 1);
+  }
+  let collector13Array = [];
+  
+  function drawLineFromCenter13(x, y, len, sin, cos) {
+    let xComp = len * cos * 0.5;
+    let yComp = len * sin * 0.5;
+    
+    ctx13.beginPath();
+    ctx13.moveTo(x - xComp, y - yComp);
+    ctx13.lineTo(x + xComp, y + yComp);
+    ctx13.stroke();
+  }
+  
+  function drawLine13() {
+    if (collector13Array.length === 0) return;
+    
+    currDrawn13++;
+    
+    let selected = collector13Array[Math.floor(Math.random() * collector13Array.length)];
+    
+    ctx13.lineWidth = lineWidth13;
+    let h = selected.hue + randBetween(-15, 15);
+    let s = randBetween(50, 100);
+    let l = randBetween(50, 90);
+    let a = opacity13;
+    ctx13.strokeStyle = `hsla(${h}deg, ${s}%, ${l}%, ${a})`;
+    
+    let theta = Math.random() * Math.PI * 2; // Angle for positioning new line
+    let radius = canvas13.width * spread13 * rand13(); // Radius for positioning new line
+    let x = selected.x + (radius * Math.cos(theta));
+    let y = selected.y + (radius * Math.sin(theta));
+    
+    let phi = toRad((Math.random() * 360).toMultipleOf(60) + randBetween(-tilt13, tilt13)) + selected.angle;
+    let cos = Math.cos(phi);
+    let sin = Math.sin(phi);
+    
+    let len = randBetween(0.3, 1) * lineLength13 * selected.scale;
+    
+    drawLineFromCenter13(x, y, len, cos, sin);
+  }
+  
+  function reset13() {
+    ctx13.fillStyle = "black";
+    ctx13.fillRect(0, 0, canvas13.width, canvas13.height);
+    
+    currDrawn13 = 0;
+    
+    randomSettings13();
+    
+    collector13Array = [];
+    for (let i = 0; i < numCollectors13; i++) collector13Array.push(new Collector13());
+    
+    if (!canvas13Running) frame13();
+  }
+  
+  function randomSettings13() {
+    hue13 = Math.random() * 360;
+    bias13 = Math.random() < 0.5 ? 4 : 3;
+    hueVariation13 = 1 - (Math.random() * Math.random());
+    numCollectors13 = Math.round(randBetween(10, 30));
+    lineLength13 = randBetween(250, 450);
+    tilt13 = Math.random() * 10;
+  }
+  
+  let lastFrame13Time = 0;
+  let lastFps13DisplayTime = 1000;
+  function frame13() {
+    if (Date.now() - lastFps13DisplayTime >= 500) {
+      fps13Txt.innerHTML = (1000 / (Date.now() - lastFrame13Time)).toFixed(1);
+      lastFps13DisplayTime = Date.now();
+    }
+    lastFrame13Time = Date.now();
+    
+    for (let i = 0; i < stepsPerFrame13; i++) drawLine13();
+    
+    if (canvas13Running) requestAnimationFrame(frame13);
+  }
+  stepsPerFrame13 = 100000;
+  reset13();
+  stepsPerFrame13 = 2000;
+  
+  function startCanvas13(caller) {
+    if (canvas13Running) {
+      canvas13Running = false;
+      caller.innerHTML = "<b><i>Paused</i></b>";
+      caller.style.color = caller.style.borderColor = "red";
+    }
+    else {
+      canvas13Running = true;
+      caller.innerHTML = "<b><i>Running</i></b>";
+      caller.style.color = caller.style.borderColor = "green";
+      frame13();
+    }
+  }
+</script>
+<div class = "project-num">Project #12: Random Crossing Lines</div>
+<canvas id = "canvas12"></canvas>
+<button onclick = "draw12()">Redraw</button>
+<div class = "desc">
+  <b><i>(7/16/2022):</i></b> I'm honestly not really sure what this is. It started out as an attempt to draw some simple colorful pattern for a background on Project #11, but it didn't fit the galaxy theme so I moved it to a new project. It's basically a 50&times;50 grid randomly filled with bars that go from left-to-right or top-to-bottom, but positioned from their corner, and biased towards the center of the canvas. This creates an interesting shape in the middle of the canvas.
+</div>
+<hr><hr>
+<script>
+  const ctx12 = canvas12.getContext("2d");
+  canvas12.width = canvas12.height = 1000;
+  
+  let hue12 = 0;
+  
+  function drawLine12() {
+    let a = Math.random() * Math.PI * 2;
+    let r = Math.random() * Math.random() * Math.random() * canvas12.width * Math.SQRT2;
+    let x = ((canvas12.width * 0.3) + (r * Math.cos(a))).toMultipleOf(20);
+    let y = ((canvas12.height * 0.3) + (r * Math.sin(a))).toMultipleOf(20);
+    
+    let h = hue12 + randBetween(-15, 15);
+    let s = Math.random() * 100;
+    let l = randBetween(80, 95);
+    ctx12.strokeStyle = `hsla(${h}deg, ${s}%, ${l}%, 0.02)`; // Random very bright color
+    ctx12.lineWidth = 20//randBetween(10, 15);
+    
+    ctx12.lineCap = ctx12.lineJoin = "square";
+    ctx12.beginPath();
+    ctx12.moveTo(x, y);
+    if (Math.random() < 0.5) ctx12.lineTo(x, y + (randBetween(50, 150) * 4).toMultipleOf(20));
+    else ctx12.lineTo(x + (randBetween(50, 150) * 4).toMultipleOf(20), y);
+    ctx12.stroke();
+  }
+  
+  function draw12() {
+    hue12 = Math.random() * 360;
+    
+    let h = 240 + (Math.random() * randSign() * 20);
+    let s = randBetween(25, 75);
+    let l = Math.max(0, randBetween(-2, 5));
+    ctx12.fillStyle = `hsl(${h}deg, ${s}%, ${l}%)`; // Random very dark color
+    ctx12.fillRect(0, 0, canvas12.width, canvas12.height);
+    
+    let numLines = 3000;
+    for (let i = 0; i < numLines; i++) drawLine12();
+    return;
+  }
+  draw12();
+</script>
+<div class = "project-num">Project #11: Clustering Stars</div>
+<canvas id = "canvas11" style = "width: 500px; height: 500px"></canvas>
+<button onclick = "draw11()">Redraw</button>
+<div class = "desc">
+  <b><i>(7/16/2022):</i></b> I wanted to make a generative art galaxy generator, but currently I only have the stars working. The stars randomly lerp to a few random invisible black holes around the canvas so that they cluster and form structures and groups, instead of just being randomly strewn about the canvas. I want to add more to this generator eventually so that it actually looks like an intricate galaxy.
+</div>
+<hr><hr>
+<script>
+  const ctx11 = canvas11.getContext("2d");
+  canvas11.width = canvas11.height = 1000;
+  
+  let colorfulness11 = 0;
+  let hue11 = 0;
+  
+  function drawStar11(x, y, scale) {
+    let h = Math.random() * 360;
+    let s = Math.random() * 100;
+    let l = Math.min(100, randBetween(90 - (Math.random() * 40 * colorfulness11), 90 - (Math.random() * 20 * colorfulness11)));
+    ctx11.fillStyle = `hsl(${h}deg, ${s}%, ${l}%)`; // Random very bright color
+    
+    let size = randBetween(1.5, 3) * scale;
+    
+    ctx11.shadowColor = `hsla(${h}deg, ${s}%, ${l}%, 0.65)`;
+    ctx11.shadowBlur = size * randBetween(2, 4);
+    
+    let iterations = Math.round(randBetween(2, 4)); // Iterations for shadow drawing, higher values make it more intense
+    for (let i = 0; i < iterations; i++) {
+      ctx11.fillCircle(x, y, size);
+      //ctx11.fillRectFromCenter(x, y, size * 2, size * 2);
+    }
+    
+    ctx11.shadowBlur = 0;
+  }
+  
+  function lerp11(a, b, t) {
+    return {x: a.x + ((b.x - a.x) * t), y: a.y + ((b.y - a.y) * t)};
+  }
+  
+  function draw11() {
+    colorfulness11 = Math.random() * 0.6;
+    hue11 = Math.random() * 360;
+    
+    let h = 240 + (Math.random() * randSign() * 20);
+    let s = randBetween(25, 75);
+    let l = Math.max(0, randBetween(-2, 5));
+    ctx11.fillStyle = `hsl(${h}deg, ${s}%, ${l}%)`; // Random very dark color
+    ctx11.fillRect(0, 0, canvas11.width, canvas11.height);
+    
+    let numBlackHoles = Math.round(randBetween(4, 7));
+    let blackHoleArray = []; // Black holes that stars will move towards to gather into clumps more
+    for (let i = 0; i < numBlackHoles; i++) {
+      blackHoleArray.push({x: randBetween(-0.25, 1.25) * canvas11.width, y: randBetween(-0.25, 1.25) * canvas11.height});
+    }
+    
+    let numStars = Math.round(randBetween(250, 700));
+    let starArray = []; // Initialize array of random stars
+    for (let i = 0; i < numStars; i++) {
+      starArray.push({
+        x: Math.random() * canvas11.width,
+        y: Math.random() * canvas11.height,
+        scale: 1
+      });
+    }
+    let numBigStars = Math.round(randBetween(0, 6)); // Add a few extra big stars
+    for (let i = 0; i < numBigStars; i++) {
+      starArray.push({
+        x: Math.random() * canvas11.width,
+        y: Math.random() * canvas11.height,
+        scale: randBetween(2, 3)
+      });
+    }
+    
+    let moveChance = randBetween(0.7, 0.8); // Chance for stars to move towards a random black hole
+    
+    for (let i = 0; i < starArray.length; i++) {
+      let star = starArray[i];
+      
+      if (numBlackHoles > 0) {
+        let selectedBlackHole = blackHoleArray[Math.floor(Math.random() * blackHoleArray.length)]; // Choose random black hole
+        
+        // If moveChance is met, lerp current star 60%-80% towards a random black hole
+        let newPos = lerp11(star, selectedBlackHole, randBetween(0.5, 0.9));
+        if (Math.random() < moveChance) {
+          star.x = newPos.x;
+          star.y = newPos.y;
+        }
+      }
+      
+      drawStar11(star.x, star.y, star.scale);
+    }
+  }
+  draw11();
+</script>
+<div class = "project-num">Project #10: Random Open Circles in a Grid</div>
+<canvas id = "canvas10"></canvas>
+<button onclick = "draw10()">Redraw</button>
+<button id = "switchButton10" onclick = "switchMode10()">Mode: Old</button>
+<div class = "desc">
+  <b><i>(7/14/2022):</i></b> I'm not really sure where I was going with this, but the final result is kinda interesting looking. It's a variation on Project #87 in <a href = "testbed2.html" target = "_blank">Test Bed 2</a>, but where the smallest circles aren't drawn, and each circle has a random "mouth" cut out from it. It looked different in my head before making it, so I'm not super proud of the outcome, but it looks cool enough that I'll keep it.
+  <br><br>
+  <b><i>(7/16/2022):</i></b> I changed how the "mouths" draw to just be a slice cut out of a full circle instead of a strange rounded cutout (but added a button to switch to the old moded too).
+</div>
+<hr><hr>
+<script>
+  const ctx10 = canvas10.getContext("2d");
+  canvas10.width = canvas10.height = 1000;
+  
+  function switchMode10() {
+    if (mode10 === 1) {
+      mode10 = 2;
+      switchButton10.innerHTML = "Mode: New";
+    }
+    else {
+      mode10 = 1;
+      switchButton10.innerHTML = "Mode: Old";
+    }
+    
+    draw10();
+  }
+  
+  let gridSize10 = 100;//40;
+  canvas10.width = canvas10.height = gridSize10 * Math.round(1000 / gridSize10);
+  let tileSize10 = canvas10.width / gridSize10;
+  let maxSize10 = 0.35;
+  let shape10 = 3; // 1: Square  |  2: Circle  |  3: Mixed
+  let hue10 = 0;
+  let lineWidth10 = 0.05;
+  let accentLineWidth10 = 0.8;
+  let drawChance10 = 0;//0.5;
+  let rainbow10 = false;
+  let filledCells10 = 0;
+  let contrast10 = 0.7;
+  let saturation10 = 50;
+  let mode10 = 1;
+  
+  let grid10 = [];
+  
+  function drawCircle10(x, y, radius) {
+    if (mode10 === 1) {
+      ctx10.beginPath();
+      ctx10.arc(x, y, radius, 0, Math.PI * 2);
+      ctx10.fill();
+    }
+    
+    let num = 1;//Math.random() < 0.5 ? 1 : 2;
+    if (mode10 === 2) {
+      let a = Math.random() * Math.PI * 2;
+      let a2 = a + toRad(randBetween(15, 120));
+      ctx10.beginPath();
+      ctx10.moveTo(x, y);
+      ctx10.arc(x, y, radius, a, a2, true);
+      ctx10.fill();
+      return;
+    }
+    
+    for (let i = 0; i < num; i++) {
+      let a = Math.random() * Math.PI * 2;
+      
+      ctx10.lineWidth = accentLineWidth10 * radius;
+      
+      let r = radius * (1 + (lineWidth10 / 2));
+      let a2 = a + toRad(Math.random() * 45);//(Math.round(randBetween(1, 1)) * Math.PI * 0.25); // angle plus random 45-deg angle between 45 and 180
+      
+      let _x1 = x + (r * Math.cos(a));
+      let _y1 = y + (r * Math.sin(a));
+      let _x2 = x + (r * Math.cos(a2));
+      let _y2 = y + (r * Math.sin(a2));
+      
+      ctx10.beginPath();
+      ctx10.moveTo(_x1, _y1);
+      ctx10.lineTo(x, y);
+      ctx10.lineTo(_x2, _y2);
+    }
+    ctx10.stroke();
+  }
+  
+  function color10(size) {
+    let max = Math.max(Math.round(maxSize10 * gridSize10), 1);
+    let hue = ((size / max) * 360) + hue10;
+    if (rainbow10) hue = Math.random() * 360;
+    let brightness = 50 + (Math.random() * contrast10 * 50 * (Math.random() < 0.5 ? 1 : -1));
+    return `hsl(${hue}deg, ${randBetween(saturation10, Math.min(saturation10 + 50, 100))}%, ${brightness}%)`;
+  }
+  
+  function validateSquare10(_x, _y, size) {
+    let x = _x - Math.floor(size / 2);
+    let y = _y - Math.floor(size / 2);
+    let offTop = y < 0;
+    let offBottom = (y + size) > gridSize10;
+    let offLeft = x < 0;
+    let offRight = (x + size) > gridSize10;
+    if (offTop || offBottom || offLeft || offRight) return false; // Square goes outside canvas
+    
+    for (let i = 0; i < size; i++) {
+      for (let j = 0; j < size; j++) {
+        if (grid10[x + i][y + j].filled) return false; // Square does not fit
+      }
+    }
+    
+    return true; // Square fits
+  }
+  
+  function drawSquare10() {
+    let x, y;
+    do {
+      x = Math.floor(Math.random() * gridSize10);
+      y = Math.floor(Math.random() * gridSize10);
+    }
+    while (grid10[x][y].filled);
+    
+    let fits = false;
+    
+    let max = Math.max(Math.round(maxSize10 * gridSize10), 1);
+    
+    let size = 1;
+    do {
+      size++;
+      fits = validateSquare10(x, y, size);
+      if (size > max) fits = false;
+    }
+    while (fits);
+    
+    size--;
+    
+    let _x = x - Math.floor(size / 2);
+    let _y = y - Math.floor(size / 2);
+    
+    for (let i = 0; i < size; i++) {
+      for (let j = 0; j < size; j++) {
+        grid10[_x + i][_y + j].filled = true; // Mark this square's touched cells as filled
+        filledCells10++;
+      }
+    }
+    
+    let cx = _x + (size / 2);
+    let cy = _y + (size / 2);
+    
+    if (size === 1 && Math.random() >= drawChance10) return;
+    
+    ctx10.lineJoin = "round";
+    ctx10.strokeStyle = "black";
+    ctx10.fillStyle = color10(size);
+    ctx10.lineWidth = lineWidth10 * tileSize10;
+    let stroke = lineWidth10 !== 0;
+    
+    drawCircle10(cx * tileSize10, cy * tileSize10, size * tileSize10 * 0.5 * (1 - lineWidth10));
+  }
+  
+  function draw10() {
+    canvas10.width = canvas10.height = gridSize10 * Math.round(1000 / gridSize10);
+    tileSize10 = Math.max(canvas10.width / gridSize10, 10);
+    canvas10.width = canvas10.height = tileSize10 * gridSize10;
+    
+    ctx10.fillStyle = "black";
+    ctx10.fillRect(0, 0, canvas10.width, canvas10.height);
+    
+    hue10 = Math.random() * 360;
+    
+    filledCells10 = 0;
+    
+    grid10 = [];
+    for (let x = 0; x < gridSize10; x++) {
+      let column = [];
+      for (let y = 0; y < gridSize10; y++) {
+        column.push({filled: false});
+      }
+      grid10.push(column);
+    }
+    
+    while (filledCells10 < gridSize10 * gridSize10) drawSquare10(); // Draw squares every grid cell is filled
+  }
+  draw10();
+</script>
 <div class = "project-num">Project #9: Generative Pipes</div>
 <canvas id = "canvas9" style = "width: 400px; height: 400px"></canvas>
 <button onclick = "draw9()">Redraw</button>
