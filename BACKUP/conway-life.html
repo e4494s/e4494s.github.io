@@ -1,0 +1,3299 @@
+<!DOCTYPE html>
+<html>
+<!--
+Page Timeline:
+
+(11/3/2022):
+- Added "Museum" rule preset (called this because when randomizing high densities, it tends to create intricate and interesting still lifes, with widely varying sizes and shape. They're also fragile, and adding one cell next to a still life usually causes it to collapse)
+- Fixed a bug where drawing cells while the canvas was running wouldn't properly update whether you started on a black or white cell
+
+(11/2/2022):
+- Changed Diagonal Line to X and made it two crossing diagonal lines, since one single line tended to make boring patterns
+- Fixed a bug I’d had for ages where the top-left pixel of every structure preview would always  be drawn darker, and I could never figure out why
+    - I fixed it by hard-coding it to draw a white square underneath the top-left pixel, so it looks normal now, even though I have absolutely no idea why that was even a bug
+- Added Cross shape structure
+- Added dynamic structure mirroring (through much debugging (and lamenting that strings are immutable in JS))
+- Turned hotkey descriptions into a table that generates on initHTML() so it can be more nicely formatted
+
+(11/1/2022):
+- Changed how the grid resizes so that it saves the current grid state and centers it
+    - Now changing the grid size doesn't clear what you currently have, but replaces it in the center
+- Now a random structure is placed when the page is reloaded, instead of just randomizing the grid
+- Added Twirling T-Tetsons II structure
+- Added Diagonal Line shape structure
+
+(10/26/2022):
+- Finally added support for Rectangle Shape Structures
+- Added settings for Shape Structure Dimensions
+
+(10/25/2022):
+- Fixed a bug where the structure preview would be left on the canvas if you moved your cursor off the canvas
+- Added hotkeys for clearing and randomizing the grid, and for stepping one tick
+- Added Pööpenfärten as discovered and named by David French
+- Added "Placing:" text to show currently selected structure
+- Added Kok's Galaxy
+- Added UI to make the canvas's outline black when Wrap Grid Edges is false
+- This is officially the 14th day in a row I've worked on this project, from the very beginning
+
+(10/24/2022):
+- Fixed a bug where the structure preview would sometimes still be shown immediately after placing, instead of being hidden until the mouse moves
+
+(10/23/2022):
+- Added hotkeys for structure placing, pausing, and resetting
+
+(10/22/2022):
+- Added top-canvas above canvas
+- Made structure previews and grid lines draw on top-canvas, so that previewing a structure doesn't need to redraw thousands of cells and is much less laggy now
+
+(10/21/2022):
+- Added function to convert .rle files to the format I use for structures
+- Added more structures
+
+(10/20/2022):
+- Added Spacefillers structures subsection
+- Added Glider Synthesis structures subsection
+- Made it so that resizing the grid clears it, instead of randomizing it
+
+(10/19/2022):
+- Added more Game of Life structures
+
+(10/18/2022):
+- Changed CSS button styles
+- Commented all code
+- Added code for two different sections on the rightmost <td>
+- Added structures, you can enter Placing Mode and copy preset designs onto the grid
+
+(10/17/2022):
+- Added more rule presets
+- Added a Reset button to revert to the last edited grid state
+
+(10/16/2022):
+- Added rule presets and more settings
+
+(10/15/2022):
+- Added more settings and improved performance when drawing cells
+
+(10/14/2022):
+- More CSS design changes
+- Added census information
+- Added grid lines and cell rules
+
+(10/13/2022):
+- Page created, as a more updated version of life.html
+- Added page wrap and base HTML and rule settings
+-->
+  <head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <link rel = "icon" href = "images/favicon.png" type = "image/png">
+    <link rel = "stylesheet" href = "stylesheets/main.css">
+    <link rel = "stylesheet" href = "stylesheets/page.css">
+    <title>Conway's Game of Life ~ e4494s</title>
+    <style>
+      canvas, #canvas, #top-canvas {
+        border: none;
+        outline: none;
+      }
+      #canvas {
+        outline: 2px solid rgb(200, 200, 200);
+        z-index: -1;
+      }
+      #top-canvas {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 1;
+        width: 400px;
+        height: 400px;
+      }
+      #canvas-div {
+        position: relative;
+        outline: none;
+        border: none;
+      }
+      
+      .preset-btn, .active-preset-btn {
+        padding-left: 5px;
+        padding-right: 5px;
+        padding-top: 1px;
+        padding-bottom: 1px;
+      }
+      
+      button {
+        font-size: 15px;
+        font-style: italic;
+        padding-top: 5px;
+        padding-bottom: 5px;
+        border-radius: 15px;
+        border: 6px double #ff9500; /* Accent color */
+        color: #cc7700; /* Dark accent color */
+      }
+      
+      .normal-btn {
+        font-weight: bold;
+        border-width: 6px;
+        border-color: #ff9500; /* Accent color */
+        border-style: double dashed double dashed;
+        border-radius: 0;
+        background-color: white;
+        padding: 2px 5px 2px 5px;
+        font-size: initial;
+        color: black;
+        font-style: normal;
+      }
+      .normal-btn:hover {
+        background-color: #ffd599; /* Light accent color */
+      }
+      .normal-btn:active {
+        background-color: #ffbf66; /* Medium light accent color */
+      }
+      
+      .download-canvas-btn {
+        color: blue;
+      }
+      
+      .padded-div {
+        padding-left: 6px;
+        padding-right: 6px;
+      }
+      
+      .colored-div {
+        padding: 5px;
+        border-radius: 20px;
+        background-color: #fdf28b; /* Light yellow */
+        border: 2px solid black;
+        display: inline-block;
+      }
+      
+      .small-title {
+        font-weight: bold;
+        font-style: italic;
+        font-size: 20px;
+        text-align: center;
+      }
+      
+      input[type=checkbox] {
+        margin: 0;
+      }
+      
+      .rule-label {
+        padding-left: 6px;
+        padding-right: 6px;
+        padding-top: 3px;
+        padding-bottom: 3px;
+        margin-top: 3px;
+        margin-bottom: 3px;
+        text-align: center;
+        border: none;
+        cursor: pointer;
+      }
+      .rule-label:hover {
+        outline: 1px solid black;
+      }
+      .rule-label:active {
+        outline: 2px solid black;
+      }
+      
+      #fps-range {
+        width: 180px;
+      }
+      
+      input[type=range] {
+        width: 120px;
+      }
+      
+      .reset-btn-active {
+        background-color: black;
+        color: white;
+        border: 6px double rgb(120, 120, 255);
+      }
+      .reset-btn-active:hover {
+        background-color: rgb(80, 80, 80);
+      }
+      .reset-btn-active:active {
+        background-color: rgb(120, 120, 120);
+      }
+      
+      .running-btn, .paused-btn {
+        background-color: white;
+        width: 130px;
+      }
+      
+      .running-btn {
+        border: 6px double green;
+        color: green;
+      }
+      .running-btn:hover {
+        background-color: #66ff66; /* Light green */
+      }
+      .running-btn:active {
+        background-color: #00cc00; /* Green */
+      }
+      
+      .paused-btn {
+        border: 6px double red;
+        color: red;
+      }
+      .paused-btn:hover {
+        background-color: #ffb3b3; /* Light red */
+      }
+      .paused-btn:active {
+        background-color: #ff6666; /* Red */
+      }
+      
+      .step-btn-active, .step-btn-inactive {
+        background-color: white;
+      }
+      
+      .step-btn-active {
+        border: 6px double black;
+        color: black;
+        cursor: pointer;
+      }
+      .step-btn-active:hover {
+        background-color: #999999; /* Light gray */
+      }
+      .step-btn-active:active {
+        background-color: #808080; /* Gray */
+      }
+      
+      .step-btn-inactive, .step-btn-inactive:hover, .step-btn-inactive:active, .reset-btn-inactive, .reset-btn-inactive:hover, .reset-btn-inactive:active {
+        border: 6px double #999999;
+        background-color: white;
+        color: #999999;
+        cursor: default;
+      }
+      
+      .census-td {
+        padding: 10px;
+        min-width: 0;
+      }
+      .census-txt {
+        font-size: 17px;
+        font-weight: bold;
+      }
+      
+      label, input[type=checkbox] {
+        cursor: pointer;
+      }
+      
+      .slightly-larger-txt {
+        font-style: italic;
+        font-size: 15px;
+      }
+      
+      .active-preset-btn, .active-preset-btn:hover, .active-preset-btn:active {
+        font-style: italic;
+        font-weight: normal;
+        font-size: 12px;
+        border-width: 4px;
+        border-style: double hidden double hidden;
+        margin: 5px;
+        border-radius: 12px;
+        background-color: #ffbf66; /* Medium light accent color */
+        cursor: default;
+      }
+      
+      .rule-preset-title {
+        font-size: 15px;
+        font-weight: bold;
+        text-align: center;
+      }
+      
+      .rule-preset-div {
+        margin: 5px;
+        border: 2px solid gray;
+        border-radius: 15px;
+        padding: 5px;
+        background-color: lightgray;
+      }
+      
+      .section-btn-inactive, .section-btn-active {
+        padding: 3px 6px 3px 6px;
+        border: 2px solid black;
+        color: black;
+        font-size: 15px;
+        font-style: normal;
+        cursor: pointer;
+        margin: 3px;
+      }
+      
+      .section-btn-active, .section-btn-active:hover, .section-btn-active:active {
+        background-color: rgb(110, 110, 0);
+        cursor: default;
+      }
+      
+      .section-btn-inactive {
+        background-color: rgb(255, 255, 100);
+        cursor: pointer;
+      }
+      .section-btn-inactive:hover {
+        background-color: rgb(150, 150, 50);
+      }
+      .section-btn-inactive:active {
+        background-color: rgb(110, 110, 0);
+      }
+      
+      .structure-btn-inactive, .structure-btn-active {
+        font-size: 12px;
+        font-style: normal;
+        padding: 2px 4px 2px 4px;
+        color: black;
+        border: 2px solid black;
+        cursor: pointer;
+        border-radius: 0;
+        margin: 3px;
+      }
+      .structure-btn-inactive:hover {
+        background-color: lightgray;
+      }
+      .structure-btn-inactive:active {
+        background-color: gray;
+      }
+      
+      .structure-btn-active, .structure-btn-active:hover, .structure-btn-active:active {
+        background-color: gray;
+      }
+      
+      .little-font {
+        font-size: 11px;
+        color: dimgray;
+        font-style: italic;
+      }
+      
+      #exit-placing-btn {
+        margin-top: 5px;
+        padding: 1px 4px 1px 4px;
+        border: 2px solid black;
+        font-size: 11px;
+        color: black;
+        font-style: normal;
+      }
+      
+      .shape-property-div {
+        margin-top: 20px;
+        margin-bottom: 20px;
+      }
+      
+      .hotkey-txt {
+        font-weight: bold;
+        font-style: normal;
+        padding-right: 10px;
+        font-size: 15px;
+      }
+    </style>
+  </head>
+<body onload = "initHTML()">
+<a id = "top-title" href = "https://e4494s.neocities.org" target = "_blank"></a>
+<h1>&mdash;&mdash; Conway's Game of Life &mdash;&mdash;</h1>
+<div id = "how-it-works">
+  <b><i>How It Works:</i></b> The Game of Life is a 2D cellular automata created by John Conway. It consists of a simple grid of cells, each either <i>on</i> or <i>off</i>. Every step, three rules are followed: (1) Any live cell with 2 or 3 neighbors survives, (2) any dead cell with exactly 3 neighbors becomes a live cell, and (3) all other cells become dead cells. Using these three simple rules, chaotic and complex behavior emerges.
+  <br><br>
+  <span class = "setting">Cell Rules</span> can be turned on and off to change how many neighbors each cell needs to be born or to survive, which will drastically change how the simulation runs.
+  <br><br>
+  Click the <span class = "setting">Reset</span> button to revert the grid to the last edited state.
+  <br><br>
+  <b><i>Click and drag on the canvas to turn cells on or off (it is recommended to pause the simulation before drawing).</i></b>
+  <br><br>
+  <b><u>Hotkeys:</u></b>
+  <br>
+  <table id = "hotkey-table"></table>
+</div>
+<table>
+  <tr valign = "top">
+    <td colspan = "3">
+      <div style = "display: flex">
+        <div class = "padded-div"><button onclick = "startStop()" id = "start-stop-btn" class = "running-btn" title = "Play/Pause (P)">Running...</button></div>
+        <div class = "padded-div"><button onclick = "if (!canvasRunning) frame()" id = "step-btn" class = "step-btn-inactive" title = "Step One Tick (S)" DISABLED>Step</button></div>
+        <div class = "padded-div"><button onclick = "resetGrid()" id = "reset-btn" class = "reset-btn-active" title = "Reset Grid (R)">Reset</button></div>
+        <div class = "padded-div"><button onclick = "clearGrid()" title = "Clear Grid (C)">Clear</button></div>
+        <div class = "padded-div"><button onclick = "randomizeGrid()" title = "Clear Grid (V)">Randomize</button></div>
+        <div class = "padded-div">
+          <div><b><i>Randomization Density:</i></b> <span id = "fill-chance-txt">15</span>%</div>
+          <input type = "range" min = "5" max = "95" value = "15" step = "5" id = "fill-chance-range" oninput = "updateSettings()">
+        </div>
+      </div>
+      <div style = "display: flex">
+        <div class = "padded-div"><button id = "exit-placing-btn" onclick = "initStruct(-1)" style = "visibility: hidden" title = "Exit Placing (Esc)">Exit Structure Placing</button></div>
+        <div class = "padded-div">
+          <div id = "structure-name-txt" style = "margin-top: 8px"></div>
+        </div>
+      </div>
+    </td>
+  </tr>
+  <tr valign = "top">
+    <td>
+      <div id = "canvas-div">
+        <canvas id = "canvas">If you're seeing this text, your browser does not support the canvas element.</canvas>
+        <canvas id = "top-canvas"></canvas>
+      </div>
+      <table style = "width: 100%">
+        <tr>
+          <td class = "census-td">
+            <div><b><u>Generations:</u></b></div>
+            <div id = "generations-txt" class = "census-txt"></div>
+          </td>
+          <td class = "census-td">
+            <div><b><u>Population:</u></b></div>
+            <div id = "population-txt" class = "census-txt"></div>
+          </td>
+          <td class = "census-td">
+            <div><b><u>Density:</u></b></div>
+            <div id = "density-txt" class = "census-txt"></div>
+          </td>
+        </tr>
+      </table>
+      <br>
+      <button class = "download-canvas-btn" onclick = "downloadCanvas()">Download Screenshot</button>
+    </td>
+    <td style = "padding-right: 10px; border-right: 4px solid #01017a">
+      <br>
+      <div><b><u>Update Rate:</u></b> <span id = "fps-txt">20 FPS<br><br></span></div>
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "fps-range" oninput = "updateSettings()">
+      <br><br>
+      <div class = "colored-div">
+        <div class = "small-title">&mdash; &mdash; Cell Rules &mdash; &mdash;</div>
+        <br>
+        <div style = "text-align: center"><b><span class = "slightly-larger-txt">BORN</span> with __ neighbors:</b></div>
+        <div style = "display: flex; align-items: center; justify-content: center" id = "born-with-div"></div>
+        <br>
+        <div style = "text-align: center"><b><span class = "slightly-larger-txt">SURVIVE</span> with __ neighbors:</b></div>
+        <div style = "display: flex; align-items: center; justify-content: center" id = "survive-with-div"></div>
+        <div style = "text-align: center"><button onclick = "randomizeRule()" class = "normal-btn">Random Rule</button></div>
+      </div>
+      <hr>
+      <div><b><u>Grid Size:</u></b> <span id = "grid-size-txt">75&times;75</span></div>
+      <input type = "range" min = "0" max = "10" value = "0" step = "1" id = "grid-size-range" oninput = "updateSettings(true)">
+      <br><br><br>
+      <label for = "show-grid-lines-checkbox"><b><u>Grid Lines:</u></b> <input type = "checkbox" id = "show-grid-lines-checkbox" oninput = "updateSettings(); drawGrid()" CHECKED></label>
+      <br><br><br>
+      <label for = "wrap-edges-checkbox"><b><u>Wrap Grid Around Edges:</u></b> <input type = "checkbox" id = "wrap-edges-checkbox" oninput = "updateSettings()" CHECKED></label>
+    </td>
+    <td>
+      <button onclick = "showSection('a', 2, 1)" class = "section-btn-inactive" id = "show-section-btn-a-1">Rules</button>
+      <button onclick = "showSection('a', 2, 2)" class = "section-btn-inactive" id = "show-section-btn-a-2">Structures</button>
+      <hr>
+      <div id = "section-a-1" style = "display: none">
+        <div class = "small-title" style = "text-align: left"><b>Load Rule Presets:</b></div>
+        <div class = "little-font">Click to change the ruleset for Cell Rules, changing how the simulation runs.</div>
+        <div id = "chaotic-presets-div" class = "rule-preset-div">
+          <div class = "rule-preset-title">- - Chaotic - -</div>
+        </div>
+        <div id = "stable-presets-div" class = "rule-preset-div">
+          <div class = "rule-preset-title">- - Stable - -</div>
+        </div>
+        <div id = "spreading-presets-div" class = "rule-preset-div">
+          <div class = "rule-preset-title">- - Spreading - -</div>
+        </div>
+        <div id = "exploding-presets-div" class = "rule-preset-div">
+          <div class = "rule-preset-title">- - Exploding - -</div>
+        </div>
+      </div>
+      <div id = "section-a-2" style = "display: none">
+        <div class = "small-title" style = "text-align: left"><b>Load Structure Presets:</b></div>
+        <div class = "little-font">Click on a structure button to select it. When it's selected, click anywhere on the grid to place that structure there. Click the "Exit Structure Placing" button above the grid to leave this mode.</div>
+        <br>
+        <button onclick = "showSection('b', 2, 1)" class = "section-btn-inactive" id = "show-section-btn-b-1">Game of Life</button>
+        <button onclick = "showSection('b', 2, 2)" class = "section-btn-inactive" id = "show-section-btn-b-2">Shapes</button>
+        <br>
+        <div id = "section-b-1" style = "display: none">
+          <div class = "little-font" style = "margin-top: 3px">Credit to <a href = "https://conwaylife.com/ref/lexicon/lex.htm" target = "_blank">Life Lexicon</a> for cataloguing these designs.</div>
+          <div id = "spaceships-structures-div" class = "rule-preset-div">
+            <div class = "rule-preset-title">- - Spaceships - -</div>
+          </div>
+          <div id = "oscillators-structures-div" class = "rule-preset-div">
+            <div class = "rule-preset-title">- - Oscillators - -</div>
+          </div>
+          <div id = "puffers-structures-div" class = "rule-preset-div">
+            <div class = "rule-preset-title">- - Puffers - -</div>
+          </div>
+          <div id = "spacefillers-structures-div" class = "rule-preset-div">
+            <div class = "rule-preset-title">- - Spacefillers - -</div>
+          </div>
+          <div id = "guns-structures-div" class = "rule-preset-div">
+            <div class = "rule-preset-title">- - Guns - -</div>
+          </div>
+          <div id = "glider-synthesis-structures-div" class = "rule-preset-div">
+            <div class = "rule-preset-title">- - Glider Synthesis - -</div>
+          </div>
+        </div>
+        <div id = "section-b-2" style = "display: none">
+          <div id = "shapes-structures-div" class = "rule-preset-div">
+            <div class = "rule-preset-title">- - Select Shape - -</div>
+          </div>
+          <div class = "rule-preset-div">
+            <div class = "rule-preset-title">- - Shape Settings - -</div>
+            <table>
+              <tr>
+                <td style = "min-width: 0">
+                  <div id = "shape-width-div" style = "display: block" class = "shape-property-div">
+                    <div><b><u>Width:</u></b> <span id = "shape-struct-width-txt">9</span></div>
+                    <input type = "range" min = "1" max = "50" step = "1" value = "9" id = "shape-struct-width-range" oninput = "updateSettings()">
+                  </div>
+                  <div id = "shape-height-div" style = "display: block" class = "shape-property-div">
+                    <div><b><u>Height:</u></b> <span id = "shape-struct-height-txt">9</span></div>
+                    <input type = "range" min = "1" max = "50" step = "1" value = "9" id = "shape-struct-height-range" oninput = "updateSettings()">
+                  </div>
+                  <div id = "shape-length-div" style = "display: none" class = "shape-property-div">
+                    <div><b><u>Length:</u></b> <span id = "shape-struct-length-txt">9</span></div>
+                    <input type = "range" min = "1" max = "50" step = "1" value = "9" id = "shape-struct-length-range" oninput = "updateSettings()">
+                  </div>
+                  <div id = "shape-thickness-div" style = "display: none" class = "shape-property-div">
+                    <div><b><u>Thickness:</u></b> <span id = "shape-struct-thickness-txt">2</span></div>
+                    <input type = "range" min = "1" max = "11" step = "1" value = "2" id = "shape-struct-thickness-range" oninput = "updateSettings()">
+                  </div>
+                </td>
+                <td style = "min-width: 0">
+                  <div><b><u>Fill Type:</u></b></div>
+                  <input type = "radio" name = "shape-struct-fill-radio" id = "shape-struct-fill-radio-0" oninput = "updateSettings()" CHECKED>
+                  <label for = "shape-struct-fill-radio-0">Outline</label>
+                  <br>
+                  <input type = "radio" name = "shape-struct-fill-radio" id = "shape-struct-fill-radio-1" oninput = "updateSettings()">
+                  <label for = "shape-struct-fill-radio-1">Solid</label>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </td>
+  </tr>
+</table>
+<br>
+<script src = "scripts/main.js"></script>
+<script>
+  let canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  
+  let topCanvas = document.getElementById("top-canvas");
+  const tctx = topCanvas.getContext("2d");
+  
+  let canvasSize = 1000;
+  canvas.width = canvas.height = topCanvas.width = topCanvas.height = canvasSize;
+  let canvasRunning = true;
+  let FPS = 20;
+  
+  let placingStruct = false; // Whether a structure is currently selected or not
+  let structWidth = 0; // Size of the selected structure
+  let structHeight = 0;
+  let structCode = [""]; // Encoded state of the structure, as an array of strings
+  let structIndex = -1; // Index in the structures array
+  let lastStructIndex = 0; // Last-selected struct
+  let willPlaceStruct = false; // Once-used variable for placing structs while canvas is running
+  let structFlippedX = false;
+  let structFlippedY = false;
+  
+  function showSection(group, groupLength, number) {
+    // Show the given HTML section, in a certain group
+    
+    for (let i = 1; i <= groupLength; i++) {
+      let section = document.getElementById("section-" + group + "-" + i);
+      let btn = document.getElementById("show-section-btn-" + group + "-" + i);
+      if (i === number) {
+        section.style.display = "block";
+        btn.className = "section-btn-active";
+      }
+      else {
+        section.style.display = "none";
+        btn.className = "section-btn-inactive";
+      }
+    }
+  }
+  
+  let fpsRange = document.getElementById("fps-range");
+  let fpsTxt = document.getElementById("fps-txt");
+  let startStopBtn = document.getElementById("start-stop-btn");
+  let bornWithDiv = document.getElementById("born-with-div");
+  let surviveWithDiv = document.getElementById("survive-with-div");
+  let stepBtn = document.getElementById("step-btn");
+  let generationsTxt = document.getElementById("generations-txt");
+  let populationTxt = document.getElementById("population-txt");
+  let densityTxt = document.getElementById("density-txt");
+  let gridSizeRange = document.getElementById("grid-size-range");
+  let gridSizeTxt = document.getElementById("grid-size-txt");
+  let showGridLinesCheckbox = document.getElementById("show-grid-lines-checkbox");
+  let fillChanceRange = document.getElementById("fill-chance-range");
+  let fillChanceTxt = document.getElementById("fill-chance-txt");
+  let wrapEdgesCheckbox = document.getElementById("wrap-edges-checkbox");
+  let resetBtn = document.getElementById("reset-btn");
+  let exitPlacingBtn = document.getElementById("exit-placing-btn");
+  let structureNameTxt = document.getElementById("structure-name-txt");
+  let shapeStructWidthTxt = document.getElementById("shape-struct-width-txt");
+  let shapeStructWidthRange = document.getElementById("shape-struct-width-range");
+  let shapeStructHeightTxt = document.getElementById("shape-struct-height-txt");
+  let shapeStructHeightRange = document.getElementById("shape-struct-height-range");
+  let shapeStructLengthTxt = document.getElementById("shape-struct-length-txt");
+  let shapeStructLengthRange = document.getElementById("shape-struct-length-range");
+  let shapeStructThicknessTxt = document.getElementById("shape-struct-thickness-txt");
+  let shapeStructThicknessRange = document.getElementById("shape-struct-thickness-range");
+  let shapeWidthDiv = document.getElementById("shape-width-div");
+  let shapeHeightDiv = document.getElementById("shape-height-div");
+  let shapeLengthDiv = document.getElementById("shape-length-div");
+  let shapeThicknessDiv = document.getElementById("shape-thickness-div");
+  let shapeStructFillRadio0 = document.getElementById("shape-struct-fill-radio-0");
+  let shapeStructFillRadio1 = document.getElementById("shape-struct-fill-radio-1");
+  let hotkeyTable = document.getElementById("hotkey-table");
+  
+  let fpsRangeArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40, 50, -1, -2, -3, -4, -5, -11];
+  fpsRange.max = fpsRangeArray.length - 1;
+  fpsRange.value = fpsRangeArray.indexOf(20);
+  
+  let gridSizeRangeArray = [5, 10, 15, 20, 30, 40, 50, 75, 100, 150, 200, 250];
+  gridSizeRange.max = gridSizeRangeArray.length - 1;
+  gridSizeRange.value = gridSizeRangeArray.indexOf(75);
+  
+  function updateSettings(changingGridSize) {
+    // Update actual JavaScript variables to match user inputted HTML
+    // changingGridSize parameter is always false unless called by gridSizeRange
+    
+    let fpsRangeValue = fpsRangeArray[Number(fpsRange.value)];
+    FPS = fpsRangeValue;
+    if (FPS >= 0) fpsTxt.innerHTML = FPS + " FPS<br><br>";
+    else {
+      if (FPS === -1) fpsTxt.innerHTML = "<i>Unlimited</i><br><br>";
+      else fpsTxt.innerHTML = `<i>Unlimited</i><br><i>(${Math.abs(FPS)} steps per frame)</i>`;
+    }
+    
+    let lastGridSize = gridSize;
+    gridSize = gridSizeRangeArray[Number(gridSizeRange.value)];
+    gridSizeTxt.innerHTML = gridSize + "&times;" + gridSize;
+    
+    showGridLines = showGridLinesCheckbox.checked;
+    
+    fillChanceTxt.innerHTML = Number(fillChanceRange.value);
+    fillChance = Number(fillChanceRange.value) / 100;
+    
+    wrapEdges = wrapEdgesCheckbox.checked;
+    if (wrapEdges) canvas.style.outline = "2px solid rgb(200, 200, 200)";
+    else canvas.style.outline = "2px solid black";
+    
+    shapeStructWidth = shapeStructWidthTxt.innerHTML = Number(shapeStructWidthRange.value);
+    shapeStructHeight = shapeStructHeightTxt.innerHTML = Number(shapeStructHeightRange.value);
+    shapeStructLength = shapeStructLengthTxt.innerHTML = Number(shapeStructLengthRange.value);
+    shapeStructThickness = shapeStructThicknessTxt.innerHTML = Number(shapeStructThicknessRange.value);
+    
+    if (shapeStructFillRadio0.checked) shapeStructFill = 0;
+    else if (shapeStructFillRadio1.checked) shapeStructFill = 1;
+    
+    if (placingStruct && structures[structIndex].category === "Shapes") {
+      let i = structIndex;
+      initStruct(-1);
+      initStruct(i);
+    }
+    
+    if (changingGridSize) updateGridSize(lastGridSize);
+  }
+  
+  function updateGridSize(lastGridSize) {
+    // Saves the current grid state, and then places that in the center of the grid after resizing
+    // This means resizing the grid will still save your current cells
+    
+    let currGrid = [];
+    for (let x = 0; x < lastGridSize; x++) {
+      let col = [];
+      for (let y = 0; y < lastGridSize; y++) {
+        col.push(grid[x][y]);
+      }
+      currGrid.push(col);
+    }
+    
+    clearGrid();
+    
+    for (let x = 0; x < lastGridSize; x++) {
+      for (let y = 0; y < lastGridSize; y++) {
+        let _x = Math.floor(gridSize / 2) - Math.floor(lastGridSize / 2) + x;
+        let _y = Math.floor(gridSize / 2) - Math.floor(lastGridSize / 2) + y;
+        let xOn = _x >= 0 && _x < gridSize;
+        let yOn = _y >= 0 && _y < gridSize;
+        if (xOn && yOn) grid[_x][_y] = currGrid[x][y];
+      }
+    }
+    
+    drawGrid();
+    
+    
+    // This counts as user input, so save the grid state
+    setLastGrid();
+  }
+  
+  let Mouse = {
+    x: 0, // Actual x and y of the mouse, relative to the canvas
+    y: 0,
+    down: false,
+    mode: 1, // Which state the mouse will convert cells to when dragging
+    gridX: 0, // Which cell on the grid the mouse is currently hovering over
+    gridY: 0,
+    movedSinceLastClick: false
+  };
+  
+  let Keys = { // Which hotkeys are currently down
+    rDown: false,
+    escDown: false,
+    pDown: false,
+    cDown: false,
+    vDown: false
+  };
+  window.addEventListener("keydown", e => {
+    if ((e.keyCode === 27 || e.code === "Escape") && !Keys.escDown) { // If esc is pressed (not held):
+      Keys.escDown = true;
+      if (placingStruct) {
+        Mouse.movedSinceLastClick = false;
+        initStruct(-1); // If placing, exit placing
+      }
+      else {
+        Mouse.movedSinceLastClick = true;
+        initStruct(lastStructIndex); // Otherwise, enter placing mode with last selected structure
+      }
+    }
+    
+    if ((e.keyCode === 82 || e.code === "KeyR") && !Keys.rDown) { // If R is pressed (not held):
+      Keys.rDown = true;
+      resetGrid();
+    }
+    
+    if ((e.keyCode === 80 || e.code === "KeyP") && !Keys.pDown) { // If P is pressed (not held):
+      Keys.pDown = true;
+      startStop();
+    }
+    
+    if ((e.keyCode === 67 || e.code === "KeyC") && !Keys.cDown) { // If C is pressed (not held):
+      Keys.cDown = true;
+      clearGrid();
+    }
+    
+    if ((e.keyCode === 86 || e.code === "KeyV") && !Keys.vDown) { // If V is pressed (not held):
+      Keys.vDown = true;
+      randomizeGrid();
+    }
+    
+    // If any arrow keys are pressed (or held):
+    /*if (((e.keyCode >= 37 && e.keyCode <= 40 ) || e.code === "ArrowLeft" || e.code === "ArrowUp" || e.code === "ArrowRight" || e.code === "ArrowDown") && !canvasRunning) {
+      e.preventDefault();
+      frame();
+    }*/
+    if ((e.keyCode === 83 || e.code === "KeyS") && !canvasRunning) frame();
+    
+    if (e.keyCode === 188 || e.code === "Comma") structFlippedY = !structFlippedY;
+    if (e.keyCode === 190 || e.code === "Period") structFlippedX = !structFlippedX;
+    
+    if ((e.keyCode === 188 || e.code === "Comma" || e.keyCode === 190 || e.code === "Period") && placingStruct) {
+      Mouse.movedSinceLastClick = true;
+      previewStruct(Mouse.gridX, Mouse.gridY);
+    }
+  });
+  window.addEventListener("keyup", e => {
+    if (e.keyCode === 27 || e.code === "Escape") Keys.escDown = false;
+    
+    if (e.keyCode === 82 || e.code === "KeyR") Keys.rDown = false;
+    
+    if (e.keyCode === 80 || e.code === "KeyP") Keys.pDown = false;
+    
+    if (e.keyCode === 67 || e.code === "KeyC") Keys.cDown = false;
+    
+    if (e.keyCode === 86 || e.code === "KeyV") Keys.vDown = false;
+  });
+  
+  let grid = [];
+  let gridSize = 75;
+  let tileSize = 0;
+  let wrapEdges = true;
+  
+  let lastGrid = []; // Last user-edited grid, which is what resetGrid() reloads to
+  
+  let born = []; // Each is an array of true or false, showing whether that checkbox is checked
+  let survive = [];
+  
+  let generations = 0;
+  
+  let bgColor = "white";
+  let cellColor = "black";
+  let gridLineColor = "lightgray";
+  
+  let gridLineWidth = 0.15;
+  
+  let showGridLines = true;
+  
+  let fillChance = 0.15; // Randomization density
+  
+  function setLastGrid() {
+    // Save the current grid as lastGrid
+    
+    let population = 0;
+    
+    lastGrid = [];
+    for (let x = 0; x < gridSize; x++) {
+      let column = [];
+      for (let y = 0; y < gridSize; y++) {
+        column.push(grid[x][y]);
+        if (grid[x][y] === 1) population++;
+      }
+      lastGrid.push(column);
+    }
+    
+    generations = 0;
+    
+    // Update census information
+    generationsTxt.innerHTML = comma(generations);
+    populationTxt.innerHTML = comma(population);
+    densityTxt.innerHTML = ((population / (gridSize * gridSize)) * 100).toFixed(1) + "%";
+  }
+  
+  function resetGrid() {
+    // Set grid to last user-edited state
+    
+    grid = [];
+    for (let x = 0; x < gridSize; x++) {
+      let column = [];
+      for (let y = 0; y < gridSize; y++) {
+        column.push(lastGrid[x][y]);
+      }
+      grid.push(column);
+    }
+    
+    generations = 0;
+    
+    drawGrid();
+  }
+  
+  function comma(num) {
+    // Add commas to number; 123456 --> 123,456
+    
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+  
+  function isValidStructPlacement(x, y) {
+    // Check if the given position is far enough away from the edges to place the current structure there
+    
+    let w2 = Math.floor(structWidth / 2);
+    let h2 = Math.floor(structHeight / 2);
+    let wOffset = structWidth % 2;
+    let hOffset = structHeight % 2;
+    return (x + 1 - wOffset >= w2) && (gridSize - x - 1 >= w2) && (y + 1 - hOffset >= h2) && (gridSize - y - 1 >= h2);
+  }
+  
+  function drawGrid() {
+    // Draw the current grid state to the canvas
+    
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    tctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    tileSize = canvas.width / gridSize;
+    
+    let population = 0;
+    
+    for (let x = 0; x < gridSize; x++) {
+      for (let y = 0; y < gridSize; y++) {
+        if (grid[x][y] === 1) {
+          ctx.fillStyle = cellColor;
+          ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+          population++;
+        }
+        if (placingStruct) {
+          // If placing a structure, draw translucent red squares at all invalid positions
+          
+          ctx.fillStyle = "red";
+          ctx.globalAlpha = 0.3;
+          
+          if (!isValidStructPlacement(x, y)) ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+          
+          ctx.globalAlpha = 1;
+        }
+      }
+    }
+    
+    // Draw grid lines above cells (on top-canvas)
+    if (showGridLines) {
+      tctx.strokeStyle = gridLineColor;
+      tctx.lineWidth = Math.max(1, (tileSize * gridLineWidth).toMultipleOf(2)); // Make line width an even number to reduce blurring
+      
+      // Vertical lines
+      for (let x = 0; x <= gridSize; x++) {
+        tctx.beginPath();
+        tctx.moveTo(x * tileSize, 0);
+        tctx.lineTo(x * tileSize, canvas.height);
+        tctx.stroke();
+      }
+      
+      // Horizontal lines
+      for (let y = 0; y <= gridSize; y++) {
+        tctx.beginPath();
+        tctx.moveTo(0, y * tileSize);
+        tctx.lineTo(canvas.width, y * tileSize);
+        tctx.stroke();
+      }
+    }
+    
+    // Update census information
+    generationsTxt.innerHTML = comma(generations);
+    populationTxt.innerHTML = comma(population);
+    densityTxt.innerHTML = ((population / (gridSize * gridSize)) * 100).toFixed(1) + "%";
+  }
+  
+  function drawOneCell(gridX, gridY, state, opacity, ctx) {
+    // Draw one single cell, and its grid lines
+    
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(gridX * tileSize, gridY * tileSize, tileSize, tileSize);
+    
+    ctx.fillStyle = state === 1 ? cellColor : bgColor;
+    ctx.globalAlpha = state === 1 ? opacity : 1;
+    ctx.fillRect(gridX * tileSize, gridY * tileSize, tileSize, tileSize);
+    ctx.globalAlpha = 1;
+    
+    if (placingStruct) {
+      // If placing a struct, draw a red square if the given position is not valid
+      
+      if (!isValidStructPlacement(gridX, gridY) && state === 0) {
+        ctx.fillStyle = "white";
+        ctx.globalAlpha = 1;
+        ctx.fillRect(gridX * tileSize, gridY * tileSize, tileSize, tileSize);
+        
+        ctx.fillStyle = "red";
+        ctx.globalAlpha = 0.3;
+        ctx.fillRect(gridX * tileSize, gridY * tileSize, tileSize, tileSize);
+      }
+      
+      ctx.globalAlpha = 1;
+    }
+  }
+  
+  function wrapPos(x, y) {
+    // Wrap position around grid edges to be on the actual grid, Pac-Man style
+    // (or return original position if its already on the grid)
+    
+    if (!wrapEdges && (x < 0 || x >= gridSize || y < 0 || y >= gridSize)) return 0; // If not wrapping edges, and the current position is off the canvas, return an empty cell
+    
+    return grid[((x % gridSize) + gridSize) % gridSize][((y % gridSize) + gridSize) % gridSize]; // Otherwise return cell value
+  }
+  
+  function countNeighbors(x, y) {
+    // Sum of 8 neighbors around given cell
+    
+    let count = 0;
+    
+    count += wrapPos(x, y - 1); // Top
+    count += wrapPos(x + 1, y - 1); // Top right
+    count += wrapPos(x + 1, y); // Right
+    count += wrapPos(x + 1, y + 1); // Bottom right
+    count += wrapPos(x, y + 1); // Bottom
+    count += wrapPos(x - 1, y + 1); // Bottom left
+    count += wrapPos(x - 1, y); // Left
+    count += wrapPos(x - 1, y - 1); // Top left
+    
+    return count;
+  }
+  
+  function updateGrid() {
+    // Iterate through all cells and update their state according to the born/survive ruleset
+    
+    generations++;
+    
+    // Set up grid for next iteration
+    let nextGrid = [];
+    for (let x = 0; x < gridSize; x++) {
+      let column = [];
+      for (let y = 0; y < gridSize; y++) {
+        column.push(grid[x][y]);
+      }
+      nextGrid.push(column);
+    }
+    
+    // Update each cell and copy its new state to nextGrid
+    for (let x = 0; x < gridSize; x++) {
+      for (let y = 0; y < gridSize; y++) {
+        let neighbors = countNeighbors(x, y);
+        
+        for (let i = 0; i <= 8; i++) { // Loop through all 9 possible neighbor values
+          if (countNeighbors(x, y) === i) {
+            if (grid[x][y] === 0 && born[i]) nextGrid[x][y] = 1; // Dead cell is born
+            else if (grid[x][y] === 1 && !survive[i]) nextGrid[x][y] = 0; // Live cell dies (all other cells stay the same)
+          }
+        }
+      }
+    }
+    
+    // Copy nextGrid to grid
+    for (let x = 0; x < gridSize; x++) {
+      for (let y = 0; y < gridSize; y++) {
+        grid[x][y] = nextGrid[x][y];
+      }
+    }
+  }
+  
+  function randomizeGrid() {
+    // Fills the canvas randomly with black/white cells, according to fillChance
+    
+    // Set canvas size to an integer multiple of gridSize, as close to 1000x1000 as possible
+    // This removes Moire patterns from tiles being like 53.7 pixels large
+    canvas.width = canvas.height = topCanvas.width = topCanvas.height = gridSize * Math.round(canvasSize / gridSize);
+    tileSize = canvas.width / gridSize;
+    if (tileSize < 10) { // Don't let tile size get too small
+      tileSize = 10;
+      canvas.width = canvas.height = topCanvas.width = topCanvas.height = gridSize * tileSize;
+    }
+    
+    // Re-initialize grid to fix any potential errors with gridSize not matching the dimensions of the current grid
+    grid = [];
+    
+    for (let x = 0; x < gridSize; x++) {
+      let column = [];
+      for (let y = 0; y < gridSize; y++) {
+        column.push(Math.random() < fillChance ? 1 : 0);
+      }
+      grid.push(column);
+    }
+    
+    generations = 0;
+    
+    // This counts as a user input, so it saves the grid state
+    setLastGrid();
+    
+    drawGrid();
+  }
+  
+  function clearGrid() {
+    // Sets every cell in the grid to 0
+    
+    // Set canvas size to an integer multiple of gridSize, as close to 1000x1000 as possible
+    // This removes Moire patterns from tiles being like 53.7 pixels large
+    canvas.width = canvas.height = topCanvas.width = topCanvas.height = gridSize * Math.round(canvasSize / gridSize);
+    tileSize = canvas.width / gridSize;
+    if (tileSize < 10) { // Don't let tile size get too small
+      tileSize = 10;
+      canvas.width = canvas.height = topCanvas.width = topCanvas.height = gridSize * tileSize;
+    }
+    
+    // Re-initialize grid to fix any potential errors with gridSize not matching the dimensions of the current grid
+    grid = [];
+    
+    for (let x = 0; x < gridSize; x++) {
+      let column = [];
+      for (let y = 0; y < gridSize; y++) {
+        column.push(0);
+      }
+      grid.push(column);
+    }
+    
+    generations = 0;
+    
+    // This doesn't count as user input, so it will retain the previously saved grid state
+    
+    drawGrid();
+  }
+  
+  function updatePresetButtons(b, s) {
+    // Given an array of born values and survive values, check if it matches any preset
+    // If it does, turn that one active
+    
+    let code = numberifyRule(b, s);
+    for (let i = 0; i < presets.length; i++) {
+      if (presets[i].code === code) presets[i].button.className = "active-preset-btn";
+      else presets[i].button.className = "preset-btn";
+    }
+  }
+  
+  function checksToRules() {
+    // Update born and survive arrays to match HTML rule checkboxes
+    
+    born = [];
+    survive = [];
+    let b = [];
+    let s = [];
+    
+    for (let i = 0; i <= 8; i++) {
+      born.push(document.getElementById("born" + i).checked);
+      if (document.getElementById("born" + i).checked) b.push(i);
+      survive.push(document.getElementById("survive" + i).checked);
+      if (document.getElementById("survive" + i).checked) s.push(i);
+    }
+    
+    // Check if the new rule matches any presets
+    updatePresetButtons(b, s);
+  }
+  
+  function rulesToChecks() {
+    // Opposite of checksToRules()
+    // Updates HTML checkboxes to match actual born and survive arrays
+    
+    for (let i = 0; i <= 8; i++) {
+      document.getElementById("born" + i).checked = born[i];
+      document.getElementById("survive" + i).checked = survive[i];
+    }
+  }
+  
+  function setRules(b, s) {
+    // Update HTML checkboxes AND actual born/survive arrays to match given arrays of born/survive values
+    
+    born = [];
+    survive = [];
+    for (let i = 0; i <= 8; i++) {
+      born.push(b.includes(i));
+      survive.push(s.includes(i));
+    }
+    
+    updatePresetButtons(b, s);
+    
+    rulesToChecks();
+  }
+  
+  function randomizeRule() {
+    // Randomly turn each checkbox on or off
+    
+    let b = [];
+    let s = [];
+    
+    for (let i = 0; i <= 8; i++) {
+      if (Math.random() < 0.5) b.push(i);
+      if (Math.random() < 0.5) s.push(i);
+    }
+    
+    setRules(b, s);
+  }
+  
+  function frame() {
+    // Do everything
+    
+    // If FPS is negative, interpret that as how many steps to take per frame
+    if (FPS < 0 && canvasRunning) {
+      for (let i = 0; i < Math.abs(FPS); i++) updateGrid();
+    }
+    else updateGrid();
+    
+    // If the user is drawing, update the cell at the current mouse position
+    if (canvasRunning && Mouse.down && !placingStruct) {
+      Mouse.gridX = Math.floor(Mouse.x / tileSize);
+      Mouse.gridY = Math.floor(Mouse.y / tileSize);
+      
+      if (Mouse.gridX >= 0 && Mouse.gridX < gridSize && Mouse.gridY >= 0 && Mouse.gridY < gridSize) grid[Mouse.gridX][Mouse.gridY] = Mouse.mode;
+    }
+    
+    // Place struct if mouse was just lifted, then disable the willPlace flag
+    if (placingStruct && willPlaceStruct) {
+      if (isValidStructPlacement(Mouse.gridX, Mouse.gridY)) placeStruct(Mouse.gridX, Mouse.gridY);
+      
+      willPlaceStruct = false;
+    }
+    
+    drawGrid();
+    
+    // Draw a translucent preview of the structure being placed
+    if (canvasRunning && placingStruct && Mouse.movedSinceLastClick) {
+      previewStruct(Mouse.gridX, Mouse.gridY);
+    }
+    
+    // If FPS is "unlimited", request an animationFrame (up to user's computer how fast that will be)
+    // Otherwise, keep framerate equal to FPS
+    if (canvasRunning) {
+      if (FPS < 0) requestAnimationFrame(frame);
+      else setTimeout(frame, 1000 / FPS);
+    }
+  }
+  
+  function mousePos(e) {
+    // Given a mouseDown or mouseMove event, return the position of the mouse relative to the canvas
+    
+    let rect = canvas.getBoundingClientRect();
+    let ratio = canvas.width / 400;
+    
+    return {x: (e.clientX - rect.left) * ratio, y: (e.clientY - rect.top) * ratio};
+  }
+  
+  topCanvas.addEventListener("mousedown", e => {
+    Mouse.down = true;
+    //Mouse.movedSinceLastClick = true;
+    
+    e.preventDefault();
+    
+    let pos = mousePos(e);
+    Mouse.x = pos.x;
+    Mouse.y = pos.y;
+    
+    Mouse.gridX = Math.floor(Mouse.x / tileSize);
+    Mouse.gridY = Math.floor(Mouse.y / tileSize);
+    
+    // If started drawing on a black cell, draw white cells
+    // If started drawing on a white cell, draw black cells
+    if (!placingStruct) Mouse.mode = 1 - grid[Mouse.gridX][Mouse.gridY];
+    
+    if (!canvasRunning && !placingStruct) { // Draw current cell at mouse position
+      if (Mouse.gridX >= 0 && Mouse.gridX < gridSize && Mouse.gridY >= 0 && Mouse.gridY < gridSize) grid[Mouse.gridX][Mouse.gridY] = Mouse.mode;
+      
+      // This is user input, so save current grid state
+      setLastGrid();
+      
+      drawOneCell(Mouse.gridX, Mouse.gridY, grid[Mouse.gridX][Mouse.gridY], 1, ctx);
+    }
+  });
+  window.addEventListener("mousemove", e => {
+    if (Mouse.down) e.preventDefault();
+    
+    let willErase = isValidStructPlacement(Mouse.gridX, Mouse.gridY);
+    
+    let pos = mousePos(e);
+    Mouse.x = pos.x;
+    Mouse.y = pos.y;
+    
+    Mouse.gridX = Math.floor(Mouse.x / tileSize);
+    Mouse.gridY = Math.floor(Mouse.y / tileSize);
+    
+    if (!isValidStructPlacement(Mouse.gridX, Mouse.gridY) && willErase) {
+      Mouse.movedSinceLastClick = false;
+      drawGrid();
+      return;
+    }
+    
+    if (!canvasRunning && !placingStruct && Mouse.down) { // Draw current cell at mouse position
+      if (Mouse.gridX >= 0 && Mouse.gridX < gridSize && Mouse.gridY >= 0 && Mouse.gridY < gridSize) {
+        grid[Mouse.gridX][Mouse.gridY] = Mouse.mode;
+      
+        // This is user input, so save current grid state
+        setLastGrid();
+        
+        drawOneCell(Mouse.gridX, Mouse.gridY, grid[Mouse.gridX][Mouse.gridY], 1, ctx);
+      }
+    }
+    
+    // If a structure is selected, and the simulation is paused, draw a preview every time the mouse moves
+    if (placingStruct && !canvasRunning && Mouse.movedSinceLastClick) {
+      previewStruct(Mouse.gridX, Mouse.gridY);
+    }
+    Mouse.movedSinceLastClick = true;
+  });
+  window.addEventListener("mouseup", e => {
+    Mouse.down = false;
+    Mouse.movedSinceLastClick = false;
+    
+    if (!placingStruct) return;
+    
+    // When mouse is lifted, set willPlace flag to true for next frame() call to place a structure
+    
+    let pos = mousePos(e);
+    Mouse.x = pos.x;
+    Mouse.y = pos.y;
+    
+    Mouse.gridX = Math.floor(Mouse.x / tileSize);
+    Mouse.gridY = Math.floor(Mouse.y / tileSize);
+    
+    willPlaceStruct = true;
+    
+    if (!canvasRunning) {
+      if (isValidStructPlacement(Mouse.gridX, Mouse.gridY)) placeStruct(Mouse.gridX, Mouse.gridY);
+      
+      willPlaceStruct = false;
+    }
+  });
+  
+  function startStop() {
+    // Toggle whether the simulation is currently running
+    
+    if (canvasRunning) {
+      // If running, stop everything
+      
+      canvasRunning = false;
+      
+      // Turn start/stop button to red
+      startStopBtn.innerHTML = "Paused.";
+      startStopBtn.className = "paused-btn";
+      
+      // Enable step button
+      stepBtn.className = "step-btn-active";
+      stepBtn.disabled = false;
+    }
+    else {
+      // If not running, start everything
+      
+      canvasRunning = true;
+      
+      // Turn start/stop button to green
+      startStopBtn.innerHTML = "Running...";
+      startStopBtn.className = "running-btn";
+      
+      // Disable step button
+      stepBtn.className = "step-btn-inactive";
+      stepBtn.disabled = true;
+      
+      frame();
+    }
+  }
+  
+  function downloadCanvas() {
+    // Downloads the current canvas state to the user's device
+    
+    let link = document.createElement("a");
+    link.href = canvas.toDataURL();
+    link.download = "life.png";
+    link.click();
+  }
+  
+  function numberifyRule(b, s) {
+    // Convert an array of born/survive values into a unique integer, to make matching rules with presets easier
+    // E.g., Game of Life's code is 6152
+    // (Uses binary, each checkbox is the next place value)
+    
+    let result = 0;
+    let mult = 1;
+    
+    for (let i = 0; i <= 8; i++) {
+      if (b.includes(i)) result += mult;
+      mult *= 2;
+    }
+    
+    for (let i = 0; i <= 8; i++) {
+      if (s.includes(i)) result += mult;
+      mult *= 2;
+    }
+    
+    return result;
+  }
+  
+  // Rule presets
+  let presets = [
+    {
+      name: "Game of Life",
+      category: "chaotic", // Which preset div to append this preset to
+      born: [3],
+      survive: [2, 3],
+      code: undefined, // Integer code that encodes its ruleset
+      button: undefined // Reference to the HTML button that sets this preset
+    },
+    {
+      name: "2x2",
+      category: "chaotic",
+      born: [3, 6],
+      survive: [1, 2, 5],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "Amoeba",
+      category: "chaotic",
+      born: [3, 5, 7],
+      survive: [1, 3, 5, 8],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "Diamoeba",
+      category: "chaotic",
+      born: [3, 5, 6, 7, 8],
+      survive: [5, 6, 7, 8],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "High Life",
+      category: "chaotic",
+      born: [3, 6],
+      survive: [2, 3],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "Inverse Life",
+      category: "chaotic",
+      born: [0, 1, 2, 3, 4, 7, 8],
+      survive: [3, 4, 6, 7, 8],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "Pseudo Life",
+      category: "chaotic",
+      born: [3, 6, 8],
+      survive: [2, 3, 8],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "Assimilation",
+      category: "stable",
+      born: [3, 4, 5],
+      survive: [4, 5, 6, 7],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "Day and Night",
+      category: "stable",
+      born: [3, 6, 7, 8],
+      survive: [3, 4, 6, 7, 8],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "Long Life",
+      category: "stable",
+      born: [3, 4, 5],
+      survive: [5],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "Move",
+      category: "stable",
+      born: [3, 6, 8],
+      survive: [2, 4, 5],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "Stains",
+      category: "stable",
+      born: [3, 6, 7, 8],
+      survive: [2, 3, 5, 6, 7, 8],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "Walled Cities",
+      category: "stable",
+      born: [4, 5, 6, 7, 8],
+      survive: [2, 3, 4, 5],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "Anneal",
+      category: "stable",
+      born: [4, 6, 7, 8],
+      survive: [3, 5, 6, 7, 8],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "Museum",
+      category: "stable",
+      born: [5, 8],
+      survive: [3, 4, 6, 7, 8],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "Flakes",
+      category: "spreading",
+      born: [3],
+      survive: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "Coral",
+      category: "spreading",
+      born: [3],
+      survive: [4, 5, 6, 7, 8],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "Maze",
+      category: "spreading",
+      born: [3],
+      survive: [1, 2, 3, 4, 5],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "Stripes",
+      category: "spreading",
+      born: [3, 4],
+      survive: [0, 1, 2, 3, 4, 5, 6],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "Circuitry",
+      category: "spreading",
+      born: [2, 5, 6, 7],
+      survive: [0, 2, 3, 4, 5, 6, 7],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "34 Life",
+      category: "exploding",
+      born: [3, 4],
+      survive: [3, 4],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "Cogaulations",
+      category: "exploding",
+      born: [3, 7, 8],
+      survive: [2, 3, 5, 6, 7, 8],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "Gnarl",
+      category: "exploding",
+      born: [1],
+      survive: [1],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "Replicator",
+      category: "exploding",
+      born: [1, 3, 5, 7],
+      survive: [1, 3, 5, 7],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "Seeds",
+      category: "exploding",
+      born: [2],
+      survive: [],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "Serviettes",
+      category: "exploding",
+      born: [2, 3, 4],
+      survive: [],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "Live Free or Die",
+      category: "exploding",
+      born: [2],
+      survive: [0],
+      code: undefined,
+      button: undefined
+    },
+    {
+      name: "Iceballs",
+      category: "exploding",
+      born: [2, 5, 6, 7, 8],
+      survive: [5, 6, 7, 8],
+      code: undefined,
+      button: undefined
+    }
+    /*{
+      name: "NAME",
+      category: "THING",
+      born: 
+      code: undefined,
+      button: undefined
+    }*/
+  ];
+  function loadPreset(n) {
+    
+    let p = presets[n];
+    
+    setRules(p.born, p.survive);
+  }
+  
+  let hotkeys = [
+    {
+      key: "P",
+      desc: "Play/Pause Simulation"
+    },
+    {
+      key: "S",
+      desc: "Step Simulation"
+    },
+    {
+      key: "R",
+      desc: "Reset Grid State (to last edited)"
+    },
+    {
+      key: "C",
+      desc: "Clear Grid"
+    },
+    {
+      key: "V",
+      desc: "Randomize Grid"
+    },
+    {
+      key: "Esc",
+      desc: "Toggle Structure Placing On/Off"
+    },
+    {
+      key: ",",
+      desc: "Flip Current Structure <b>Horizontally</b>"
+    },
+    {
+      key: ".",
+      desc: "Flip Current Structure <b>Vertically</b>"
+    }
+  ];
+  
+  let structures = [
+    // Game of Life
+    {
+      name: "Glider",
+      category: "Game of Life", // Which Structures section it will go under
+      subcategory: "spaceships", // Which subsection it will go under on that section
+      code: [ // Encoded state of the pattern, X is on and - is off
+        "-X-",
+        "--X",
+        "XXX"
+      ],
+      button: undefined // Reference to HTML button that activates this structure
+    },
+    {
+      name: "Light Spaceship",
+      category: "Game of Life",
+      subcategory: "spaceships",
+      code: [
+        "X--X-",
+        "----X",
+        "X---X",
+        "-XXXX"
+      ],
+      button: undefined
+    },
+    {
+      name: "Middle Spaceship",
+      category: "Game of Life",
+      subcategory: "spaceships",
+      code: [
+        "--X---",
+        "X---X-",
+        "-----X",
+        "X----X",
+        "-XXXXX"
+      ],
+      button: undefined
+    },
+    {
+      name: "Heavy Spaceship",
+      category: "Game of Life",
+      subcategory: "spaceships",
+      code: [
+        "--XX---",
+        "X----X-",
+        "------X",
+        "X-----X",
+        "-XXXXXX"
+      ],
+      button: undefined
+    },
+    {
+      name: "Copperhead",
+      category: "Game of Life",
+      subcategory: "spaceships",
+      code: [
+        "-XXXX-",
+        "------",
+        "-X--X-",
+        "X-XX-X",
+        "X----X",
+        "------",
+        "X----X",
+        "XX--XX",
+        "XXXXXX",
+        "-X--X-",
+        "--XX--",
+        "--XX--"
+      ],
+      button: undefined
+    },
+    {
+      name: "Loafer",
+      category: "Game of Life",
+      subcategory: "spaceships",
+      code: [
+        "-XX--X-XX",
+        "X--X--XX-",
+        "-X-X-----",
+        "--X------",
+        "--------X",
+        "------XXX",
+        "-----X---",
+        "------X--",
+        "-------XX"
+      ],
+      button: undefined
+    },
+    {
+      name: "Blinker Puffer",
+      category: "Game of Life",
+      subcategory: "puffers",
+      code: [
+        "---X-----",
+        "-X---X---",
+        "X--------",
+        "X----X---",
+        "XXXXX----",
+        "---------",
+        "---------",
+        "---------",
+        "-XX------",
+        "XX-XXX---",
+        "-XXXX----",
+        "--XX-----",
+        "---------",
+        "-----XX--",
+        "---X----X",
+        "--X------",
+        "--X-----X",
+        "--XXXXXX-"
+      ],
+      button: undefined
+    },
+    {
+      name: "Weekender",
+      category: "Game of Life",
+      subcategory: "spaceships",
+      code: [
+        "-X------------X-",
+        "-X------------X-",
+        "X-X----------X-X",
+        "-X------------X-",
+        "-X------------X-",
+        "--X---XXXX---X--",
+        "------XXXX------",
+        "--XXXX----XXXX--",
+        "----------------",
+        "----X------X----",
+        "-----XX--XX-----"
+      ],
+      button: undefined
+    },
+    {
+      name: "Pufferfish",
+      category: "Game of Life",
+      subcategory: "puffers",
+      code: [
+        "---X-------X---",
+        "--XXX-----XXX--",
+        "-XX--X---X--XX-",
+        "---XXX---XXX---",
+        "---------------",
+        "----X-----X----",
+        "--X--X---X--X--",
+        "X-----X-X-----X",
+        "XX----X-X----XX",
+        "------X-X------",
+        "---X-X---X-X---",
+        "----X-----X----"
+      ],
+      button: undefined
+    },
+    {
+      name: "Dart",
+      category: "Game of Life",
+      subcategory: "spaceships",
+      code: [
+        "-------X-------",
+        "------X-X------",
+        "-----X---X-----",
+        "------XXX------",
+        "---------------",
+        "----XX---XX----",
+        "--X---X-X---X--",
+        "-XX---X-X---XX-",
+        "X-----X-X-----X",
+        "-X-XX-X-X-XX-X-"
+      ],
+      button: undefined
+    },
+    {
+      name: "x66",
+      category: "Game of Life",
+      subcategory: "spaceships",
+      code: [
+        "--X------",
+        "XX-------",
+        "X--XXX--X",
+        "X----XXX-",
+        "-XXX--XX-",
+        "---------",
+        "-XXX--XX-",
+        "X----XXX-",
+        "X--XXX--X",
+        "XX-------",
+        "--X------"
+      ],
+      button: undefined
+    },
+    {
+      name: "Big Glider",
+      category: "Game of Life",
+      subcategory: "spaceships",
+      code: [
+        "---XXX------------",
+        "---X--XXX---------",
+        "----X-X-----------",
+        "XX-------X--------",
+        "X-X----X--X-------",
+        "X--------XX-------",
+        "-XX---------------",
+        "-X--X-----X-XX----",
+        "-X---------XX-X---",
+        "---X-X------XX--X-",
+        "----XX-X----XX---X",
+        "--------X-------X-",
+        "-------XXXX---X-X-",
+        "-------X-XX---XXXX",
+        "--------X---XX-X--",
+        "-------------XX---",
+        "---------X-XXX----",
+        "----------X--X----"
+      ],
+      button: undefined
+    },
+    {
+      name: "Sir Robin",
+      category: "Game of Life",
+      subcategory: "spaceships",
+      code: [
+        "----XX-------------------------",
+        "----X--X-----------------------",
+        "----X---X----------------------",
+        "------XXX----------------------",
+        "--XX------XXXX-----------------",
+        "--X-XX----XXXX-----------------",
+        "-X----X------XXX---------------",
+        "--XXXX----XX---X---------------",
+        "X---------XX-------------------",
+        "-X---X-------------------------",
+        "------XXX--XX--X---------------",
+        "--XX-------X----X--------------",
+        "-------------X-XX--------------",
+        "----------XX------X------------",
+        "-----------XX-XXX-X------------",
+        "----------XX---X--X------------",
+        "----------X-X--XX--------------",
+        "----------X--X-X-X-------------",
+        "----------XXX------X-----------",
+        "-----------X-X-X---X-----------",
+        "--------------XX-X-X-----------",
+        "-----------X------XXX----------",
+        "-------------------------------",
+        "-----------X---------X---------",
+        "-----------X---X------X--------",
+        "------------X-----XXXXX--------",
+        "------------XXX----------------",
+        "----------------XX-------------",
+        "-------------XXX--X------------",
+        "-----------X-XXX-X-------------",
+        "----------X---X--X-------------",
+        "-----------X----XX-XXX---------",
+        "-------------XXXX-X----XX------",
+        "-------------X-XXXX----XX------",
+        "-------------------X-----------",
+        "--------------------X--XX------",
+        "--------------------XX---------",
+        "---------------------XXXXX-----",
+        "-------------------------XX----",
+        "-------------------XXX------X--",
+        "--------------------X-X---X-X--",
+        "-------------------X---X---X---",
+        "-------------------X---XX------",
+        "------------------X------X-XXX-",
+        "-------------------XX---X---XX-",
+        "--------------------XXXX--X--X-",
+        "----------------------XX---X---",
+        "---------------------X---------",
+        "---------------------XX-X------",
+        "--------------------X----------",
+        "-------------------XXXXX-------",
+        "-------------------X----X------",
+        "------------------XXX-XXX------",
+        "------------------X-XXXXX------",
+        "------------------X------------",
+        "--------------------X----------",
+        "----------------X----XXXX------",
+        "--------------------XXXX-XX----",
+        "-----------------XXX----X------",
+        "------------------------X-X----",
+        "----------------------------X--",
+        "------------------------X--XX--",
+        "-------------------------XXX---",
+        "----------------------XX-------",
+        "---------------------XXX-----X-",
+        "------------------------XX--X-X",
+        "---------------------X--XXX-X-X",
+        "----------------------XX-X--X--",
+        "------------------------X-X--XX",
+        "--------------------------XX---",
+        "----------------------XXX----X-",
+        "----------------------XXX----X-",
+        "-----------------------XX---XXX",
+        "------------------------XX-XX--",
+        "-------------------------XX----",
+        "-------------------------X-----",
+        "-------------------------------",
+        "------------------------XX-----",
+        "--------------------------X----"
+      ],
+      button: undefined
+    },
+    {
+      name: "Figure 8",
+      category: "Game of Life",
+      subcategory: "oscillators",
+      code: [
+        "XXX---",
+        "XXX---",
+        "XXX---",
+        "---XXX",
+        "---XXX",
+        "---XXX"
+      ],
+      button: undefined
+    },
+    {
+      name: "Pentadecathlon",
+      category: "Game of Life",
+      subcategory: "oscillators",
+      code: [
+        "--X----X--",
+        "XX-XXXX-XX",
+        "--X----X--"
+      ],
+      button: undefined
+    },
+    {
+      name: "Snacker",
+      category: "Game of Life",
+      subcategory: "oscillators",
+      code: [
+        "XX----------------XX",
+        "-X----------------X-",
+        "-X-X------------X-X-",
+        "--XX------------XX--",
+        "-------X----X-------",
+        "-----XX-XXXX-XX-----",
+        "-------X----X-------",
+        "--XX------------XX--",
+        "-X-X------------X-X-",
+        "-X----------------X-",
+        "XX----------------XX"
+      ],
+      button: undefined
+    },
+    {
+      name: "Tumbler",
+      category: "Game of Life",
+      subcategory: "oscillators",
+      code: [
+        "-X-----X-",
+        "X-X---X-X",
+        "X--X-X--X",
+        "--X---X--",
+        "--XX-XX--"
+      ],
+      button: undefined
+    },
+    {
+      name: "Star",
+      category: "Game of Life",
+      subcategory: "oscillators",
+      code: [
+        "-----X-----",
+        "----XXX----",
+        "--XXX-XXX--",
+        "--X-----X--",
+        "-XX-----XX-",
+        "XX-------XX",
+        "-XX-----XX-",
+        "--X-----X--",
+        "--XXX-XXX--",
+        "----XXX----",
+        "-----X-----"
+      ],
+      button: undefined
+    },
+    {
+      name: "Toad Flipper",
+      category: "Game of Life",
+      subcategory: "oscillators",
+      code: [
+        "-X--------------X-",
+        "-X--------------X-",
+        "X-X------------X-X",
+        "-X--------------X-",
+        "-X------X-------X-",
+        "-X------XX------X-",
+        "-X------XX------X-",
+        "X-X------X-----X-X",
+        "-X--------------X-",
+        "-X--------------X-"
+      ],
+      button: undefined
+    },
+    {
+      name: "Gourmet",
+      category: "Game of Life",
+      subcategory: "oscillators",
+      code: [
+        "----------XX--------",
+        "----------X---------",
+        "----XX-XX-X----XX---",
+        "--X--X-X-X-----X----",
+        "--XX----X--------X--",
+        "----------------XX--",
+        "--------------------",
+        "----------------XX--",
+        "X---------XXX--X-X--",
+        "XXX-------X-X---X---",
+        "---X------X-X----XXX",
+        "--X-X--------------X",
+        "--XX----------------",
+        "--------------------",
+        "--XX----------------",
+        "--X--------X----XX--",
+        "----X-----X-X-X--X--",
+        "---XX----X-XX-XX----",
+        "---------X----------",
+        "--------XX----------"
+      ],
+      button: undefined
+    },
+    {
+      name: "Phoenix Heart",
+      category: "Game of Life",
+      subcategory: "oscillators",
+      code: [
+        "---X-------X----",
+        "---X-X-----X-X--",
+        "-X-----X-X------",
+        "-------X------XX",
+        "XX--------------",
+        "--------------X-",
+        "--X-------------",
+        "------------XX--",
+        "--XX------------",
+        "------------X---",
+        "----X-----------",
+        "----------XX----",
+        "----XX----------",
+        "----------X-----",
+        "------X-X-------",
+        "--------X-------"
+      ],
+      button: undefined
+    },
+    {
+      name: "Queen Bee Shuttle",
+      category: "Game of Life",
+      subcategory: "oscillators",
+      code: [
+        "---------X------------",
+        "-------X-X------------",
+        "------X-X-------------",
+        "XX---X--X-------------",
+        "XX----X-X-------------",
+        "-------X-X--------XX--",
+        "---------X--------X-X-",
+        "--------------------X-",
+        "--------------------XX"
+      ],
+      button: undefined
+    },
+    {
+      name: "Pulsar",
+      category: "Game of Life",
+      subcategory: "oscillators",
+      code: [
+        "--XXX---XXX--",
+        "-------------",
+        "X----X-X----X",
+        "X----X-X----X",
+        "X----X-X----X",
+        "--XXX---XXX--",
+        "-------------",
+        "--XXX---XXX--",
+        "X----X-X----X",
+        "X----X-X----X",
+        "X----X-X----X",
+        "-------------",
+        "--XXX---XXX--"
+      ],
+      button: undefined
+    },
+    {
+      name: "Glider Train",
+      category: "Game of Life",
+      subcategory: "puffers",
+      code: [
+        "------------------------------X------------",
+        "-------------------------------X-----------",
+        "-------------------------X-----X-----------",
+        "----X---------------------XXXXXX-----XXXXXX",
+        "-----X------------------------------X-----X",
+        "X----X------------------------------------X",
+        "-XXXXX------------------------------X----X-",
+        "--------------------------------------XX---",
+        "-------------------------------------------",
+        "-------------------------------------X-----",
+        "------------------------------------X------",
+        "-----------------------------------XX---XX-",
+        "-----------------------------------X-X---XX",
+        "------------------------------------X---XX-",
+        "----------------------------------------X--",
+        "-------------------------------------------",
+        "----------------------------------------X--",
+        "------------------------------------X---XX-",
+        "-----------------------------------X-X---XX",
+        "-----------------------------------XX---XX-",
+        "------------------------------------X------",
+        "-------------------------------------X-----",
+        "-------------------------------------------",
+        "--------------------------------------XX---",
+        "-XXXXX------------------------------X----X-",
+        "X----X------------------------------------X",
+        "-----X------------------------------X-----X",
+        "----X---------------------XXXXXX-----XXXXXX",
+        "-------------------------X-----X-----------",
+        "-------------------------------X-----------",
+        "------------------------------X------------"
+      ],
+      button: undefined
+    },
+    {
+      name: "One Per Generation",
+      category: "Game of Life",
+      subcategory: "puffers",
+      code: [
+        "--------XX-------",
+        "-------XX--------",
+        "---------X-------",
+        "-----------XX----",
+        "----------X------",
+        "-----------------",
+        "---------X--XX---",
+        "-XX-----XX----X--",
+        "XX-----X-----X---",
+        "--X----X-X---XX--",
+        "----X--X----XX-X-",
+        "----XX-------XX--",
+        "--------X----X-XX",
+        "-------X-X--X-XX-",
+        "--------X--------"
+      ],
+      button: undefined
+    },
+    {
+      name: "Space Rake",
+      category: "Game of Life",
+      subcategory: "puffers",
+      code: [
+        "-----------XX-----XXXX",
+        "---------XX-XX---X---X",
+        "---------XXXX--------X",
+        "----------XX-----X--X-",
+        "----------------------",
+        "--------X-------------",
+        "-------XX--------XX---",
+        "------X---------X--X--",
+        "-------XXXXX----X--X--",
+        "--------XXXX---XX-XX--",
+        "-----------X----XX----",
+        "----------------------",
+        "----------------------",
+        "----------------------",
+        "------------------XXXX",
+        "X--X-------------X---X",
+        "----X----------------X",
+        "X---X------------X--X-",
+        "-XXXX-----------------"
+      ],
+      button: undefined
+    },
+    {
+      name: "Max",
+      category: "Game of Life",
+      subcategory: "spacefillers",
+      code: [
+        "------------------X--------",
+        "-----------------XXX-------",
+        "------------XXX----XX------",
+        "-----------X--XXX--X-XX----",
+        "----------X---X-X--X-X-----",
+        "----------X----X-X-X-X-XX--",
+        "------------X----X-X---XX--",
+        "XXXX-----X-X----X---X-XXX--",
+        "X---XX-X-XXX-XX---------XX-",
+        "X-----XX-----X-------------",
+        "-X--XX-X--X--X-XX----------",
+        "-------X-X-X-X-X-X-----XXXX",
+        "-X--XX-X--X--X--XX-X-XX---X",
+        "X-----XX---X-X-X---XX-----X",
+        "X---XX-X-XX--X--X--X-XX--X-",
+        "XXXX-----X-X-X-X-X-X-------",
+        "----------XX-X--X--X-XX--X-",
+        "-------------X-----XX-----X",
+        "-XX---------XX-XXX-X-XX---X",
+        "--XXX-X---X----X-X-----XXXX",
+        "--XX---X-X----X------------",
+        "--XX-X-X-X-X----X----------",
+        "-----X-X--X-X---X----------",
+        "----XX-X--XXX--X-----------",
+        "------XX----XXX------------",
+        "-------XXX-----------------",
+        "--------X------------------"
+      ],
+      button: undefined
+    },
+    {
+      name: "Max Grandperent",
+      category: "Game of Life",
+      subcategory: "spacefillers",
+      code: [
+        "X-X-X-XX---X-X--XXX---XX-",
+        "XXX-X---X---X---XX---XXX-",
+        "---XXXX--X-XX---X-X-X-X--",
+        "--XXX-X--XX-X-XXX---X-X-X",
+        "XXXXXXXX--XX-XX--X-XX--X-",
+        "--XX-X-XX-X-X---X-X-X-XXX",
+        "XX--X--XX----X---X------X",
+        "X--X-X---X-XXX-XXXX--X-X-",
+        "X--X------XX--XXXXX---XXX",
+        "--XX-X-X-XXX--X----XXX---",
+        "XX----X-X-------XXXXXX-XX",
+        "---XX-X--XX-XX-XX--X-XX-X",
+        "X---X--XXXX-XXX--X------X",
+        "X-XX----X-------XXX-XX---",
+        "XX-X-X--XX-X-X---X---X-XX",
+        "---XX--X-X---X--X--X-XX--",
+        "XX-XXXX-XX-----XX-X-----X",
+        "-XX--XXX--XX-X-XX---XX--X",
+        "X--X----X-XX-------XXX-XX",
+        "X--XX--XX-XXXX------XXX--",
+        "--X-X-X-X---------X---X--",
+        "------X-X-XX---XXX----XXX",
+        "XXX-XX-X--XX---X---XX-XX-",
+        "-XXX-X-XX--X--X-X-----X-X",
+        "XXX---XXX--XX-----XX--X--"
+      ],
+      button: undefined
+    },
+    {
+      name: "Holzwart Spacefiller",
+      category: "Game of Life",
+      subcategory: "spacefillers",
+      code: [
+        "--------------------XXX---XXX--------------------",
+        "-------------------X--X---X--X-------------------",
+        "XXXX------------------X---X------------------XXXX",
+        "X---X-----------------X---X-----------------X---X",
+        "X--------X------------X---X------------X--------X",
+        "-X--X--XX--X-------------------------X--XX--X--X-",
+        "------X-----X-------XXX---XXX-------X-----X------",
+        "------X-----X--------X-----X--------X-----X------",
+        "------X-----X--------XXXXXXX--------X-----X------",
+        "-X--X--XX--X--XX----X-------X----XX--X--XX--X--X-",
+        "X--------X---XX----XXXXXXXXXXX----XX---X--------X",
+        "X---X---------XX-----------------XX---------X---X",
+        "XXXX-----------XXXXXXXXXXXXXXXXXXX-----------XXXX",
+        "----------------X-X-----------X-X----------------",
+        "-------------------XXXXXXXXXXX-------------------",
+        "-------------------X---------X-------------------",
+        "--------------------XXXXXXXXX--------------------",
+        "------------------------X------------------------",
+        "--------------------XXX---XXX--------------------",
+        "----------------------X---X----------------------",
+        "-------------------------------------------------",
+        "---------------------XXX-XXX---------------------",
+        "---------------------XXX-XXX---------------------",
+        "--------------------X-XX-XX-X--------------------",
+        "--------------------XXX---XXX--------------------",
+        "---------------------X-----X---------------------"
+      ],
+      button: undefined
+    },
+    {
+      name: "Space Non-Filler",
+      category: "Game of Life",
+      subcategory: "spacefillers",
+      code: [
+        "-------------------XXX---------------",
+        "------------------X--X---------------",
+        "------------XXX------X----XXX--------",
+        "------------X--X-X---X----X--X-------",
+        "------------X--X-X---X----X--X-------",
+        "----------X----------X--X-X-XXX------",
+        "----------XX--XX--X-X----X-----X-----",
+        "--------X----------------XX--XXX-----",
+        "--------XXX-X-XX----------X------X---",
+        "------X--------X---------X-X---XXX---",
+        "------XXX-----X----------X--------X--",
+        "---X-X-------------------------X-XXX-",
+        "--XXXXX-X--------------------------X-",
+        "-XX------X---------------------XXXXX-",
+        "XX----XX------------------X-X--------",
+        "-X-X---X--X---------------X--X---X-X-",
+        "--------X-X------------------XX----XX",
+        "-XXXXX---------------------X------XX-",
+        "-X--------------------------X-XXXXX--",
+        "-XXX-X-------------------------X-X---",
+        "--X--------X----------X-----XXX------",
+        "---XXX---X-X---------X--------X------",
+        "---X------X----------XX-X-XXX--------",
+        "-----XXX--XX----------------X--------",
+        "-----X-----X----X-X--XX--XX----------",
+        "------XXX-X-X--X----------X----------",
+        "-------X--X----X---X-X--X------------",
+        "-------X--X----X---X-X--X------------",
+        "--------XXX----X------XXX------------",
+        "---------------X--X------------------",
+        "---------------XXX-------------------"
+      ],
+      button: undefined
+    },
+    {
+      name: "Quasar",
+      category: "Game of Life",
+      subcategory: "oscillators",
+      code: [
+        "----------XXX---XXX----------",
+        "-----------------------------",
+        "--------X----X-X----X--------",
+        "--------X----X-X----X--------",
+        "--------X----X-X----X--------",
+        "----------XXX---XXX----------",
+        "-----------------------------",
+        "--------XXX-------XXX--------",
+        "--XXX--X----X---X----X--XXX--",
+        "-------X----X---X----X-------",
+        "X----X-X----X---X----X-X----X",
+        "X----X-----------------X----X",
+        "X----X--XXX-------XXX--X----X",
+        "--XXX-------------------XXX--",
+        "-----------------------------",
+        "--XXX-------------------XXX--",
+        "X----X--XXX-------XXX--X----X",
+        "X----X-----------------X----X",
+        "X----X-X----X---X----X-X----X",
+        "-------X----X---X----X-------",
+        "--XXX--X----X---X----X--XXX--",
+        "--------XXX-------XXX--------",
+        "-----------------------------",
+        "----------XXX---XXX----------",
+        "--------X----X-X----X--------",
+        "--------X----X-X----X--------",
+        "--------X----X-X----X--------",
+        "-----------------------------",
+        "----------XXX---XXX----------"
+      ],
+      button: undefined
+    },
+    {
+      name: "Kok's Galaxy",
+      category: "Game of Life",
+      subcategory: "oscillators",
+      code: [
+        "XXXXXX-XX",
+        "XXXXXX-XX",
+        "-------XX",
+        "XX-----XX",
+        "XX-----XX",
+        "XX-----XX",
+        "XX-------",
+        "XX-XXXXXX",
+        "XX-XXXXXX"
+      ],
+      button: undefined
+    },
+    {
+      name: "Pööpenfärten", // Credit: David French
+      category: "Game of Life",
+      subcategory: "oscillators",
+      code: [
+        "-XX-",
+        "X--X",
+        "X---",
+        "X---",
+        "X-XX",
+        "--XX",
+        "----",
+        "----",
+        "-XX-",
+        "-XX-"
+      ],
+      button: undefined
+    },
+    {
+      name: "Twirling T-Tetsons II",
+      category: "Game of Life",
+      subcategory: "oscillators",
+      code: [
+        "-------XX---XX----------",
+        "------X-------X---------",
+        "---------X-X------------",
+        "-------XX---XX----------",
+        "------------------------",
+        "------------------------",
+        "------------------------",
+        "---------------------XXX",
+        "--------------------XXX-",
+        "-------------X----------",
+        "XXX---------XXX---------",
+        "-XXX--------------------",
+        "--------------------XXX-",
+        "---------------------XXX",
+        "------------------------",
+        "-XXX--------------------",
+        "XXX---------XXX---------",
+        "-------------X----------",
+        "------------------------",
+        "------------------------",
+        "----------XX---XX-------",
+        "------------X-X---------",
+        "---------X-------X------",
+        "----------XX---XX-------"
+      ],
+      button: undefined
+    },
+    {
+      name: "Gosper Glider Gun",
+      category: "Game of Life",
+      subcategory: "guns",
+      code: [
+        "------------------------X-----------",
+        "----------------------X-X-----------",
+        "------------XX------XX------------XX",
+        "-----------X---X----XX------------XX",
+        "XX--------X-----X---XX--------------",
+        "XX--------X---X-XX----X-X-----------",
+        "----------X-----X-------X-----------",
+        "-----------X---X--------------------",
+        "------------XX----------------------"
+      ],
+      button: undefined
+    },
+    {
+      name: "Simkin Glider Gun",
+      category: "Game of Life",
+      subcategory: "guns",
+      code: [
+        "XX-----XX------------------------",
+        "XX-----XX------------------------",
+        "---------------------------------",
+        "----XX---------------------------",
+        "----XX---------------------------",
+        "---------------------------------",
+        "---------------------------------",
+        "---------------------------------",
+        "---------------------------------",
+        "----------------------XX-XX------",
+        "---------------------X-----X-----",
+        "---------------------X------X--XX",
+        "---------------------XXX---X---XX",
+        "--------------------------X------"
+      ],
+      button: undefined
+    },
+    {
+      name: "p46 Gun",
+      category: "Game of Life",
+      subcategory: "guns",
+      code: [
+        "-------------------------XX-----XX",
+        "-------------------------XX-----XX",
+        "----------------------------------",
+        "----------------------------------",
+        "----------------------------------",
+        "----------------------------------",
+        "----------------------------------",
+        "----------------------------------",
+        "----------------------------------",
+        "----------------------------------",
+        "----------------------------------",
+        "----------------------------------",
+        "----------------------------------",
+        "---------------------------XX-XX--",
+        "--------------------------X-----X-",
+        "----------------------------------",
+        "-------------------------X-------X",
+        "-------------------------X--X-X--X",
+        "-------------------------XXX---XXX",
+        "----------------------------------",
+        "----------------------------------",
+        "----------------------------------",
+        "----------------------------------",
+        "-----------------X----------------",
+        "XX---------------XX---------------",
+        "XX----------------XX--------------",
+        "-------------XX--XX---------------",
+        "----------------------------------",
+        "----------------------------------",
+        "----------------------------------",
+        "-------------XX--XX---------------",
+        "XX----------------XX-------XX-----",
+        "XX---------------XX--------XX-----",
+        "-----------------X----------------"
+      ],
+      button: undefined
+    },
+    {
+      name: "p104 Gun",
+      category: "Game of Life",
+      subcategory: "guns",
+      code: [
+        "-XX--------XX--------------------------",
+        "-XX---------X-------X------------------",
+        "-XX---------X-XX---X-X------------XX---",
+        "-X-----------X------X-------------XXX--",
+        "X-X------XX------X----------------XX-X-",
+        "X-XX-----XX----X--------------------X-X",
+        "----------------X------------------X--X",
+        "------------------------------------XX-",
+        "-XX------------------------------------",
+        "-XX------------------------------------",
+        "---------------XX----------------------",
+        "----------------XX------------------XX-",
+        "----------------X-------------------XX-",
+        "-XX------XXX------------------------XX-",
+        "X--X-------X------------------------X--",
+        "X-X-------------------------XX-----X-X-",
+        "-X-XX-----------------------XX-----X-XX",
+        "--XXX-------------X--------------------",
+        "---XX------------X-X-------------------",
+        "------------------X-----------------XX-",
+        "------------------------------------XX-"
+      ],
+      button: undefined
+    },
+    {
+      name: "Light Spaceship Synth",
+      category: "Game of Life",
+      subcategory: "glider-synthesis",
+      code: [
+        "----X---",
+        "---X----",
+        "---XXX--",
+        "--------",
+        "--------",
+        "--------",
+        "------X-",
+        "XXX--XX-",
+        "--X--X-X",
+        "-X------"
+      ],
+      button: undefined
+    },
+    {
+      name: "Middle Spaceship Synth",
+      category: "Game of Life",
+      subcategory: "glider-synthesis",
+      code: [
+        "----X------X",
+        "-----X---XX-",
+        "---XXX----XX",
+        "------------",
+        "------------",
+        "XXX---------",
+        "--X---------",
+        "-X----------"
+      ],
+      button: undefined
+    },
+    {
+      name: "Heavy Spaceship Synth",
+      category: "Game of Life",
+      subcategory: "glider-synthesis",
+      code: [
+        "X---------",
+        "-XX-------",
+        "XX--------",
+        "-------XX-",
+        "-------X-X",
+        "--XX---X--",
+        "--X-X-----",
+        "--X-------"
+      ],
+      button: undefined
+    },
+    {
+      name: "Pentadecathlon Synth",
+      category: "Game of Life",
+      subcategory: "glider-synthesis",
+      code: [
+        "------X---",
+        "------X-X-",
+        "------XX--",
+        "----------",
+        "XXX-------",
+        "--X-------",
+        "-X-----XX-",
+        "--------XX",
+        "-------X--"
+      ],
+      button: undefined
+    },
+    {
+      name: "Loafer Synth",
+      category: "Game of Life",
+      subcategory: "glider-synthesis",
+      code: [
+        "---------------------------------X",
+        "-------------------------------XX-",
+        "--------------------------------XX",
+        "---------X------------------------",
+        "-X--------X-----------------------",
+        "--X-----XXX-----------------------",
+        "XXX-------------------------------",
+        "----------------------------------",
+        "----------------------------------",
+        "-----X----------------------------",
+        "------X---------------------------",
+        "----XXX---------------------------",
+        "------------------------X-X-------",
+        "-------------------------XX-------",
+        "-------------------------X--------",
+        "----------------------------------",
+        "---------------------------X-X----",
+        "---------------------------XX-----",
+        "----------------------------X-----",
+        "-------------------------------XXX",
+        "-------------------------------X--",
+        "--------------------------------X-",
+        "----------------------------------",
+        "----------------------------------",
+        "----------------------------------",
+        "----------------------------------",
+        "----------------------------------",
+        "----------------------------------",
+        "-----XX---------------------------",
+        "------XX--------------------------",
+        "-----X----------------------------"
+      ],
+      button: undefined
+    },
+    {
+      name: "x66 Synth",
+      category: "Game of Life",
+      subcategory: "glider-synthesis",
+      code: [
+        "-----------------X---------",
+        "------------------X--------",
+        "----------------XXX--------",
+        "---------------------------",
+        "----------X----------------",
+        "--------X-X----------------",
+        "---------XX----X-X---------",
+        "----------------XX---------",
+        "----------------X----------",
+        "-------------------X-------",
+        "----------X--------X-X----X",
+        "--------X-X--------XX---XX-",
+        "---------XX--------------XX",
+        "---------------------------",
+        "---------------------------",
+        "---------------------------",
+        "---------------------------",
+        "---------XX----------------",
+        "--------X-X----------------",
+        "----------X----------------",
+        "-------------------------XX",
+        "-------------------XX---XX-",
+        "-------------------X-X----X",
+        "XXX----------------X-------",
+        "--X-------------X----------",
+        "-X---XXX--------XX---------",
+        "-------X-------X-X---------",
+        "------X--------------------",
+        "---------------------------",
+        "---------------------------",
+        "----------------XXX--------",
+        "------------------X--------",
+        "-----------------X---------"
+      ],
+      button: undefined
+    },
+    {
+      name: "Copperhead Synth",
+      category: "Game of Life",
+      subcategory: "glider-synthesis",
+      code: [
+        "---X--------------------------------------------",
+        "-X-X--------------------------------------------",
+        "--XX--------------------------------------------",
+        "------------------------------------------------",
+        "------------------------------------------------",
+        "------------------------------------------------",
+        "------------------------------------------------",
+        "------------------------------------------------",
+        "------------------------------------------------",
+        "------------------------------------------------",
+        "------------------------------------------------",
+        "------------------------------------------------",
+        "------------------------------------------------",
+        "----------------------------XX------------------",
+        "---------------------------XX-------------------",
+        "------------------------XX---X------------------",
+        "-----------------------X-X----------------------",
+        "-------------------------X----------------------",
+        "---------------------------------XXX---XX-------",
+        "-----------------------------------X--XX--------",
+        "----------------------------------X-----X-------",
+        "------------------------------------------------",
+        "------------------------------------------------",
+        "------------------------------------------------",
+        "------------------------------------------------",
+        "------------------------------------------------",
+        "------------------------------------------------",
+        "------------------------------------------------",
+        "------------------------------------------------",
+        "------------------------------------------------",
+        "XX--------------------------------------X-------",
+        "-XX------------------------------------XX-------",
+        "X--------------------------------------X-X------",
+        "------------------------------------------------",
+        "---XX--------X----------------------------------",
+        "--X-X--------XX---------------------------------",
+        "----X-------X-X---------------------------------",
+        "-------XX------------------------------------XX-",
+        "------X-X------------------------------------X-X",
+        "--------X------------------------------------X--",
+        "-----------XXX----------------------------------",
+        "-------------X----------------------------------",
+        "------------X-----------------------------------",
+        "------------------------------------------XXX---",
+        "------------------------------------------X-----",
+        "-------------------------------------------X----"
+      ],
+      button: undefined
+    },
+    {
+      name: "Two-Glider Mess",
+      category: "Game of Life",
+      subcategory: "glider-synthesis",
+      code: [
+        "--X---------",
+        "X-X---------",
+        "-XX---------",
+        "-----------X",
+        "---------XX-",
+        "----------XX"
+      ],
+      button: undefined
+    },
+    
+    // Shapes
+    {
+      name: "Rectangle",
+      category: "Shapes",
+      code: [],
+      button: undefined
+    },
+    {
+      name: "X",
+      category: "Shapes",
+      code: [],
+      button: undefined
+    },
+    {
+      name: "Cross",
+      category: "Shapes",
+      code: [],
+      button: undefined
+    }
+  ];
+  
+  let shapeStructWidth = 9;
+  let shapeStructHeight = 9;
+  let shapeStructFill = 0; // 0: Outline  |  1: Solid  |  2: Concentric odd (starts at 1x1)  |  3: Concentric even (starts at 2x2)
+  let shapeStructLength = 9;
+  let shapeStructThickness = 2;
+  
+  function generateShapeStruct(name, width, height, fill) {
+    // Returns an array of strings of X's and -'s like a structure code, to generate a structure for shapes of different sizes
+    
+    let code = [];
+    
+    if (name === "Rectangle") {
+      for (let y = 0; y < height; y++) {
+        let row = "";
+        for (let x = 0; x < width; x++) {
+          if (fill === 0) { // Outline
+            let isEdge = x === 0 || x === width - 1 || y === 0 || y === height - 1;
+            row += isEdge ? "X" : "-";
+          }
+          if (fill === 1) { // Solid
+            row += "X";
+          }
+        }
+        code.push(row);
+      }
+    }
+    
+    if (name === "X") {
+      for (let y = 0; y < height; y++) {
+        let row = "";
+        for (let x = 0; x < width; x++) {
+          //let distToDiagonal = Math.abs(x - y);
+          if (fill === 0) {
+            let isEdge = x === 0 || x === width - 1 || y === 0 || y === height - 1;
+            let onDiagonal = false;
+            if (isEdge) onDiagonal = (Math.abs(x - y) <= shapeStructThickness - 1) || (Math.abs((width - x - 1) - y) <= shapeStructThickness - 1);
+            else {
+              onDiagonal = (Math.abs(x - y) === shapeStructThickness - 1) || (Math.abs((width - x - 1) - y) === shapeStructThickness - 1);
+              if ((Math.abs(x - y) < shapeStructThickness - 1) || (Math.abs((width - x - 1) - y) < shapeStructThickness - 1)) onDiagonal = false;
+            }
+            row += onDiagonal ? "X" : "-";
+          }
+          else if (fill === 1) {
+            let onDiagonal = (Math.abs(x - y) <= shapeStructThickness - 1) || (Math.abs((width - x - 1) - y) <= shapeStructThickness - 1);
+            row += onDiagonal ? "X" : "-";
+          }
+        }
+        code.push(row);
+      }
+    }
+    
+    if (name === "Cross") {
+      for (let y = 0; y < height; y++) {
+        let row = "";
+        for (let x = 0; x < width; x++) {
+          if (fill === 0) { // Outline
+            let isEdge = x === 0 || x === width - 1 || y === 0 || y === height - 1;
+            let onCross = false;
+            if (isEdge) onCross = Math.abs(x - Math.floor(width / 2)) <= shapeStructThickness - 1 || Math.abs(y - Math.floor(height / 2)) <= shapeStructThickness - 1;
+            else {
+              onCross = Math.abs(x - Math.floor(width / 2)) === shapeStructThickness - 1 || Math.abs(y - Math.floor(height / 2)) === shapeStructThickness - 1;
+              if (Math.abs(x - Math.floor(width / 2)) < shapeStructThickness - 1 || Math.abs(y - Math.floor(height / 2)) < shapeStructThickness - 1) onCross = false;
+            }
+            row += onCross ? "X" : "-";
+          }
+          else if (fill === 1) { // Solid
+            onCross = Math.abs(x - Math.floor(width / 2)) <= shapeStructThickness - 1 || Math.abs(y - Math.floor(height / 2)) <= shapeStructThickness - 1;
+            row += onCross ? "X" : "-";
+          }
+          /*if (fill === 0) { // Outline
+            let isEdge = x === 0 || x === width - 1 || y === 0 || y === height - 1;
+            let onOrthogonal = false;
+            if (isEdge) onOrthogonal = Math.abs(x - Math.floor(height / 2)) <= shapeStructThickness - 1 || Math.abs(y - Math.floor(width / 2)) <= shapeStructThickness - 1;
+            else {
+              onOrthogonal = Math.abs(x - Math.floor(height / 2)) === shapeStructThickness - 1 || Math.abs(y - Math.floor(width / 2)) === shapeStructThickness - 1;
+              if ((Math.abs(x - Math.floor(height / 2)) < shapeStructThickness - 1) || (Math.abs(y - (Math.floor(width / 2)) < shapeStructThickness - 1))) onOrthogonal = false;
+            }
+            row += onOrthogonal ? "X" : "-";
+          }
+          if (fill === 1) { // Solid
+            onOrthogonal = Math.abs(x - Math.floor(height / 2)) <= shapeStructThickness - 1 || Math.abs(y - Math.floor(width / 2)) <= shapeStructThickness - 1;
+            row += onOrthogonal ? "X" : "-";*/
+        }
+        code.push(row);
+      }
+    }
+    
+    return code;
+  }
+  
+  function lifeLexiconToStruct(str) {
+    // Used solely in the console
+    // I can copy and paste the plaintext from Life Lexicon and convert it to a style where I can directly copy and paste it into my code
+    
+    let arr = str.replaceAll(" ", "").replaceAll("\t", "").replaceAll(".", "-").replaceAll("O", "X").split("\n");
+    
+    let win = window.open();
+    win.document.body.style.fontFamily = "monospace";
+    for (let i = 0; i < arr.length; i++) {
+      win.document.body.innerHTML += "\"";
+      win.document.body.innerHTML += arr[i];
+      win.document.body.innerHTML += "\"";
+      if (i !== arr.length - 1) win.document.body.innerHTML += ",<br>";
+    }
+  }
+  function rleToStruct(str) {
+    // Used solely in the console
+    // Converts a .rle (run length encoded) string to text I can copy and paste to a structure object
+    
+    let longestRow = 0;
+    let rleArr = str.replaceAll("!", "").replaceAll("\n", "").split("$");
+    let nextArr = [];
+    
+    let y = 0;
+    while (y < rleArr.length) {
+      let currString = "";
+      let row = rleArr[y] + "$";
+      let x = 0;
+      let numString = "";
+      while (x < row.length) {
+        numString = "";
+        while (!Number.isNaN(Number(row[x]))) { // While current index is a digit character
+          numString += String(row[x]);
+          x++;
+        }
+        if (numString === "") numString = "1";
+        if (row[x] === "b") {
+          for (let i = 0; i < Number(numString); i++) currString += "-";
+        }
+        else if (row[x] === "o") {
+          for (let i = 0; i < Number(numString); i++) currString += "X";
+        }
+        else if (row[x] === "$") {
+          for (let i = 0; i < Number(numString) - 1; i++) {
+            nextArr.push(currString);
+            currString = "";
+          }
+          x = row.length;
+        }
+        
+        x++;
+      }
+      y++;
+      nextArr.push(currString);
+      longestRow = Math.max(currString.length, longestRow);
+    }
+    
+    for (let i = 0; i < nextArr.length; i++) nextArr[i] = nextArr[i].padEnd(longestRow, "-");
+    
+    lifeLexiconToStruct(nextArr.join("\n"));
+  }
+  
+  String.prototype.replaceAt = function(index, replacement) {
+    return this.substring(0, index) + replacement + this.substring(index + replacement.length);
+  };
+  
+  function mirrorCode(code, axis) {
+    let flipCode = [];
+    
+    let width = code[0].length;
+    let height = code.length;
+    
+    for (let y = 0; y < height; y++) flipCode.push(code[y]);
+    
+    if (axis === "y") {
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          flipCode[y] = flipCode[y].replaceAt(x, code[y][width - x - 1]);
+        }
+      }
+    }
+    
+    else if (axis === "x") {
+      for (let x = 0; x < width; x++) {
+        for (let y = 0; y < height; y++) {
+          flipCode[y] = flipCode[y].replaceAt(x, code[height - y - 1][x]);
+        }
+      }
+    }
+    
+    return flipCode;
+  }
+  
+  function loadRandomStruct() {
+    // Randomly chooses a structure to place in the middle of the grid
+    
+    let validStructs = [];
+    for (let i = 0; i < structures.length; i++) {
+      let s = structures[i];
+      
+      // Ignore Shapes and structures that are too large
+      if (s.category !== "Shapes") {
+        let valid = true;
+        valid &&= s.code.length <= 50;
+        valid &&= s.code[0].length <= 50;
+        //valid &&= s.code.length >= 7 || s.code[0].length >= 7;
+        if (valid) validStructs.push(i);
+        //else console.log(s);
+      }
+    }
+    
+    clearGrid();
+    
+    let chosenIndex = validStructs[Math.floor(Math.random() * validStructs.length)]; // Choose random valid structure
+    
+    // Select it, place it, deselect it
+    initStruct(chosenIndex);
+    placeStruct(Math.floor(gridSize / 2), Math.floor(gridSize / 2));
+    initStruct(chosenIndex);
+  }
+  
+  function initStruct(n) {
+    // When a structure button is clicked, enter structure placing mode
+    
+    if (n !== -1) {
+      // Set up structure information variables
+      
+      let preset = structures[n];
+      
+      if (preset.category === "Shapes") {
+        if (preset.name === "Rectangle") {
+          preset.code = generateShapeStruct(preset.name, shapeStructWidth, shapeStructHeight, shapeStructFill);
+          
+          shapeWidthDiv.style.display = "block";
+          shapeHeightDiv.style.display = "block";
+          shapeLengthDiv.style.display = "none";
+          shapeThicknessDiv.style.display = "none";
+        }
+        if (preset.name === "X") {
+          preset.code = generateShapeStruct(preset.name, shapeStructLength, shapeStructLength, shapeStructFill);
+          
+          shapeWidthDiv.style.display = "none";
+          shapeHeightDiv.style.display = "none";
+          shapeLengthDiv.style.display = "block";
+          shapeThicknessDiv.style.display = "block";
+        }
+        if (preset.name === "Cross") {
+          preset.code = generateShapeStruct(preset.name, shapeStructWidth, shapeStructHeight, shapeStructFill);
+          
+          shapeWidthDiv.style.display = "block";
+          shapeHeightDiv.style.display = "block";
+          shapeLengthDiv.style.display = "none";
+          shapeThicknessDiv.style.display = "block";
+        }
+      }
+      
+      structWidth = preset.code[0].length;
+      structHeight = preset.code.length;
+      placingStruct = true;
+      structCode = preset.code;
+      exitPlacingBtn.style.visibility = "visible"; // Show Exit Placing button
+      structureNameTxt.innerHTML = "<b>Placing: " + preset.name + "</b>";
+      
+      document.getElementById("show-section-btn-a-2").click(); // Switch to structures tab
+      
+      if (preset.category === "Game of Life") document.getElementById("show-section-btn-b-1").click();
+      if (preset.category === "Shapes") document.getElementById("show-section-btn-b-2").click();
+    }
+    
+    // Disable all other structure buttons, but set this one to shown
+    
+    for (let i = 0; i < structures.length; i++) {
+      let s = structures[i];
+      
+      if (i === n) { // Once a case is matched,
+        if (structIndex === i) { // If the button that called this is already active, turn off Structure Placing Mode
+          s.button.className = "structure-btn-inactive";
+          placingStruct = false;
+          exitPlacingBtn.style.visibility = "hidden";
+          lastStructIndex = structIndex;
+          structIndex = -1; // -1 index means nothing is selected
+          structureNameTxt.innerHTML = "";
+        }
+        else { // Otherwise, activate that button
+          s.button.className = "structure-btn-active";
+          lastStructIndex = structIndex;
+          structIndex = n;
+          structureNameTxt.innerHTML = "<b>Placing: " + s.name + "</b>";
+        }
+      }
+      else s.button.className = "structure-btn-inactive";
+    }
+    
+    if (n === -1) { // Inputting -1 to this function disables all structure buttons
+      placingStruct = false;
+      exitPlacingBtn.style.visibility = "hidden";
+      lastStructIndex = structIndex;
+      structIndex = -1;
+      structureNameTxt.innerHTML = "";
+    }
+    
+    drawGrid();
+    
+    if (Mouse.movedSinceLastClick && n !== -1) previewStruct(Mouse.gridX, Mouse.gridY);
+  }
+  
+  function previewStruct(gridX, gridY) {
+    // Draw a translucent preview of the currently selected structure at the given position
+    
+    structCode = structures[structIndex].code;
+    if (structFlippedX) structCode = mirrorCode(structCode, "x");
+    if (structFlippedY) structCode = mirrorCode(structCode, "y");
+    
+    if (!isValidStructPlacement(gridX, gridY)) return;
+    
+    let w2 = Math.floor(structWidth / 2);
+    let h2 = Math.floor(structHeight / 2);
+    let wOffset = (structWidth + 1) % 2;
+    let hOffset = (structHeight + 1) % 2;
+    
+    tctx.clearRect(0, 0, canvas.width, canvas.height);
+    tctx.fillStyle = cellColor;
+    tctx.globalAlpha = 0.5;
+    
+    for (let x = 0; x < structWidth; x++) {
+      for (let y = 0; y < structHeight; y++) {
+        let _x = x - w2 + wOffset;
+        let _y = y - h2 + hOffset;
+        
+        if (x === 0 && y === 0) drawOneCell(_x + gridX, _y + gridY, 0, 1, tctx);
+        drawOneCell(_x + gridX, _y + gridY, structCode[y][x] === "X" ? 1 : 0, 0.5, tctx);
+      }
+    }
+    
+    tctx.globalAlpha = 1;
+    
+    // Draw grid lines above cells (on top-canvas)
+    if (showGridLines) {
+      tctx.strokeStyle = gridLineColor;
+      tctx.lineWidth = Math.max(1, (tileSize * gridLineWidth).toMultipleOf(2)); // Make line width an even number to reduce blurring
+      
+      // Vertical lines
+      for (let x = 0; x <= gridSize; x++) {
+        tctx.beginPath();
+        tctx.moveTo(x * tileSize, 0);
+        tctx.lineTo(x * tileSize, canvas.height);
+        tctx.stroke();
+      }
+      
+      // Horizontal lines
+      for (let y = 0; y <= gridSize; y++) {
+        tctx.beginPath();
+        tctx.moveTo(0, y * tileSize);
+        tctx.lineTo(canvas.width, y * tileSize);
+        tctx.stroke();
+      }
+    }
+  }
+  
+  function placeStruct(gridX, gridY) {
+    // Copies the current structure pattern onto the grid, at the given position (centered at the position)
+    
+    structCode = structures[structIndex].code;
+    if (structFlippedX) structCode = mirrorCode(structCode, "x");
+    if (structFlippedY) structCode = mirrorCode(structCode, "y");
+    
+    Mouse.movedSinceLastClick = false;
+    
+    if (!isValidStructPlacement(gridX, gridY)) return;
+    
+    let w2 = Math.floor(structWidth / 2);
+    let h2 = Math.floor(structHeight / 2);
+    let wOffset = (structWidth + 1) % 2;
+    let hOffset = (structHeight + 1) % 2;
+    
+    for (let x = 0; x < structWidth; x++) {
+      for (let y = 0; y < structHeight; y++) {
+        let _x = x - w2 + wOffset;
+        let _y = y - h2 + hOffset;
+        
+        grid[_x + gridX][_y + gridY] = structCode[y][x] === "X" ? 1 : 0;
+      }
+    }
+    
+    // This is user input, so save last grid state
+    setLastGrid();
+    
+    drawGrid();
+  }
+  
+  function initHTML() {
+    // Create preset buttons
+    for (let i = 0; i < presets.length; i++) {
+      presets[i].code = numberifyRule(presets[i].born, presets[i].survive);
+      
+      let btn = document.createElement("button");
+      btn.id = "preset-btn-" + i;
+      presets[i].button = btn;
+      btn.innerHTML = presets[i].name;
+      btn.className = "preset-btn";
+      btn.onclick = () => loadPreset(i);
+      document.getElementById(presets[i].category + "-presets-div").appendChild(btn);
+    }
+    
+    // Create born checkboxes
+    for (let i = 0; i <= 8; i++) {
+      let ruleLabel = document.createElement("label");
+      ruleLabel.className = "rule-label";
+      
+      let check = document.createElement("input");
+      check.type = "checkbox";
+      check.oninput = () => checksToRules();
+      check.id = "born" + i;
+      check.className = "no-margin-checkbox";
+      ruleLabel.for = check.id;
+      
+      let br = document.createElement("br");
+      
+      let numDiv = document.createElement("div");
+      numDiv.innerHTML = "<b>" + i + "</b>";
+      
+      ruleLabel.appendChild(check);
+      ruleLabel.appendChild(br);
+      ruleLabel.appendChild(numDiv);
+      
+      bornWithDiv.appendChild(ruleLabel);
+    }
+    
+    // Create survive checkboxes
+    for (let i = 0; i <= 8; i++) {
+      let ruleLabel = document.createElement("label");
+      ruleLabel.className = "rule-label";
+      
+      let check = document.createElement("input");
+      check.type = "checkbox";
+      check.oninput = () => checksToRules();
+      check.id = "survive" + i;
+      check.className = "no-margin-checkbox";
+      ruleLabel.for = check.id;
+      
+      let br = document.createElement("br");
+      
+      let numDiv = document.createElement("div");
+      numDiv.innerHTML = "<b>" + i + "</b>";
+      
+      ruleLabel.appendChild(check);
+      ruleLabel.appendChild(br);
+      ruleLabel.appendChild(numDiv);
+      
+      surviveWithDiv.appendChild(ruleLabel);
+    }
+    
+    // Create structure buttons
+    for (let i = 0; i < structures.length; i++) {
+      let s = structures[i];
+      let btn = document.createElement("button");
+      btn.className = "structure-btn-inactive";
+      btn.innerHTML = s.name;
+      btn.onclick = () => initStruct(i);
+      s.button = btn;
+      
+      if (s.category === "Game of Life") {
+        document.getElementById(s.subcategory + "-structures-div").appendChild(btn);
+      }
+      
+      if (s.category === "Shapes") document.getElementById("shapes-structures-div").appendChild(btn);
+    }
+    
+    // Create hotkey descriptions
+    for (let i = 0; i < hotkeys.length; i++) {
+      let h = hotkeys[i];
+      
+      let tr = document.createElement("tr");
+      
+      let td1 = document.createElement("td");
+      let td2 = document.createElement("td");
+      
+      td1.style.minWidth = td2.style.minWidth = "0";
+      td1.style.padding = td2.style.padding = "0";
+      td1.style.textAlign = "right";
+      
+      let span = document.createElement("span");
+      span.className = "hotkey-txt";
+      span.innerHTML = h.key;
+      td1.appendChild(span);
+      tr.appendChild(td1);
+      
+      td2.innerHTML = h.desc;
+      tr.appendChild(td2);
+      
+      hotkeyTable.appendChild(tr);
+    }
+    
+    setRules([3], [2, 3]);
+    
+    loadRandomStruct();
+    
+    showSection("a", 2, 1);
+    showSection("b", 2, 1);
+    
+    frame();
+  }
+</script>
+
+<script>(()=>{let links=document.getElementsByTagName("link");for(let i=0;i<links.length;i++){links[i].href+="?v="+Math.random();}let scripts=document.getElementsByTagName("script");for(let i=0;i<scripts.length;i++){if(scripts[i].src!==""){scripts[i].src+="?v="+Math.random();}}})();</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
