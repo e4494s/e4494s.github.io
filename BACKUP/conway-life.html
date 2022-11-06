@@ -3,6 +3,12 @@
 <!--
 Page Timeline:
 
+(11/6/2022):
+- Holy CRAP I spent ages getting the rotation down but...it works now! I literally had to bust out (practically) Group Theory to model the symmetries of a square and how to map between then under various operations. After ages and ages of debugging and rewriting and restructuring code...it finally works, and you can now mirror and rotate any structure to your heart's content (even non-square shapes)
+
+(11/5/2022):
+- Attempted to add rotation of structures and got bogged down with complicated group theory of symmetries and how rotations interact with mirroring, and I ended up breaking it. I just removed the mirroring functionality (for now) until I can solve this and hopefully get mirroring AND rotation to work
+
 (11/3/2022):
 - Added "Museum" rule preset (called this because when randomizing high densities, it tends to create intricate and interesting still lifes, with widely varying sizes and shape. They're also fragile, and adding one cell next to a still life usually causes it to collapse)
 - Fixed a bug where drawing cells while the canvas was running wouldn't properly update whether you started on a black or white cell
@@ -580,8 +586,12 @@ Page Timeline:
   let structIndex = -1; // Index in the structures array
   let lastStructIndex = 0; // Last-selected struct
   let willPlaceStruct = false; // Once-used variable for placing structs while canvas is running
-  let structFlippedX = false;
-  let structFlippedY = false;
+  
+  let flipHorizontallyMap = [6, 5, 4, 7, 2, 1, 0, 3];
+  let flipVerticallyMap = [4, 7, 6, 5, 0, 3, 2, 1];
+  let rotateLeftMap = [3, 0, 1, 2, 7, 4, 5, 6];
+  let rotateRightMap = [1, 2, 3, 0, 5, 6, 7, 4];
+  let structState = 0;
   
   function showSection(group, groupLength, number) {
     // Show the given HTML section, in a certain group
@@ -731,7 +741,11 @@ Page Timeline:
     escDown: false,
     pDown: false,
     cDown: false,
-    vDown: false
+    vDown: false,
+    commaDown: false,
+    periodDown: false,
+    lDown: false,
+    semicolonDown: false
   };
   window.addEventListener("keydown", e => {
     if ((e.keyCode === 27 || e.code === "Escape") && !Keys.escDown) { // If esc is pressed (not held):
@@ -766,17 +780,43 @@ Page Timeline:
       randomizeGrid();
     }
     
-    // If any arrow keys are pressed (or held):
-    /*if (((e.keyCode >= 37 && e.keyCode <= 40 ) || e.code === "ArrowLeft" || e.code === "ArrowUp" || e.code === "ArrowRight" || e.code === "ArrowDown") && !canvasRunning) {
-      e.preventDefault();
-      frame();
-    }*/
     if ((e.keyCode === 83 || e.code === "KeyS") && !canvasRunning) frame();
     
-    if (e.keyCode === 188 || e.code === "Comma") structFlippedY = !structFlippedY;
-    if (e.keyCode === 190 || e.code === "Period") structFlippedX = !structFlippedX;
+    let changedStruct = false;
     
-    if ((e.keyCode === 188 || e.code === "Comma" || e.keyCode === 190 || e.code === "Period") && placingStruct) {
+    //if (e.keyCode === 188 || e.code === "Comma") structFlippedY = !structFlippedY;
+    //if (e.keyCode === 190 || e.code === "Period") structFlippedX = !structFlippedX;
+    if ((e.keyCode === 188 || e.code === "Comma") && !Keys.commaDown) {
+      structState = flipHorizontallyMap[structState];
+      
+      Keys.commaDown = true;
+      changedStruct = true;
+    }
+    if ((e.keyCode === 190 || e.code === "Period") && !Keys.periodDown) {
+      structState = flipVerticallyMap[structState];
+      
+      Keys.periodDown = true;
+      changedStruct = true;
+    }
+    
+    if ((e.keyCode === 76 || e.code === "KeyL") && !Keys.lDown) {
+      structState = rotateLeftMap[structState];
+      
+      Keys.lDown = true;
+      changedStruct = true;
+    }
+    if ((e.keyCode === 186 || e.code === "Semicolon") && !Keys.semicolonDown) {
+      structState = rotateRightMap[structState];
+      
+      Keys.semicolonDown = true;
+      changedStruct = true;
+    }
+    
+    if (changedStruct && placingStruct) {
+      updateStruct();
+      
+      drawGrid();
+      
       Mouse.movedSinceLastClick = true;
       previewStruct(Mouse.gridX, Mouse.gridY);
     }
@@ -791,6 +831,14 @@ Page Timeline:
     if (e.keyCode === 67 || e.code === "KeyC") Keys.cDown = false;
     
     if (e.keyCode === 86 || e.code === "KeyV") Keys.vDown = false;
+    
+    if (e.keyCode === 188 || e.code === "Comma") Keys.commaDown = false;
+    
+    if (e.keyCode === 190 || e.code === "Period") Keys.periodDown = false;
+    
+    if (e.keyCode === 76 || e.code === "KeyL") Keys.lDown = false;
+    
+    if (e.keyCode === 186 || e.code === "Semicolon") Keys.semicolonDown = false;
   });
   
   let grid = [];
@@ -1275,7 +1323,7 @@ Page Timeline:
     Mouse.gridX = Math.floor(Mouse.x / tileSize);
     Mouse.gridY = Math.floor(Mouse.y / tileSize);
     
-    willPlaceStruct = true;
+    if (isValidStructPlacement(Mouse.gridX, Mouse.gridY)) willPlaceStruct = true;
     
     if (!canvasRunning) {
       if (isValidStructPlacement(Mouse.gridX, Mouse.gridY)) placeStruct(Mouse.gridX, Mouse.gridY);
@@ -1620,7 +1668,15 @@ Page Timeline:
     {
       key: ".",
       desc: "Flip Current Structure <b>Vertically</b>"
-    }
+    },
+    {
+      key: "L",
+      desc: "Rotate Current Structure to the <b>Left</b>"
+    },
+    {
+      key: ";",
+      desc: "Rotate Current Structure to the <b>Right</b>"
+    },
   ];
   
   let structures = [
@@ -2947,18 +3003,18 @@ Page Timeline:
     return this.substring(0, index) + replacement + this.substring(index + replacement.length);
   };
   
-  function mirrorCode(code, axis) {
+  function mirrorCode(axis) {
     let flipCode = [];
     
-    let width = code[0].length;
-    let height = code.length;
+    let width = structCode[0].length;
+    let height = structCode.length;
     
-    for (let y = 0; y < height; y++) flipCode.push(code[y]);
+    for (let y = 0; y < height; y++) flipCode.push(structCode[y]);
     
     if (axis === "y") {
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
-          flipCode[y] = flipCode[y].replaceAt(x, code[y][width - x - 1]);
+          flipCode[y] = flipCode[y].replaceAt(x, structCode[y][width - x - 1]);
         }
       }
     }
@@ -2966,12 +3022,32 @@ Page Timeline:
     else if (axis === "x") {
       for (let x = 0; x < width; x++) {
         for (let y = 0; y < height; y++) {
-          flipCode[y] = flipCode[y].replaceAt(x, code[height - y - 1][x]);
+          flipCode[y] = flipCode[y].replaceAt(x, structCode[height - y - 1][x]);
         }
       }
     }
     
-    return flipCode;
+    structCode = flipCode;
+  }
+  
+  function flipXYCode() {
+    let flipCode = [];
+    
+    structWidth = structCode.length;
+    structHeight = structCode[0].length;
+    
+    for (let x = 0; x < structHeight; x++) {
+      let row = "";
+      for (let y = 0; y < structWidth; y++) {
+        row += structCode[y][x];
+      }
+      flipCode.push(row);
+    }
+    
+    structWidth = structCode.length;
+    structHeight = structCode[0].length;
+    
+    structCode = flipCode;
   }
   
   function loadRandomStruct() {
@@ -3037,10 +3113,11 @@ Page Timeline:
         }
       }
       
-      structWidth = preset.code[0].length;
-      structHeight = preset.code.length;
       placingStruct = true;
       structCode = preset.code;
+      structWidth = preset.code[0].length;
+      structHeight = preset.code.length;
+      
       exitPlacingBtn.style.visibility = "visible"; // Show Exit Placing button
       structureNameTxt.innerHTML = "<b>Placing: " + preset.name + "</b>";
       
@@ -3082,17 +3159,62 @@ Page Timeline:
       structureNameTxt.innerHTML = "";
     }
     
+    if (structIndex !== -1) updateStruct();
     drawGrid();
     
     if (Mouse.movedSinceLastClick && n !== -1) previewStruct(Mouse.gridX, Mouse.gridY);
   }
   
+  function updateStruct() {
+    structCode = structures[structIndex].code;
+    structWidth = structCode[0].length;
+    structHeight = structCode.length;
+    
+    switch(structState) {
+      case 0:
+        break;
+      
+      case 1:
+        flipXYCode();
+        mirrorCode("y");
+        break;
+      
+      case 2:
+        flipXYCode();
+        mirrorCode("y");
+        flipXYCode();
+        mirrorCode("y");
+        break;
+      
+      case 3:
+        mirrorCode("y");
+        flipXYCode();
+        break;
+      
+      case 4:
+        mirrorCode("x");
+        break;
+      
+      case 5:
+        mirrorCode("x");
+        flipXYCode();
+        mirrorCode("y");
+        break;
+      
+      case 6:
+        mirrorCode("y");
+        break;
+      
+      case 7:
+        mirrorCode("y");
+        flipXYCode();
+        mirrorCode("y");
+        break;
+    }
+  }
+  
   function previewStruct(gridX, gridY) {
     // Draw a translucent preview of the currently selected structure at the given position
-    
-    structCode = structures[structIndex].code;
-    if (structFlippedX) structCode = mirrorCode(structCode, "x");
-    if (structFlippedY) structCode = mirrorCode(structCode, "y");
     
     if (!isValidStructPlacement(gridX, gridY)) return;
     
@@ -3142,10 +3264,6 @@ Page Timeline:
   
   function placeStruct(gridX, gridY) {
     // Copies the current structure pattern onto the grid, at the given position (centered at the position)
-    
-    structCode = structures[structIndex].code;
-    if (structFlippedX) structCode = mirrorCode(structCode, "x");
-    if (structFlippedY) structCode = mirrorCode(structCode, "y");
     
     Mouse.movedSinceLastClick = false;
     
