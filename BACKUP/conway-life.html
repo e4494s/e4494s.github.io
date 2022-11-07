@@ -4,7 +4,10 @@
 Page Timeline:
 
 (11/6/2022):
-- Holy CRAP I spent ages getting the rotation down but...it works now! I literally had to bust out (practically) Group Theory to model the symmetries of a square and how to map between then under various operations. After ages and ages of debugging and rewriting and restructuring code...it finally works, and you can now mirror and rotate any structure to your heart's content (even non-square shapes)
+- Holy CRAP I spent ages getting the rotation down but...it works now! I literally had to bust out (practically) Group Theory to model the symmetries of a square and how to map between then under various operations. After ages and ages of debugging and rewriting and restructuring code...it finally works, and you can now mirror and rotate any structure to your heart's content (even non-square shapes). The problem wasn't implementing rotating a grid (although that was a big struggle), the main difficulty was mapping between different orientations, so if a user hit ",l,;..;l,.;l" it wouldn't have to step through all of those instructions one-by-one every time, it would just have a set state to draw the structure in. I finally got that working.
+- Added buttons in the Structures tab that mirror and rotate the structure
+- Formatted hotkey descriptions into two columns so it takes up less vertical space
+- Modified all spaceship structures so that they're all facing to the right (or bottom right if they're oblique) so that rotating one will make them all face the same direction still, instead of being in different orientations
 
 (11/5/2022):
 - Attempted to add rotation of structures and got bogged down with complicated group theory of symmetries and how rotations interact with mirroring, and I ended up breaking it. I just removed the mirroring functionality (for now) until I can solve this and hopefully get mirroring AND rotation to work
@@ -367,13 +370,21 @@ Page Timeline:
         font-style: italic;
       }
       
-      #exit-placing-btn {
+      .smaller-btn {
         margin-top: 5px;
-        padding: 1px 4px 1px 4px;
+        padding: 2px 5px 2px 5px;
         border: 2px solid black;
         font-size: 11px;
         color: black;
         font-style: normal;
+        background-color: white;
+        font-weight: normal;
+      }
+      .smaller-btn:hover {
+        background-color: lightgray;
+      }
+      .smaller-btn:active {
+        background-color: gray;
       }
       
       .shape-property-div {
@@ -384,8 +395,8 @@ Page Timeline:
       .hotkey-txt {
         font-weight: bold;
         font-style: normal;
-        padding-right: 10px;
         font-size: 15px;
+        padding-right: 10px;
       }
     </style>
   </head>
@@ -401,9 +412,28 @@ Page Timeline:
   <br><br>
   <b><i>Click and drag on the canvas to turn cells on or off (it is recommended to pause the simulation before drawing).</i></b>
   <br><br>
-  <b><u>Hotkeys:</u></b>
-  <br>
-  <table id = "hotkey-table"></table>
+  <table>
+    <tr>
+      <td>
+        <table id = "hotkey-table-general">
+          <tr>
+            <td style = "min-width: 0; padding: 0" colspan = "3">
+              <span class = "hotkey-txt"><u>General Hotkeys</u></span>
+            </td>
+          </tr>
+        </table>
+      </td>
+      <td>
+        <table id = "hotkey-table-structures">
+          <tr>
+            <td style = "min-width: 0; padding: 0" colspan = "3">
+              <span class = "hotkey-txt"><u>Structure Hotkeys</u></span>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 </div>
 <table>
   <tr valign = "top">
@@ -420,7 +450,7 @@ Page Timeline:
         </div>
       </div>
       <div style = "display: flex">
-        <div class = "padded-div"><button id = "exit-placing-btn" onclick = "initStruct(-1)" style = "visibility: hidden" title = "Exit Placing (Esc)">Exit Structure Placing</button></div>
+        <div class = "padded-div"><button id = "exit-placing-btn" class = "smaller-btn" onclick = "initStruct(-1)" style = "visibility: hidden" title = "Exit Placing (Esc)">Exit Structure Placing</button></div>
         <div class = "padded-div">
           <div id = "structure-name-txt" style = "margin-top: 8px"></div>
         </div>
@@ -496,6 +526,12 @@ Page Timeline:
         </div>
       </div>
       <div id = "section-a-2" style = "display: none">
+        <button class = "smaller-btn" onclick = "simulateKeyPress(',')" title = "Mirror Struct Horizontally (Comma)">Mirror Struct <b><i>Horizontally</i></b></button>
+        <button class = "smaller-btn" onclick = "simulateKeyPress('.')" title = "Mirror Struct Vertically (Period)">Mirror Struct <b><i>Vertically</i></b></button>
+        <br>
+        <button class = "smaller-btn" onclick = "simulateKeyPress('l')" title = "Rotate Struct Left (L)">Rotate Struct <b><i>Left</i></b></button>
+        <button class = "smaller-btn" onclick = "simulateKeyPress(';')" title = "Rotate Struct Right (Semicolon)">Rotate Struct <b><i>Right</i></b></button>
+        <br><br>
         <div class = "small-title" style = "text-align: left"><b>Load Structure Presets:</b></div>
         <div class = "little-font">Click on a structure button to select it. When it's selected, click anywhere on the grid to place that structure there. Click the "Exit Structure Placing" button above the grid to leave this mode.</div>
         <br>
@@ -587,28 +623,27 @@ Page Timeline:
   let lastStructIndex = 0; // Last-selected struct
   let willPlaceStruct = false; // Once-used variable for placing structs while canvas is running
   
+  // Struct State is a very complicated variable, even though it only holds an integer from 0-7 inclusive
+  // It represents the 8 possible orientations of a square on a grid (all 4 quarter-turn rotations, along with each one's mirror)
+  // This is what allows me to go from any orientation to any other, without using complicated geometry or anything
+  // It just maps between different states using the various "map" arrays
+  let structState = 0;
+  
   let flipHorizontallyMap = [6, 5, 4, 7, 2, 1, 0, 3];
   let flipVerticallyMap = [4, 7, 6, 5, 0, 3, 2, 1];
   let rotateLeftMap = [3, 0, 1, 2, 7, 4, 5, 6];
   let rotateRightMap = [1, 2, 3, 0, 5, 6, 7, 4];
-  let structState = 0;
   
-  function showSection(group, groupLength, number) {
-    // Show the given HTML section, in a certain group
-    
-    for (let i = 1; i <= groupLength; i++) {
-      let section = document.getElementById("section-" + group + "-" + i);
-      let btn = document.getElementById("show-section-btn-" + group + "-" + i);
-      if (i === number) {
-        section.style.display = "block";
-        btn.className = "section-btn-active";
-      }
-      else {
-        section.style.display = "none";
-        btn.className = "section-btn-inactive";
-      }
-    }
-  }
+  // Settings specific to the structures in the "Shapes" subtab
+  // Not all of these settings are used for every shape -- selecting a different shape will change which setting sliders are visible vs invisible
+  // For example, "Rectangle" has Width/Height/Thickness, while "X" has Length/Thickness
+  let shapeStructWidth = 9;
+  let shapeStructHeight = 9;
+  let shapeStructFill = 0; // 0: Outline  |  1: Solid
+  let shapeStructLength = 9;
+  let shapeStructThickness = 2;
+  
+  // HTML element reference declarations
   
   let fpsRange = document.getElementById("fps-range");
   let fpsTxt = document.getElementById("fps-txt");
@@ -642,7 +677,6 @@ Page Timeline:
   let shapeThicknessDiv = document.getElementById("shape-thickness-div");
   let shapeStructFillRadio0 = document.getElementById("shape-struct-fill-radio-0");
   let shapeStructFillRadio1 = document.getElementById("shape-struct-fill-radio-1");
-  let hotkeyTable = document.getElementById("hotkey-table");
   
   let fpsRangeArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40, 50, -1, -2, -3, -4, -5, -11];
   fpsRange.max = fpsRangeArray.length - 1;
@@ -651,6 +685,50 @@ Page Timeline:
   let gridSizeRangeArray = [5, 10, 15, 20, 30, 40, 50, 75, 100, 150, 200, 250];
   gridSizeRange.max = gridSizeRangeArray.length - 1;
   gridSizeRange.value = gridSizeRangeArray.indexOf(75);
+  
+  let Mouse = {
+    x: 0, // Actual x and y of the mouse, relative to the canvas
+    y: 0,
+    down: false,
+    mode: 1, // Which state the mouse will convert cells to when dragging
+    gridX: 0, // Which cell on the grid the mouse is currently hovering over
+    gridY: 0,
+    movedSinceLastClick: false
+  };
+  
+  let Keys = { // Which hotkeys are currently down
+    rDown: false,
+    escDown: false,
+    pDown: false,
+    cDown: false,
+    vDown: false,
+    commaDown: false,
+    periodDown: false,
+    lDown: false,
+    semicolonDown: false
+  };
+  
+  let grid = [];
+  let gridSize = 75;
+  let tileSize = 0;
+  let wrapEdges = true;
+  
+  let lastGrid = []; // Last user-edited grid, which is what resetGrid() reloads to
+  
+  let born = []; // Each is an array of true or false, showing whether that checkbox is checked
+  let survive = [];
+  
+  let generations = 0;
+  
+  let bgColor = "white";
+  let cellColor = "black";
+  let gridLineColor = "lightgray";
+  
+  let gridLineWidth = 0.15;
+  
+  let showGridLines = true;
+  
+  let fillChance = 0.15; // Randomization density
   
   function updateSettings(changingGridSize) {
     // Update actual JavaScript variables to match user inputted HTML
@@ -686,6 +764,8 @@ Page Timeline:
     else if (shapeStructFillRadio1.checked) shapeStructFill = 1;
     
     if (placingStruct && structures[structIndex].category === "Shapes") {
+      // If placing a shape, exit and re-enter placing mode so that the new shape settings take effect
+      
       let i = structIndex;
       initStruct(-1);
       initStruct(i);
@@ -713,8 +793,8 @@ Page Timeline:
       for (let y = 0; y < lastGridSize; y++) {
         let _x = Math.floor(gridSize / 2) - Math.floor(lastGridSize / 2) + x;
         let _y = Math.floor(gridSize / 2) - Math.floor(lastGridSize / 2) + y;
-        let xOn = _x >= 0 && _x < gridSize;
-        let yOn = _y >= 0 && _y < gridSize;
+        let xOn = _x >= 0 && _x < gridSize; // x-value within grid size
+        let yOn = _y >= 0 && _y < gridSize; // y-value within grid size
         if (xOn && yOn) grid[_x][_y] = currGrid[x][y];
       }
     }
@@ -726,27 +806,6 @@ Page Timeline:
     setLastGrid();
   }
   
-  let Mouse = {
-    x: 0, // Actual x and y of the mouse, relative to the canvas
-    y: 0,
-    down: false,
-    mode: 1, // Which state the mouse will convert cells to when dragging
-    gridX: 0, // Which cell on the grid the mouse is currently hovering over
-    gridY: 0,
-    movedSinceLastClick: false
-  };
-  
-  let Keys = { // Which hotkeys are currently down
-    rDown: false,
-    escDown: false,
-    pDown: false,
-    cDown: false,
-    vDown: false,
-    commaDown: false,
-    periodDown: false,
-    lDown: false,
-    semicolonDown: false
-  };
   window.addEventListener("keydown", e => {
     if ((e.keyCode === 27 || e.code === "Escape") && !Keys.escDown) { // If esc is pressed (not held):
       Keys.escDown = true;
@@ -780,39 +839,37 @@ Page Timeline:
       randomizeGrid();
     }
     
-    if ((e.keyCode === 83 || e.code === "KeyS") && !canvasRunning) frame();
+    if ((e.keyCode === 83 || e.code === "KeyS") && !canvasRunning) frame(); // If S is pressed (or held):
     
-    let changedStruct = false;
+    let changedStruct = false; // Whether or not a structure-related hotkey has been pressed
     
-    //if (e.keyCode === 188 || e.code === "Comma") structFlippedY = !structFlippedY;
-    //if (e.keyCode === 190 || e.code === "Period") structFlippedX = !structFlippedX;
-    if ((e.keyCode === 188 || e.code === "Comma") && !Keys.commaDown) {
-      structState = flipHorizontallyMap[structState];
+    if ((e.keyCode === 188 || e.code === "Comma") && !Keys.commaDown) { // If comma is pressed (not held):
+      structState = flipHorizontallyMap[structState]; // Change structState to reflect the horizontal mirroring
       
       Keys.commaDown = true;
       changedStruct = true;
     }
-    if ((e.keyCode === 190 || e.code === "Period") && !Keys.periodDown) {
-      structState = flipVerticallyMap[structState];
+    if ((e.keyCode === 190 || e.code === "Period") && !Keys.periodDown) { // If period is pressed (not held):
+      structState = flipVerticallyMap[structState]; // Change structState to reflect the vertical mirroring
       
       Keys.periodDown = true;
       changedStruct = true;
     }
     
-    if ((e.keyCode === 76 || e.code === "KeyL") && !Keys.lDown) {
-      structState = rotateLeftMap[structState];
+    if ((e.keyCode === 76 || e.code === "KeyL") && !Keys.lDown) { // If L is pressed (not held):
+      structState = rotateLeftMap[structState]; // Change structState to reflect the left rotation
       
       Keys.lDown = true;
       changedStruct = true;
     }
-    if ((e.keyCode === 186 || e.code === "Semicolon") && !Keys.semicolonDown) {
-      structState = rotateRightMap[structState];
+    if ((e.keyCode === 186 || e.code === "Semicolon") && !Keys.semicolonDown) { // If semicolon is pressed (not held):
+      structState = rotateRightMap[structState]; // Change structState to reflect the right rotation
       
       Keys.semicolonDown = true;
       changedStruct = true;
     }
     
-    if (changedStruct && placingStruct) {
+    if (changedStruct && placingStruct) { // If struct hotkeys were pressed, and a structure is being placed:
       updateStruct();
       
       drawGrid();
@@ -821,6 +878,32 @@ Page Timeline:
       previewStruct(Mouse.gridX, Mouse.gridY);
     }
   });
+  function simulateKeyPress(key) {
+    // Replicates the behavior that pressing a certain hotkey does
+    // Since I never need to use it for most hotkeys, it only works for the structure-related hotkeys
+    
+    if (key === ",") {
+      structState = flipHorizontallyMap[structState]; // Change structState to reflect the horizontal mirroring
+    }
+    else if (key === ".") {
+      structState = flipVerticallyMap[structState]; // Change structState to reflect the vertical mirroring
+    }
+    else if (key === "l") {
+      structState = rotateLeftMap[structState]; // Change structState to reflect the left rotation
+    }
+    else if (key === ";") {
+      structState = rotateRightMap[structState]; // Change structState to reflect the right rotation
+    }
+    
+    if (placingStruct) {
+      updateStruct();
+      
+      drawGrid();
+      
+      Mouse.movedSinceLastClick = true;
+      previewStruct(Mouse.gridX, Mouse.gridY);
+    }
+  }
   window.addEventListener("keyup", e => {
     if (e.keyCode === 27 || e.code === "Escape") Keys.escDown = false;
     
@@ -840,28 +923,6 @@ Page Timeline:
     
     if (e.keyCode === 186 || e.code === "Semicolon") Keys.semicolonDown = false;
   });
-  
-  let grid = [];
-  let gridSize = 75;
-  let tileSize = 0;
-  let wrapEdges = true;
-  
-  let lastGrid = []; // Last user-edited grid, which is what resetGrid() reloads to
-  
-  let born = []; // Each is an array of true or false, showing whether that checkbox is checked
-  let survive = [];
-  
-  let generations = 0;
-  
-  let bgColor = "white";
-  let cellColor = "black";
-  let gridLineColor = "lightgray";
-  
-  let gridLineWidth = 0.15;
-  
-  let showGridLines = true;
-  
-  let fillChance = 0.15; // Randomization density
   
   function setLastGrid() {
     // Save the current grid as lastGrid
@@ -1274,7 +1335,7 @@ Page Timeline:
     }
   });
   window.addEventListener("mousemove", e => {
-    if (Mouse.down) e.preventDefault();
+    if (Mouse.down) e.preventDefault(); // Prevent unwanted text selection that occurs from clicking and dragging on the canvas
     
     let willErase = isValidStructPlacement(Mouse.gridX, Mouse.gridY);
     
@@ -1286,6 +1347,9 @@ Page Timeline:
     Mouse.gridY = Math.floor(Mouse.y / tileSize);
     
     if (!isValidStructPlacement(Mouse.gridX, Mouse.gridY) && willErase) {
+      // If the current struct placement is invalid, but it wasn't invalid before updating, redraw the grid
+      // We don't do this every time because it is redundant if the previous placement was invalid, which slows down things a lot
+      
       Mouse.movedSinceLastClick = false;
       drawGrid();
       return;
@@ -1639,42 +1703,52 @@ Page Timeline:
   let hotkeys = [
     {
       key: "P",
+      category: "general",
       desc: "Play/Pause Simulation"
     },
     {
       key: "S",
+      category: "general",
       desc: "Step Simulation"
     },
     {
       key: "R",
+      category: "general",
       desc: "Reset Grid State (to last edited)"
     },
     {
       key: "C",
+      category: "general",
       desc: "Clear Grid"
     },
     {
       key: "V",
+      category: "general",
       desc: "Randomize Grid"
     },
     {
       key: "Esc",
+      category: "structures",
       desc: "Toggle Structure Placing On/Off"
     },
     {
       key: ",",
+      category: "structures",
       desc: "Flip Current Structure <b>Horizontally</b>"
     },
     {
       key: ".",
+      category: "structures",
       desc: "Flip Current Structure <b>Vertically</b>"
     },
     {
       key: "L",
+      category: "structures",
       desc: "Rotate Current Structure to the <b>Left</b>"
     },
     {
       key: ";",
+      category: "structures",
       desc: "Rotate Current Structure to the <b>Right</b>"
     },
   ];
@@ -1735,18 +1809,12 @@ Page Timeline:
       category: "Game of Life",
       subcategory: "spaceships",
       code: [
-        "-XXXX-",
-        "------",
-        "-X--X-",
-        "X-XX-X",
-        "X----X",
-        "------",
-        "X----X",
-        "XX--XX",
-        "XXXXXX",
-        "-X--X-",
-        "--XX--",
-        "--XX--"
+        "---XXX-XX---",
+        "--XXX----X-X",
+        "XX-X----X--X",
+        "XX-X----X--X",
+        "--XXX----X-X",
+        "---XXX-XX---"
       ],
       button: undefined
     },
@@ -1755,15 +1823,15 @@ Page Timeline:
       category: "Game of Life",
       subcategory: "spaceships",
       code: [
-        "-XX--X-XX",
-        "X--X--XX-",
-        "-X-X-----",
-        "--X------",
-        "--------X",
-        "------XXX",
-        "-----X---",
+        "XX-X--XX-",
+        "-XX--X--X",
+        "-----X-X-",
         "------X--",
-        "-------XX"
+        "X--------",
+        "XXX------",
+        "---X-----",
+        "--X------",
+        "XX-------"
       ],
       button: undefined
     },
@@ -1772,24 +1840,24 @@ Page Timeline:
       category: "Game of Life",
       subcategory: "puffers",
       code: [
-        "---X-----",
-        "-X---X---",
-        "X--------",
-        "X----X---",
-        "XXXXX----",
-        "---------",
-        "---------",
-        "---------",
-        "-XX------",
-        "XX-XXX---",
-        "-XXXX----",
-        "--XX-----",
-        "---------",
-        "-----XX--",
+        "-----X---",
+        "---X---X-",
+        "--------X",
         "---X----X",
-        "--X------",
-        "--X-----X",
-        "--XXXXXX-"
+        "----XXXXX",
+        "---------",
+        "---------",
+        "---------",
+        "------XX-",
+        "---XXX-XX",
+        "----XXXX-",
+        "-----XX--",
+        "---------",
+        "--XX-----",
+        "X----X---",
+        "------X--",
+        "X-----X--",
+        "-XXXXXX--"
       ],
       button: undefined
     },
@@ -1798,17 +1866,22 @@ Page Timeline:
       category: "Game of Life",
       subcategory: "spaceships",
       code: [
-        "-X------------X-",
-        "-X------------X-",
-        "X-X----------X-X",
-        "-X------------X-",
-        "-X------------X-",
-        "--X---XXXX---X--",
-        "------XXXX------",
-        "--XXXX----XXXX--",
-        "----------------",
-        "----X------X----",
-        "-----XX--XX-----"
+        "--------X--",
+        "------XX-XX",
+        "---X-X--X--",
+        "---X-------",
+        "-X-X-------",
+        "X--X-------",
+        "X---XX-----",
+        "----XX-----",
+        "----XX-----",
+        "X---XX-----",
+        "X--X-------",
+        "-X-X-------",
+        "---X-------",
+        "---X-X--X--",
+        "------XX-XX",
+        "--------X--"
       ],
       button: undefined
     },
@@ -1817,18 +1890,21 @@ Page Timeline:
       category: "Game of Life",
       subcategory: "puffers",
       code: [
-        "---X-------X---",
-        "--XXX-----XXX--",
-        "-XX--X---X--XX-",
-        "---XXX---XXX---",
-        "---------------",
-        "----X-----X----",
-        "--X--X---X--X--",
-        "X-----X-X-----X",
-        "XX----X-X----XX",
-        "------X-X------",
-        "---X-X---X-X---",
-        "----X-----X----"
+        "---XX-------",
+        "---X-----X--",
+        "-----X---XX-",
+        "-X------X-XX",
+        "X-----X-X-X-",
+        "-X---X--XX--",
+        "--XXX-------",
+        "------------",
+        "--XXX-------",
+        "-X---X--XX--",
+        "X-----X-X-X-",
+        "-X------X-XX",
+        "-----X---XX-",
+        "---X-----X--",
+        "---XX-------"
       ],
       button: undefined
     },
@@ -1837,16 +1913,21 @@ Page Timeline:
       category: "Game of Life",
       subcategory: "spaceships",
       code: [
-        "-------X-------",
-        "------X-X------",
-        "-----X---X-----",
-        "------XXX------",
-        "---------------",
-        "----XX---XX----",
-        "--X---X-X---X--",
-        "-XX---X-X---XX-",
-        "X-----X-X-----X",
-        "-X-XX-X-X-XX-X-"
+        "-X--------",
+        "X-X-------",
+        "--XX------",
+        "X---------",
+        "X---X-----",
+        "----X--X--",
+        "XXXX--X-X-",
+        "------X--X",
+        "XXXX--X-X-",
+        "----X--X--",
+        "X---X-----",
+        "X---------",
+        "--XX------",
+        "X-X-------",
+        "-X--------"
       ],
       button: undefined
     },
@@ -1855,17 +1936,17 @@ Page Timeline:
       category: "Game of Life",
       subcategory: "spaceships",
       code: [
-        "--X------",
-        "XX-------",
+        "------X--",
+        "-------XX",
         "X--XXX--X",
-        "X----XXX-",
-        "-XXX--XX-",
+        "-XXX----X",
+        "-XX--XXX-",
         "---------",
-        "-XXX--XX-",
-        "X----XXX-",
+        "-XX--XXX-",
+        "-XXX----X",
         "X--XXX--X",
-        "XX-------",
-        "--X------"
+        "-------XX",
+        "------X--"
       ],
       button: undefined
     },
@@ -1874,24 +1955,24 @@ Page Timeline:
       category: "Game of Life",
       subcategory: "spaceships",
       code: [
-        "---XXX------------",
-        "---X--XXX---------",
-        "----X-X-----------",
-        "XX-------X--------",
-        "X-X----X--X-------",
-        "X--------XX-------",
-        "-XX---------------",
-        "-X--X-----X-XX----",
-        "-X---------XX-X---",
-        "---X-X------XX--X-",
-        "----XX-X----XX---X",
-        "--------X-------X-",
-        "-------XXXX---X-X-",
-        "-------X-XX---XXXX",
-        "--------X---XX-X--",
-        "-------------XX---",
-        "---------X-XXX----",
-        "----------X--X----"
+        "----X--X----------",
+        "----XXX-X---------",
+        "---XX-------------",
+        "--X-XX---X--------",
+        "XXXX---XX-X-------",
+        "-X-X---XXXX-------",
+        "-X-------X--------",
+        "X---XX----X-XX----",
+        "-X--XX------X-X---",
+        "---X-XX---------X-",
+        "----XX-X-----X--X-",
+        "---------------XX-",
+        "-------XX--------X",
+        "-------X--X----X-X",
+        "--------X-------XX",
+        "-----------X-X----",
+        "---------XXX--X---",
+        "------------XXX---"
       ],
       button: undefined
     },
@@ -1900,85 +1981,85 @@ Page Timeline:
       category: "Game of Life",
       subcategory: "spaceships",
       code: [
+        "----X--------------------------",
+        "-----XX------------------------",
+        "-------------------------------",
+        "-----X-------------------------",
         "----XX-------------------------",
-        "----X--X-----------------------",
-        "----X---X----------------------",
-        "------XXX----------------------",
-        "--XX------XXXX-----------------",
-        "--X-XX----XXXX-----------------",
-        "-X----X------XXX---------------",
-        "--XXXX----XX---X---------------",
-        "X---------XX-------------------",
-        "-X---X-------------------------",
-        "------XXX--XX--X---------------",
-        "--XX-------X----X--------------",
-        "-------------X-XX--------------",
-        "----------XX------X------------",
-        "-----------XX-XXX-X------------",
-        "----------XX---X--X------------",
-        "----------X-X--XX--------------",
-        "----------X--X-X-X-------------",
+        "--XX-XX------------------------",
+        "XXX---XX-----------------------",
+        "-X----XXX----------------------",
+        "-X----XXX----------------------",
+        "---XX--------------------------",
+        "XX--X-X------------------------",
+        "--X--X-XX----------------------",
+        "X-X-XXX--X---------------------",
+        "X-X--XX------------------------",
+        "-X-----XXX---------------------",
+        "-------XX----------------------",
+        "---XXX-------------------------",
+        "--XX--X------------------------",
+        "--X----------------------------",
+        "----X-X------------------------",
+        "------X----XXX-----------------",
+        "----XX-XXXX--------------------",
+        "------XXXX----X----------------",
+        "----------X--------------------",
+        "------------X------------------",
+        "------XXXXX-X------------------",
+        "------XXX-XXX------------------",
+        "------X----X-------------------",
+        "-------XXXXX-------------------",
+        "----------X--------------------",
+        "------X-XX---------------------",
+        "---------X---------------------",
+        "---X---XX----------------------",
+        "-X--X--XXXX--------------------",
+        "-XX---X---XX-------------------",
+        "-XXX-X------X------------------",
+        "------XX---X-------------------",
+        "---X---X---X-------------------",
+        "--X-X---X-X--------------------",
+        "--X------XXX-------------------",
+        "----XX-------------------------",
+        "-----XXXXX---------------------",
+        "---------XX--------------------",
+        "------XX--X--------------------",
+        "-----------X-------------------",
+        "------XX----XXXX-X-------------",
+        "------XX----X-XXXX-------------",
+        "---------XXX-XX----X-----------",
+        "-------------X--X---X----------",
+        "-------------X-XXX-X-----------",
+        "------------X--XXX-------------",
+        "-------------XX----------------",
+        "----------------XXX------------",
+        "--------XXXXX-----X------------",
+        "--------X------X---X-----------",
+        "---------X---------X-----------",
+        "-------------------------------",
         "----------XXX------X-----------",
-        "-----------X-X-X---X-----------",
-        "--------------XX-X-X-----------",
+        "-----------X-X-XX--------------",
+        "-----------X---X-X-X-----------",
         "-----------X------XXX----------",
-        "-------------------------------",
-        "-----------X---------X---------",
-        "-----------X---X------X--------",
-        "------------X-----XXXXX--------",
-        "------------XXX----------------",
-        "----------------XX-------------",
-        "-------------XXX--X------------",
-        "-----------X-XXX-X-------------",
-        "----------X---X--X-------------",
-        "-----------X----XX-XXX---------",
-        "-------------XXXX-X----XX------",
-        "-------------X-XXXX----XX------",
-        "-------------------X-----------",
-        "--------------------X--XX------",
-        "--------------------XX---------",
-        "---------------------XXXXX-----",
-        "-------------------------XX----",
-        "-------------------XXX------X--",
-        "--------------------X-X---X-X--",
-        "-------------------X---X---X---",
-        "-------------------X---XX------",
-        "------------------X------X-XXX-",
-        "-------------------XX---X---XX-",
-        "--------------------XXXX--X--X-",
-        "----------------------XX---X---",
-        "---------------------X---------",
-        "---------------------XX-X------",
-        "--------------------X----------",
-        "-------------------XXXXX-------",
-        "-------------------X----X------",
-        "------------------XXX-XXX------",
-        "------------------X-XXXXX------",
-        "------------------X------------",
-        "--------------------X----------",
-        "----------------X----XXXX------",
-        "--------------------XXXX-XX----",
-        "-----------------XXX----X------",
-        "------------------------X-X----",
-        "----------------------------X--",
-        "------------------------X--XX--",
-        "-------------------------XXX---",
-        "----------------------XX-------",
-        "---------------------XXX-----X-",
-        "------------------------XX--X-X",
-        "---------------------X--XXX-X-X",
-        "----------------------XX-X--X--",
-        "------------------------X-X--XX",
-        "--------------------------XX---",
-        "----------------------XXX----X-",
-        "----------------------XXX----X-",
-        "-----------------------XX---XXX",
-        "------------------------XX-XX--",
-        "-------------------------XX----",
-        "-------------------------X-----",
-        "-------------------------------",
-        "------------------------XX-----",
-        "--------------------------X----"
+        "-------------X-X-X--X----------",
+        "--------------XX--X-X----------",
+        "------------X--X---XX----------",
+        "------------X-XXX-XX-----------",
+        "------------X------XX----------",
+        "--------------XX-X-------------",
+        "--------------X----X-------XX--",
+        "---------------X--XX--XXX------",
+        "-------------------------X---X-",
+        "-------------------XX---------X",
+        "---------------X---XX----XXXX--",
+        "---------------XXX------X----X-",
+        "-----------------XXXX----XX-X--",
+        "-----------------XXXX------XX--",
+        "----------------------XXX------",
+        "----------------------X---X----",
+        "-----------------------X--X----",
+        "-------------------------XX----"
       ],
       button: undefined
     },
@@ -2210,21 +2291,21 @@ Page Timeline:
       category: "Game of Life",
       subcategory: "puffers",
       code: [
-        "--------XX-------",
-        "-------XX--------",
-        "---------X-------",
-        "-----------XX----",
-        "----------X------",
+        "--------X--------",
+        "-XX-X--X-X-------",
+        "XX-X----X--------",
+        "--XX-------XX----",
+        "-X-XX----X--X----",
+        "--XX---X-X----X--",
+        "---X-----X-----XX",
+        "--X----XX-----XX-",
+        "---XX--X---------",
         "-----------------",
-        "---------X--XX---",
-        "-XX-----XX----X--",
-        "XX-----X-----X---",
-        "--X----X-X---XX--",
-        "----X--X----XX-X-",
-        "----XX-------XX--",
-        "--------X----X-XX",
-        "-------X-X--X-XX-",
-        "--------X--------"
+        "------X----------",
+        "----XX-----------",
+        "-------X---------",
+        "--------XX-------",
+        "-------XX--------"
       ],
       button: undefined
     },
@@ -2233,25 +2314,25 @@ Page Timeline:
       category: "Game of Life",
       subcategory: "puffers",
       code: [
-        "-----------XX-----XXXX",
-        "---------XX-XX---X---X",
-        "---------XXXX--------X",
-        "----------XX-----X--X-",
-        "----------------------",
-        "--------X-------------",
-        "-------XX--------XX---",
-        "------X---------X--X--",
-        "-------XXXXX----X--X--",
-        "--------XXXX---XX-XX--",
-        "-----------X----XX----",
-        "----------------------",
-        "----------------------",
-        "----------------------",
-        "------------------XXXX",
-        "X--X-------------X---X",
-        "----X----------------X",
+        "-XXXX-----------------",
         "X---X------------X--X-",
-        "-XXXX-----------------"
+        "----X----------------X",
+        "X--X-------------X---X",
+        "------------------XXXX",
+        "----------------------",
+        "----------------------",
+        "----------------------",
+        "-----------X----XX----",
+        "--------XXXX---XX-XX--",
+        "-------XXXXX----X--X--",
+        "------X---------X--X--",
+        "-------XX--------XX---",
+        "--------X-------------",
+        "----------------------",
+        "----------XX-----X--X-",
+        "---------XXXX--------X",
+        "---------XX-XX---X---X",
+        "-----------XX-----XXXX"
       ],
       button: undefined
     },
@@ -2682,37 +2763,37 @@ Page Timeline:
       category: "Game of Life",
       subcategory: "glider-synthesis",
       code: [
-        "---------------------------------X",
-        "-------------------------------XX-",
-        "--------------------------------XX",
-        "---------X------------------------",
-        "-X--------X-----------------------",
-        "--X-----XXX-----------------------",
-        "XXX-------------------------------",
-        "----------------------------------",
-        "----------------------------------",
-        "-----X----------------------------",
-        "------X---------------------------",
-        "----XXX---------------------------",
-        "------------------------X-X-------",
-        "-------------------------XX-------",
-        "-------------------------X--------",
-        "----------------------------------",
-        "---------------------------X-X----",
-        "---------------------------XX-----",
-        "----------------------------X-----",
+        "X---------------------------------",
+        "-XX-------------------------------",
+        "XX--------------------------------",
+        "------------------------X---------",
+        "-----------------------X--------X-",
+        "-----------------------XXX-----X--",
         "-------------------------------XXX",
-        "-------------------------------X--",
-        "--------------------------------X-",
         "----------------------------------",
         "----------------------------------",
+        "----------------------------X-----",
+        "---------------------------X------",
+        "---------------------------XXX----",
+        "-------X-X------------------------",
+        "-------XX-------------------------",
+        "--------X-------------------------",
         "----------------------------------",
-        "----------------------------------",
-        "----------------------------------",
-        "----------------------------------",
+        "----X-X---------------------------",
         "-----XX---------------------------",
-        "------XX--------------------------",
-        "-----X----------------------------"
+        "-----X----------------------------",
+        "XXX-------------------------------",
+        "--X-------------------------------",
+        "-X--------------------------------",
+        "----------------------------------",
+        "----------------------------------",
+        "----------------------------------",
+        "----------------------------------",
+        "----------------------------------",
+        "----------------------------------",
+        "---------------------------XX-----",
+        "--------------------------XX------",
+        "----------------------------X-----"
       ],
       button: undefined
     },
@@ -2762,52 +2843,54 @@ Page Timeline:
       category: "Game of Life",
       subcategory: "glider-synthesis",
       code: [
-        "---X--------------------------------------------",
-        "-X-X--------------------------------------------",
-        "--XX--------------------------------------------",
-        "------------------------------------------------",
-        "------------------------------------------------",
-        "------------------------------------------------",
-        "------------------------------------------------",
-        "------------------------------------------------",
-        "------------------------------------------------",
-        "------------------------------------------------",
-        "------------------------------------------------",
-        "------------------------------------------------",
-        "------------------------------------------------",
-        "----------------------------XX------------------",
-        "---------------------------XX-------------------",
-        "------------------------XX---X------------------",
-        "-----------------------X-X----------------------",
-        "-------------------------X----------------------",
-        "---------------------------------XXX---XX-------",
-        "-----------------------------------X--XX--------",
-        "----------------------------------X-----X-------",
-        "------------------------------------------------",
-        "------------------------------------------------",
-        "------------------------------------------------",
-        "------------------------------------------------",
-        "------------------------------------------------",
-        "------------------------------------------------",
-        "------------------------------------------------",
-        "------------------------------------------------",
-        "------------------------------------------------",
-        "XX--------------------------------------X-------",
-        "-XX------------------------------------XX-------",
-        "X--------------------------------------X-X------",
-        "------------------------------------------------",
-        "---XX--------X----------------------------------",
-        "--X-X--------XX---------------------------------",
-        "----X-------X-X---------------------------------",
-        "-------XX------------------------------------XX-",
-        "------X-X------------------------------------X-X",
-        "--------X------------------------------------X--",
-        "-----------XXX----------------------------------",
-        "-------------X----------------------------------",
-        "------------X-----------------------------------",
-        "------------------------------------------XXX---",
-        "------------------------------------------X-----",
-        "-------------------------------------------X----"
+        "-------------X-X------------------------------",
+        "--------------XX----------------------------X-",
+        "----------X---X----------------------------X--",
+        "-----------X-------------------------------XXX",
+        "---------XXX----------------------------------",
+        "----------------------------------------------",
+        "-------X--------------------------------------",
+        "--------X-------------------------------------",
+        "------XXX-------------------------------------",
+        "----------------------------------------------",
+        "----------------------------------------------",
+        "-----X----------------------------------------",
+        "---X-X---X------------------------------------",
+        "----XX----XX----------------------------------",
+        "---------XX-----------------------------------",
+        "----------------------------------------------",
+        "----------------------------------------------",
+        "----------------------------------------------",
+        "----------------------------------------------",
+        "----------------------------------------------",
+        "----------------------------------------------",
+        "----------------------------------------------",
+        "----------------------------------------------",
+        "-----------------------------X----------------",
+        "------------------------------X---------------",
+        "----------------------------XXX---------------",
+        "----------------------------------------------",
+        "-------------------------------X--------------",
+        "-------------------------------XX-------------",
+        "------------------------------X-X-------------",
+        "----------------------------------------------",
+        "----------------------------------------------",
+        "----------------------------------------------",
+        "---------------------------X------------------",
+        "-------------------------X-X------------------",
+        "--------------------------XX------------------",
+        "----------------------------------------------",
+        "----------------------------------------------",
+        "--------------------------X-------------------",
+        "-------------XX-----------XX------------------",
+        "--------------XX---------X-X------------------",
+        "-------------X--------------------------------",
+        "-XX-------------------------------------------",
+        "X-X-------------------------------------------",
+        "--X-------------------------------------------",
+        "------XXX-------------------------------------",
+        "--------X-------------------------------------",
+        "-------X--------------------------------------"
       ],
       button: undefined
     },
@@ -2847,12 +2930,6 @@ Page Timeline:
     }
   ];
   
-  let shapeStructWidth = 9;
-  let shapeStructHeight = 9;
-  let shapeStructFill = 0; // 0: Outline  |  1: Solid  |  2: Concentric odd (starts at 1x1)  |  3: Concentric even (starts at 2x2)
-  let shapeStructLength = 9;
-  let shapeStructThickness = 2;
-  
   function generateShapeStruct(name, width, height, fill) {
     // Returns an array of strings of X's and -'s like a structure code, to generate a structure for shapes of different sizes
     
@@ -2862,11 +2939,13 @@ Page Timeline:
       for (let y = 0; y < height; y++) {
         let row = "";
         for (let x = 0; x < width; x++) {
-          if (fill === 0) { // Outline
+          if (fill === 0) { // If only drawing with an outline:
+            // If we're on an edge, draw a cell
             let isEdge = x === 0 || x === width - 1 || y === 0 || y === height - 1;
             row += isEdge ? "X" : "-";
           }
-          if (fill === 1) { // Solid
+          if (fill === 1) { // If drawing a solid shape:
+            // Literally just always draw a cell at every position within the size
             row += "X";
           }
         }
@@ -2878,18 +2957,21 @@ Page Timeline:
       for (let y = 0; y < height; y++) {
         let row = "";
         for (let x = 0; x < width; x++) {
-          //let distToDiagonal = Math.abs(x - y);
-          if (fill === 0) {
+          if (fill === 0) { // If only drawing with an outline:
             let isEdge = x === 0 || x === width - 1 || y === 0 || y === height - 1;
             let onDiagonal = false;
+            // If we're on an edge, being on the diagonal is counted as long as its in-between the two edges of the diagonal stripes
             if (isEdge) onDiagonal = (Math.abs(x - y) <= shapeStructThickness - 1) || (Math.abs((width - x - 1) - y) <= shapeStructThickness - 1);
+            // Otherwise, you need to be directly on one of the two edges of the diagonal stripes
+            // This way, we get a hollow x-shape but the corners still close up normally
             else {
               onDiagonal = (Math.abs(x - y) === shapeStructThickness - 1) || (Math.abs((width - x - 1) - y) === shapeStructThickness - 1);
               if ((Math.abs(x - y) < shapeStructThickness - 1) || (Math.abs((width - x - 1) - y) < shapeStructThickness - 1)) onDiagonal = false;
             }
-            row += onDiagonal ? "X" : "-";
+            row += onDiagonal ? "X" : "-"; // Draw a cell only on the diagonal
           }
-          else if (fill === 1) {
+          else if (fill === 1) { // If drawing a solid shape:
+            // Draw a cell as long as we're in-between the two edges of the diagonal stripes
             let onDiagonal = (Math.abs(x - y) <= shapeStructThickness - 1) || (Math.abs((width - x - 1) - y) <= shapeStructThickness - 1);
             row += onDiagonal ? "X" : "-";
           }
@@ -2902,33 +2984,24 @@ Page Timeline:
       for (let y = 0; y < height; y++) {
         let row = "";
         for (let x = 0; x < width; x++) {
-          if (fill === 0) { // Outline
+          if (fill === 0) { // If only drawing with an outline:
             let isEdge = x === 0 || x === width - 1 || y === 0 || y === height - 1;
             let onCross = false;
+            // If we're on an edge, being on the cross-shape is counted as long as its in-between the two edges of the orthogonal stripes
             if (isEdge) onCross = Math.abs(x - Math.floor(width / 2)) <= shapeStructThickness - 1 || Math.abs(y - Math.floor(height / 2)) <= shapeStructThickness - 1;
+            // Otherwise, you need to be directly on one of the two edges of the orthogonal stripes
+            // This way, we get a hollow cross-shape but the edges still close up normally
             else {
               onCross = Math.abs(x - Math.floor(width / 2)) === shapeStructThickness - 1 || Math.abs(y - Math.floor(height / 2)) === shapeStructThickness - 1;
               if (Math.abs(x - Math.floor(width / 2)) < shapeStructThickness - 1 || Math.abs(y - Math.floor(height / 2)) < shapeStructThickness - 1) onCross = false;
             }
             row += onCross ? "X" : "-";
           }
-          else if (fill === 1) { // Solid
+          else if (fill === 1) { // If drawing a solid shape:
+            // Draw a cell as long as we're in-between the two edges of the orthogonal stripes
             onCross = Math.abs(x - Math.floor(width / 2)) <= shapeStructThickness - 1 || Math.abs(y - Math.floor(height / 2)) <= shapeStructThickness - 1;
             row += onCross ? "X" : "-";
           }
-          /*if (fill === 0) { // Outline
-            let isEdge = x === 0 || x === width - 1 || y === 0 || y === height - 1;
-            let onOrthogonal = false;
-            if (isEdge) onOrthogonal = Math.abs(x - Math.floor(height / 2)) <= shapeStructThickness - 1 || Math.abs(y - Math.floor(width / 2)) <= shapeStructThickness - 1;
-            else {
-              onOrthogonal = Math.abs(x - Math.floor(height / 2)) === shapeStructThickness - 1 || Math.abs(y - Math.floor(width / 2)) === shapeStructThickness - 1;
-              if ((Math.abs(x - Math.floor(height / 2)) < shapeStructThickness - 1) || (Math.abs(y - (Math.floor(width / 2)) < shapeStructThickness - 1))) onOrthogonal = false;
-            }
-            row += onOrthogonal ? "X" : "-";
-          }
-          if (fill === 1) { // Solid
-            onOrthogonal = Math.abs(x - Math.floor(height / 2)) <= shapeStructThickness - 1 || Math.abs(y - Math.floor(width / 2)) <= shapeStructThickness - 1;
-            row += onOrthogonal ? "X" : "-";*/
         }
         code.push(row);
       }
@@ -2998,12 +3071,19 @@ Page Timeline:
     
     lifeLexiconToStruct(nextArr.join("\n"));
   }
+  function codeToCopyPaste(code) {
+    // Takes a structCode (array of strings) and opens a new window with data to copy-paste into the structure array's code
+    
+    lifeLexiconToStruct(code.join("\n"));
+  }
   
   String.prototype.replaceAt = function(index, replacement) {
     return this.substring(0, index) + replacement + this.substring(index + replacement.length);
   };
   
   function mirrorCode(axis) {
+    // Mutates structCode so that it is mirrored about the given axis
+    
     let flipCode = [];
     
     let width = structCode[0].length;
@@ -3031,6 +3111,8 @@ Page Timeline:
   }
   
   function flipXYCode() {
+    // Mutates structCode so that every x and y are swapped (and, consequently, width and height are swapped as well)
+    
     let flipCode = [];
     
     structWidth = structCode.length;
@@ -3087,6 +3169,8 @@ Page Timeline:
       let preset = structures[n];
       
       if (preset.category === "Shapes") {
+        // If drawing a shape, go through and enable/disable various setting sliders based on which shape is selected
+          
         if (preset.name === "Rectangle") {
           preset.code = generateShapeStruct(preset.name, shapeStructWidth, shapeStructHeight, shapeStructFill);
           
@@ -3160,52 +3244,55 @@ Page Timeline:
     }
     
     if (structIndex !== -1) updateStruct();
+    
     drawGrid();
     
     if (Mouse.movedSinceLastClick && n !== -1) previewStruct(Mouse.gridX, Mouse.gridY);
   }
   
   function updateStruct() {
+    // Mutates structCode to reflect the orientation of the currently selected structState
+    
     structCode = structures[structIndex].code;
     structWidth = structCode[0].length;
     structHeight = structCode.length;
     
     switch(structState) {
-      case 0:
+      case 0: // Right-side up, 0deg
         break;
       
-      case 1:
+      case 1: // Right-side up, 90deg
         flipXYCode();
         mirrorCode("y");
         break;
       
-      case 2:
+      case 2: // Right-side up, 180deg
         flipXYCode();
         mirrorCode("y");
         flipXYCode();
         mirrorCode("y");
         break;
       
-      case 3:
+      case 3: // Right-side up, 270deg
         mirrorCode("y");
         flipXYCode();
         break;
       
-      case 4:
+      case 4: // Upside-down, 0deg
         mirrorCode("x");
         break;
       
-      case 5:
+      case 5: // Upside-down, 90deg
         mirrorCode("x");
         flipXYCode();
         mirrorCode("y");
         break;
       
-      case 6:
+      case 6: // Upside-down, 180deg
         mirrorCode("y");
         break;
       
-      case 7:
+      case 7: // Upside-down, 270deg
         mirrorCode("y");
         flipXYCode();
         mirrorCode("y");
@@ -3287,6 +3374,23 @@ Page Timeline:
     setLastGrid();
     
     drawGrid();
+  }
+  
+  function showSection(group, groupLength, number) {
+    // Show the given HTML section, in a certain group
+    
+    for (let i = 1; i <= groupLength; i++) {
+      let section = document.getElementById("section-" + group + "-" + i);
+      let btn = document.getElementById("show-section-btn-" + group + "-" + i);
+      if (i === number) { // Show selected section
+        section.style.display = "block";
+        btn.className = "section-btn-active";
+      }
+      else { // Hide others
+        section.style.display = "none";
+        btn.className = "section-btn-inactive";
+      }
+    }
   }
   
   function initHTML() {
@@ -3389,7 +3493,7 @@ Page Timeline:
       td2.innerHTML = h.desc;
       tr.appendChild(td2);
       
-      hotkeyTable.appendChild(tr);
+      document.getElementById("hotkey-table-" + h.category).appendChild(tr);
     }
     
     setRules([3], [2, 3]);
