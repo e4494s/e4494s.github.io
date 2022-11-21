@@ -3,6 +3,56 @@
 <!--
 Page Timeline:
 
+(11/21/2022):
+- Fixed some bugs where the structure preview wouldn't show up after clicking some hotkeys
+
+(11/20/2022):
+- Added title text to every single structure preset, with information like pattern type, period, speed, etc.
+- Fixed some bugs with a few structures' bounding boxes and initial phases
+- Added many new oscillators and spaceships to "Day and Night" structures and "Move" structures
+- Added new tab for structures for "Diamoeba"
+- Added new tab for structures for "34 Life"
+- Also, after adding "Morningstar" to "34 Life", I hit 100 structures!
+
+(11/19/2022):
+- Removed the old way of placing structs; before, there were red cells drawn wherever the struct couldn't be placed; e.g., if it was less than half the width from the left side. This makes the grid a lot less ugly when placing a struct, since before it was covered in red rectangles
+    - Now, every grid position is a valid placement, and it just pushes the struct to be inside the grid even if the cursor was really close to the edge
+	- I also made the "Placing:" text give a red error if the current struct doesn't fit on the canvas
+- Changed which phase Steam Train (2x2) was in so that it more accurately represents the size of it, instead of picking its smallest phase
+- Added symmetry options for the "Static" shape struct
+
+(11/17/2022):
+- Added "Static" shape structure, that randomizes the cells inside the given width/height
+    - It also re-randomizes whenever you place it
+
+(11/16/2022):
+- Added "Tortoise" and "Scarabs" structures for 2x2
+- Added additional text stating currently selected structure above struct-canvas
+- Gave Shape Structures additional information (like width, height, etc.) in the "Placing:" and "Selected:" descriptions
+- Added "Flock" rule preset
+    - Added structure presets for Flock, found on LifeWiki
+	- At some point while deciding the name of one spaceship for this rule, I decided on "Artemis," which made me decide to continue the theme of Greek mythology names, so there's now Apollo, Artemis, Kronos, and Hyperion
+- Added "(Selected: ___)" text to Cell Rules div, showing currently selected ruleset, or "Custom Rule" if it doesn't match any preset
+- Added "Eraser" shape structure, that just clears a set area
+- Attempted to add a third fill option for Shape structures, striped, but I couldn't quite get it working right
+
+(11/14/2022):
+- Fixed a minor bug where the structure preview would disappear if you paused the simulation while your canvas was still on the screen
+- After messing around with the Move ruleset, I discovered two spaceships! I named them Hang Glider and Steam Train, and the latter is even a puffer!
+    - Added Move subsection to the Structures tab
+	- Added text clarifying that some structures only work in certain rules, and added shortcut buttons to activate those rules
+	- I also found that if you place two Hang Gliders with 16 empty cells between them (facing each other), it synthesises a Steam Train!
+	- Later I found that if you place two Steam Trains (in the initial state from the structures menu) facing each other with 20 empty cells between them, they'll crash into each other, and when the dust clears the result is two Steam Trains going in opposite directions, and across the other axis! E.g., if they are 20 spaces apart horizontally, then after crashing they'll be driving away from each other vertically.
+	    - If they are only 10 apart, they'll crash and start moving away from each other on the *same* axis.
+- Added new Oscillator and Spaceship structures under Game of Life
+- Added settings for Cell Trailing under the Colors tab, which affects the rate at which the grid clears every step, creating a trailing effect behind cells.
+- Added more structures for Game of Life
+- Added structures for Day and Night and 2x2
+    - I didn't find these myself; I found that LifeWiki has pages for different cellular automata as well, including structures for them
+
+(11/13/2022):
+- Added a structCanvas that displays a preview of the currently selected structure, so that you don't have to hover your mouse over the canvas to see what the structure looks like. This is especially helpful when changing settings on shape structures. Clicking this small canvas is the same as pressing the Escape key, and toggles structure placing mode.
+
 (11/6/2022):
 - Holy CRAP I spent ages getting the rotation down but...it works now! I literally had to bust out (practically) Group Theory to model the symmetries of a square and how to map between then under various operations. After ages and ages of debugging and rewriting and restructuring code...it finally works, and you can now mirror and rotate any structure to your heart's content (even non-square shapes). The problem wasn't implementing rotating a grid (although that was a big struggle), the main difficulty was mapping between different orientations, so if a user hit ",l,;..;l,.;l" it wouldn't have to step through all of those instructions one-by-one every time, it would just have a set state to draw the structure in. I finally got that working.
 - Added buttons in the Structures tab that mirror and rotate the structure
@@ -398,6 +448,30 @@ Page Timeline:
         font-size: 15px;
         padding-right: 10px;
       }
+	  
+	  #struct-canvas {
+		width: 150px;
+		height: 150px;
+		cursor: pointer;
+		margin: 6px;
+	  }
+	  
+	  #struct-desc-txt-wrapper {
+	    font-weight: bold;
+		font-style: italic;
+		font-size: 11px;
+		color: rgb(80, 80, 80);
+		text-align: center;
+	  }
+	  
+	  #curr-rule-txt {
+	    font-weight: bold;
+		font-style: italic;
+		font-size: 11px;
+		text-align: center;
+		margin-top: 5px;
+		margin-bottom: 5px;
+	  }
     </style>
   </head>
 <body onload = "initHTML()">
@@ -443,10 +517,10 @@ Page Timeline:
         <div class = "padded-div"><button onclick = "if (!canvasRunning) frame()" id = "step-btn" class = "step-btn-inactive" title = "Step One Tick (S)" DISABLED>Step</button></div>
         <div class = "padded-div"><button onclick = "resetGrid()" id = "reset-btn" class = "reset-btn-active" title = "Reset Grid (R)">Reset</button></div>
         <div class = "padded-div"><button onclick = "clearGrid()" title = "Clear Grid (C)">Clear</button></div>
-        <div class = "padded-div"><button onclick = "randomizeGrid()" title = "Clear Grid (V)">Randomize</button></div>
+        <div class = "padded-div"><button onclick = "randomizeGrid()" title = "Randomize Grid (V)">Randomize</button></div>
         <div class = "padded-div">
           <div><b><i>Randomization Density:</i></b> <span id = "fill-chance-txt">15</span>%</div>
-          <input type = "range" min = "5" max = "95" value = "15" step = "5" id = "fill-chance-range" oninput = "updateSettings()">
+          <input type = "range" min = "5" max = "95" value = "15" step = "5" id = "fill-chance-range" oninput = "updateSettings(false, false)">
         </div>
       </div>
       <div style = "display: flex">
@@ -485,11 +559,11 @@ Page Timeline:
     <td style = "padding-right: 10px; border-right: 4px solid #01017a">
       <br>
       <div><b><u>Update Rate:</u></b> <span id = "fps-txt">20 FPS<br><br></span></div>
-      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "fps-range" oninput = "updateSettings()">
+      <input type = "range" min = "0" max = "10" step = "1" value = "0" id = "fps-range" oninput = "updateSettings(false, false)">
       <br><br>
       <div class = "colored-div">
         <div class = "small-title">&mdash; &mdash; Cell Rules &mdash; &mdash;</div>
-        <br>
+        <div id = "curr-rule-txt">(Selected: Game of Life)</div>
         <div style = "text-align: center"><b><span class = "slightly-larger-txt">BORN</span> with __ neighbors:</b></div>
         <div style = "display: flex; align-items: center; justify-content: center" id = "born-with-div"></div>
         <br>
@@ -499,15 +573,16 @@ Page Timeline:
       </div>
       <hr>
       <div><b><u>Grid Size:</u></b> <span id = "grid-size-txt">75&times;75</span></div>
-      <input type = "range" min = "0" max = "10" value = "0" step = "1" id = "grid-size-range" oninput = "updateSettings(true)">
+      <input type = "range" min = "0" max = "10" value = "0" step = "1" id = "grid-size-range" oninput = "updateSettings(true, false)">
       <br><br><br>
-      <label for = "show-grid-lines-checkbox"><b><u>Grid Lines:</u></b> <input type = "checkbox" id = "show-grid-lines-checkbox" oninput = "updateSettings(); drawGrid()" CHECKED></label>
+      <label for = "show-grid-lines-checkbox"><b><u>Grid Lines:</u></b> <input type = "checkbox" id = "show-grid-lines-checkbox" oninput = "updateSettings(false, false); drawGrid()" CHECKED></label>
       <br><br><br>
-      <label for = "wrap-edges-checkbox"><b><u>Wrap Grid Around Edges:</u></b> <input type = "checkbox" id = "wrap-edges-checkbox" oninput = "updateSettings()" CHECKED></label>
+      <label for = "wrap-edges-checkbox"><b><u>Wrap Grid Around Edges:</u></b> <input type = "checkbox" id = "wrap-edges-checkbox" oninput = "updateSettings(false, false)" CHECKED></label>
     </td>
     <td>
-      <button onclick = "showSection('a', 2, 1)" class = "section-btn-inactive" id = "show-section-btn-a-1">Rules</button>
-      <button onclick = "showSection('a', 2, 2)" class = "section-btn-inactive" id = "show-section-btn-a-2">Structures</button>
+      <button onclick = "showSection('a', NUM_SECTIONS_A, 1)" class = "section-btn-inactive" id = "show-section-btn-a-1">Rules</button>
+      <button onclick = "showSection('a', NUM_SECTIONS_A, 2)" class = "section-btn-inactive" id = "show-section-btn-a-2">Structures</button>
+      <button onclick = "showSection('a', NUM_SECTIONS_A, 3)" class = "section-btn-inactive" id = "show-section-btn-a-3">Colors</button>
       <hr>
       <div id = "section-a-1" style = "display: none">
         <div class = "small-title" style = "text-align: left"><b>Load Rule Presets:</b></div>
@@ -526,20 +601,30 @@ Page Timeline:
         </div>
       </div>
       <div id = "section-a-2" style = "display: none">
+		<div class = "rule-preset-title">Structure Preview:</div>
+		<div id = "struct-desc-txt-wrapper">(Selected: <span id = "struct-desc-txt"></span>)</div>
+		<canvas id = "struct-canvas" onclick = "togglePlacingStruct()" title = 'Structure Preview (Click or press "Esc" to toggle structure placing)'>If you're seeing this text, your browser does not support the canvas element.</canvas>
+		<br>
         <button class = "smaller-btn" onclick = "simulateKeyPress(',')" title = "Mirror Struct Horizontally (Comma)">Mirror Struct <b><i>Horizontally</i></b></button>
         <button class = "smaller-btn" onclick = "simulateKeyPress('.')" title = "Mirror Struct Vertically (Period)">Mirror Struct <b><i>Vertically</i></b></button>
         <br>
         <button class = "smaller-btn" onclick = "simulateKeyPress('l')" title = "Rotate Struct Left (L)">Rotate Struct <b><i>Left</i></b></button>
         <button class = "smaller-btn" onclick = "simulateKeyPress(';')" title = "Rotate Struct Right (Semicolon)">Rotate Struct <b><i>Right</i></b></button>
-        <br><br>
-        <div class = "small-title" style = "text-align: left"><b>Load Structure Presets:</b></div>
+		<br><br>
+		<div class = "small-title" style = "text-align: left"><b>Load Structure Presets:</b></div>
         <div class = "little-font">Click on a structure button to select it. When it's selected, click anywhere on the grid to place that structure there. Click the "Exit Structure Placing" button above the grid to leave this mode.</div>
         <br>
-        <button onclick = "showSection('b', 2, 1)" class = "section-btn-inactive" id = "show-section-btn-b-1">Game of Life</button>
-        <button onclick = "showSection('b', 2, 2)" class = "section-btn-inactive" id = "show-section-btn-b-2">Shapes</button>
+        <button onclick = "showSection('b', NUM_SECTIONS_B, 2)" class = "section-btn-inactive" id = "show-section-btn-b-2">Shapes</button>
+		<button onclick = "showSection('b', NUM_SECTIONS_B, 1)" class = "section-btn-inactive" id = "show-section-btn-b-1">Game of Life</button>
+		<button onclick = "showSection('b', NUM_SECTIONS_B, 3)" class = "section-btn-inactive" id = "show-section-btn-b-3">Move</button>
+		<button onclick = "showSection('b', NUM_SECTIONS_B, 4)" class = "section-btn-inactive" id = "show-section-btn-b-4">Day and Night</button>
+		<button onclick = "showSection('b', NUM_SECTIONS_B, 5)" class = "section-btn-inactive" id = "show-section-btn-b-5">2x2</button>
+		<button onclick = "showSection('b', NUM_SECTIONS_B, 6)" class = "section-btn-inactive" id = "show-section-btn-b-6">Flock</button>
+		<button onclick = "showSection('b', NUM_SECTIONS_B, 7)" class = "section-btn-inactive" id = "show-section-btn-b-7">Diamoeba</button>
+		<button onclick = "showSection('b', NUM_SECTIONS_B, 8)" class = "section-btn-inactive" id = "show-section-btn-b-8">34 Life</button>
         <br>
         <div id = "section-b-1" style = "display: none">
-          <div class = "little-font" style = "margin-top: 3px">Credit to <a href = "https://conwaylife.com/ref/lexicon/lex.htm" target = "_blank">Life Lexicon</a> for cataloguing these designs.</div>
+          <div class = "little-font" style = "margin-top: 3px"><b>These structures only work when running the "Game of Life" rule preset.</b> <button class = "preset-btn" onclick = "loadRuleFromName('Game of Life')">Select "Game of Life" Rule</button></div>
           <div id = "spaceships-structures-div" class = "rule-preset-div">
             <div class = "rule-preset-title">- - Spaceships - -</div>
           </div>
@@ -547,7 +632,7 @@ Page Timeline:
             <div class = "rule-preset-title">- - Oscillators - -</div>
           </div>
           <div id = "puffers-structures-div" class = "rule-preset-div">
-            <div class = "rule-preset-title">- - Puffers - -</div>
+            <div class = "rule-preset-title">- - Puffers/Rakes - -</div>
           </div>
           <div id = "spacefillers-structures-div" class = "rule-preset-div">
             <div class = "rule-preset-title">- - Spacefillers - -</div>
@@ -558,8 +643,12 @@ Page Timeline:
           <div id = "glider-synthesis-structures-div" class = "rule-preset-div">
             <div class = "rule-preset-title">- - Glider Synthesis - -</div>
           </div>
+		  <br>
+		  <div class = "little-font" style = "margin-top: 3px">Credit to <a href = "https://conwaylife.com/ref/lexicon/lex.htm" target = "_blank">Life Lexicon</a> for cataloguing these designs.</div>
         </div>
+		
         <div id = "section-b-2" style = "display: none">
+			<div class = "little-font" style = "margin-top: 3px"><b>These structures aren't intended for any specific rule set, and merely serve as shortcuts to drawing specific designs.</b></div>
           <div id = "shapes-structures-div" class = "rule-preset-div">
             <div class = "rule-preset-title">- - Select Shape - -</div>
           </div>
@@ -570,34 +659,104 @@ Page Timeline:
                 <td style = "min-width: 0">
                   <div id = "shape-width-div" style = "display: block" class = "shape-property-div">
                     <div><b><u>Width:</u></b> <span id = "shape-struct-width-txt">9</span></div>
-                    <input type = "range" min = "1" max = "50" step = "1" value = "9" id = "shape-struct-width-range" oninput = "updateSettings()">
+                    <input type = "range" min = "1" max = "50" step = "1" value = "9" id = "shape-struct-width-range" oninput = "updateSettings(false, true)">
                   </div>
                   <div id = "shape-height-div" style = "display: block" class = "shape-property-div">
                     <div><b><u>Height:</u></b> <span id = "shape-struct-height-txt">9</span></div>
-                    <input type = "range" min = "1" max = "50" step = "1" value = "9" id = "shape-struct-height-range" oninput = "updateSettings()">
+                    <input type = "range" min = "1" max = "50" step = "1" value = "9" id = "shape-struct-height-range" oninput = "updateSettings(false, true)">
                   </div>
                   <div id = "shape-length-div" style = "display: none" class = "shape-property-div">
                     <div><b><u>Length:</u></b> <span id = "shape-struct-length-txt">9</span></div>
-                    <input type = "range" min = "1" max = "50" step = "1" value = "9" id = "shape-struct-length-range" oninput = "updateSettings()">
+                    <input type = "range" min = "1" max = "50" step = "1" value = "9" id = "shape-struct-length-range" oninput = "updateSettings(false, true)">
                   </div>
                   <div id = "shape-thickness-div" style = "display: none" class = "shape-property-div">
                     <div><b><u>Thickness:</u></b> <span id = "shape-struct-thickness-txt">2</span></div>
-                    <input type = "range" min = "1" max = "11" step = "1" value = "2" id = "shape-struct-thickness-range" oninput = "updateSettings()">
+                    <input type = "range" min = "1" max = "10" step = "1" value = "2" id = "shape-struct-thickness-range" oninput = "updateSettings(false, true)">
+                  </div>
+				  <div id = "shape-random-density-div" style = "display: none" class = "shape-property-div">
+                    <div><b><u>Randomization Density:</u></b> <span id = "shape-struct-random-density-txt">50</span>%</div>
+                    <input type = "range" min = "5" max = "95" step = "5" value = "50" id = "shape-struct-random-density-range" oninput = "updateSettings(false, true)">
                   </div>
                 </td>
                 <td style = "min-width: 0">
-                  <div><b><u>Fill Type:</u></b></div>
-                  <input type = "radio" name = "shape-struct-fill-radio" id = "shape-struct-fill-radio-0" oninput = "updateSettings()" CHECKED>
-                  <label for = "shape-struct-fill-radio-0">Outline</label>
-                  <br>
-                  <input type = "radio" name = "shape-struct-fill-radio" id = "shape-struct-fill-radio-1" oninput = "updateSettings()">
-                  <label for = "shape-struct-fill-radio-1">Solid</label>
+				  <div id = "shape-fill-div" style = "display: block">
+                    <div><b><u>Fill Type:</u></b></div>
+                    <input type = "radio" name = "shape-struct-fill-radio" id = "shape-struct-fill-radio-0" oninput = "updateSettings(false, true)" CHECKED>
+                    <label for = "shape-struct-fill-radio-0">Outline</label>
+                    <br>
+                    <input type = "radio" name = "shape-struct-fill-radio" id = "shape-struct-fill-radio-1" oninput = "updateSettings(false, true)">
+                    <label for = "shape-struct-fill-radio-1">Solid</label>
+					<br>
+                    <input type = "radio" name = "shape-struct-fill-radio" id = "shape-struct-fill-radio-2" oninput = "updateSettings(false, true)">
+                    <label for = "shape-struct-fill-radio-2">Striped</label>
+				  </div>
+				  <div id = "shape-symmetry-div" style = "display: none">
+                    <div><b><u>Randomization Symmetry:</u></b></div>
+                    <input type = "radio" name = "shape-struct-symmetry-radio" id = "shape-struct-symmetry-radio-0" oninput = "updateSettings(false, true)">
+                    <label for = "shape-struct-symmetry-radio-0">Asymmetric</label>
+                    <br>
+                    <input type = "radio" name = "shape-struct-symmetry-radio" id = "shape-struct-symmetry-radio-1" oninput = "updateSettings(false, true)" CHECKED>
+                    <label for = "shape-struct-symmetry-radio-1">1-Way Symmetric</label>
+                    <br>
+					<input type = "radio" name = "shape-struct-symmetry-radio" id = "shape-struct-symmetry-radio-2" oninput = "updateSettings(false, true)">
+                    <label for = "shape-struct-symmetry-radio-2">2-Way Symmetric</label>
+				  </div>
                 </td>
               </tr>
             </table>
           </div>
         </div>
+		
+		<div id = "section-b-3" style = "display: none">
+          <div class = "little-font" style = "margin-top: 3px"><b>These structures only work when running the "Move" rule preset.</b> <button class = "preset-btn" onclick = "loadRuleFromName('Move')">Select "Move"</button></div>
+          <div id = "move-structures-div" class = "rule-preset-div"></div>
+		  <br>
+		  <div class = "little-font" style = "margin-top: 3px">Credit to <a href = "https://conwaylife.com/wiki/Main_Page" target = "_blank">Life Wiki</a> users for cataloguing these designs.</div>
+		</div>
+		
+		<div id = "section-b-4" style = "display: none">
+          <div class = "little-font" style = "margin-top: 3px"><b>These structures only work when running the "Day and Night" rule preset.</b> <button class = "preset-btn" onclick = "loadRuleFromName('Day and Night')">Select "Day and Night"</button></div>
+          <div id = "day-and-night-structures-div" class = "rule-preset-div"></div>
+		  <br>
+		  <div class = "little-font" style = "margin-top: 3px">Credit to <a href = "https://conwaylife.com/wiki/Main_Page" target = "_blank">Life Wiki</a> users for cataloguing these designs.</div>
+		</div>
+		
+		<div id = "section-b-5" style = "display: none">
+          <div class = "little-font" style = "margin-top: 3px"><b>These structures only work when running the "2x2" rule preset.</b> <button class = "preset-btn" onclick = "loadRuleFromName('2x2')">Select "2x2"</button></div>
+          <div id = "2x2-structures-div" class = "rule-preset-div"></div>
+		  <br>
+		  <div class = "little-font" style = "margin-top: 3px">Credit to Nathaniel Johnston and <a href = "https://conwaylife.com/wiki/Main_Page" target = "_blank">Life Wiki</a> users for cataloguing these designs.</div>
+		</div>
+		
+		<div id = "section-b-6" style = "display: none">
+          <div class = "little-font" style = "margin-top: 3px"><b>These structures only work when running the "Flock" rule preset.</b> <button class = "preset-btn" onclick = "loadRuleFromName('Flock')">Select "Flock"</button></div>
+          <div id = "flock-structures-div" class = "rule-preset-div"></div>
+		  <br>
+		  <div class = "little-font" style = "margin-top: 3px">Credit to <a href = "https://conwaylife.com/wiki/Main_Page" target = "_blank">Life Wiki</a> users for cataloguing these designs.</div>
+		</div>
+		
+		<div id = "section-b-7" style = "display: none">
+          <div class = "little-font" style = "margin-top: 3px"><b>These structures only work when running the "Diamoeba" rule preset.</b> <button class = "preset-btn" onclick = "loadRuleFromName('Diamoeba')">Select "Diamoeba"</button></div>
+          <div id = "diamoeba-structures-div" class = "rule-preset-div"></div>
+		  <br>
+		  <div class = "little-font" style = "margin-top: 3px">Credit to <a href = "https://conwaylife.com/wiki/Main_Page" target = "_blank">Life Wiki</a> users for cataloguing these designs.</div>
+		</div>
+		
+		<div id = "section-b-8" style = "display: none">
+          <div class = "little-font" style = "margin-top: 3px"><b>These structures only work when running the "34 Life" rule preset.</b> <button class = "preset-btn" onclick = "loadRuleFromName('34 Life')">Select "34 Life"</button></div>
+          <div id = "34-life-structures-div" class = "rule-preset-div"></div>
+		  <br>
+		  <div class = "little-font" style = "margin-top: 3px">Credit to <a href = "https://conwaylife.com/wiki/Main_Page" target = "_blank">Life Wiki</a> users for cataloguing these designs.</div>
+		</div>
       </div>
+      <div id = "section-a-3" style = "display: none">
+        <div class = "small-title" style = "text-align: left"><b>Change Simulation Colors:</b></div>
+		<br><br>
+		<label for = "cell-trailing-checkbox"><b><u>Cell Trailing:</u></b> <input type = "checkbox" id = "cell-trailing-checkbox" oninput = "updateSettings(false, false); drawGrid()"></label>
+		<br><br><br>
+		<div><b><u>Trailing Rate:</u></b> <span id = "clear-rate-txt">70</span>%</div>
+		<input type = "range" min = "20" max = "90" value = "70" step = "10" id = "clear-rate-range" oninput = "updateSettings(false, false)">
+	  </div>
     </td>
   </tr>
 </table>
@@ -610,41 +769,20 @@ Page Timeline:
   let topCanvas = document.getElementById("top-canvas");
   const tctx = topCanvas.getContext("2d");
   
+  let structCanvas = document.getElementById("struct-canvas");
+  const sctx = structCanvas.getContext("2d");
+  let structCanvasSize = 500;
+  structCanvas.width = structCanvas.height = structCanvasSize;
+  
   let canvasSize = 1000;
   canvas.width = canvas.height = topCanvas.width = topCanvas.height = canvasSize;
   let canvasRunning = true;
   let FPS = 20;
   
-  let placingStruct = false; // Whether a structure is currently selected or not
-  let structWidth = 0; // Size of the selected structure
-  let structHeight = 0;
-  let structCode = [""]; // Encoded state of the structure, as an array of strings
-  let structIndex = -1; // Index in the structures array
-  let lastStructIndex = 0; // Last-selected struct
-  let willPlaceStruct = false; // Once-used variable for placing structs while canvas is running
-  
-  // Struct State is a very complicated variable, even though it only holds an integer from 0-7 inclusive
-  // It represents the 8 possible orientations of a square on a grid (all 4 quarter-turn rotations, along with each one's mirror)
-  // This is what allows me to go from any orientation to any other, without using complicated geometry or anything
-  // It just maps between different states using the various "map" arrays
-  let structState = 0;
-  
-  let flipHorizontallyMap = [6, 5, 4, 7, 2, 1, 0, 3];
-  let flipVerticallyMap = [4, 7, 6, 5, 0, 3, 2, 1];
-  let rotateLeftMap = [3, 0, 1, 2, 7, 4, 5, 6];
-  let rotateRightMap = [1, 2, 3, 0, 5, 6, 7, 4];
-  
-  // Settings specific to the structures in the "Shapes" subtab
-  // Not all of these settings are used for every shape -- selecting a different shape will change which setting sliders are visible vs invisible
-  // For example, "Rectangle" has Width/Height/Thickness, while "X" has Length/Thickness
-  let shapeStructWidth = 9;
-  let shapeStructHeight = 9;
-  let shapeStructFill = 0; // 0: Outline  |  1: Solid
-  let shapeStructLength = 9;
-  let shapeStructThickness = 2;
+  const NUM_SECTIONS_A = 3;
+  const NUM_SECTIONS_B = 8;
   
   // HTML element reference declarations
-  
   let fpsRange = document.getElementById("fps-range");
   let fpsTxt = document.getElementById("fps-txt");
   let startStopBtn = document.getElementById("start-stop-btn");
@@ -671,13 +809,59 @@ Page Timeline:
   let shapeStructLengthRange = document.getElementById("shape-struct-length-range");
   let shapeStructThicknessTxt = document.getElementById("shape-struct-thickness-txt");
   let shapeStructThicknessRange = document.getElementById("shape-struct-thickness-range");
+  let shapeStructRandomDensityTxt = document.getElementById("shape-struct-random-density-txt");
+  let shapeStructRandomDensityRange = document.getElementById("shape-struct-random-density-range");
   let shapeWidthDiv = document.getElementById("shape-width-div");
   let shapeHeightDiv = document.getElementById("shape-height-div");
   let shapeLengthDiv = document.getElementById("shape-length-div");
   let shapeThicknessDiv = document.getElementById("shape-thickness-div");
+  let shapeRandomDensityDiv = document.getElementById("shape-random-density-div");
   let shapeStructFillRadio0 = document.getElementById("shape-struct-fill-radio-0");
   let shapeStructFillRadio1 = document.getElementById("shape-struct-fill-radio-1");
+  let shapeStructFillRadio2 = document.getElementById("shape-struct-fill-radio-2");
+  let shapeSymmetryDiv = document.getElementById("shape-symmetry-div");
+  let shapeStructSymmetryRadio0 = document.getElementById("shape-struct-symmetry-radio-0");
+  let shapeStructSymmetryRadio1 = document.getElementById("shape-struct-symmetry-radio-1");
+  let shapeStructSymmetryRadio2 = document.getElementById("shape-struct-symmetry-radio-2");
+  let shapeFillDiv = document.getElementById("shape-fill-div");
+  let clearRateTxt = document.getElementById("clear-rate-txt");
+  let clearRateRange = document.getElementById("clear-rate-range");
+  let cellTrailingCheckbox = document.getElementById("cell-trailing-checkbox");
+  let structDescTxt = document.getElementById("struct-desc-txt");
+  let currRuleTxt = document.getElementById("curr-rule-txt");
   
+  let placingStruct = false; // Whether a structure is currently selected or not
+  let structWidth = 0; // Size of the selected structure
+  let structHeight = 0;
+  let structCode = [""]; // Encoded state of the structure, as an array of strings
+  let structIndex = -1; // Index in the structures array
+  let lastStructIndex = 0; // Last-selected struct
+  let willPlaceStruct = false; // Once-used variable for placing structs while canvas is running
+  let structFitsOnGrid = true; // Whether or not the current struct is small enough to be placed on the grid
+  
+  // Struct State is a very complicated variable, even though it only holds an integer from 0-7 inclusive
+  // It represents the 8 possible orientations of a square on a grid (all 4 quarter-turn rotations, along with each one's mirror)
+  // This is what allows me to go from any orientation to any other, without using complicated geometry or anything
+  // It just maps between different states using the various "map" arrays
+  let structState = 0;
+  
+  let flipHorizontallyMap = [6, 5, 4, 7, 2, 1, 0, 3];
+  let flipVerticallyMap = [4, 7, 6, 5, 0, 3, 2, 1];
+  let rotateLeftMap = [3, 0, 1, 2, 7, 4, 5, 6];
+  let rotateRightMap = [1, 2, 3, 0, 5, 6, 7, 4];
+  
+  // Settings specific to the structures in the "Shapes" subtab
+  // Not all of these settings are used for every shape -- selecting a different shape will change which setting sliders are visible vs invisible
+  // For example, "Rectangle" has Width/Height/Thickness, while "X" has Length/Thickness
+  let shapeStructWidth = 9;
+  let shapeStructHeight = 9;
+  let shapeStructFill = 0; // 0: Outline  |  1: Solid  |  2: Striped
+  let shapeStructLength = 9;
+  let shapeStructThickness = 2;
+  let shapeStructRandomDensity = 0.5; // Randomization density for the "Static" shape
+  let shapeStructSymmetry = 1; // Symmetry for the "Static" shape  |  0: Asymmetric  |  1: 1-Way Symmetry  |  2: 2-Way Symmetry
+  
+  // Arrays to define custom ranges for HTML sliders
   let fpsRangeArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40, 50, -1, -2, -3, -4, -5, -11];
   fpsRange.max = fpsRangeArray.length - 1;
   fpsRange.value = fpsRangeArray.indexOf(20);
@@ -730,7 +914,9 @@ Page Timeline:
   
   let fillChance = 0.15; // Randomization density
   
-  function updateSettings(changingGridSize) {
+  let clearRate = 1; // Rate at which the grid clears over time - lower values increase trailing
+  
+  function updateSettings(changingGridSize, changingStructSettings) {
     // Update actual JavaScript variables to match user inputted HTML
     // changingGridSize parameter is always false unless called by gridSizeRange
     
@@ -759,19 +945,59 @@ Page Timeline:
     shapeStructHeight = shapeStructHeightTxt.innerHTML = Number(shapeStructHeightRange.value);
     shapeStructLength = shapeStructLengthTxt.innerHTML = Number(shapeStructLengthRange.value);
     shapeStructThickness = shapeStructThicknessTxt.innerHTML = Number(shapeStructThicknessRange.value);
+	shapeStructRandomDensityTxt.innerHTML = shapeStructRandomDensityRange.value;
+	shapeStructRandomDensity = Number(shapeStructRandomDensityRange.value) / 100;
     
     if (shapeStructFillRadio0.checked) shapeStructFill = 0;
     else if (shapeStructFillRadio1.checked) shapeStructFill = 1;
+	else if (shapeStructFillRadio2.checked) shapeStructFill = 2;
+	
+	if (shapeStructSymmetryRadio0.checked) shapeStructSymmetry = 0;
+	else if (shapeStructSymmetryRadio1.checked) shapeStructSymmetry = 1;
+	else if (shapeStructSymmetryRadio2.checked) shapeStructSymmetry = 2;
+	
+	clearRateTxt.innerHTML = clearRateRange.value;
+	clearRate = 1 - (Number(clearRateRange.value) / 100);
+	if (clearRate > 0.95) clearRate = 1;
+	
+	if (!cellTrailingCheckbox.checked) clearRate = 1;
     
-    if (placingStruct && structures[structIndex].category === "Shapes") {
-      // If placing a shape, exit and re-enter placing mode so that the new shape settings take effect
+	checkIfStructFits();
+	
+    if (changingGridSize) updateGridSize(lastGridSize);
+	
+	if (changingStructSettings) { // If stuct settings are being changed, update struct information
+	  let n = structIndex === -1 ? lastStructIndex : structIndex;
+	  
+	  let preset = structures[n];
       
-      let i = structIndex;
+      if (preset.category === "Shapes") {
+        // If drawing a shape, go through and enable/disable various setting sliders based on which shape is selected
+		
+		initShapeStruct(n);
+      }
+	  
+	  let i = structIndex;
       initStruct(-1);
       initStruct(i);
-    }
-    
-    if (changingGridSize) updateGridSize(lastGridSize);
+	  
+	  structCanvasPreview();
+	}
+  }
+  
+  function checkIfStructFits() {
+    // Checks if the currently selected structure actually fits on the current grid
+	
+	let n = structIndex === -1 ? lastStructIndex : structIndex;
+	
+	if (structWidth > gridSize || structHeight > gridSize) { // If it doesn't fit, display a red error message
+	  structFitsOnGrid = false;
+	  structureNameTxt.innerHTML = "<span style = 'color:red'><b><i>ERROR: \"" + getStructName(n) + "\" does not fit on the grid.</i></b></span>";
+	}
+	else { // Otherwise, display struct name like usual
+	  structFitsOnGrid = true;
+	  structureNameTxt.innerHTML = "<b>(Placing: " + getStructName(n) + ")</b>";
+	}
   }
   
   function updateGridSize(lastGridSize) {
@@ -798,9 +1024,10 @@ Page Timeline:
         if (xOn && yOn) grid[_x][_y] = currGrid[x][y];
       }
     }
+	
+	checkIfStructFits(); // Changing the grid size has the potential to change whether or not the current struct fits, so re-check that
     
     drawGrid();
-    
     
     // This counts as user input, so save the grid state
     setLastGrid();
@@ -809,14 +1036,7 @@ Page Timeline:
   window.addEventListener("keydown", e => {
     if ((e.keyCode === 27 || e.code === "Escape") && !Keys.escDown) { // If esc is pressed (not held):
       Keys.escDown = true;
-      if (placingStruct) {
-        Mouse.movedSinceLastClick = false;
-        initStruct(-1); // If placing, exit placing
-      }
-      else {
-        Mouse.movedSinceLastClick = true;
-        initStruct(lastStructIndex); // Otherwise, enter placing mode with last selected structure
-      }
+      togglePlacingStruct();
     }
     
     if ((e.keyCode === 82 || e.code === "KeyR") && !Keys.rDown) { // If R is pressed (not held):
@@ -875,8 +1095,8 @@ Page Timeline:
       drawGrid();
       
       Mouse.movedSinceLastClick = true;
-      previewStruct(Mouse.gridX, Mouse.gridY);
     }
+	if (changedStruct) structCanvasPreview();
   });
   function simulateKeyPress(key) {
     // Replicates the behavior that pressing a certain hotkey does
@@ -901,8 +1121,9 @@ Page Timeline:
       drawGrid();
       
       Mouse.movedSinceLastClick = true;
-      previewStruct(Mouse.gridX, Mouse.gridY);
     }
+	
+	structCanvasPreview();
   }
   window.addEventListener("keyup", e => {
     if (e.keyCode === 27 || e.code === "Escape") Keys.escDown = false;
@@ -949,6 +1170,8 @@ Page Timeline:
   
   function resetGrid() {
     // Set grid to last user-edited state
+	
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     grid = [];
     for (let x = 0; x < gridSize; x++) {
@@ -959,32 +1182,33 @@ Page Timeline:
       grid.push(column);
     }
     
-    generations = 0;
+    generations = 0; // The simulation is resetting, so time elapsed is back to 0
     
     drawGrid();
   }
   
   function comma(num) {
-    // Add commas to number; 123456 --> 123,456
+    // Add commas to number
+	// 123456 --> 123,456
     
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
   
   function isValidStructPlacement(x, y) {
-    // Check if the given position is far enough away from the edges to place the current structure there
-    
-    let w2 = Math.floor(structWidth / 2);
-    let h2 = Math.floor(structHeight / 2);
-    let wOffset = structWidth % 2;
-    let hOffset = structHeight % 2;
-    return (x + 1 - wOffset >= w2) && (gridSize - x - 1 >= w2) && (y + 1 - hOffset >= h2) && (gridSize - y - 1 >= h2);
+    // Checks if the given position is on the grid
+	
+	return x >= 0 && x < gridSize && y >= 0 && y < gridSize;
   }
   
   function drawGrid() {
     // Draw the current grid state to the canvas
     
+	// Draw background at lower opacity for trailing
+	ctx.globalAlpha = clearRate;
     ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+	ctx.globalAlpha = 1;
+	
     tctx.clearRect(0, 0, canvas.width, canvas.height);
     
     tileSize = canvas.width / gridSize;
@@ -997,16 +1221,6 @@ Page Timeline:
           ctx.fillStyle = cellColor;
           ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
           population++;
-        }
-        if (placingStruct) {
-          // If placing a structure, draw translucent red squares at all invalid positions
-          
-          ctx.fillStyle = "red";
-          ctx.globalAlpha = 0.3;
-          
-          if (!isValidStructPlacement(x, y)) ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
-          
-          ctx.globalAlpha = 1;
         }
       }
     }
@@ -1032,6 +1246,9 @@ Page Timeline:
         tctx.stroke();
       }
     }
+	
+	// Draw a structure preview if necessary
+	if (placingStruct && Mouse.movedSinceLastClick) previewStruct(Mouse.gridX, Mouse.gridY);
     
     // Update census information
     generationsTxt.innerHTML = comma(generations);
@@ -1044,27 +1261,11 @@ Page Timeline:
     
     ctx.fillStyle = bgColor;
     ctx.fillRect(gridX * tileSize, gridY * tileSize, tileSize, tileSize);
-    
+	
     ctx.fillStyle = state === 1 ? cellColor : bgColor;
     ctx.globalAlpha = state === 1 ? opacity : 1;
     ctx.fillRect(gridX * tileSize, gridY * tileSize, tileSize, tileSize);
     ctx.globalAlpha = 1;
-    
-    if (placingStruct) {
-      // If placing a struct, draw a red square if the given position is not valid
-      
-      if (!isValidStructPlacement(gridX, gridY) && state === 0) {
-        ctx.fillStyle = "white";
-        ctx.globalAlpha = 1;
-        ctx.fillRect(gridX * tileSize, gridY * tileSize, tileSize, tileSize);
-        
-        ctx.fillStyle = "red";
-        ctx.globalAlpha = 0.3;
-        ctx.fillRect(gridX * tileSize, gridY * tileSize, tileSize, tileSize);
-      }
-      
-      ctx.globalAlpha = 1;
-    }
   }
   
   function wrapPos(x, y) {
@@ -1168,7 +1369,7 @@ Page Timeline:
     // This removes Moire patterns from tiles being like 53.7 pixels large
     canvas.width = canvas.height = topCanvas.width = topCanvas.height = gridSize * Math.round(canvasSize / gridSize);
     tileSize = canvas.width / gridSize;
-    if (tileSize < 10) { // Don't let tile size get too small
+    if (tileSize < 10) { // Tile size should never go below 10px (it gets too blurry), so if it does, make the canvas larger
       tileSize = 10;
       canvas.width = canvas.height = topCanvas.width = topCanvas.height = gridSize * tileSize;
     }
@@ -1186,7 +1387,7 @@ Page Timeline:
     
     generations = 0;
     
-    // This doesn't count as user input, so it will retain the previously saved grid state
+    // This doesn't count as user input, so it will retain the previously saved grid state (no setLastGrid())
     
     drawGrid();
   }
@@ -1195,11 +1396,19 @@ Page Timeline:
     // Given an array of born values and survive values, check if it matches any preset
     // If it does, turn that one active
     
+	let matchedCode = false;
+	
     let code = numberifyRule(b, s);
     for (let i = 0; i < presets.length; i++) {
-      if (presets[i].code === code) presets[i].button.className = "active-preset-btn";
+      if (presets[i].code === code) {
+		presets[i].button.className = "active-preset-btn";
+		currRuleTxt.innerHTML = `(Selected: ${presets[i].name})`;
+		matchedCode = true;
+	  }
       else presets[i].button.className = "preset-btn";
     }
+	
+	if (!matchedCode) currRuleTxt.innerHTML = `(Selected: Custom Rule)`;
   }
   
   function checksToRules() {
@@ -1233,7 +1442,7 @@ Page Timeline:
   
   function setRules(b, s) {
     // Update HTML checkboxes AND actual born/survive arrays to match given arrays of born/survive values
-    
+	
     born = [];
     survive = [];
     for (let i = 0; i <= 8; i++) {
@@ -1286,17 +1495,13 @@ Page Timeline:
     
     drawGrid();
     
-    // Draw a translucent preview of the structure being placed
-    if (canvasRunning && placingStruct && Mouse.movedSinceLastClick) {
-      previewStruct(Mouse.gridX, Mouse.gridY);
-    }
-    
     // If FPS is "unlimited", request an animationFrame (up to user's computer how fast that will be)
     // Otherwise, keep framerate equal to FPS
     if (canvasRunning) {
       if (FPS < 0) requestAnimationFrame(frame);
       else setTimeout(frame, 1000 / FPS);
     }
+	else if (placingStruct && Mouse.movedSinceLastClick) previewStruct(Mouse.gridX, Mouse.gridY); // This guarantees that the preview will still be drawn even if the simulation is paused in the middle of a frame
   }
   
   function mousePos(e) {
@@ -1549,6 +1754,14 @@ Page Timeline:
       code: undefined,
       button: undefined
     },
+	{
+      name: "Flock",
+      category: "stable",
+      born: [3],
+      survive: [1, 2],
+      code: undefined,
+      button: undefined
+    },
     {
       name: "Stains",
       category: "stable",
@@ -1700,6 +1913,19 @@ Page Timeline:
     setRules(p.born, p.survive);
   }
   
+  function loadRuleFromName(name) {
+    // Called by 'Select "X"' buttons
+	// Loops through all rules to find the one that matches the given name, and loads it
+	// This is done without a hardcoded index to the rule itself, so that if I ever add/reorder rules, this function won't break
+	
+	for (let i = 0; i < presets.length; i++) {
+	  if (presets[i].name === name) {
+	    loadPreset(i);
+		break;
+	  }
+	}
+  }
+  
   let hotkeys = [
     {
       key: "P",
@@ -1757,6 +1983,7 @@ Page Timeline:
     // Game of Life
     {
       name: "Glider",
+	  titleText: "Spaceship, c/4", // Hover text for the HTML button
       category: "Game of Life", // Which Structures section it will go under
       subcategory: "spaceships", // Which subsection it will go under on that section
       code: [ // Encoded state of the pattern, X is on and - is off
@@ -1768,6 +1995,7 @@ Page Timeline:
     },
     {
       name: "Light Spaceship",
+	  titleText: "Spaceship, c/2 (2c/4)",
       category: "Game of Life",
       subcategory: "spaceships",
       code: [
@@ -1780,6 +2008,7 @@ Page Timeline:
     },
     {
       name: "Middle Spaceship",
+	  titleText: "Spaceship, c/2 (2c/4)",
       category: "Game of Life",
       subcategory: "spaceships",
       code: [
@@ -1793,6 +2022,7 @@ Page Timeline:
     },
     {
       name: "Heavy Spaceship",
+	  titleText: "Spaceship, c/2 (2c/4)",
       category: "Game of Life",
       subcategory: "spaceships",
       code: [
@@ -1806,6 +2036,7 @@ Page Timeline:
     },
     {
       name: "Copperhead",
+	  titleText: "Spaceship, c/10",
       category: "Game of Life",
       subcategory: "spaceships",
       code: [
@@ -1820,6 +2051,7 @@ Page Timeline:
     },
     {
       name: "Loafer",
+	  titleText: "Spaceship, c/7",
       category: "Game of Life",
       subcategory: "spaceships",
       code: [
@@ -1837,6 +2069,7 @@ Page Timeline:
     },
     {
       name: "Blinker Puffer",
+	  titleText: "Puffer, p8, c/2 (4c/8)",
       category: "Game of Life",
       subcategory: "puffers",
       code: [
@@ -1863,6 +2096,7 @@ Page Timeline:
     },
     {
       name: "Weekender",
+	  titleText: "Spaceship, 2c/7",
       category: "Game of Life",
       subcategory: "spaceships",
       code: [
@@ -1887,6 +2121,7 @@ Page Timeline:
     },
     {
       name: "Pufferfish",
+	  titleText: "Puffer, p12, c/2 (6c/12)",
       category: "Game of Life",
       subcategory: "puffers",
       code: [
@@ -1910,6 +2145,7 @@ Page Timeline:
     },
     {
       name: "Dart",
+	  titleText: "Spaceship, c/3",
       category: "Game of Life",
       subcategory: "spaceships",
       code: [
@@ -1933,6 +2169,7 @@ Page Timeline:
     },
     {
       name: "x66",
+	  titleText: "Spaceship, c/2 (2c/4)",
       category: "Game of Life",
       subcategory: "spaceships",
       code: [
@@ -1950,8 +2187,101 @@ Page Timeline:
       ],
       button: undefined
     },
+	{
+      name: "Toad Flipper/Escorter",
+	  titleText: "Spaceship, c/2 (2c/4)",
+      category: "Game of Life",
+      subcategory: "spaceships",
+      code: [
+        "-----XXX--",
+		"---XXXXXX-",
+		"--XXXXX-XX",
+		"--X----XX-",
+		"----------",
+		"----X-----",
+		"-X-XX-----",
+		"--XXX-----",
+		"-----XX---",
+		"----X-XX--",
+		"-------XX-",
+		"-----X-X--",
+		"------X---",
+		"-----X----",
+		"--XX------",
+		"---X------",
+		"-----XXX--",
+		"--X-XXXXX-",
+		"XX--XXX-XX",
+		"-------XX-",
+		"----------",
+		"----------",
+		"-----X----",
+		"--X--X----",
+		"--X--X----",
+		"----X-----",
+		"----------",
+		"-----XXX--",
+		"---XXXXXX-",
+		"--XXXXX-XX",
+		"--X----XX-",
+		"----------",
+		"----X-----",
+		"-X-XX-----",
+		"--XXX-----",
+		"-----XX---",
+		"----X-XX--",
+		"-------XX-",
+		"-----X-X--",
+		"------X---",
+		"-----X----",
+		"--XX------",
+		"---X------",
+		"-----XXX--",
+		"--X-XXXXX-",
+		"XX--XXX-XX",
+		"-------XX-"
+      ],
+      button: undefined
+    },
+	{
+      name: "Clogged Backrake", // (My name, catalogued is nameless) (variation on Backrake 1, but with one pattern changed so that the gliders are no longer emitted)
+	  titleText: "Spaceship, c/2 (2c/4)",
+      category: "Game of Life",
+      subcategory: "spaceships",
+      code: [
+        "----------X-X-----",
+		"----------X--X----",
+		"-------------XX---",
+		"---------------X--",
+		"-------------XXXX-",
+		"-----X------X----X",
+		"-----X-XX-----X--X",
+		"--------X-----X--X",
+		"--------X-------X-",
+		"----------X-XXXX--",
+		"----------X---X---",
+		"--XX---------X----",
+		"X----X---XXXXX----",
+		"------X-----------",
+		"X-----X--XXXXX----",
+		"-XXXXXX------X----",
+		"----------X---X---",
+		"----------X-XXXX--",
+		"--------X-------X-",
+		"--------X-----X--X",
+		"-----X-XX-----X--X",
+		"-----X------X----X",
+		"-------------XXXX-",
+		"---------------X--",
+		"-------------XX---",
+		"----------X--X----",
+		"----------X-X-----"
+      ],
+      button: undefined
+    },
     {
       name: "Big Glider",
+	  titleText: "Spaceship, c/4",
       category: "Game of Life",
       subcategory: "spaceships",
       code: [
@@ -1978,93 +2308,47 @@ Page Timeline:
     },
     {
       name: "Sir Robin",
+	  titleText: "Spaceship, (2, 1)c/6",
       category: "Game of Life",
       subcategory: "spaceships",
       code: [
-        "----X--------------------------",
-        "-----XX------------------------",
-        "-------------------------------",
-        "-----X-------------------------",
-        "----XX-------------------------",
-        "--XX-XX------------------------",
-        "XXX---XX-----------------------",
-        "-X----XXX----------------------",
-        "-X----XXX----------------------",
-        "---XX--------------------------",
-        "XX--X-X------------------------",
-        "--X--X-XX----------------------",
-        "X-X-XXX--X---------------------",
-        "X-X--XX------------------------",
-        "-X-----XXX---------------------",
-        "-------XX----------------------",
-        "---XXX-------------------------",
-        "--XX--X------------------------",
-        "--X----------------------------",
-        "----X-X------------------------",
-        "------X----XXX-----------------",
-        "----XX-XXXX--------------------",
-        "------XXXX----X----------------",
-        "----------X--------------------",
-        "------------X------------------",
-        "------XXXXX-X------------------",
-        "------XXX-XXX------------------",
-        "------X----X-------------------",
-        "-------XXXXX-------------------",
-        "----------X--------------------",
-        "------X-XX---------------------",
-        "---------X---------------------",
-        "---X---XX----------------------",
-        "-X--X--XXXX--------------------",
-        "-XX---X---XX-------------------",
-        "-XXX-X------X------------------",
-        "------XX---X-------------------",
-        "---X---X---X-------------------",
-        "--X-X---X-X--------------------",
-        "--X------XXX-------------------",
-        "----XX-------------------------",
-        "-----XXXXX---------------------",
-        "---------XX--------------------",
-        "------XX--X--------------------",
-        "-----------X-------------------",
-        "------XX----XXXX-X-------------",
-        "------XX----X-XXXX-------------",
-        "---------XXX-XX----X-----------",
-        "-------------X--X---X----------",
-        "-------------X-XXX-X-----------",
-        "------------X--XXX-------------",
-        "-------------XX----------------",
-        "----------------XXX------------",
-        "--------XXXXX-----X------------",
-        "--------X------X---X-----------",
-        "---------X---------X-----------",
-        "-------------------------------",
-        "----------XXX------X-----------",
-        "-----------X-X-XX--------------",
-        "-----------X---X-X-X-----------",
-        "-----------X------XXX----------",
-        "-------------X-X-X--X----------",
-        "--------------XX--X-X----------",
-        "------------X--X---XX----------",
-        "------------X-XXX-XX-----------",
-        "------------X------XX----------",
-        "--------------XX-X-------------",
-        "--------------X----X-------XX--",
-        "---------------X--XX--XXX------",
-        "-------------------------X---X-",
-        "-------------------XX---------X",
-        "---------------X---XX----XXXX--",
-        "---------------XXX------X----X-",
-        "-----------------XXXX----XX-X--",
-        "-----------------XXXX------XX--",
-        "----------------------XXX------",
-        "----------------------X---X----",
-        "-----------------------X--X----",
-        "-------------------------XX----"
+        "------X---X-XX-----------------------------------------------------------------",
+		"------XXX-X---X------------------XXX-------------------------------------------",
+		"-----XX----XXX---XX---------------XX--XX---------------------------------------",
+		"-----X---X------XX--------------X--X-X-----------------------------------------",
+		"X---X----XX-X---X--X-X-----------X----X-X--------------------------------------",
+		"-X-XXX-----XXX--X----X-------------X----XX-------------------------------------",
+		"-X---XXXX-X-XX---X-XX-X--XXX--X---X-X----X-X-XX--------------------------------",
+		"------XXX--X--XX-----XX--XX-X---XX--XX---X-X-XX--------------------------------",
+		"-------XX--X--XX-----XX--XX-X-X-XX----X--X-----------XX------------------------",
+		"------------X-X------XX--X--X-XX-X-----X-XX----X-----X-X-----------------------",
+		"---------------------X-X-XX-XX---XX---XX--XX---X-----X---X---------------------",
+		"--------------------X-----XXX-----X-XX-X----X--X-----X---XXXX------------------",
+		"--------------------X---XXX--------X---------XX---X--X---X-----XXX-------------",
+		"--------------------X------------------------X-XXX-X------X--X-----------------",
+		"----------------------X----------------------XXX---X----------X-X-XX-----------",
+		"---------------------------------------------XX--XX---X---XX-XXXX-X-X--XX------",
+		"----------------------------------------------X-XXX-X-----X-----X-------X------",
+		"---------------------------------------------XX--XX-X------X-X----X-----XXX----",
+		"----------------------------------------------------XX------X-X-X---X----XX----",
+		"-----------------------------------------------X-X----XX-X-XX--XXX-XX-XX-XX----",
+		"------------------------------------------------X-----------XXXX-X----XX-XX----",
+		"-------------------------------------------------------------------------------",
+		"--------------------------------------------------------------------X------XX--",
+		"--------------------------------------------------------------------X------X-X-",
+		"--------------------------------------------------------------------X---X--X---",
+		"---------------------------------------------------------------------X-X-X----X",
+		"-----------------------------------------------------------------------X-X--XXX",
+		"-------------------------------------------------------------------X---X--X----",
+		"-------------------------------------------------------------------X---X-XX----",
+		"---------------------------------------------------------------------X--X------",
+		"----------------------------------------------------------------------X--------"
       ],
       button: undefined
     },
     {
       name: "Figure 8",
+	  titleText: "Oscillator, p8",
       category: "Game of Life",
       subcategory: "oscillators",
       code: [
@@ -2079,6 +2363,7 @@ Page Timeline:
     },
     {
       name: "Pentadecathlon",
+	  titleText: "Oscillator, p15",
       category: "Game of Life",
       subcategory: "oscillators",
       code: [
@@ -2090,6 +2375,7 @@ Page Timeline:
     },
     {
       name: "Snacker",
+	  titleText: "Oscillator, p9",
       category: "Game of Life",
       subcategory: "oscillators",
       code: [
@@ -2109,6 +2395,7 @@ Page Timeline:
     },
     {
       name: "Tumbler",
+	  titleText: "Oscillator, p14",
       category: "Game of Life",
       subcategory: "oscillators",
       code: [
@@ -2122,6 +2409,7 @@ Page Timeline:
     },
     {
       name: "Star",
+	  titleText: "Oscillator, p3",
       category: "Game of Life",
       subcategory: "oscillators",
       code: [
@@ -2141,6 +2429,7 @@ Page Timeline:
     },
     {
       name: "Toad Flipper",
+	  titleText: "Oscillator, p60",
       category: "Game of Life",
       subcategory: "oscillators",
       code: [
@@ -2159,6 +2448,7 @@ Page Timeline:
     },
     {
       name: "Gourmet",
+	  titleText: "Oscillator, p32",
       category: "Game of Life",
       subcategory: "oscillators",
       code: [
@@ -2187,6 +2477,7 @@ Page Timeline:
     },
     {
       name: "Phoenix Heart",
+	  titleText: "Oscillator, p2",
       category: "Game of Life",
       subcategory: "oscillators",
       code: [
@@ -2211,6 +2502,7 @@ Page Timeline:
     },
     {
       name: "Queen Bee Shuttle",
+	  titleText: "Oscillator, p30",
       category: "Game of Life",
       subcategory: "oscillators",
       code: [
@@ -2228,6 +2520,7 @@ Page Timeline:
     },
     {
       name: "Pulsar",
+	  titleText: "Oscillator, p3",
       category: "Game of Life",
       subcategory: "oscillators",
       code: [
@@ -2249,13 +2542,15 @@ Page Timeline:
     },
     {
       name: "Glider Train",
+	  titleText: "Puffer/Rake, p64, c/2 (32c/64)",
       category: "Game of Life",
       subcategory: "puffers",
       code: [
-        "------------------------------X------------",
+		"---------------------------XX--------------",
+        "-------------------------X----X------------",
         "-------------------------------X-----------",
-        "-------------------------X-----X-----------",
-        "----X---------------------XXXXXX-----XXXXXX",
+        "--X----------------------X-----X-----------",
+        "X---X---------------------XXXXXX-----XXXXXX",
         "-----X------------------------------X-----X",
         "X----X------------------------------------X",
         "-XXXXX------------------------------X----X-",
@@ -2279,38 +2574,41 @@ Page Timeline:
         "-XXXXX------------------------------X----X-",
         "X----X------------------------------------X",
         "-----X------------------------------X-----X",
-        "----X---------------------XXXXXX-----XXXXXX",
-        "-------------------------X-----X-----------",
+        "X---X---------------------XXXXXX-----XXXXXX",
+        "--X----------------------X-----X-----------",
         "-------------------------------X-----------",
-        "------------------------------X------------"
+        "-------------------------X----X------------",
+		"---------------------------XX--------------"
       ],
       button: undefined
     },
     {
       name: "One Per Generation",
+	  titleText: "Wickstretcher, p4, c/4",
       category: "Game of Life",
       subcategory: "puffers",
       code: [
-        "--------X--------",
-        "-XX-X--X-X-------",
-        "XX-X----X--------",
-        "--XX-------XX----",
-        "-X-XX----X--X----",
-        "--XX---X-X----X--",
-        "---X-----X-----XX",
-        "--X----XX-----XX-",
-        "---XX--X---------",
-        "-----------------",
-        "------X----------",
-        "----XX-----------",
-        "-------X---------",
-        "--------XX-------",
-        "-------XX--------"
+        "------X--------",
+		"-----X-X-------",
+		"------X--------",
+		"---------XX----",
+		"------X-XXXX---",
+		"-------XX----X-",
+		"-X---X-X------X",
+		"X-X--XX-----XXX",
+		"-X---XX--------",
+		"---------------",
+		"---X-----------",
+		"---XX----------",
+		"------X--------",
+		"-------X-------",
+		"-----XXX-------"
       ],
       button: undefined
     },
     {
       name: "Space Rake",
+	  titleText: "Rake, p20, c/2 (10c/20)",
       category: "Game of Life",
       subcategory: "puffers",
       code: [
@@ -2336,8 +2634,45 @@ Page Timeline:
       ],
       button: undefined
     },
+	{
+      name: "Backrake", // Variation on catalogued name of "Backrake 1"
+	  titleText: "Rake, p8, c/2 (4c/8)",
+      category: "Game of Life",
+      subcategory: "puffers",
+      code: [
+        "----------X-X-----",
+		"----------X--X----",
+		"-------------XX---",
+		"---------------X--",
+		"-------------XXXX-",
+		"------------X----X",
+		"------XXX-----X--X",
+		"--------X-----X--X",
+		"------X-X-------X-",
+		"----------X-XXXX--",
+		"-------X--X---X---",
+		"--XX---------X----",
+		"X----X---XXXXX----",
+		"------X-----------",
+		"X-----X--XXXXX----",
+		"-XXXXXX------X----",
+		"----------X---X---",
+		"----------X-XXXX--",
+		"--------X-------X-",
+		"--------X-----X--X",
+		"-----X-XX-----X--X",
+		"-----X------X----X",
+		"-------------XXXX-",
+		"---------------X--",
+		"-------------XX---",
+		"----------X--X----",
+		"----------X-X-----"
+      ],
+      button: undefined
+    },
     {
       name: "Max",
+	  titleText: "Spacefiller, p4, c/2 (2c/4)",
       category: "Game of Life",
       subcategory: "spacefillers",
       code: [
@@ -2372,7 +2707,8 @@ Page Timeline:
       button: undefined
     },
     {
-      name: "Max Grandperent",
+      name: "Max Grandparent",
+	  titleText: "Spacefiller, p4, c/2 (2c/4)",
       category: "Game of Life",
       subcategory: "spacefillers",
       code: [
@@ -2406,6 +2742,7 @@ Page Timeline:
     },
     {
       name: "Holzwart Spacefiller",
+	  titleText: "Spacefiller, p4, c/2 (2c/4)",
       category: "Game of Life",
       subcategory: "spacefillers",
       code: [
@@ -2440,6 +2777,7 @@ Page Timeline:
     },
     {
       name: "Space Non-Filler",
+	  titleText: "Spacefiller, p4, c/2 (2c/4)",
       category: "Game of Life",
       subcategory: "spacefillers",
       code: [
@@ -2479,6 +2817,7 @@ Page Timeline:
     },
     {
       name: "Quasar",
+	  titleText: "Oscillator, p3",
       category: "Game of Life",
       subcategory: "oscillators",
       code: [
@@ -2516,6 +2855,7 @@ Page Timeline:
     },
     {
       name: "Kok's Galaxy",
+	  titleText: "Oscillator, p8",
       category: "Game of Life",
       subcategory: "oscillators",
       code: [
@@ -2532,7 +2872,8 @@ Page Timeline:
       button: undefined
     },
     {
-      name: "Pööpenfärten", // Credit: David French
+      name: "Pööpenfärten", // Name Credit (and thought to be discoverer): David French (Catalogued name is "Blocker")
+	  titleText: "Oscillator, p8",
       category: "Game of Life",
       subcategory: "oscillators",
       code: [
@@ -2551,6 +2892,7 @@ Page Timeline:
     },
     {
       name: "Twirling T-Tetsons II",
+	  titleText: "Oscillator, p60",
       category: "Game of Life",
       subcategory: "oscillators",
       code: [
@@ -2581,8 +2923,79 @@ Page Timeline:
       ],
       button: undefined
     },
+	{
+      name: "Blender", // (My name, catalogued name is just "132P7")
+	  titleText: "Oscillator, p7",
+      category: "Game of Life",
+      subcategory: "oscillators",
+      code: [
+        "----X---XX---X----",
+		"---X-X-X--X-X-X---",
+		"---X-X------X-X---",
+		"-XXX-X------X-XXX-",
+		"X----X-XXXX-X----X",
+		"-XXX-X-XXXX-X-XXX-",
+		"---X--XX--XX--X---",
+		"------X----X------",
+		"-------X--X-------",
+		"--------XX--------",
+		"---X----------X---",
+		"-XXX----------XXX-",
+		"X-----XXXXXX-----X",
+		"-XXX----------XXX-",
+		"---X----------X---",
+		"--------XX--------",
+		"-------X--X-------",
+		"------X----X------",
+		"---X--XX--XX--X---",
+		"-XXX-X-XXXX-X-XXX-",
+		"X----X-XXXX-X----X",
+		"-XXX-X------X-XXX-",
+		"---X-X------X-X---",
+		"---X-X-X--X-X-X---",
+		"----X---XX---X----"
+      ],
+      button: undefined
+    },
+	{
+      name: "Swiveller", // (My name, catalogued name is just "38P7.2"
+	  titleText: "Oscillator, p7",
+      category: "Game of Life",
+      subcategory: "oscillators",
+      code: [
+        "----X---X----",
+		"X--X-X-X-X--X",
+		"X-X--X-X--X-X",
+		"-X--XX-XX--X-",
+		"-----X-X-----",
+		"--XX-----XX--",
+		"--X-------X--",
+		"----X---X----",
+		"-------------",
+		"-X--X---X--X-",
+		"--XX-----XX--"
+      ],
+      button: undefined
+    },
+	{
+      name: "Toad Worker Bee", // (My name, catalogued name is just "P6 Worker Bee"
+	  titleText: "Oscillator, p6",
+      category: "Game of Life",
+      subcategory: "oscillators",
+      code: [
+        "XXX----------XXX",
+		"-XXX-X----X-XXX-",
+		"------X--X------",
+		"-------XX-------",
+		"------X--X------",
+		"-XXX-X----X-XXX-",
+		"XXX----------XXX"
+      ],
+      button: undefined
+    },
     {
       name: "Gosper Glider Gun",
+	  titleText: "Gun, p30",
       category: "Game of Life",
       subcategory: "guns",
       code: [
@@ -2600,6 +3013,7 @@ Page Timeline:
     },
     {
       name: "Simkin Glider Gun",
+	  titleText: "Gun, p120, 2-Barrel",
       category: "Game of Life",
       subcategory: "guns",
       code: [
@@ -2621,7 +3035,8 @@ Page Timeline:
       button: undefined
     },
     {
-      name: "p46 Gun",
+      name: "Bolt-Action Rifle", // (My name, catalogued name is "New Gun")
+	  titleText: "Gun, p46",
       category: "Game of Life",
       subcategory: "guns",
       code: [
@@ -2663,36 +3078,38 @@ Page Timeline:
       button: undefined
     },
     {
-      name: "p104 Gun",
+      name: "B-52 Bomber",
+	  titleText: "Oscillator, p104, 2-Barrel",
       category: "Game of Life",
       subcategory: "guns",
       code: [
-        "-XX--------XX--------------------------",
-        "-XX---------X-------X------------------",
-        "-XX---------X-XX---X-X------------XX---",
-        "-X-----------X------X-------------XXX--",
-        "X-X------XX------X----------------XX-X-",
-        "X-XX-----XX----X--------------------X-X",
-        "----------------X------------------X--X",
-        "------------------------------------XX-",
         "-XX------------------------------------",
-        "-XX------------------------------------",
-        "---------------XX----------------------",
-        "----------------XX------------------XX-",
-        "----------------X-------------------XX-",
-        "-XX------XXX------------------------XX-",
-        "X--X-------X------------------------X--",
-        "X-X-------------------------XX-----X-X-",
-        "-X-XX-----------------------XX-----X-XX",
-        "--XXX-------------X--------------------",
-        "---XX------------X-X-------------------",
-        "------------------X-----------------XX-",
-        "------------------------------------XX-"
+		"-XX-----------------X------------------",
+		"-------------------X-X------------X-X--",
+		"--------------------X------------X-----",
+		"XX-------XX-----------------------X--X-",
+		"XX-X-----XX-----------------------X-X-X",
+		"---X-----------------------X-------X--X",
+		"---X-----------------------XX-------XX-",
+		"X--X-----------------XX-----X----------",
+		"-XX------------------X-----------------",
+		"---------------------XXX---------------",
+		"------------------------------------XX-",
+		"------------------------------------XX-",
+		"-XX------------------------------------",
+		"X--X-----------------------------------",
+		"X-X-X----------------X-X----XX-----XX--",
+		"-X--X-----------------XX----XX-----XX-X",
+		"-----X------------X---X---------------X",
+		"--X-X------------X-X------------------X",
+		"------------------X----------------X--X",
+		"------------------------------------XX-"
       ],
       button: undefined
     },
     {
       name: "Light Spaceship Synth",
+	  titleText: "Glider Synthesis, 3G", // _G is number of gliders
       category: "Game of Life",
       subcategory: "glider-synthesis",
       code: [
@@ -2711,6 +3128,7 @@ Page Timeline:
     },
     {
       name: "Middle Spaceship Synth",
+	  titleText: "Glider Synthesis, 3G",
       category: "Game of Life",
       subcategory: "glider-synthesis",
       code: [
@@ -2727,6 +3145,7 @@ Page Timeline:
     },
     {
       name: "Heavy Spaceship Synth",
+	  titleText: "Glider Synthesis, 3G",
       category: "Game of Life",
       subcategory: "glider-synthesis",
       code: [
@@ -2743,6 +3162,7 @@ Page Timeline:
     },
     {
       name: "Pentadecathlon Synth",
+	  titleText: "Glider Synthesis, 3G",
       category: "Game of Life",
       subcategory: "glider-synthesis",
       code: [
@@ -2760,6 +3180,7 @@ Page Timeline:
     },
     {
       name: "Loafer Synth",
+	  titleText: "Glider Synthesis, 8G",
       category: "Game of Life",
       subcategory: "glider-synthesis",
       code: [
@@ -2799,6 +3220,7 @@ Page Timeline:
     },
     {
       name: "x66 Synth",
+	  titleText: "Glider Synthesis, 13G",
       category: "Game of Life",
       subcategory: "glider-synthesis",
       code: [
@@ -2840,6 +3262,7 @@ Page Timeline:
     },
     {
       name: "Copperhead Synth",
+	  titleText: "Glider Synthesis, 13G",
       category: "Game of Life",
       subcategory: "glider-synthesis",
       code: [
@@ -2896,6 +3319,7 @@ Page Timeline:
     },
     {
       name: "Two-Glider Mess",
+	  titleText: "Glider Synthesis, 2G",
       category: "Game of Life",
       subcategory: "glider-synthesis",
       code: [
@@ -2908,43 +3332,890 @@ Page Timeline:
       ],
       button: undefined
     },
+	
+	// Move
+	
+	{
+      name: "Jellyfish", // (Catalogued name)
+	  titleText: "Spaceship, c/7",
+      category: "Move",
+      code: [
+        "--X-",
+		"---X",
+		"X-X-",
+		"-X--"
+      ],
+      button: undefined
+    },
+	{
+      name: "Silverfish", // (My name, catalogued name is unnamed)
+	  titleText: "Spaceship, c/4",
+      category: "Move",
+      code: [
+        "X----XX",
+		"XXX-XXX",
+		"-X--XXX",
+		"-----XX"
+      ],
+      button: undefined
+    },
+	{
+      name: "Space Invader", // (My name, catalogued name is unnamed) (Several of its phases remind me of the alien spaceships in Space Invaders, Galaga, etc.)
+	  titleText: "Spaceship, c/10",
+      category: "Move",
+      code: [
+        "--XX---",
+		"---XX--",
+		"X--XX-X",
+		"-X--XXX",
+		"X--XX-X",
+		"---XX--",
+		"--XX---"
+      ],
+      button: undefined
+    },
+	{
+      name: "Leapfrog", // (My name, catalogued name is unnamed) (The way it goes slowly and then pulls its "back" forwards quickly reminds me of a frog jumping)
+	  titleText: "Spaceship, 4c/23",
+      category: "Move",
+      code: [
+        "--X-----",
+		"-XX-X---",
+		"X-XX-X--",
+		"------XX",
+		"------XX",
+		"X-XX-X--",
+		"-XX-X---",
+		"--X-----"
+      ],
+      button: undefined
+    },
+	{
+      name: "Steam Train", // (My name, catalogued name is unnamed)
+	  titleText: "Puffer, p170, 13c/170",
+      category: "Move",
+      code: [
+        "-------XXX------",
+		"-X---XXXX-------",
+		"-X---X-XX-XX-X--",
+		"X--XXXXX-XX-X-X-",
+		"XX-----XXXXXXXXX",
+		"XX-----XXXXXXXXX",
+		"X--XXXXX-XX-X-X-",
+		"-X---X-XX-XX-X--",
+		"-X---XXXX-------",
+		"-------XXX------"
+      ],
+      button: undefined
+    },
+	{
+      name: "Inverter", // (My name, catalogued name is unnamed)
+	  titleText: "Oscillator, p9",
+      category: "Move",
+      code: [
+        "----XX----",
+		"----XX----",
+		"----XX----",
+		"----XX----",
+		"XXXX--XXXX",
+		"XXXX--XXXX",
+		"----XX----",
+		"----XX----",
+		"----XX----",
+		"----XX----"
+      ],
+      button: undefined
+    },
+	
+	// Day and Night
+	
+	{
+      name: "Hovercar", // (My name, catalogued name is unnamed)
+	  titleText: "Spaceship, c/2",
+      category: "Day and Night",
+      code: [
+        "-X-X--",
+		"--XXX-",
+		"--XXXX",
+		"--XXXX",
+		"XXX---",
+		"X-X-X-",
+		"--X-X-",
+		"X-XXX-",
+		"X-X-X-",
+		"--XX--"
+      ],
+      button: undefined
+    },
+	{
+      name: "Plodder", // (My name, catalogued name is unnamed)
+	  titleText: "Spaceship, c/7 (2c/14)",
+      category: "Day and Night",
+      code: [
+        "---X--",
+		"-X-XX-",
+		"XXXXXX",
+		"-X-XX-",
+		"---X--"
+      ],
+      button: undefined
+    },
+	{
+      name: "Jumper", // (My name, catalogued name is unnamed)
+	  titleText: "Spaceship, c/3",
+      category: "Day and Night",
+      code: [
+        "---X-",
+		"---XX",
+		"---XX",
+		"XXX-X",
+		"-XXX-"
+      ],
+      button: undefined
+    },
+	{
+      name: "Blobfish", // (My name, catalogued name is unnamed)
+	  titleText: "Spaceship, c/4",
+      category: "Day and Night",
+      code: [
+        "----X--",
+		"---X-X-",
+		"----X-X",
+		"---XXX-",
+		"--XXXXX",
+		"XXXXXX-",
+		"XXXXX--",
+		"-XXX---"
+      ],
+      button: undefined
+    },
+	{
+      name: "Horsefly", // (My name, catalogued name is unnamed)
+	  titleText: "Spaceship, c/6",
+      category: "Day and Night",
+      code: [
+        "--XX------------",
+		"-XXX------------",
+		"-X-X------------",
+		"--XXXX----------",
+		"----X-X---------",
+		"--XXXX----------",
+		"--XXXX-XX---XXX-",
+		"XXXXXXXXX----X-X",
+		"--XXXX-XX---XXX-",
+		"--XXXX----------",
+		"----X-X---------",
+		"--XXXX----------",
+		"-X-X------------",
+		"-XXX------------",
+		"--XX------------"
+      ],
+      button: undefined
+    },
+	{
+      name: "Ramship", // (My name, catalogued name is unnamed) (Looks like the horns on a ram)
+	  titleText: "Spaceship, 2c/5",
+      category: "Day and Night",
+      code: [
+        "------------X-------",
+		"-------X----X-------",
+		"-----XXX-X---XXX-X--",
+		"-----X-X--XX--X-XXX-",
+		"----X-XX--X-X-XXXXX-",
+		"-----XXXXX-X---X--XX",
+		"---X-XXXXX-----X---X",
+		"-X--XXXX-X------XXXX",
+		"XXX--X-XX-------XXX-",
+		"---------------XXXX-",
+		"-------------XX--X--",
+		"-----------XX-XXX---",
+		"------------X-XXXX--",
+		"------------X-XXXX--",
+		"-----------XX-XXX---",
+		"-------------XX--X--",
+		"---------------XXXX-",
+		"XXX--X-XX-------XXX-",
+		"-X--XXXX-X------XXXX",
+		"---X-XXXXX-----X---X",
+		"-----XXXXX-X---X--XX",
+		"----X-XX--X-X-XXXXX-",
+		"-----X-X--XX--X-XXX-",
+		"-----XXX-X---XXX-X--",
+		"-------X----X-------",
+		"------------X-------"
+      ],
+      button: undefined
+    },
+	{
+      name: "Laddership", // (My name, catalogued name is unnamed)
+	  titleText: "Spaceship, c/2",
+      category: "Day and Night",
+      code: [
+        "------------------------------------------XX-",
+		"----------------------------------------XXX-X",
+		"----------------------------------------X-XXX",
+		"------------------------------------------X-X",
+		"--X--X-X---X--X-X---X--X-X---X--X-X---XXX-XX-",
+		"X-XX--XXXX-XX--XXXX-XX--XXXX-XX--XXXX-X-X----",
+		"--X--X-X---X--X-X---X--X-X---X--X-X---XXXX---",
+		"-----------------------------------------X---",
+		"----------------------------------------X-XX-",
+		"-----------------------------------------XXXX",
+		"-----------------------------------------XXX-",
+		"----------------------------------------X-X--"
+      ],
+      button: undefined
+    },
+	{
+      name: "Rocket",
+	  titleText: "Spaceship, c/2 (20c/40)",
+      category: "Day and Night",
+      code: [
+        "-----------------------XX---X--X-------",
+		"--XXX-------XXX--------XXX---XX--XX----",
+		"XXXX-X--------X--XX---X-XXXXXXXXXX-XX--",
+		"XXXXX---XXX--XXXXXXXX--XXXXXXXXXXXXXXX-",
+		"-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+		"XXXXX---XXX--XXXXXXXX--XXXXXXXXXXXXXXX-",
+		"XXXX-X--------X--XX---X-XXXXXXXXXX-XX--",
+		"--XXX-------XXX--------XXX---XX--XX----",
+		"-----------------------XX---X--X-------"
+      ],
+      button: undefined
+    },
+	{
+      name: "Fireball",
+	  titleText: "Spaceship, c/2 (20c/40)",
+      category: "Day and Night",
+      code: [
+        "---------------------XX--------------------XX------",
+		"-----------------X-XXX-X---------------XX-XXXX-----",
+		"---XX-----------X-XXXXX-XX-------------XXXXXXX-X---",
+		"-X---X----------XXXXXXXX-XX--X--XXX---X-XXXXXXXXX--",
+		"XX---X-----------XXXXXXXXXX--XXX-X--X--XXXXXXXXXXX-",
+		"----XX----------X-XXXXXXXXX----XXXXXXXXXXXXXXXXXXXX",
+		"-----------------XXXXXXXXXXX-XXXXXXXXXXXXXXXXXXXXXX",
+		"--------------XXXXXXXX-XXXXXXXX--XXXXXXXX-XXXXXXXX-",
+		"----------------XXXX-XXX----X---X-XXXXX----XXXXXX--",
+		"----------------X--X-X--X-----------X------XXXXX---",
+		"-----------------XX--XX---------XX-X-------XX-X----"
+      ],
+      button: undefined
+    },
+	{
+      name: "Ricochet", // (My name, catalogued name is unnamed)
+	  titleText: "Oscillator, p36",
+      category: "Day and Night",
+      code: [
+        "--XXX",
+		"--XXX",
+		"X-XXX",
+		"X----",
+		"XXX--",
+      ],
+      button: undefined
+    },
+	{
+      name: "Fission Reactor", // (My name, catalogued name is unnamed)
+	  titleText: "Oscillator, p9",
+      category: "Day and Night",
+      code: [
+        "--X-------X--",
+		"-X-X-----X-X-",
+		"X-X-X---X-X-X",
+		"-X-XX-X-XX-X-",
+		"--XXXXXXXXX--",
+		"----XXXXX----",
+		"---XXXXXXX---",
+		"----XXXXX----",
+		"--XXXXXXXXX--",
+		"-X-XX-X-XX-X-",
+		"X-X-X---X-X-X",
+		"-X-X-----X-X-",
+		"--X-------X--"
+      ],
+      button: undefined
+    },
+	{
+      name: "Corn on the Cob", // (My name, catalogued name is unnamed)
+	  titleText: "Oscillator, p15",
+      category: "Day and Night",
+      code: [
+        "----X------",
+		"XX-X-----XX",
+		"XXXXXXXXXXX",
+		"-XXXXXXXXX-",
+		"XXXXXXXXXXX",
+		"XX-----X-XX",
+		"------X----"
+      ],
+      button: undefined
+    },
+	{
+      name: "Neuron", // (My name, catalogued name is unnamed)
+	  titleText: "Oscillator, p11",
+      category: "Day and Night",
+      code: [
+        "----XX-X--",
+		"----X-X-X-",
+		"----XXXXXX",
+		"----XXXXX-",
+		"-XXXXX----",
+		"XXXXXX----",
+		"-X-X-X----",
+		"--X-XX----"
+      ],
+      button: undefined
+    },
+	
+	// 2x2
+	
+	{
+      name: "Sprinkler", // (My name, catalogued name is unnamed) (Credit to Nathaniel Johnston)
+	  titleText: "Spaceship, c/8",
+      category: "2x2",
+      code: [
+        "---X-",
+		"X--XX",
+		"-XXX-",
+		"--X--"
+      ],
+      button: undefined
+    },
+	{
+      name: "Twin Engine", // (My name, catalogued name is unnamed) (Credit to Nathaniel Johnston)
+	  titleText: "Spaceship, c/4",
+      category: "2x2",
+      code: [
+        "------X-X----",
+		"-------XX----",
+		"------XXXX---",
+		"-------------",
+		"-------------",
+		"---------XXXX",
+		"X-X---------X",
+		"-XX-----X----",
+		"XXX----X-XXX-",
+		"--X--X--X-X--",
+		"-----X--XX---",
+		"-----X--X----",
+		"-----XX------"
+      ],
+      button: undefined
+    },
+	{
+      name: "Tortoise", // (My name, catalogued name is unnamed) (Credit to Nathaniel Johnston)
+	  titleText: "Spaceship, c/3",
+      category: "2x2",
+      code: [
+        "---XX-------",
+		"-X--X--XX---",
+		"XXX---X--X--",
+		"X--X-X----X-",
+		"------XX----",
+		"---X-------X",
+		"---------X-X",
+		"---X-------X",
+		"------XX----",
+		"X--X-X----X-",
+		"XXX---X--X--",
+		"-X--X--XX---",
+		"---XX-------"
+      ],
+      button: undefined
+    },
+	{
+      name: "Scarabs", // (My name, catalogued name is unnamed) (Credit to Nathaniel Johnston)
+	  titleText: "Spaceship, c/3",
+      category: "2x2",
+      code: [
+        "-X---------",
+		"XXX----XXX-",
+		"-X-X-X-----",
+		"-X-X-XXXXXX",
+		"XXX--XXXXXX",
+		"-X---X-----",
+		"-------XXX-"
+      ],
+      button: undefined
+    },
+	{
+      name: "Cocktail Shaker", // (My name, unknown if in the catalogue) (p22)
+	  titleText: "Oscillator, p22",
+      category: "2x2",
+      code: [
+        "XX--XX",
+		"------",
+		"--XX--",
+		"-X--X-",
+		"-X--X-"
+      ],
+      button: undefined
+    },
+	
+	// Flock
+	
+	{
+      name: "Moth", // (My name, catalogued name is unnamed)
+	  titleText: "Spaceship, c/4 (2c/8)",
+      category: "Flock",
+      code: [
+        "---------X-",
+		"----------X",
+		"------X----",
+		"-----XXXXXX",
+		"------XXXX-",
+		"---X--XXX--",
+		"--XXXX-----",
+		"---XXX-----",
+		"---XXX-----",
+		"X--XX------",
+		"-X-X-------"
+      ],
+      button: undefined
+    },
+	{
+      name: "Apollo", // (My name, catalogued name is unnamed)
+	  titleText: "Spaceship, c/4",
+      category: "Flock",
+      code: [
+        "----------X-X-",
+		"---X---------X",
+		"---XX---X----X",
+		"-----X----X-XX",
+		"XXXXX-----X---",
+		"-X-X--X-------",
+		"-----X---X----",
+		"-XX--X--X-----",
+		"--------------",
+		"-XX--X--X-----",
+		"-----X---X----",
+		"-X-X--X-------",
+		"XXXXX-----X---",
+		"-----X----X-XX",
+		"---XX---X----X",
+		"---X---------X",
+		"----------X-X-"
+      ],
+      button: undefined
+    },
+	{
+      name: "Artemis", // (My name, catalogued name is unnamed)
+	  titleText: "Spaceship, c/4",
+      category: "Flock",
+      code: [
+        "--XX-------",
+		"-----XX----",
+		"-X-----X---",
+		"X----------",
+		"-X----X--X-",
+		"-----X-X--X",
+		"--XX----X-X",
+		"--------XXX",
+		"-----------",
+		"--------XXX",
+		"--XX----X-X",
+		"-----X-X--X",
+		"-X----X--X-",
+		"X----------",
+		"-X-----X---",
+		"-----XX----",
+		"--XX-------"
+      ],
+      button: undefined
+    },
+	{
+      name: "Kronos", // (My name, catalogued name is unnamed)
+	  titleText: "Spaceship, c/5",
+      category: "Flock",
+      code: [
+        "---------XX------------------------------",
+		"--------X---X-------------------X--------",
+		"-------X--------------------X---X--------",
+		"-------XXX--X-X-X-----------XXXX---------",
+		"-------X---X------X----------X---X-------",
+		"------X---X-----X--X--------------XX-----",
+		"-----X----XX---X----X-------X-----X--X---",
+		"----X-X--XXXX--------X---X--X--XX--X--X--",
+		"----XX-XX--X--X------XXX---X---X----XXXX-",
+		"XX------------X--X--X-X-----X------X----X",
+		"-XX-X------------X-X--X--X-XX-XX----X----",
+		"-XX-XXX------------X-----X------X------X-",
+		"-XX-XXX------------X-----X------X------X-",
+		"-XX-X------------X-X--X--X-XX-XX----X----",
+		"XX------------X--X--X-X-----X------X----X",
+		"----XX-XX--X--X------XXX---X---X----XXXX-",
+		"----X-X--XXXX--------X---X--X--XX--X--X--",
+		"-----X----XX---X----X-------X-----X--X---",
+		"------X---X-----X--X--------------XX-----",
+		"-------X---X------X----------X---X-------",
+		"-------XXX--X-X-X-----------XXXX---------",
+		"-------X--------------------X---X--------",
+		"--------X---X-------------------X--------",
+		"---------XX------------------------------"
+      ],
+      button: undefined
+    },
+	{
+      name: "Hyperion", // (My name, catalogued name is unnamed)
+	  titleText: "Spaceship, 2c/5",
+      category: "Flock",
+      code: [
+        "-------X--------------------------------",
+		"------X--XX-XX--------------------------",
+		"-------X---XXXX-------------------------",
+		"----------------------------------------",
+		"---------------X------------------X-----",
+		"-------X---X--X-------XX----X---X--X----",
+		"----------XX---------X-----X-------X----",
+		"X--------------XX---X------X-------X----",
+		"XX---X---XXX--------XX-XXX---X-----X----",
+		"--X--X--XX--X-----------XX--X-XXXXXX----",
+		"------X-XX----XXX--X----XXX----X--X-----",
+		"---XX--X------XXX-X--X--XXX-----XX------",
+		"--X-XX--X------XX----------X----XX------",
+		"--X---XX------------X--X----X---XX--XX--",
+		"-------X-----------XXXXXX----------XXXX-",
+		"--------X---------X-X----X--X-XX--------",
+		"-------XX-----------X------------------X",
+		"-------XX-----------X------------------X",
+		"--------X---------X-X----X--X-XX--------",
+		"-------X-----------XXXXXX----------XXXX-",
+		"--X---XX------------X--X----X---XX--XX--",
+		"--X-XX--X------XX----------X----XX------",
+		"---XX--X------XXX-X--X--XXX-----XX------",
+		"------X-XX----XXX--X----XXX----X--X-----",
+		"--X--X--XX--X-----------XX--X-XXXXXX----",
+		"XX---X---XXX--------XX-XXX---X-----X----",
+		"X--------------XX---X------X-------X----",
+		"----------XX---------X-----X-------X----",
+		"-------X---X--X-------XX----X---X--X----",
+		"---------------X------------------X-----",
+		"----------------------------------------",
+		"-------X---XXXX-------------------------",
+		"------X--XX-XX--------------------------",
+		"-------X--------------------------------"
+      ],
+      button: undefined
+    },
+	{
+      name: "Dust Cloud", // (My name, catalogued name is unnamed)
+	  titleText: "Oscillator, p7",
+      category: "Flock",
+      code: [
+        "-X-X----",
+		"----X---",
+		"X--X----",
+		"XXX-----",
+		"--------",
+		"-----XXX",
+		"----X--X",
+		"---X----",
+		"----X-X-"
+      ],
+      button: undefined
+    },
+	{
+      name: "Capacitor", // (My name, catalogued name is unnamed)
+	  titleText: "Oscillator, p5",
+      category: "Flock",
+      code: [
+		"-XX----X-------X----XX-",
+		"X--X--X---------X--X--X",
+		"-X---X-----------X---X-",
+		"-----XX----X----XX-----",
+		"---X---X---X---X---X---",
+		"----XX-X-X---X-X-XX----",
+		"----XXX---------XXX----",
+		"----XX-X-X---X-X-XX----",
+		"---X---X---X---X---X---",
+		"-----XX----X----XX-----",
+		"-X---X-----------X---X-",
+		"X--X--X---------X--X--X",
+		"-XX----X-------X----XX-"
+      ],
+      button: undefined
+    },
+	{
+      name: "Hurricane", // (My name, catalogued name is unnamed)
+	  titleText: "Oscillator, p9",
+      category: "Flock",
+      code: [
+        "-------XX--------",
+		"-----------------",
+		"--------X--X-----",
+		"-------XXXXX-----",
+		"----X---XXXXX----",
+		"--XXX------------",
+		"---XX------------",
+		"---XX--------X--X",
+		"X-XXX-------XXX-X",
+		"X--X--------XX---",
+		"------------XX---",
+		"------------XXX--",
+		"----XXXXX---X----",
+		"-----XXXXX-------",
+		"-----X--X--------",
+		"-----------------",
+		"--------XX-------"
+      ],
+      button: undefined
+    },
+	
+	// Diamoeba
+	
+	{
+      name: "Slimer", // (My name, catalogued name is unnamed)
+	  titleText: "Spaceship, c/16",
+      category: "Diamoeba",
+      code: [
+        "--XXXXXXX----",
+		"-XXXXXXXXX---",
+		"--XXXXXXXXXX-",
+		"-XXXXXXXXXX--",
+		"--XXXXXXXXXXX",
+		"XXXXXXXXXXX--",
+		"--XXXXXXXXXXX",
+		"-XXXXXXXXXX--",
+		"--XXXXXXXXXX-",
+		"-XXXXXXXXX---",
+		"--XXXXXXX----"
+      ],
+      button: undefined
+    },
+	{
+      name: "Snail", // (My name, catalogued name is unnamed)
+	  titleText: "Spaceship, c/7",
+      category: "Diamoeba",
+      code: [
+        "----X-XX-----------------",
+		"----XXXX-X---------------",
+		"--XXXXXXXXX------------X-",
+		"--XXXXXXXXX--X---X-X-XX-X",
+		"XXXXXXXXXXXX-X-X-X-XXXXX-",
+		"XXXXXXXXXXXXXXXXXXXXXXXX-",
+		"XXXXXXXXXXXXXXXXXXXXXXXX-",
+		"XXXXXXXXXXXX-X-X-X-XXXXX-",
+		"--XXXXXXXXX--X---X-X-XX-X",
+		"--XXXXXXXXX------------X-",
+		"----XXXX-X---------------",
+		"----X-XX-----------------"
+      ],
+      button: undefined
+    },
+	
+	// 34 Life
+	
+	{
+      name: "Musketball", // (My name, catalogued name is "orthogonal glider" in the context of 34 Life)
+	  titleText: "Spaceship, c/3",
+      category: "34 Life",
+      code: [
+        "X-",
+		"XX",
+		"XX",
+		"X-"
+      ],
+      button: undefined
+    },
+	{
+      name: "Hang Glider", // (My name, catalogued name is unnamed)
+	  titleText: "Spaceship, c/3",
+      category: "34 Life",
+      code: [
+        "-X--",
+		"X--X",
+		"--XX",
+		"-XXX"
+      ],
+      button: undefined
+    },
+	{
+      name: "Bumblebee", // (My name, catalogued name is unnamed)
+	  titleText: "Spaceship, c/3",
+      category: "34 Life",
+      code: [
+        "XXXX",
+		"---X",
+		"X--X",
+		"-XXX",
+		"-X--"
+      ],
+      button: undefined
+    },
+	{
+      name: "Flatfish", // (My name, catalogued name is unnamed) (I have plenty of spaceships for this rule but I finally found one that wasn't c/3)
+	  titleText: "Spaceship, c/7",
+      category: "34 Life",
+      code: [
+        "-X----XXX--",
+		"-XX--X---X-",
+		"---XX-----X",
+		"-X-XX-----X",
+		"X----X----X",
+		"-X-XX-----X",
+		"---XX-----X",
+		"-XX--X---X-",
+		"-X----XXX--"
+      ],
+      button: undefined
+    },
+	{
+      name: "Totem Pole", // (My name, catalogued name is unnamed)
+	  titleText: "Spaceship, c/3",
+      category: "34 Life",
+      code: [
+        "-X----------------------",
+		"-X-------XX-X-X-XXX--X--",
+		"X-XX-X-X-X-XXX--X---XX-X",
+		"-X-X-XXX--X-XXX-----XXXX",
+		"-X-X-XXX--X-XXX-----XXXX",
+		"X-XX-X-X-X-XXX--X---XX-X",
+		"-X-------XX-X-X-XXX--X--",
+		"-X----------------------"
+      ],
+      button: undefined
+    },
+	{
+      name: "Crownship", // (My name, catalogued name is unnamed)
+	  titleText: "Spaceship, c/2",
+      category: "34 Life",
+      code: [
+        "-----X-XX---",
+		"--X-XX--XX--",
+		"--XXX-X--X--",
+		"-X-X-X--XXX-",
+		"-X--X-----X-",
+		"--XXX-----XX",
+		"X--X----X-XX",
+		"XXXX----XXX-",
+		"--X---------",
+		"-X------XXX-",
+		"--X-------XX",
+		"XXXX------XX",
+		"X--X----XXX-",
+		"--XXX-------",
+		"X--X----XXX-",
+		"XXXX------XX",
+		"--X-------XX",
+		"-X------XXX-",
+		"--X---------",
+		"XXXX----XXX-",
+		"X--X----X-XX",
+		"--XXX-----XX",
+		"-X--X-----X-",
+		"-X-X-X--XXX-",
+		"--XXX-X--X--",
+		"--X-XX--XX--",
+		"-----X-XX---"
+      ],
+      button: undefined
+    },
+	{
+      name: "Tiki Mask", // (My name, catalogued name is unnamed)
+	  titleText: "Spaceship, c/3",
+      category: "34 Life",
+      code: [
+        "-------------X-X--------------",
+		"------X-X-X-X-XX---X----------",
+		"-----XX-XX-XXX--XX-XXX--------",
+		"--XX---XXX-X-XXXX-XXXX-XX-----",
+		"----XX--XX-XXX---XXX-X-X-XXX--",
+		"--XXXXX-XX-XX--XXX-X-X--XXXXX-",
+		"XX--XX--XX--XX-XX--X-XX---X--X",
+		"-XX--XXXXX----------------X--X",
+		"XX--XX--XX--XX-XX--X-XX---X--X",
+		"--XXXXX-XX-XX--XXX-X-X--XXXXX-",
+		"----XX--XX-XXX---XXX-X-X-XXX--",
+		"--XX---XXX-X-XXXX-XXXX-XX-----",
+		"-----XX-XX-XXX--XX-XXX--------",
+		"------X-X-X-X-XX---X----------",
+		"-------------X-X--------------"
+      ],
+      button: undefined
+    },
+	{
+      name: "Firecracker", // (My name, catalogued name is unnamed)
+	  titleText: "Oscillator, p20",
+      category: "34 Life",
+      code: [
+        "XXX---",
+		"X-X---",
+		"XXX---",
+		"---XXX",
+		"---X-X",
+		"---XXX"
+      ],
+      button: undefined
+    },
+	{
+      name: "Morningstar", // (My name, catalogued name is unnamed)
+	  titleText: "Oscillator, p10",
+      category: "34 Life",
+      code: [
+        "-X-X--",
+		"---X-X",
+		"XX----",
+		"----XX",
+		"X-X---",
+		"--X-X-"
+      ],
+      button: undefined
+    },
     
     // Shapes
     {
       name: "Rectangle",
+	  titleText: "Shape",
       category: "Shapes",
       code: [],
       button: undefined
     },
     {
       name: "X",
+	  titleText: "Shape",
       category: "Shapes",
       code: [],
       button: undefined
     },
     {
       name: "Cross",
+	  titleText: "Shape",
+      category: "Shapes",
+      code: [],
+      button: undefined
+    },
+	{
+      name: "Static",
+	  titleText: "Shape",
+      category: "Shapes",
+      code: [],
+      button: undefined
+    },
+	{
+      name: "Eraser",
+	  titleText: "Shape",
       category: "Shapes",
       code: [],
       button: undefined
     }
   ];
   
-  function generateShapeStruct(name, width, height, fill) {
+  function generateShapeStruct(name) {
     // Returns an array of strings of X's and -'s like a structure code, to generate a structure for shapes of different sizes
     
     let code = [];
     
     if (name === "Rectangle") {
-      for (let y = 0; y < height; y++) {
+      for (let y = 0; y < shapeStructHeight; y++) {
         let row = "";
-        for (let x = 0; x < width; x++) {
-          if (fill === 0) { // If only drawing with an outline:
+        for (let x = 0; x < shapeStructWidth; x++) {
+          if (shapeStructFill === 0) { // If only drawing with an outline:
             // If we're on an edge, draw a cell
-            let isEdge = x === 0 || x === width - 1 || y === 0 || y === height - 1;
+            let isEdge = x === 0 || x === shapeStructWidth - 1 || y === 0 || y === shapeStructHeight - 1;
             row += isEdge ? "X" : "-";
           }
-          if (fill === 1) { // If drawing a solid shape:
+          else if (shapeStructFill === 1) { // If drawing a solid shape:
             // Literally just always draw a cell at every position within the size
             row += "X";
           }
@@ -2954,25 +4225,25 @@ Page Timeline:
     }
     
     if (name === "X") {
-      for (let y = 0; y < height; y++) {
+      for (let y = 0; y < shapeStructLength; y++) {
         let row = "";
-        for (let x = 0; x < width; x++) {
-          if (fill === 0) { // If only drawing with an outline:
-            let isEdge = x === 0 || x === width - 1 || y === 0 || y === height - 1;
+        for (let x = 0; x < shapeStructLength; x++) {
+          if (shapeStructFill === 0) { // If only drawing with an outline:
+            let isEdge = x === 0 || x === shapeStructLength - 1 || y === 0 || y === shapeStructLength - 1;
             let onDiagonal = false;
             // If we're on an edge, being on the diagonal is counted as long as its in-between the two edges of the diagonal stripes
-            if (isEdge) onDiagonal = (Math.abs(x - y) <= shapeStructThickness - 1) || (Math.abs((width - x - 1) - y) <= shapeStructThickness - 1);
+            if (isEdge) onDiagonal = (Math.abs(x - y) <= shapeStructThickness - 1) || (Math.abs((shapeStructLength - x - 1) - y) <= shapeStructThickness - 1);
             // Otherwise, you need to be directly on one of the two edges of the diagonal stripes
             // This way, we get a hollow x-shape but the corners still close up normally
             else {
-              onDiagonal = (Math.abs(x - y) === shapeStructThickness - 1) || (Math.abs((width - x - 1) - y) === shapeStructThickness - 1);
-              if ((Math.abs(x - y) < shapeStructThickness - 1) || (Math.abs((width - x - 1) - y) < shapeStructThickness - 1)) onDiagonal = false;
+              onDiagonal = (Math.abs(x - y) === shapeStructThickness - 1) || (Math.abs((shapeStructLength - x - 1) - y) === shapeStructThickness - 1);
+              if ((Math.abs(x - y) < shapeStructThickness - 1) || (Math.abs((shapeStructLength - x - 1) - y) < shapeStructThickness - 1)) onDiagonal = false;
             }
             row += onDiagonal ? "X" : "-"; // Draw a cell only on the diagonal
           }
-          else if (fill === 1) { // If drawing a solid shape:
+          else if (shapeStructFill === 1) { // If drawing a solid shape:
             // Draw a cell as long as we're in-between the two edges of the diagonal stripes
-            let onDiagonal = (Math.abs(x - y) <= shapeStructThickness - 1) || (Math.abs((width - x - 1) - y) <= shapeStructThickness - 1);
+            let onDiagonal = (Math.abs(x - y) <= shapeStructThickness - 1) || (Math.abs((shapeStructLength - x - 1) - y) <= shapeStructThickness - 1);
             row += onDiagonal ? "X" : "-";
           }
         }
@@ -2981,31 +4252,92 @@ Page Timeline:
     }
     
     if (name === "Cross") {
-      for (let y = 0; y < height; y++) {
+      for (let y = 0; y < shapeStructHeight; y++) {
         let row = "";
-        for (let x = 0; x < width; x++) {
-          if (fill === 0) { // If only drawing with an outline:
-            let isEdge = x === 0 || x === width - 1 || y === 0 || y === height - 1;
+        for (let x = 0; x < shapeStructWidth; x++) {
+          if (shapeStructFill === 0) { // If only drawing with an outline:
+            let isEdge = x === 0 || x === shapeStructWidth - 1 || y === 0 || y === shapeStructHeight - 1;
             let onCross = false;
             // If we're on an edge, being on the cross-shape is counted as long as its in-between the two edges of the orthogonal stripes
-            if (isEdge) onCross = Math.abs(x - Math.floor(width / 2)) <= shapeStructThickness - 1 || Math.abs(y - Math.floor(height / 2)) <= shapeStructThickness - 1;
+            if (isEdge) onCross = Math.abs(x - Math.floor(shapeStructWidth / 2)) <= shapeStructThickness - 1 || Math.abs(y - Math.floor(shapeStructHeight / 2)) <= shapeStructThickness - 1;
             // Otherwise, you need to be directly on one of the two edges of the orthogonal stripes
             // This way, we get a hollow cross-shape but the edges still close up normally
             else {
-              onCross = Math.abs(x - Math.floor(width / 2)) === shapeStructThickness - 1 || Math.abs(y - Math.floor(height / 2)) === shapeStructThickness - 1;
-              if (Math.abs(x - Math.floor(width / 2)) < shapeStructThickness - 1 || Math.abs(y - Math.floor(height / 2)) < shapeStructThickness - 1) onCross = false;
+              onCross = Math.abs(x - Math.floor(shapeStructWidth / 2)) === shapeStructThickness - 1 || Math.abs(y - Math.floor(shapeStructHeight / 2)) === shapeStructThickness - 1;
+              if (Math.abs(x - Math.floor(shapeStructWidth / 2)) < shapeStructThickness - 1 || Math.abs(y - Math.floor(shapeStructHeight / 2)) < shapeStructThickness - 1) onCross = false;
             }
             row += onCross ? "X" : "-";
           }
-          else if (fill === 1) { // If drawing a solid shape:
+          else if (shapeStructFill === 1) { // If drawing a solid shape:
             // Draw a cell as long as we're in-between the two edges of the orthogonal stripes
-            onCross = Math.abs(x - Math.floor(width / 2)) <= shapeStructThickness - 1 || Math.abs(y - Math.floor(height / 2)) <= shapeStructThickness - 1;
+            onCross = Math.abs(x - Math.floor(shapeStructWidth / 2)) <= shapeStructThickness - 1 || Math.abs(y - Math.floor(shapeStructHeight / 2)) <= shapeStructThickness - 1;
             row += onCross ? "X" : "-";
           }
         }
         code.push(row);
       }
     }
+	
+	if (name === "Eraser") {
+	  for (let y = 0; y < shapeStructHeight; y++) {
+        let row = "";
+        for (let x = 0; x < shapeStructWidth; x++) {
+          row += "-"; // Fill only with empty cells
+        }
+        code.push(row);
+      }
+	}
+	
+	if (name === "Static") {
+	  if (shapeStructSymmetry === 0) { // Asymmetric
+	    for (let y = 0; y < shapeStructHeight; y++) {
+          let row = "";
+          for (let x = 0; x < shapeStructWidth; x++) {
+            row += Math.random() < shapeStructRandomDensity ? "X" : "-"; // Fill randomly with empty/live cells
+          }
+          code.push(row);
+        }
+	  }
+	  else if (shapeStructSymmetry === 1) { // 1-Way Symmetry
+	    // Make full grid of random static like usual
+	    for (let y = 0; y < shapeStructHeight; y++) {
+          let row = "";
+          for (let x = 0; x < shapeStructWidth; x++) {
+            row += Math.random() < shapeStructRandomDensity ? "X" : "-"; // Fill randomly with empty/live cells
+          }
+          code.push(row);
+        }
+		
+		// Then go through the left half of the grid and mirror it to the right half
+		for (let y = 0; y < shapeStructHeight; y++) {
+		  for (let x = 0; x < Math.floor(shapeStructWidth / 2) + 1; x++) {
+	        code[y] = code[y].replaceAt(x, code[y][shapeStructWidth - x - 1]);
+		  }
+		}
+	  }
+	  else if (shapeStructSymmetry === 2) { // 2-Way Symmetry
+	    // Make full grid of random static like usual
+	    for (let y = 0; y < shapeStructHeight; y++) {
+          let row = "";
+          for (let x = 0; x < shapeStructWidth; x++) {
+            row += Math.random() < shapeStructRandomDensity ? "X" : "-"; // Fill randomly with empty/live cells
+          }
+          code.push(row);
+        }
+		
+		// Then go through the top left half of the grid and mirror it to the top right half
+		for (let y = 0; y < Math.floor(shapeStructHeight / 2) + 1; y++) {
+		  for (let x = 0; x < Math.floor(shapeStructWidth / 2) + 1; x++) {
+	        code[y] = code[y].replaceAt(x, code[y][shapeStructWidth - x - 1]);
+		  }
+		}
+		
+		// Then go through the top half of the grid and mirror it to the bottom half
+		for (let y = 0; y < Math.floor(shapeStructHeight / 2) + 1; y++) {
+		  code[shapeStructHeight - y - 1] = code[y];
+		}
+	  }
+	}
     
     return code;
   }
@@ -3076,6 +4408,39 @@ Page Timeline:
     
     lifeLexiconToStruct(code.join("\n"));
   }
+  function loadRuleString(str) {
+    // Given a rulestring like "b3s23", load that rule
+	
+	str = str.toLowerCase().replaceAll("/", "");
+	
+	let rule = str.split("s");
+	rule[0] = rule[0].replace("b", "");
+	
+	let b = [];
+	for (let i = 0; i < rule[0].length; i++) b.push(Number(rule[0][i]));
+	
+	
+	let s = [];
+	for (let i = 0; i < rule[1].length; i++) s.push(Number(rule[1][i]));
+	
+	setRules(b, s);
+  }
+  
+  function doStructsHaveDuplicateNames() {
+    // A debugging function used only to make sure no structures share a name
+	
+	let duplicates = [];
+	
+	for (let i = 0; i < structures.length; i++) {
+	  let iName = structures[i].name.toLowerCase().replaceAll(" ", "");
+	  for (let j = 0; j < structures.length; j++) {
+	    let jName = structures[j].name.toLowerCase().replaceAll(" ", "");
+		if (iName === jName && i !== j) duplicates.push(iName);
+	  }
+	}
+	
+	return duplicates.length === 0 ? "no duplicates found" : duplicates;
+  }
   
   String.prototype.replaceAt = function(index, replacement) {
     return this.substring(0, index) + replacement + this.substring(index + replacement.length);
@@ -3140,7 +4505,7 @@ Page Timeline:
       let s = structures[i];
       
       // Ignore Shapes and structures that are too large
-      if (s.category !== "Shapes") {
+      if (s.category === "Game of Life") {
         let valid = true;
         valid &&= s.code.length <= 50;
         valid &&= s.code[0].length <= 50;
@@ -3160,6 +4525,68 @@ Page Timeline:
     initStruct(chosenIndex);
   }
   
+  function initShapeStruct(n) {
+    // Given an index of a shape structure, update the preset's code accordingly, and hide/show various shape settings
+	
+    let preset = structures[n];
+	
+	if (preset.name === "Rectangle") {
+	  preset.code = generateShapeStruct(preset.name);
+	  
+	  shapeWidthDiv.style.display = "block";
+	  shapeHeightDiv.style.display = "block";
+	  shapeLengthDiv.style.display = "none";
+	  shapeThicknessDiv.style.display = "none";
+	  shapeRandomDensityDiv.style.display = "none";
+	  shapeFillDiv.style.display = "block";
+	  shapeSymmetryDiv.style.display = "none";
+	}
+	if (preset.name === "X") {
+	  preset.code = generateShapeStruct(preset.name);
+	  
+	  shapeWidthDiv.style.display = "none";
+	  shapeHeightDiv.style.display = "none";
+	  shapeLengthDiv.style.display = "block";
+	  shapeThicknessDiv.style.display = "block";
+	  shapeRandomDensityDiv.style.display = "none";
+	  shapeFillDiv.style.display = "block";
+	  shapeSymmetryDiv.style.display = "none";
+	}
+	if (preset.name === "Cross") {
+	  preset.code = generateShapeStruct(preset.name);
+	  
+	  shapeWidthDiv.style.display = "block";
+	  shapeHeightDiv.style.display = "block";
+	  shapeLengthDiv.style.display = "none";
+	  shapeThicknessDiv.style.display = "block";
+	  shapeRandomDensityDiv.style.display = "none";
+	  shapeFillDiv.style.display = "block";
+	  shapeSymmetryDiv.style.display = "none";
+	}
+	if (preset.name === "Eraser") {
+	  preset.code = generateShapeStruct(preset.name);
+	  
+	  shapeWidthDiv.style.display = "block";
+	  shapeHeightDiv.style.display = "block";
+	  shapeLengthDiv.style.display = "none";
+	  shapeThicknessDiv.style.display = "none";
+	  shapeRandomDensityDiv.style.display = "none";
+	  shapeFillDiv.style.display = "none";
+	  shapeSymmetryDiv.style.display = "none";
+	}
+	if (preset.name === "Static") {
+	  preset.code = generateShapeStruct(preset.name);
+	  
+	  shapeWidthDiv.style.display = "block";
+	  shapeHeightDiv.style.display = "block";
+	  shapeLengthDiv.style.display = "none";
+	  shapeThicknessDiv.style.display = "none";
+	  shapeRandomDensityDiv.style.display = "block";
+	  shapeFillDiv.style.display = "none";
+	  shapeSymmetryDiv.style.display = "block";
+	}
+  }
+  
   function initStruct(n) {
     // When a structure button is clicked, enter structure placing mode
     
@@ -3167,34 +4594,12 @@ Page Timeline:
       // Set up structure information variables
       
       let preset = structures[n];
+	  let name = preset.name;
       
       if (preset.category === "Shapes") {
         // If drawing a shape, go through and enable/disable various setting sliders based on which shape is selected
           
-        if (preset.name === "Rectangle") {
-          preset.code = generateShapeStruct(preset.name, shapeStructWidth, shapeStructHeight, shapeStructFill);
-          
-          shapeWidthDiv.style.display = "block";
-          shapeHeightDiv.style.display = "block";
-          shapeLengthDiv.style.display = "none";
-          shapeThicknessDiv.style.display = "none";
-        }
-        if (preset.name === "X") {
-          preset.code = generateShapeStruct(preset.name, shapeStructLength, shapeStructLength, shapeStructFill);
-          
-          shapeWidthDiv.style.display = "none";
-          shapeHeightDiv.style.display = "none";
-          shapeLengthDiv.style.display = "block";
-          shapeThicknessDiv.style.display = "block";
-        }
-        if (preset.name === "Cross") {
-          preset.code = generateShapeStruct(preset.name, shapeStructWidth, shapeStructHeight, shapeStructFill);
-          
-          shapeWidthDiv.style.display = "block";
-          shapeHeightDiv.style.display = "block";
-          shapeLengthDiv.style.display = "none";
-          shapeThicknessDiv.style.display = "block";
-        }
+        initShapeStruct(n);
       }
       
       placingStruct = true;
@@ -3202,8 +4607,9 @@ Page Timeline:
       structWidth = preset.code[0].length;
       structHeight = preset.code.length;
       
-      exitPlacingBtn.style.visibility = "visible"; // Show Exit Placing button
-      structureNameTxt.innerHTML = "<b>Placing: " + preset.name + "</b>";
+      exitPlacingBtn.style.visibility = structureNameTxt.style.visibility = "visible"; // Show Exit Placing button
+      structureNameTxt.innerHTML = "<b>(Placing: " + getStructName(n) + ")</b>";
+	  structDescTxt.innerHTML = getStructName(n);
       
       document.getElementById("show-section-btn-a-2").click(); // Switch to structures tab
       
@@ -3220,16 +4626,17 @@ Page Timeline:
         if (structIndex === i) { // If the button that called this is already active, turn off Structure Placing Mode
           s.button.className = "structure-btn-inactive";
           placingStruct = false;
-          exitPlacingBtn.style.visibility = "hidden";
-          lastStructIndex = structIndex;
+          exitPlacingBtn.style.visibility = structureNameTxt.style.visibility = "hidden";
+          if (structIndex !== -1) lastStructIndex = structIndex;
           structIndex = -1; // -1 index means nothing is selected
           structureNameTxt.innerHTML = "";
         }
         else { // Otherwise, activate that button
           s.button.className = "structure-btn-active";
-          lastStructIndex = structIndex;
+          if (structIndex !== -1) lastStructIndex = structIndex;
           structIndex = n;
-          structureNameTxt.innerHTML = "<b>Placing: " + s.name + "</b>";
+          structureNameTxt.innerHTML = "<b>(Placing: " + getStructName(i) + ")</b>";
+		  structDescTxt.innerHTML = getStructName(i);
         }
       }
       else s.button.className = "structure-btn-inactive";
@@ -3237,26 +4644,120 @@ Page Timeline:
     
     if (n === -1) { // Inputting -1 to this function disables all structure buttons
       placingStruct = false;
-      exitPlacingBtn.style.visibility = "hidden";
-      lastStructIndex = structIndex;
+      exitPlacingBtn.style.visibility = structureNameTxt.style.visibility = "hidden";
+      if (structIndex !== -1) lastStructIndex = structIndex;
       structIndex = -1;
       structureNameTxt.innerHTML = "";
+	  ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas if deselecting a struct, so that the red zones disappear even if trailing is on
     }
     
+	checkIfStructFits();
+	
     if (structIndex !== -1) updateStruct();
     
     drawGrid();
-    
-    if (Mouse.movedSinceLastClick && n !== -1) previewStruct(Mouse.gridX, Mouse.gridY);
+	
+	structCanvasPreview();
+  }
+  
+  function getStructName(i) {
+    // Returns the name of the structure at the given index, but formatted with more information if its a shape struct
+	
+	let s = structures[i];
+	let name = "";
+	
+	if (s.category !== "Shapes") name = s.name; // Non-shape gets default name
+	else { // Shapes get name with added description of characteristics
+	  let fill = ["Outline", "Solid", "Striped"][shapeStructFill]; // Convert shapeStructFill to a string description of it
+	  let symmetry = ["Asymmetric", "1-Way Symmetric", "2-Way Symmetric"][shapeStructSymmetry]; // Convert shapeStructSymmetry to a string description of it
+	  
+	  if (s.name === "Rectangle") name = `Rectangle &mdash; ${shapeStructWidth}&times;${shapeStructHeight}, ${fill}`;
+      
+	  else if (s.name === "X") name = `X &mdash; ${shapeStructLength} Long, ${shapeStructThickness} Thick, ${fill}`;
+      
+	  else if (s.name === "Cross") name = `Cross &mdash; ${shapeStructWidth}&times;${shapeStructHeight}, ${shapeStructThickness} Thick, ${fill}`;
+	  
+	  else if (s.name === "Eraser") name = `Eraser &mdash; ${shapeStructWidth}&times;${shapeStructHeight}`;
+	  
+	  else if (s.name === "Static") name = `${symmetry} Static &mdash; ${shapeStructWidth}&times;${shapeStructHeight}`;
+	}
+	
+	return name;
+  }
+  
+  function structCanvasPreview() {
+    // Draws a preview of the current structure on structCanvas
+	
+	updateStruct();
+	
+	// Find the larger dimension of the current structure, and adjust the canvas's size to be a multiple of that size
+	let largerSize = Math.max(structWidth, structHeight);
+	structCanvas.width = structCanvas.height = largerSize * Math.round(structCanvasSize / largerSize);
+	
+	sctx.fillStyle = bgColor;
+	sctx.fillRect(0, 0, structCanvas.width, structCanvas.height);
+	sctx.fillStyle = cellColor;
+	
+	let tSize = structCanvas.width / largerSize; // tileSize
+	
+	let yOffset = largerSize - structHeight;
+	
+	// Draw structure preview
+	for (let x = 0; x < structWidth; x++) {
+	  for (let y = 0; y < structHeight; y++) {
+		  if (structCode[y][x] === "X") sctx.fillRect(x * tSize, (y + yOffset) * tSize, tSize, tSize);
+	  }
+	}
+	
+	// Draw grid lines
+	
+	sctx.strokeStyle = gridLineColor;
+	sctx.lineWidth = tSize * gridLineWidth;
+	
+	// Vertical lines
+	for (let x = 0; x <= largerSize; x++) {
+	  sctx.beginPath();
+	  sctx.moveTo(x * tSize, 0);
+	  sctx.lineTo(x * tSize, structCanvas.height);
+	  sctx.stroke();
+	}
+	
+	// Horizontal lines
+	for (let y = 0; y <= largerSize; y++) {
+	  sctx.beginPath();
+	  sctx.moveTo(0, y * tSize);
+	  sctx.lineTo(structCanvas.width, y * tSize);
+	  sctx.stroke();
+	}
+	
+	// Clear the portion of the grid that the structure doesn't reach
+	
+	if (structWidth < structHeight) {
+	  sctx.clearRect(structWidth * tSize, 0, structCanvas.width, structCanvas.height);
+	}
+	else if (structHeight < structWidth) {
+	  sctx.clearRect(0, 0, structCanvas.width, (largerSize - structHeight) * tSize);
+	}
+  }
+  
+  function togglePlacingStruct() {
+    if (placingStruct) {
+      Mouse.movedSinceLastClick = false;
+      initStruct(-1); // If placing, exit placing
+    }
+    else {
+      Mouse.movedSinceLastClick = true;
+      initStruct(lastStructIndex); // Otherwise, enter placing mode with last selected structure
+    }
   }
   
   function updateStruct() {
     // Mutates structCode to reflect the orientation of the currently selected structState
     
-    structCode = structures[structIndex].code;
+    structCode = structures[structIndex === -1 ? lastStructIndex : structIndex].code;
     structWidth = structCode[0].length;
     structHeight = structCode.length;
-    
+	
     switch(structState) {
       case 0: // Right-side up, 0deg
         break;
@@ -3303,12 +4804,26 @@ Page Timeline:
   function previewStruct(gridX, gridY) {
     // Draw a translucent preview of the currently selected structure at the given position
     
-    if (!isValidStructPlacement(gridX, gridY)) return;
+    if (!isValidStructPlacement(gridX, gridY) || !structFitsOnGrid) return;
     
     let w2 = Math.floor(structWidth / 2);
     let h2 = Math.floor(structHeight / 2);
     let wOffset = (structWidth + 1) % 2;
     let hOffset = (structHeight + 1) % 2;
+	
+	let minX = 0 - w2 + wOffset + gridX;
+	let minY = 0 - h2 + hOffset + gridY;
+	let maxX = structWidth - 1 - w2 + wOffset + gridX;
+	let maxY = structHeight - 1 - h2 + hOffset + gridY;
+	
+	let xOffset = 0;
+	let yOffset = 0;
+	
+	// This code "scoots" the structure so that if it's beyond the edge, it moves to be touching the edge
+	if (minX < 0) xOffset = -minX;
+	if (maxX >= gridSize) xOffset = gridSize - maxX - 1;
+	if (minY < 0) yOffset = -minY;
+	if (maxY >= gridSize) yOffset = gridSize - maxY - 1;
     
     tctx.clearRect(0, 0, canvas.width, canvas.height);
     tctx.fillStyle = cellColor;
@@ -3316,11 +4831,11 @@ Page Timeline:
     
     for (let x = 0; x < structWidth; x++) {
       for (let y = 0; y < structHeight; y++) {
-        let _x = x - w2 + wOffset;
-        let _y = y - h2 + hOffset;
+        let _x = x - w2 + wOffset + gridX;
+        let _y = y - h2 + hOffset + gridY;
         
-        if (x === 0 && y === 0) drawOneCell(_x + gridX, _y + gridY, 0, 1, tctx);
-        drawOneCell(_x + gridX, _y + gridY, structCode[y][x] === "X" ? 1 : 0, 0.5, tctx);
+        if (x === 0 && y === 0) drawOneCell(_x + xOffset, _y + yOffset, 0, 1, tctx);
+        drawOneCell(_x + xOffset, _y + yOffset, structCode[y][x] === "X" ? 1 : 0, 0.5, tctx);
       }
     }
     
@@ -3350,9 +4865,12 @@ Page Timeline:
   }
   
   function placeStruct(gridX, gridY) {
-    // Copies the current structure pattern onto the grid, at the given position (centered at the position)
+    // Copies the current structure pattern onto the grid, centered at the given position
+	
+	if (!structFitsOnGrid || !isValidStructPlacement(gridX, gridY)) return; // Don't place if the current struct is too big to fit anywhere on the grid
     
-    Mouse.movedSinceLastClick = false;
+    Mouse.movedSinceLastClick = false; // Set this flag to false, which means the struct preview won't be redrawn until the mouse is moved
+	// This ensures the user can actually see the structure they just placed, instead of it getting immediately covered up by a preview
     
     if (!isValidStructPlacement(gridX, gridY)) return;
     
@@ -3360,13 +4878,27 @@ Page Timeline:
     let h2 = Math.floor(structHeight / 2);
     let wOffset = (structWidth + 1) % 2;
     let hOffset = (structHeight + 1) % 2;
+	
+	let minX = 0 - w2 + wOffset + gridX;
+	let minY = 0 - h2 + hOffset + gridY;
+	let maxX = structWidth - 1 - w2 + wOffset + gridX;
+	let maxY = structHeight - 1 - h2 + hOffset + gridY;
+	
+	let xOffset = 0;
+	let yOffset = 0;
+	
+	// This code "scoots" the structure so that if it's beyond the edge, it moves to be touching the edge
+	if (minX < 0) xOffset = -minX;
+	if (maxX >= gridSize) xOffset = gridSize - maxX - 1;
+	if (minY < 0) yOffset = -minY;
+	if (maxY >= gridSize) yOffset = gridSize - maxY - 1;
     
     for (let x = 0; x < structWidth; x++) {
       for (let y = 0; y < structHeight; y++) {
-        let _x = x - w2 + wOffset;
-        let _y = y - h2 + hOffset;
+        let _x = x - w2 + wOffset + gridX;
+        let _y = y - h2 + hOffset + gridY;
         
-        grid[_x + gridX][_y + gridY] = structCode[y][x] === "X" ? 1 : 0;
+        grid[_x + xOffset][_y + yOffset] = structCode[y][x] === "X" ? 1 : 0;
       }
     }
     
@@ -3374,6 +4906,8 @@ Page Timeline:
     setLastGrid();
     
     drawGrid();
+	
+	if (structures[structIndex].name === "Static") updateSettings(false, true);
   }
   
   function showSection(group, groupLength, number) {
@@ -3463,12 +4997,25 @@ Page Timeline:
       btn.innerHTML = s.name;
       btn.onclick = () => initStruct(i);
       s.button = btn;
+	  btn.title = s.titleText;
       
-      if (s.category === "Game of Life") {
-        document.getElementById(s.subcategory + "-structures-div").appendChild(btn);
-      }
+	  // Append button to specific tab based on which rule it is intended for
+	  
+      if (s.category === "Game of Life") document.getElementById(s.subcategory + "-structures-div").appendChild(btn);
       
       if (s.category === "Shapes") document.getElementById("shapes-structures-div").appendChild(btn);
+	  
+	  if (s.category === "Move") document.getElementById("move-structures-div").appendChild(btn);
+	  
+	  if (s.category === "Day and Night") document.getElementById("day-and-night-structures-div").appendChild(btn);
+	  
+	  if (s.category === "2x2") document.getElementById("2x2-structures-div").appendChild(btn);
+	  
+	  if (s.category === "Flock") document.getElementById("flock-structures-div").appendChild(btn);
+	  
+	  if (s.category === "Diamoeba") document.getElementById("diamoeba-structures-div").appendChild(btn);
+	  
+	  if (s.category === "34 Life") document.getElementById("34-life-structures-div").appendChild(btn);
     }
     
     // Create hotkey descriptions
@@ -3500,8 +5047,8 @@ Page Timeline:
     
     loadRandomStruct();
     
-    showSection("a", 2, 1);
-    showSection("b", 2, 1);
+    showSection("a", NUM_SECTIONS_A, 2);
+    showSection("b", NUM_SECTIONS_B, 1);
     
     frame();
   }
